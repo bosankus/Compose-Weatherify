@@ -2,6 +2,7 @@ package bose.ankush.weatherify.util
 
 import bose.ankush.weatherify.model.AvgForecast
 import bose.ankush.weatherify.model.WeatherForecast
+import bose.ankush.weatherify.util.Helper.getTodayDateInCalenderFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
@@ -22,7 +23,6 @@ fun List<WeatherForecast.ForecastList>.getForecastListForNext4Days():
 
 
 fun List<WeatherForecast.ForecastList>.parseEachDayFromList(): List<AvgForecast> {
-
     val listOfAvgForecast = ArrayList<AvgForecast>()
     var avgTemp: Int
     var dayName: String
@@ -38,7 +38,6 @@ fun List<WeatherForecast.ForecastList>.parseEachDayFromList(): List<AvgForecast>
                 if ((counter % 7) == 0) {
                     avgTemp = totalTemp / counter
                     dayName = date.getDayName()
-
                     val avgForecast = AvgForecast(this.hashCode(), dayName, "$avgTemp C")
                     listOfAvgForecast.add(avgForecast)
                 }
@@ -49,45 +48,26 @@ fun List<WeatherForecast.ForecastList>.parseEachDayFromList(): List<AvgForecast>
 }
 
 
-fun Int.findDayOfMonthWiseDifference(): Int {
-    // get the Date of both today's and provided epoch
+fun Int.isNotMatchingWithTodayAndWithinNext4Days(): Boolean {
     val givenDate = Date(this.toLong() * 1000)
-    val todayDate = Date(System.currentTimeMillis())
-
-    val cal1 = Calendar.getInstance()
-    val cal2 = Calendar.getInstance()
-
-    cal1.time = givenDate
-    cal2.time = todayDate
-
-    // Finding difference of the dates to limit data till 4th day
-    val givenDateNumber = cal1.get(Calendar.DAY_OF_MONTH + 1)
-    val todayDateNumber = cal2.get(Calendar.DAY_OF_MONTH + 1)
-
-    return givenDateNumber - todayDateNumber
+    val givenDateCalender = Calendar.getInstance()
+    givenDateCalender.time = givenDate
+    val givenYear = givenDateCalender.get(Calendar.YEAR)
+    val currentYear = getTodayDateInCalenderFormat().get(Calendar.YEAR)
+    val givenDateNumber = givenDateCalender.get(Calendar.DAY_OF_MONTH + 1)
+    val todayDateNumber = getTodayDateInCalenderFormat().get(Calendar.DAY_OF_MONTH + 1)
+    val differenceOfDate = this.findDayOfMonthWiseDifference()
+    return (givenDateNumber > todayDateNumber && givenYear == currentYear && (differenceOfDate <= 4))
 }
 
 
-fun Int.isNotMatchingWithTodayAndWithinNext4Days(): Boolean {
+fun Int.findDayOfMonthWiseDifference(todayDate: Calendar = getTodayDateInCalenderFormat()): Int {
     val givenDate = Date(this.toLong() * 1000)
-    val todayDate = Date(System.currentTimeMillis())
-
-    val cal1 = Calendar.getInstance()
-    val cal2 = Calendar.getInstance()
-
-    cal1.time = givenDate
-    cal2.time = todayDate
-
-    val givenYear = cal1.get(Calendar.YEAR)
-    val currentYear = cal2.get(Calendar.YEAR)
-
-    // Finding difference of the dates to limit data till 4th day
-    val givenDateNumber = cal1.get(Calendar.DAY_OF_MONTH + 1)
-    val todayDateNumber = cal2.get(Calendar.DAY_OF_MONTH + 1)
-
-    val differenceOfDate = givenDateNumber - todayDateNumber
-
-    return (givenDateNumber > todayDateNumber && givenYear == currentYear && (differenceOfDate <= 4))
+    val calenderForGivenDate = Calendar.getInstance()
+    calenderForGivenDate.time = givenDate
+    val givenDateNumber = calenderForGivenDate.get(Calendar.DAY_OF_MONTH + 1)
+    val todayDateNumber = todayDate.get(Calendar.DAY_OF_MONTH + 1)
+    return givenDateNumber - todayDateNumber
 }
 
 
