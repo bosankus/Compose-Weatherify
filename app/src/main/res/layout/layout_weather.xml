@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="viewmodel"
+            type="bose.ankush.weatherify.view.MainViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        app:isCurrentTempSuccess="@{viewmodel.currentTemperature}"
+        app:isWeatherForecastSuccess="@{viewmodel.weatherForecast}">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/layout_weather_current_temp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/gap_56dp"
+            android:fontFamily="@font/roboto_black"
+            android:textColor="@color/light_grey"
+            android:textSize="@dimen/text_96sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:setTempInCelsius="@{viewmodel.currentTemperature}" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/layout_weather_current_city"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_thin"
+            android:textColor="@color/city_txt"
+            android:textSize="@dimen/text_36sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_temp"
+            app:setCurrentCity="@{viewmodel.currentTemperature}" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/layout_weather_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="62dp"
+            android:background="@color/white"
+            android:overScrollMode="ifContentScrolls"
+            android:paddingTop="@dimen/gap_16dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_city"
+            app:weatherForecastList="@{viewmodel.weatherForecast}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

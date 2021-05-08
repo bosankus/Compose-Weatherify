@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Weatherify</string>
+    <string name="error_txt">Something went wrong at our end!</string>
+    <string name="retry_btn_txt">Retry</string>
+</resources>
