@@ -23,8 +23,8 @@ Date: 05,May,2021
 @HiltViewModel
 class MainViewModel @Inject constructor(private val dataSource: WeatherRepository) : ViewModel() {
 
-    private var _currentTemperature = MutableLiveData<ResultData<*>>(ResultData.DoNothing)
-    val currentTemperature: LiveData<ResultData<*>> get() = _currentTemperature
+    private var _currentTemp = MutableLiveData<ResultData<*>>(ResultData.DoNothing)
+    val currentTemp: LiveData<ResultData<*>> get() = _currentTemp
 
     private var _weatherForecast =
         MutableLiveData<ResultData<List<AvgForecast>>>(ResultData.DoNothing)
@@ -32,7 +32,7 @@ class MainViewModel @Inject constructor(private val dataSource: WeatherRepositor
         get() = _weatherForecast
 
     private val temperatureExceptionHandler = CoroutineExceptionHandler { _, exception ->
-        _currentTemperature.postValue(ResultData.Failed("${exception.message}"))
+        _currentTemp.postValue(ResultData.Failed("${exception.message}"))
     }
 
     private val weatherExceptionHandler = CoroutineExceptionHandler { _, exception ->
@@ -45,11 +45,11 @@ class MainViewModel @Inject constructor(private val dataSource: WeatherRepositor
 
 
     fun getCurrentTemperature() {
-        _currentTemperature.postValue(ResultData.Loading)
+        _currentTemp.postValue(ResultData.Loading)
         viewModelScope.launch(temperatureExceptionHandler) {
             val response: CurrentTemperature? = dataSource.getCurrentTemperature()
-            response?.let { _currentTemperature.postValue(ResultData.Success(it)) }
-                ?: _currentTemperature.postValue(ResultData.Failed("Couldn't fetch temperature"))
+            response?.let { _currentTemp.postValue(ResultData.Success(it)) }
+                ?: _currentTemp.postValue(ResultData.Failed("Couldn't fetch temperature"))
         }
         getWeatherForecast()
     }

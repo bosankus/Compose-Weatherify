@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        app:isCurrentTempSuccess="@{viewmodel.currentTemperature}"
+        app:isCurrentTempSuccess="@{viewmodel.currentTemp}"
         app:isWeatherForecastSuccess="@{viewmodel.weatherForecast}">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -27,7 +27,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:setTempInCelsius="@{viewmodel.currentTemperature}" />
+            app:setTempInCelsius="@{viewmodel.currentTemp}" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/layout_weather_current_city"
@@ -39,7 +39,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_temp"
-            app:setCurrentCity="@{viewmodel.currentTemperature}" />
+            app:setCurrentCity="@{viewmodel.currentTemp}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/layout_weather_recyclerview"

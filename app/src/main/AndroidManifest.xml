@@ -14,7 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Weatherify"
         tools:ignore="AllowBackup">
-        <activity android:name=".view.MainActivity">
+        <activity android:name=".view.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
