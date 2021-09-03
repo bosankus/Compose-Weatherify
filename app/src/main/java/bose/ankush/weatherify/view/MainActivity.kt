@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
 
     private val animation by lazy {
-        AnimationUtils.loadAnimation(applicationContext, R.anim.slide_in_bottom)
+        AnimationUtils.loadAnimation(this, R.anim.slide_in_bottom)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
