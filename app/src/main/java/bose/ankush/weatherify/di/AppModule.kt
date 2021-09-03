@@ -2,6 +2,7 @@ package bose.ankush.weatherify.di
 
 import bose.ankush.weatherify.data.ApiService
 import bose.ankush.weatherify.data.WeatherRepository
+import bose.ankush.weatherify.data.WeatherRepositoryImpl
 import bose.ankush.weatherify.util.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -67,5 +68,6 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun getWeatherRepository(apiService: ApiService) = WeatherRepository(apiService)
+    fun provideWeatherRepository(apiService: ApiService): WeatherRepository =
+        WeatherRepositoryImpl(apiService)
 }

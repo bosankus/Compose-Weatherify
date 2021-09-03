@@ -29,14 +29,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.activityMainLayoutWeather.layoutWeatherRecyclerview.startAnimation(animation)
-        setClickListeners()
-    }
-
-
-    private fun setClickListeners() {
-        binding.activityMainLayoutError.layoutErrorBtnRetry.setOnClickListener {
-            viewModel.getCurrentTemperature()
-        }
     }
 
 }

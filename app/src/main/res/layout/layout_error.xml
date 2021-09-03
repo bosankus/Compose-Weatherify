@@ -37,6 +37,7 @@
             android:layout_marginTop="@dimen/gap_44dp"
             android:background="@color/retry_btn"
             android:text="@string/retry_btn_txt"
+            android:onClick="@{() -> viewmodel.getCurrentTemperature()}"
             android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

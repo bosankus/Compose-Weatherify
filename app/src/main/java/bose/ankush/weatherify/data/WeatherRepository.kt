@@ -2,20 +2,16 @@ package bose.ankush.weatherify.data
 
 import bose.ankush.weatherify.model.CurrentTemperature
 import bose.ankush.weatherify.model.WeatherForecast
+import bose.ankush.weatherify.util.ResultData
 
 /**Created by
 Author: Ankush Bose
 Date: 05,May,2021
  **/
 
-class WeatherRepository(private val apiService: ApiService) : WeatherImpl {
+interface WeatherRepository {
 
-    override suspend fun getCurrentTemperature(): CurrentTemperature? =
-        apiService.getCurrentTemperature()
+    suspend fun getCurrentTemperature(): CurrentTemperature?
 
-    override suspend fun getWeatherForecast(): WeatherForecast? =
-        apiService.getWeatherForecast()
-
+    suspend fun getWeatherForecast(): WeatherForecast?
 }
-
-
