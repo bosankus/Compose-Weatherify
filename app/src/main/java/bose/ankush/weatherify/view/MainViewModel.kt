@@ -12,6 +12,7 @@ import bose.ankush.weatherify.util.ResultData
 import bose.ankush.weatherify.util.getForecastListForNext4Days
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

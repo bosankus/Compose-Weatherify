@@ -19,13 +19,13 @@ interface ApiService {
 
     @GET("/data/2.5/weather")
     suspend fun getCurrentTemperature(
-        @Query("q") location: String = "Bengaluru",
+        @Query("q") location: String = "Kolkata",
         @Query("APPID") AppId: String = "ad102b2242e9f1c84075385ae4a91116"
     ): CurrentTemperature?
 
     @GET("/data/2.5/forecast")
     suspend fun getWeatherForecast(
-        @Query("q") location: String = "Bengaluru",
+        @Query("q") location: String = "Kolkata",
         @Query("APPID") AppId: String = "ad102b2242e9f1c84075385ae4a91116"
     ): WeatherForecast?
 
