@@ -3,6 +3,7 @@ package bose.ankush.weatherify.di
 import bose.ankush.weatherify.data.ApiService
 import bose.ankush.weatherify.data.WeatherRepository
 import bose.ankush.weatherify.data.WeatherRepositoryImpl
+import bose.ankush.weatherify.dispatcher.AppDispatcher
 import bose.ankush.weatherify.util.BASE_URL
 import bose.ankush.weatherify.dispatcher.DispatcherProvider
 import dagger.Module
@@ -66,6 +67,10 @@ object AppModule {
     fun getApiService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
     }
+
+    @Singleton
+    @Provides
+    fun provideDispatcherProvider(): DispatcherProvider = AppDispatcher()
 
     @Singleton
     @Provides

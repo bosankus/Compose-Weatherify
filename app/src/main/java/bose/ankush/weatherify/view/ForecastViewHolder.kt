@@ -2,7 +2,7 @@ package bose.ankush.weatherify.view
 
 import androidx.recyclerview.widget.RecyclerView
 import bose.ankush.weatherify.databinding.LayoutForecastItemBinding
-import bose.ankush.weatherify.model.AvgForecast
+import bose.ankush.weatherify.data.model.AvgForecast
 
 /**Created by
 Author: Ankush Bose

@@ -1,8 +1,8 @@
 package bose.ankush.weatherify.data
 
+import bose.ankush.weatherify.data.model.CurrentTemperature
+import bose.ankush.weatherify.data.model.WeatherForecast
 import bose.ankush.weatherify.dispatcher.DispatcherProvider
-import bose.ankush.weatherify.model.CurrentTemperature
-import bose.ankush.weatherify.model.WeatherForecast
 import kotlinx.coroutines.withContext
 
 /**Created by

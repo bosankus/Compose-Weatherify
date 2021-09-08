@@ -1,8 +1,7 @@
 package bose.ankush.weatherify.data
 
-import bose.ankush.weatherify.model.CurrentTemperature
-import bose.ankush.weatherify.model.WeatherForecast
-import bose.ankush.weatherify.util.ResultData
+import bose.ankush.weatherify.data.model.CurrentTemperature
+import bose.ankush.weatherify.data.model.WeatherForecast
 
 /**Created by
 Author: Ankush Bose

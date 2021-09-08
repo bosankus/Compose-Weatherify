@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.model
+package bose.ankush.weatherify.data.model
 
 /**Created by
 Author: Ankush Bose

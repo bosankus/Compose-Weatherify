@@ -1,15 +1,9 @@
 package bose.ankush.weatherify.data
 
-import bose.ankush.weatherify.model.CurrentTemperature
-import bose.ankush.weatherify.model.WeatherForecast
-import bose.ankush.weatherify.util.BASE_URL
-import okhttp3.*
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import bose.ankush.weatherify.data.model.CurrentTemperature
+import bose.ankush.weatherify.data.model.WeatherForecast
 import retrofit2.http.GET
 import retrofit2.http.Query
-import java.util.concurrent.TimeUnit
 
 /**Created by
 Author: Ankush Bose

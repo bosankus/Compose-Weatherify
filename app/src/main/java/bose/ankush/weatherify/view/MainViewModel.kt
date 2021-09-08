@@ -5,14 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.data.WeatherRepository
-import bose.ankush.weatherify.model.AvgForecast
-import bose.ankush.weatherify.model.CurrentTemperature
-import bose.ankush.weatherify.model.WeatherForecast
+import bose.ankush.weatherify.data.model.AvgForecast
+import bose.ankush.weatherify.data.model.CurrentTemperature
+import bose.ankush.weatherify.data.model.WeatherForecast
+import bose.ankush.weatherify.util.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.util.ResultData
-import bose.ankush.weatherify.util.getForecastListForNext4Days
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

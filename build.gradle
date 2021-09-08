@@ -1,6 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext.kotlin_version = "1.5.30"
+    ext.firebase_bom_version = "26.2.0"
     repositories {
         google()
         mavenCentral()
