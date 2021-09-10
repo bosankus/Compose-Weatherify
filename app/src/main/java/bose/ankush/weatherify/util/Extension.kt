@@ -2,7 +2,6 @@ package bose.ankush.weatherify.util
 
 import bose.ankush.weatherify.data.model.AvgForecast
 import bose.ankush.weatherify.data.model.WeatherForecast
-import bose.ankush.weatherify.util.Helper.getTodayDateInCalenderFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
@@ -14,8 +13,7 @@ Date: 06,May,2021
 
 object Extension {
 
-    fun Double.toCelsius(): String = (this - KELVIN_CONSTANT).roundToInt().toString()
-
+    fun Double.toCelsius(): String = ((this - 32).div(1.8)).roundToInt().toString()
 
     fun List<WeatherForecast.ForecastList>.getForecastListForNext4Days():
             List<AvgForecast> {
@@ -23,8 +21,22 @@ object Extension {
             .parseEachDayFromList()
     }
 
+    fun Int.getDayName(): String {
+        val calendar = Calendar.getInstance()
+        calendar.time = Date(this.toLong() * 1000)
+        return when (calendar.get(Calendar.DAY_OF_WEEK)) {
+            1 -> "SUNDAY"
+            2 -> "MONDAY"
+            3 -> "TUESDAY"
+            4 -> "WEDNESDAY"
+            5 -> "THURSDAY"
+            6 -> "FRIDAY"
+            7 -> "SATURDAY"
+            else -> "..."
+        }
+    }
 
-    fun List<WeatherForecast.ForecastList>.parseEachDayFromList(): List<AvgForecast> {
+    private fun List<WeatherForecast.ForecastList>.parseEachDayFromList(): List<AvgForecast> {
         val listOfAvgForecast = ArrayList<AvgForecast>()
         var avgTemp: Int
         var dayName: String
@@ -50,7 +62,7 @@ object Extension {
     }
 
 
-    fun Int.isNotMatchingWithTodayAndWithinNext4Days(): Boolean {
+    private fun Int.isNotMatchingWithTodayAndWithinNext4Days(): Boolean {
         val givenDate = Date(this.toLong() * 1000)
         val givenDateCalender = Calendar.getInstance()
         givenDateCalender.time = givenDate
@@ -62,8 +74,7 @@ object Extension {
         return (givenDateNumber > todayDateNumber && givenYear == currentYear && (differenceOfDate <= 4))
     }
 
-
-    fun Int.findDayOfMonthWiseDifference(todayDate: Calendar = getTodayDateInCalenderFormat()): Int {
+    private fun Int.findDayOfMonthWiseDifference(todayDate: Calendar = getTodayDateInCalenderFormat()): Int {
         val givenDate = Date(this.toLong() * 1000)
         val calenderForGivenDate = Calendar.getInstance()
         calenderForGivenDate.time = givenDate
@@ -72,20 +83,11 @@ object Extension {
         return givenDateNumber - todayDateNumber
     }
 
-
-    fun Int.getDayName(): String {
-        val calendar = Calendar.getInstance()
-        calendar.time = Date(this.toLong() * 1000)
-        return when (calendar.get(Calendar.DAY_OF_WEEK)) {
-            1 -> "SUNDAY"
-            2 -> "MONDAY"
-            3 -> "TUESDAY"
-            4 -> "WEDNESDAY"
-            5 -> "THURSDAY"
-            6 -> "FRIDAY"
-            7 -> "SATURDAY"
-            else -> "..."
-        }
+    private fun getTodayDateInCalenderFormat(): Calendar {
+        val todayDate = Date(System.currentTimeMillis())
+        val calendarForToday = Calendar.getInstance()
+        calendarForToday.time = todayDate
+        return calendarForToday
     }
 
 }

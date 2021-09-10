@@ -13,10 +13,4 @@ object Helper {
 
     fun logMessage(message: String) = Timber.d(message)
 
-    fun getTodayDateInCalenderFormat(): Calendar {
-        val todayDate = Date(System.currentTimeMillis())
-        val calendarForToday = Calendar.getInstance()
-        calendarForToday.time = todayDate
-        return calendarForToday
-    }
 }
