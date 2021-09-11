@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:background="@color/background_error"
         app:isCurrentTempFailed="@{viewmodel.currentTemp}"
-        app:isWeatherForecastFailed="@{viewmodel.weatherForecast}">
+        app:isWeatherForecastFailed="@{viewmodel.forecast}">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/layout_error_txt"
@@ -36,8 +36,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/gap_44dp"
             android:background="@color/retry_btn"
+            android:onClick="@{() -> viewmodel.fetchClimateDetails()}"
             android:text="@string/retry_btn_txt"
-            android:onClick="@{() -> viewmodel.getCurrentTemperature()}"
             android:textColor="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -14,7 +14,7 @@
         android:layout_height="match_parent"
         android:background="@color/background_color"
         app:isCurrentTempLoading="@{viewmodel.currentTemp}"
-        app:isWeatherForecastLoading="@{viewmodel.weatherForecast}">
+        app:isWeatherForecastLoading="@{viewmodel.forecast}">
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/layout_loading_loader"

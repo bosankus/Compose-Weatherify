@@ -24,25 +24,30 @@ Date: 05,May,2021
 class MainViewModel @Inject constructor(private val dataSource: WeatherRepository) : ViewModel() {
 
     private var _currentTemp = MutableLiveData<ResultData<*>>(ResultData.DoNothing)
-    val currentTemp: LiveData<ResultData<*>> get() = _currentTemp
+    val currentTemp: LiveData<ResultData<*>>
+        get() = _currentTemp
 
-    private var _weatherForecast =
+    private var _forecast =
         MutableLiveData<ResultData<List<AvgForecast>>>(ResultData.DoNothing)
-    val weatherForecast: LiveData<ResultData<List<AvgForecast>>>
-        get() = _weatherForecast
+    val forecast: LiveData<ResultData<List<AvgForecast>>>
+        get() = _forecast
 
     private val temperatureExceptionHandler = CoroutineExceptionHandler { _, exception ->
         _currentTemp.postValue(ResultData.Failed("${exception.message}"))
     }
 
     private val weatherExceptionHandler = CoroutineExceptionHandler { _, exception ->
-        _weatherForecast.postValue(ResultData.Failed("${exception.message}"))
+        _forecast.postValue(ResultData.Failed("${exception.message}"))
     }
 
     init {
-        getCurrentTemperature()
+        fetchClimateDetails()
     }
 
+    fun fetchClimateDetails() {
+        getCurrentTemperature()
+        getWeatherForecast()
+    }
 
     fun getCurrentTemperature() {
         _currentTemp.postValue(ResultData.Loading)
@@ -51,19 +56,18 @@ class MainViewModel @Inject constructor(private val dataSource: WeatherRepositor
             response?.let { _currentTemp.postValue(ResultData.Success(it)) }
                 ?: _currentTemp.postValue(ResultData.Failed("Couldn't fetch temperature"))
         }
-        getWeatherForecast()
     }
 
 
-    private fun getWeatherForecast() {
-        _weatherForecast.postValue(ResultData.Loading)
+    fun getWeatherForecast() {
+        _forecast.postValue(ResultData.Loading)
         viewModelScope.launch(weatherExceptionHandler) {
             val response: WeatherForecast? = dataSource.getWeatherForecast()
             response?.let { weatherForecast ->
                 val forecastList = weatherForecast.list?.getForecastListForNext4Days()
-                forecastList?.let { _weatherForecast.postValue(ResultData.Success(it)) }
+                forecastList?.let { _forecast.postValue(ResultData.Success(it)) }
             }
-                ?: _weatherForecast.postValue(ResultData.Failed("Couldn't fetch weather forecast"))
+                ?: _forecast.postValue(ResultData.Failed("Couldn't fetch weather forecast"))
 
         }
     }
