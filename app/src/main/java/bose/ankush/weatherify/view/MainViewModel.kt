@@ -49,7 +49,7 @@ class MainViewModel @Inject constructor(private val dataSource: WeatherRepositor
         getWeatherForecast()
     }
 
-    fun getCurrentTemperature() {
+    private fun getCurrentTemperature() {
         _currentTemp.postValue(ResultData.Loading)
         viewModelScope.launch(temperatureExceptionHandler) {
             val response: CurrentTemperature? = dataSource.getCurrentTemperature()
@@ -59,7 +59,7 @@ class MainViewModel @Inject constructor(private val dataSource: WeatherRepositor
     }
 
 
-    fun getWeatherForecast() {
+    private fun getWeatherForecast() {
         _forecast.postValue(ResultData.Loading)
         viewModelScope.launch(weatherExceptionHandler) {
             val response: WeatherForecast? = dataSource.getWeatherForecast()

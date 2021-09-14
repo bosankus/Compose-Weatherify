@@ -1,6 +1,7 @@
 package bose.ankush.weatherify.util
 
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -8,6 +9,7 @@ import bose.ankush.weatherify.data.model.AvgForecast
 import bose.ankush.weatherify.data.model.CurrentTemperature
 import bose.ankush.weatherify.util.Extension.toCelsius
 import bose.ankush.weatherify.view.ForecastAdapter
+import com.bumptech.glide.Glide
 
 /**Created by
 Author: Ankush Bose
@@ -42,7 +44,7 @@ fun View.weatherVisibility(currentTempState: ResultData<*>, weatherForecastState
 fun TextView.setTempInCelsius(value: ResultData<*>) {
     text =
         if (value is ResultData.Success<*> && value.data is CurrentTemperature)
-            "${value.data.main?.tempMax?.toCelsius()}°"
+            "${value.data.main?.tempMax?.toCelsius()}°C"
         else "0°"
 }
 
@@ -53,6 +55,19 @@ fun TextView.setCurrentCity(value: ResultData<*>) {
         if (value is ResultData.Success<*> && value.data is CurrentTemperature)
             value.data.name
         else "..."
+}
+
+
+@BindingAdapter("setWeatherIcon")
+fun ImageView.setIcon(result: ResultData<*>) {
+    if (result is ResultData.Success && result.data is CurrentTemperature) {
+        result.data.weather?.get(0)?.icon?.let {
+            val iconUrl = "https://openweathermap.org/img/w/${it}.png"
+            Glide.with(this.context)
+                .load(iconUrl)
+                .into(this)
+        }
+    }
 }
 
 

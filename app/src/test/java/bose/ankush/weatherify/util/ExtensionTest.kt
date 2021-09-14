@@ -16,11 +16,11 @@ import java.io.File
 class ExtensionTest {
 
     @Test
-    fun toCelsius_WhenFahrenheitTempProvided_ReturnsCelsiusString() {
-        // test temp is 87.0F, output 31C
-        val farTemp = 87.0
+    fun toCelsius_WhenKelvinTempProvided_ReturnsCelsiusString() {
+        // test temp is 303.12K, output 30C
+        val farTemp = 303.12
         val celsiusTemp = farTemp.toCelsius()
-        assertThat(celsiusTemp).isEqualTo("31")
+        assertThat(celsiusTemp).isEqualTo("30")
     }
 
     @Test
