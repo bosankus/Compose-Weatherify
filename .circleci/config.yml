@@ -21,7 +21,7 @@ jobs:
       # The next step will run the unit tests
       - run:
           name: Download Dependencies
-          command: sudo chmod +x gradlew ./gradlew androidDependencies
+          command: sudo chmod +x gradlew
       - android/run-tests:
           test-command: ./gradlew testDebug
 
