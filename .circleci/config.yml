@@ -36,7 +36,7 @@ jobs:
       - run:
           name: Assemble release build
           command: |
-            ./gradlew assembleRelease    
+            ./gradlew assembleRelease
 
 workflows:
   # Below is the definition of your workflow.
