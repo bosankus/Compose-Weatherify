@@ -1,5 +1,6 @@
 package bose.ankush.weatherify.data
 
+import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.data.model.CurrentTemperature
 import bose.ankush.weatherify.data.model.WeatherForecast
 import retrofit2.http.GET
@@ -14,13 +15,13 @@ interface ApiService {
     @GET("/data/2.5/weather")
     suspend fun getCurrentTemperature(
         @Query("q") location: String = "Kolkata",
-        @Query("APPID") AppId: String = "ad102b2242e9f1c84075385ae4a91116"
+        @Query("APPID") AppId: String = BuildConfig.APPID
     ): CurrentTemperature?
 
     @GET("/data/2.5/forecast")
     suspend fun getWeatherForecast(
         @Query("q") location: String = "Kolkata",
-        @Query("APPID") AppId: String = "ad102b2242e9f1c84075385ae4a91116"
+        @Query("APPID") AppId: String = BuildConfig.APPID
     ): WeatherForecast?
 
 
