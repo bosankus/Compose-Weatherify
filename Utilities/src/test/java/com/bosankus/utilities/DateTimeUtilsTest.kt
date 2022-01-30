@@ -13,25 +13,25 @@ class DateTimeUtilsTest {
 
     @Test
     fun getCurrentTimestamp_returnsTodaysTimeStampInEpoch() {
-        val currentTimestamp = DateTimeUtils.getCurrentTimestamp()
+        val currentTimestamp = DateTimeUtilsImpl.getCurrentTimestamp()
         assertThat(currentTimestamp).isNotEmpty()
     }
 
     @Test
     fun getDayWiseDifferenceFromToday_WhenProvidedGivenDay_returnNumberOfDaysInBetween() {
-        val numberOfDays = DateTimeUtils.getDayWiseDifferenceFromToday(SAMPLE_EPOCH)
+        val numberOfDays = DateTimeUtilsImpl.getDayWiseDifferenceFromToday(SAMPLE_EPOCH)
         assertThat(numberOfDays).isEqualTo(315)
     }
 
     @Test
     fun getTodayDateInCalenderFormat_returnTodaysCorrectDateFormat() {
-        val todaysDate = DateTimeUtils.getTodayDateInCalenderFormat().get(Calendar.YEAR)
+        val todaysDate = DateTimeUtilsImpl.getTodayDateInCalenderFormat().get(Calendar.YEAR)
         assertThat(todaysDate).isEqualTo(2022)
     }
 
     @Test
     fun getDayNameFromEpoch_WhenProvidedTodaysTimeStamp_returnCorrectDayName() {
-        val dayName = DateTimeUtils.getDayNameFromEpoch(SAMPLE_EPOCH)
+        val dayName = DateTimeUtilsImpl.getDayNameFromEpoch(SAMPLE_EPOCH)
         assertThat(dayName).isEqualTo("THURSDAY")
     }
 

@@ -2,7 +2,7 @@ package bose.ankush.weatherify.util
 
 import bose.ankush.weatherify.data.model.AvgForecast
 import bose.ankush.weatherify.data.model.WeatherForecast
-import com.bosankus.utilities.DateTimeUtils
+import com.bosankus.utilities.DateTimeUtilsImpl
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
@@ -31,13 +31,13 @@ object Extension {
             var counter = 0
             for (j in this.indices step 1) {
                 val date = this[j].dt
-                if (date?.let { DateTimeUtils.getDayWiseDifferenceFromToday(it) } == i) {
+                if (date?.let { DateTimeUtilsImpl.getDayWiseDifferenceFromToday(it) } == i) {
                     val forecastObj = this[j]
                     totalTemp += forecastObj.main?.temp?.toCelsius()?.toInt()!!
                     counter++
                     if ((counter % 7) == 0) {
                         avgTemp = totalTemp / counter
-                        dayName = DateTimeUtils.getDayNameFromEpoch(date)
+                        dayName = DateTimeUtilsImpl.getDayNameFromEpoch(date)
                         val avgForecast = AvgForecast(this.hashCode(), dayName, "$avgTemp C")
                         listOfAvgForecast.add(avgForecast)
                     }
@@ -53,11 +53,11 @@ object Extension {
         val givenDateCalender = Calendar.getInstance()
         givenDateCalender.time = givenDate
         val givenYear = givenDateCalender.get(Calendar.YEAR)
-        val currentYear = DateTimeUtils.getTodayDateInCalenderFormat().get(Calendar.YEAR)
+        val currentYear = DateTimeUtilsImpl.getTodayDateInCalenderFormat().get(Calendar.YEAR)
         val givenDateNumber = givenDateCalender.get(Calendar.DAY_OF_MONTH + 1)
         val todayDateNumber =
-            DateTimeUtils.getTodayDateInCalenderFormat().get(Calendar.DAY_OF_MONTH + 1)
-        val differenceOfDate = DateTimeUtils.getDayWiseDifferenceFromToday(this)
+            DateTimeUtilsImpl.getTodayDateInCalenderFormat().get(Calendar.DAY_OF_MONTH + 1)
+        val differenceOfDate = DateTimeUtilsImpl.getDayWiseDifferenceFromToday(this)
         return (givenDateNumber > todayDateNumber && givenYear == currentYear && (differenceOfDate <= 4))
     }
 

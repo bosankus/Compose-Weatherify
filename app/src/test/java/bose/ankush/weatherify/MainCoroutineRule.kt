@@ -10,6 +10,10 @@ import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
+/**
+ * Document for this class is yet to be written
+ */
+
 @ExperimentalCoroutinesApi
 class MainCoroutineRule(
     private val dispatcher: CoroutineDispatcher = TestCoroutineDispatcher()
