@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        app:isCurrentTempSuccess="@{viewmodel.currentTemp}"
+        app:isCurrentTempSuccess="@{viewmodel.temperature}"
         app:isWeatherForecastSuccess="@{viewmodel.forecast}">
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -26,7 +26,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:setWeatherIcon="@{viewmodel.currentTemp}" />
+            app:setWeatherIcon="@{viewmodel.temperature}" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/layout_weather_current_temp"
@@ -38,7 +38,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_temp_icon"
-            app:setTempInCelsius="@{viewmodel.currentTemp}" />
+            app:setTempInCelsius="@{viewmodel.temperature}" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/layout_weather_current_city"
@@ -50,7 +50,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_temp"
-            app:setCurrentCity="@{viewmodel.currentTemp}" />
+            app:setCurrentCity="@{viewmodel.temperature}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/layout_weather_recyclerview"

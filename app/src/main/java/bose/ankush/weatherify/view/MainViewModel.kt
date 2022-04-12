@@ -1,7 +1,5 @@
 package bose.ankush.weatherify.view
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.data.WeatherRepository
@@ -12,6 +10,8 @@ import bose.ankush.weatherify.util.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.util.ResultData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,21 +23,18 @@ Date: 05,May,2021
 @HiltViewModel
 class MainViewModel @Inject constructor(private val dataSource: WeatherRepository) : ViewModel() {
 
-    private var _currentTemp = MutableLiveData<ResultData<*>>(ResultData.DoNothing)
-    val currentTemp: LiveData<ResultData<*>>
-        get() = _currentTemp
+    private var _temperature = MutableStateFlow<ResultData<*>>(ResultData.DoNothing)
+    val temperature = _temperature.asStateFlow()
 
-    private var _forecast =
-        MutableLiveData<ResultData<List<AvgForecast>>>(ResultData.DoNothing)
-    val forecast: LiveData<ResultData<List<AvgForecast>>>
-        get() = _forecast
+    private var _forecast = MutableStateFlow<ResultData<List<AvgForecast>>>(ResultData.DoNothing)
+    val forecast = _forecast.asStateFlow()
 
     private val temperatureExceptionHandler = CoroutineExceptionHandler { _, exception ->
-        _currentTemp.postValue(ResultData.Failed("${exception.message}"))
+        viewModelScope.launch { _temperature.emit(ResultData.Failed("${exception.message}")) }
     }
 
     private val weatherExceptionHandler = CoroutineExceptionHandler { _, exception ->
-        _forecast.postValue(ResultData.Failed("${exception.message}"))
+        viewModelScope.launch { _forecast.emit(ResultData.Failed("${exception.message}")) }
     }
 
     init {
@@ -50,24 +47,24 @@ class MainViewModel @Inject constructor(private val dataSource: WeatherRepositor
     }
 
     private fun getCurrentTemperature() {
-        _currentTemp.postValue(ResultData.Loading)
         viewModelScope.launch(temperatureExceptionHandler) {
+            _temperature.emit(ResultData.Loading)
             val response: CurrentTemperature? = dataSource.getCurrentTemperature()
-            response?.let { _currentTemp.postValue(ResultData.Success(it)) }
-                ?: _currentTemp.postValue(ResultData.Failed("Couldn't fetch temperature"))
+            response?.let { _temperature.emit(ResultData.Success(it)) }
+                ?: _temperature.emit(ResultData.Failed("Couldn't fetch temperature"))
         }
     }
 
 
     private fun getWeatherForecast() {
-        _forecast.postValue(ResultData.Loading)
         viewModelScope.launch(weatherExceptionHandler) {
+            _forecast.emit(ResultData.Loading)
             val response: WeatherForecast? = dataSource.getWeatherForecast()
             response?.let { weatherForecast ->
                 val forecastList = weatherForecast.list?.getForecastListForNext4Days()
-                forecastList?.let { _forecast.postValue(ResultData.Success(it)) }
+                forecastList?.let { _forecast.emit(ResultData.Success(it)) }
             }
-                ?: _forecast.postValue(ResultData.Failed("Couldn't fetch weather forecast"))
+                ?: _forecast.emit(ResultData.Failed("Couldn't fetch weather forecast"))
 
         }
     }
