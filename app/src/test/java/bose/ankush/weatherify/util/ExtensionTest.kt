@@ -30,8 +30,13 @@ class ExtensionTest {
         val weatherForecast: WeatherForecast =
             Gson().fromJson(stringFile, WeatherForecast::class.java)
         val forecastList = weatherForecast.list!!
+
+        // finding next day name from read file
         val nextDayName: String? = forecastList.getForecastListForNext4Days()[0].nameOfDay
-        assertThat(nextDayName).isEqualTo("FRIDAY")
+
+        // before assertion, don't forget to update 'forecast.txt' file,
+        // and check respective next day name for successful test
+        assertThat(nextDayName).isEqualTo("TUESDAY")
     }
 
 }
