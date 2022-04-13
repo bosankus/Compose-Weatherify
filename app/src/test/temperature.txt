@@ -16,25 +16,25 @@
         "temp": 305.12,
         "feels_like": 312.12,
         "temp_min": 305.12,
-        "temp_max": 305.39,
-        "pressure": 1006,
+        "temp_max": 305.12,
+        "pressure": 1005,
         "humidity": 70
     },
-    "visibility": 5000,
+    "visibility": 4500,
     "wind": {
-        "speed": 6.17,
-        "deg": 190
+        "speed": 6.69,
+        "deg": 180
     },
     "clouds": {
-        "all": 20
+        "all": 40
     },
-    "dt": 1649650803,
+    "dt": 1649827513,
     "sys": {
         "type": 1,
         "id": 9114,
         "country": "IN",
-        "sunrise": 1649634603,
-        "sunset": 1649679890
+        "sunrise": 1649807297,
+        "sunset": 1649852734
     },
     "timezone": 19800,
     "id": 1275004,

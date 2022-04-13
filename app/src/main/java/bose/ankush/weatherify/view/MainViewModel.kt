@@ -23,8 +23,9 @@ Date: 05,May,2021
 @HiltViewModel
 class MainViewModel @Inject constructor(private val dataSource: WeatherRepository) : ViewModel() {
 
-    private var _temperature = MutableStateFlow<ResultData<*>>(ResultData.DoNothing)
-    val temperature = _temperature.asStateFlow()
+    private var _temperature =
+        MutableStateFlow<ResultData<CurrentTemperature>>(ResultData.DoNothing)
+    val temperature get() = _temperature.asStateFlow()
 
     private var _forecast = MutableStateFlow<ResultData<List<AvgForecast>>>(ResultData.DoNothing)
     val forecast = _forecast.asStateFlow()
@@ -46,12 +47,12 @@ class MainViewModel @Inject constructor(private val dataSource: WeatherRepositor
         getWeatherForecast()
     }
 
-    private fun getCurrentTemperature() {
+    fun getCurrentTemperature() {
         viewModelScope.launch(temperatureExceptionHandler) {
-            _temperature.emit(ResultData.Loading)
+            _temperature.value = ResultData.Loading
             val response: CurrentTemperature? = dataSource.getCurrentTemperature()
-            response?.let { _temperature.emit(ResultData.Success(it)) }
-                ?: _temperature.emit(ResultData.Failed("Couldn't fetch temperature"))
+            _temperature.value = response?.let { ResultData.Success(it) }
+                ?: ResultData.Failed("Couldn't fetch temperature")
         }
     }
 

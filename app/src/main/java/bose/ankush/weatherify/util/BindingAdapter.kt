@@ -44,7 +44,7 @@ fun View.weatherVisibility(currentTempState: ResultData<*>, weatherForecastState
 fun TextView.setTempInCelsius(value: ResultData<*>) {
     text =
         if (value is ResultData.Success<*> && value.data is CurrentTemperature)
-            "${value.data.main?.tempMax?.toCelsius()}°C"
+            "${value.data.main?.temp?.toCelsius()}°C"
         else "0°"
 }
 
