@@ -3,7 +3,6 @@ package bose.ankush.weatherify.data
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.data.model.AvgForecast
 import bose.ankush.weatherify.data.model.CurrentTemperature
-import bose.ankush.weatherify.data.model.WeatherForecast
 import bose.ankush.weatherify.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.util.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.util.ResultData
@@ -12,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**Created by

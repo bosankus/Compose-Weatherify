@@ -9,7 +9,7 @@ import java.util.*
 @RunWith(JUnit4::class)
 class DateTimeUtilsTest {
 
-    private val SAMPLE_EPOCH = 1669873946 // 1st December 2022
+    private val epoch = 1669873946 // 1st December 2022
 
     @Test
     fun getCurrentTimestamp_returnsTodaysTimeStampInEpoch() {
@@ -19,7 +19,7 @@ class DateTimeUtilsTest {
 
     @Test
     fun getDayWiseDifferenceFromToday_WhenProvidedGivenDay_returnNumberOfDaysInBetween() {
-        val numberOfDays = DateTimeUtilsImpl.getDayWiseDifferenceFromToday(SAMPLE_EPOCH)
+        val numberOfDays = DateTimeUtilsImpl.getDayWiseDifferenceFromToday(epoch)
         assertThat(numberOfDays).isEqualTo(315)
     }
 
@@ -31,7 +31,7 @@ class DateTimeUtilsTest {
 
     @Test
     fun getDayNameFromEpoch_WhenProvidedTodaysTimeStamp_returnCorrectDayName() {
-        val dayName = DateTimeUtilsImpl.getDayNameFromEpoch(SAMPLE_EPOCH)
+        val dayName = DateTimeUtilsImpl.getDayNameFromEpoch(epoch)
         assertThat(dayName).isEqualTo("THURSDAY")
     }
 

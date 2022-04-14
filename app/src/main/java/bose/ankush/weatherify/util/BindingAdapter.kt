@@ -5,7 +5,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
-import bose.ankush.weatherify.R
 import bose.ankush.weatherify.data.model.AvgForecast
 import bose.ankush.weatherify.data.model.CurrentTemperature
 import bose.ankush.weatherify.util.Extension.toCelsius
