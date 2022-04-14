@@ -1,5 +1,13 @@
 <resources>
-    <string name="app_name">Weatherify</string>
-    <string name="error_txt">Something went wrong at our end!</string>
+    <string name="app_name">Weatherify MVVM</string>
     <string name="retry_btn_txt">Retry</string>
+
+    <!--Error Texts-->
+    <string name="temp_fetch_error_txt">Could not fetch temperature</string>
+    <string name="forecast_fetch_error_txt">Could not fetch weather forecast</string>
+    <string name="network_error_txt">Error: %1$s</string>
+    <string name="unauthorised_access_txt">Unauthorised access!</string>
+    <string name="city_error_txt">City not found!</string>
+    <string name="server_error_txt">Umm… Looks like server issue!</string>
+    <string name="general_error_txt">Oops!..Something went wrong.</string>
 </resources>

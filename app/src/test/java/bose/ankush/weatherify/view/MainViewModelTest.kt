@@ -50,7 +50,7 @@ class MainViewModelTest {
             val job = launch(dispatcher) { viewModel.temperature.toList(result) }
 
             // Act
-            viewModel.getCurrentTemperature()
+            viewModel.fetchClimateDetails()
             runCurrent()
 
             // Assert
