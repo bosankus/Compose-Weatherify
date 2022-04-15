@@ -10,7 +10,7 @@ object Versions {
     const val extJunit = "1.1.3"
     const val truth = "1.1.3"
     const val turbine = "0.7.0"
-    const val coroutineTest = "2.1.0"
+    const val coroutineTest = "1.6.1"
     const val coreTesting = "2.1.0"
     const val espressoCore = "3.4.0"
     const val mockitoInline = "3.10.0"
@@ -32,9 +32,12 @@ object Versions {
     const val retrofitCoroutineAdapter = "0.9.2"
     const val okhttpInterceptor = "5.0.0-alpha.5"
 
-    // Dependency injection
+    // Coroutines
+    const val coroutines = "1.6.1"
+
+    // Dependency Injection
     const val hilt = "2.41"
-    const val hiltCompiler = "1.0.0"
+    const val hiltAndroidxCompiler = "1.0.0"
 
     // Miscellaneous
     const val timber = "5.0.1"
