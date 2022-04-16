@@ -3,7 +3,7 @@ object Versions {
 
     // Plugins
     const val buildGradle = "7.1.3"
-    const val navigationSafeArgs = "2.5.0""
+    const val navigationSafeArgs = "2.4.2"
 
     // Testing
     const val junit = "4.13.2"

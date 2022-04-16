@@ -1,22 +1,24 @@
 // Plugins
 object BuildPlugins {
     val buildGradle by lazy { "com.android.tools.build:gradle:${Versions.buildGradle}" }
-    val navigationSafeArgs by lazy { "androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.buildGradle}" }
+    val navigationSafeArgs by lazy { "androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.navigationSafeArgs}" }
     val hiltPlugin by lazy { "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}" }
 }
 
 // Dependencies
 object Deps {
-    // Testing
-    val junit by lazy { "junit:junit:4.13.2:${Versions.junit}" }
-    val extJunit by lazy { "androidx.test.ext:junit:1.1.3:${Versions.extJunit}" }
+    // Unit Testing
+    val junit by lazy { "junit:junit:${Versions.junit}" }
     val truth by lazy { "com.google.truth:truth:${Versions.truth}" }
-    val turbine by lazy { "app.cash.turbine:turbine:0.7.0:${Versions.turbine}" }
+    val turbine by lazy { "app.cash.turbine:turbine:${Versions.turbine}" }
     val coroutineTest by lazy { "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.coroutineTest}" }
     val coreTesting by lazy { "androidx.arch.core:core-testing:${Versions.coreTesting}" }
-    val espressoCore by lazy { "androidx.test.espresso:espresso-core:${Versions.espressoCore}" }
     val mockitoInline by lazy { "org.mockito:mockito-inline:${Versions.mockitoInline}" }
     val mockitoNhaarman by lazy { "com.nhaarman.mockitokotlin2:mockito-kotlin:${Versions.mockitoNhaarman}" }
+
+    // UI Testing
+    val extJunit by lazy { "androidx.test.ext:junit:${Versions.extJunit}" }
+    val espressoCore by lazy { "androidx.test.espresso:espresso-core:${Versions.espressoCore}" }
 
     // Core
     val androidCore by lazy { "androidx.core:core-ktx:${Versions.androidCore}" }
