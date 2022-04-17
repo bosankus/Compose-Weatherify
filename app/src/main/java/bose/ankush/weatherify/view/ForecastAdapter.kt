@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import bose.ankush.weatherify.databinding.LayoutForecastItemBinding
-import bose.ankush.weatherify.data.model.AvgForecast
+import bose.ankush.weatherify.model.model.AvgForecast
 
 /**Created by
 Author: Ankush Bose

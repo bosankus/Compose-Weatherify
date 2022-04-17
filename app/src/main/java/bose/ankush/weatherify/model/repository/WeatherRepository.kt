@@ -1,7 +1,7 @@
-package bose.ankush.weatherify.data
+package bose.ankush.weatherify.model.repository
 
-import bose.ankush.weatherify.data.model.AvgForecast
-import bose.ankush.weatherify.data.model.CurrentTemperature
+import bose.ankush.weatherify.model.model.AvgForecast
+import bose.ankush.weatherify.model.model.CurrentTemperature
 import bose.ankush.weatherify.util.ResultData
 import bose.ankush.weatherify.util.UiText
 import kotlinx.coroutines.flow.Flow

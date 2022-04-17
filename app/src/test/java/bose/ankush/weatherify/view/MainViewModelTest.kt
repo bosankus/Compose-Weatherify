@@ -2,8 +2,8 @@ package bose.ankush.weatherify.view
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import bose.ankush.weatherify.MainCoroutineRule
-import bose.ankush.weatherify.data.WeatherRepository
-import bose.ankush.weatherify.data.model.CurrentTemperature
+import bose.ankush.weatherify.model.repository.WeatherRepository
+import bose.ankush.weatherify.model.model.CurrentTemperature
 import bose.ankush.weatherify.util.ResultData
 import com.google.common.truth.Truth.assertThat
 import com.nhaarman.mockitokotlin2.mock

@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.view
 
 import androidx.recyclerview.widget.DiffUtil
-import bose.ankush.weatherify.data.model.AvgForecast
+import bose.ankush.weatherify.model.model.AvgForecast
 
 /**Created by
 Author: Ankush Bose

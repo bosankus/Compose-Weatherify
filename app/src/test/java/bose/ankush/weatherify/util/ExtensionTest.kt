@@ -1,6 +1,6 @@
 package bose.ankush.weatherify.util
 
-import bose.ankush.weatherify.data.model.WeatherForecast
+import bose.ankush.weatherify.model.model.WeatherForecast
 import bose.ankush.weatherify.util.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.util.Extension.toCelsius
 import com.google.common.truth.Truth.assertThat

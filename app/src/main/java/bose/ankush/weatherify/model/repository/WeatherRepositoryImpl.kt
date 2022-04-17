@@ -1,9 +1,10 @@
-package bose.ankush.weatherify.data
+package bose.ankush.weatherify.model.repository
 
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.data.model.AvgForecast
-import bose.ankush.weatherify.data.model.CurrentTemperature
+import bose.ankush.weatherify.model.model.AvgForecast
+import bose.ankush.weatherify.model.model.CurrentTemperature
 import bose.ankush.weatherify.dispatcher.DispatcherProvider
+import bose.ankush.weatherify.model.network.ApiService
 import bose.ankush.weatherify.util.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.util.ResultData
 import bose.ankush.weatherify.util.UiText

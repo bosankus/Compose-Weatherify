@@ -2,9 +2,9 @@ package bose.ankush.weatherify.view
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bose.ankush.weatherify.data.WeatherRepository
-import bose.ankush.weatherify.data.model.AvgForecast
-import bose.ankush.weatherify.data.model.CurrentTemperature
+import bose.ankush.weatherify.model.repository.WeatherRepository
+import bose.ankush.weatherify.model.model.AvgForecast
+import bose.ankush.weatherify.model.model.CurrentTemperature
 import bose.ankush.weatherify.util.ResultData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

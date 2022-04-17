@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.util
 
-import bose.ankush.weatherify.data.model.AvgForecast
-import bose.ankush.weatherify.data.model.WeatherForecast
+import bose.ankush.weatherify.model.model.AvgForecast
+import bose.ankush.weatherify.model.model.WeatherForecast
 import com.bosankus.utilities.DateTimeUtilsImpl
 import java.util.*
 import kotlin.collections.ArrayList

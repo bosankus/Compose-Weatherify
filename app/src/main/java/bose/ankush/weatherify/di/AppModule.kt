@@ -1,8 +1,8 @@
 package bose.ankush.weatherify.di
 
-import bose.ankush.weatherify.data.ApiService
-import bose.ankush.weatherify.data.WeatherRepository
-import bose.ankush.weatherify.data.WeatherRepositoryImpl
+import bose.ankush.weatherify.model.network.ApiService
+import bose.ankush.weatherify.model.repository.WeatherRepository
+import bose.ankush.weatherify.model.repository.WeatherRepositoryImpl
 import bose.ankush.weatherify.dispatcher.AppDispatcher
 import bose.ankush.weatherify.util.BASE_URL
 import bose.ankush.weatherify.dispatcher.DispatcherProvider

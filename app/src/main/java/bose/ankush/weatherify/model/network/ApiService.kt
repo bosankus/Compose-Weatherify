@@ -1,8 +1,8 @@
-package bose.ankush.weatherify.data
+package bose.ankush.weatherify.model.network
 
 import bose.ankush.weatherify.BuildConfig
-import bose.ankush.weatherify.data.model.CurrentTemperature
-import bose.ankush.weatherify.data.model.WeatherForecast
+import bose.ankush.weatherify.model.model.CurrentTemperature
+import bose.ankush.weatherify.model.model.WeatherForecast
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

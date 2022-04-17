@@ -6,7 +6,7 @@
 
         <variable
             name="forecast"
-            type="bose.ankush.weatherify.data.model.AvgForecast" />
+            type="bose.ankush.weatherify.model.model.AvgForecast" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
