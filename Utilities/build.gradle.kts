@@ -2,7 +2,6 @@ plugins {
     id("com.android.library")
     id("kotlin-android")
     id("kotlin-kapt")
-    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -37,20 +36,8 @@ dependencies {
 
     // Unit Testing
     testImplementation(Deps.junit)
-
-    // UI Testing
-    androidTestImplementation (Deps.extJunit)
-    androidTestImplementation (Deps.espressoCore)
+    testImplementation(Deps.truth)
 
     // Core
     implementation(Deps.androidCore)
-    implementation(Deps.appCompat)
-    implementation(Deps.androidMaterial)
-
-    // Dependency Injection
-    implementation(Deps.hilt)
-    kapt(Deps.hiltDaggerAndroidCompiler)
-
-    // Miscellaneous
-    testImplementation(Deps.truth)
 }
