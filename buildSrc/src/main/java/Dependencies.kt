@@ -15,6 +15,7 @@ object Deps {
     val coreTesting by lazy { "androidx.arch.core:core-testing:${Versions.coreTesting}" }
     val mockitoInline by lazy { "org.mockito:mockito-inline:${Versions.mockitoInline}" }
     val mockitoNhaarman by lazy { "com.nhaarman.mockitokotlin2:mockito-kotlin:${Versions.mockitoNhaarman}" }
+    val mockWebServer by lazy { "com.squareup.okhttp3:mockwebserver:${Versions.mockWebServer}" }
 
     // UI Testing
     val extJunit by lazy { "androidx.test.ext:junit:${Versions.extJunit}" }
@@ -33,6 +34,7 @@ object Deps {
     val navigationUi by lazy { "android.arch.navigation:navigation-ui-ktx:${Versions.navigation}" }
 
     // Networking
+    val okHttp3 by lazy { "com.squareup.okhttp3:okhttp:${Versions.okHttp3}" }
     val retrofit by lazy { "com.squareup.retrofit2:retrofit:${Versions.retrofit}" }
     val retrofitGson by lazy { "com.squareup.retrofit2:converter-gson:${Versions.retrofit}" }
     val retrofitCoroutineAdapter by lazy { "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:${Versions.retrofitCoroutineAdapter}" }

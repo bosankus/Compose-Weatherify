@@ -15,6 +15,7 @@ object Versions {
     const val espressoCore = "3.4.0"
     const val mockitoInline = "3.10.0"
     const val mockitoNhaarman = "2.2.0"
+    const val mockWebServer = "4.9.3"
 
     // Core
     const val androidCore = "1.7.0"
@@ -28,9 +29,10 @@ object Versions {
     const val navigation = "1.0.0"
 
     // Networking
+    const val okHttp3 = "4.9.3"
     const val retrofit = "2.9.0"
     const val retrofitCoroutineAdapter = "0.9.2"
-    const val okhttpInterceptor = "5.0.0-alpha.5"
+    const val okhttpInterceptor = "4.9.3"
 
     // Coroutines
     const val coroutines = "1.6.1"

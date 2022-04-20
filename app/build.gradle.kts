@@ -59,6 +59,7 @@ dependencies {
     testImplementation(Deps.coreTesting)
     testImplementation(Deps.mockitoInline)
     testImplementation(Deps.mockitoNhaarman)
+    testImplementation(Deps.mockWebServer)
 
     // UI Testing
     androidTestImplementation(Deps.extJunit)
@@ -77,6 +78,7 @@ dependencies {
     implementation(Deps.navigationUi)
 
     // Networking
+    implementation(Deps.okHttp3)
     implementation(Deps.retrofit)
     implementation(Deps.retrofitGson)
     implementation(Deps.okhttpInterceptor)

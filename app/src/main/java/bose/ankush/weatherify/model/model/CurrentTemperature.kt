@@ -4,6 +4,8 @@ package bose.ankush.weatherify.model.model
 import com.google.gson.annotations.SerializedName
 
 data class CurrentTemperature(
+    @SerializedName("cod")
+    val cod: Int,
     @SerializedName("main")
     val main: Main?,
     @SerializedName("name")
@@ -15,7 +17,6 @@ data class CurrentTemperature(
         @SerializedName("temp")
         val temp: Double?,
     )
-
     data class Weather(
         @SerializedName("icon")
         val icon: String?,

@@ -34,7 +34,7 @@ fun View.errorVisibility(currentTempState: ResultData<*>, weatherForecastState: 
 
 @BindingAdapter("isCurrentTempSuccess", "isWeatherForecastSuccess")
 fun View.weatherVisibility(currentTempState: ResultData<*>, weatherForecastState: ResultData<*>) {
-    if (currentTempState is ResultData.Success && weatherForecastState is ResultData.Success)
+    if (currentTempState is ResultData.Success || weatherForecastState is ResultData.Success)
         this.visibility = View.VISIBLE
     else this.visibility = View.GONE
 }

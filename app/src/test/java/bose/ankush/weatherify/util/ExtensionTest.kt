@@ -24,7 +24,7 @@ class ExtensionTest {
     @Test
     fun getForecastListForNext4Days_WhenProvidedForecastList_ReturnsNextDayName() {
         // read sample file
-        val inputStream = File("src/test/forecast.txt").inputStream()
+        val inputStream = File("src/test/forecast.json").inputStream()
         val stringFile = inputStream.bufferedReader().use { it.readText() }
         // convert string file to forecast list
         val weatherForecast: WeatherForecast =
@@ -34,7 +34,7 @@ class ExtensionTest {
         // finding next day name from read file
         val nextDayName: String? = forecastList.getForecastListForNext4Days()[0].nameOfDay
 
-        // before assertion, don't forget to update 'forecast.txt' file,
+        // before assertion, don't forget to update 'forecast.json' file,
         // and check respective next day name for successful test
         assertThat(nextDayName).isEqualTo("TUESDAY")
     }
