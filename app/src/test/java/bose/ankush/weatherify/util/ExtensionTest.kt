@@ -16,7 +16,7 @@ class ExtensionTest {
     @Test
     fun toCelsius_WhenKelvinTempProvided_ReturnsCelsiusString() {
         // test temp is 303.12K, output 30C
-        val farTemp = 303.12
+        val farTemp = 305.12
         val celsiusTemp = farTemp.toCelsius()
         assertThat(celsiusTemp).isEqualTo("30")
     }
@@ -24,8 +24,8 @@ class ExtensionTest {
     @Test
     fun getForecastListForNext4Days_WhenProvidedForecastList_ReturnsNextDayName() {
         // read sample file
-        val inputStream = File("src/test/forecast.json").inputStream()
-        val stringFile = inputStream.bufferedReader().use { it.readText() }
+        val inputStream = javaClass.classLoader?.getResourceAsStream("forecast.json")
+        val stringFile = checkNotNull(inputStream?.bufferedReader().use { it?.readText() })
         // convert string file to forecast list
         val weatherForecast: WeatherForecast =
             Gson().fromJson(stringFile, WeatherForecast::class.java)
@@ -36,7 +36,7 @@ class ExtensionTest {
 
         // before assertion, don't forget to update 'forecast.json' file,
         // and check respective next day name for successful test
-        assertThat(nextDayName).isEqualTo("TUESDAY")
+        assertThat(nextDayName).isEqualTo("FRIDAY")
     }
 
 }

@@ -1,18 +1,24 @@
 package bose.ankush.weatherify.view
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import app.cash.turbine.test
 import bose.ankush.weatherify.MainCoroutineRule
 import bose.ankush.weatherify.model.repository.WeatherRepository
 import bose.ankush.weatherify.model.model.CurrentTemperature
 import bose.ankush.weatherify.util.ResultData
 import com.google.common.truth.Truth.assertThat
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.anyVararg
 import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -42,28 +48,41 @@ class MainViewModelTest {
 
 
     @Test
-    fun getCurrentTemperature_returns_correctFlowResultData() {
-        runTest {
-            // List to collect the results
-            val dispatcher = UnconfinedTestDispatcher(testScheduler)
-            val result = arrayListOf<ResultData<CurrentTemperature>>()
-            val job = launch(dispatcher) { viewModel.temperature.toList(result) }
-
-            // Act
-            viewModel.fetchClimateDetails()
-            runCurrent()
-
-            // Assert
-            assertThat(result).isEqualTo(
-                listOf(
-                    ResultData.DoNothing,
-                    ResultData.Loading,
-                    ResultData.Success(CurrentTemperature.Main(307.12))
+    fun `getTemperature, returns data successfully via flow`() = runTest {
+        viewModel.fetchClimateDetails()
+        val job = launch { viewModel.temperature.test {
+            val first = awaitItem()
+            assertThat(first).isEqualTo(ResultData.DoNothing)
+            val second = awaitItem()
+            assertThat(second).isEqualTo(ResultData.Loading)
+            val third = awaitItem()
+            assertThat(third).isEqualTo(ResultData.Success(
+                CurrentTemperature(
+                    cod = 200,
+                    main = CurrentTemperature.Main(temp = 305.12),
+                    name = "Kolkata",
+                    weather = listOf(CurrentTemperature.Weather(icon = "50d"))
                 )
-            )
+            ))
+        } }
 
-            // Cancelling job
-            job.cancel()
-        }
+        job.join()
+        job.cancel()
+    }
+
+    @Test
+    fun `getCurrentTemperature, returns data successfully via flow`() = runTest {
+        viewModel.fetchClimateDetails()
+        val job = launch { viewModel.forecast.test {
+            val first = awaitItem()
+            assertThat(first).isEqualTo(ResultData.DoNothing)
+            val second = awaitItem()
+            assertThat(second).isEqualTo(ResultData.Loading)
+            val third = awaitItem()
+            assertThat(third).isEqualTo(ResultData.Success(null))
+        } }
+
+        job.join()
+        job.cancel()
     }
 }

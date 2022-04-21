@@ -69,14 +69,14 @@ class WeatherRepositoryTest {
 
 
     @Test
-    fun sampleTest() = runTest {
+    fun `getCurrentTemperature, reads response and returns success data`() = runTest {
 
         mockWebServer.enqueueResponse("temperature.json", 200)
 
-        val job = launch { repository.getWeatherForecast().test {
+        val job = launch { repository.getCurrentTemperature().test {
             val first = awaitItem()
             assertThat(first).isEqualTo(ResultData.Loading)
-            val second = awaitError()
+            val second = awaitItem()
             assertThat(second).isEqualTo(ResultData.Success(
                 CurrentTemperature(
                     cod = 200,
