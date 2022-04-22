@@ -5,6 +5,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
+import bose.ankush.weatherify.R
 import bose.ankush.weatherify.model.model.AvgForecast
 import bose.ankush.weatherify.model.model.CurrentTemperature
 import bose.ankush.weatherify.util.Extension.toCelsius
@@ -44,8 +45,14 @@ fun View.weatherVisibility(currentTempState: ResultData<*>, weatherForecastState
 fun TextView.setTempInCelsius(value: ResultData<*>) {
     text =
         if (value is ResultData.Success<*> && value.data is CurrentTemperature)
-            "${value.data.main?.temp?.toCelsius()}°C"
-        else "0°"
+            resources.getString(R.string.celsius, "${value.data.main?.temp?.toCelsius()}")
+        else resources.getString(R.string.celsius, "--")
+}
+
+
+@BindingAdapter("setTempInCelsius")
+fun TextView.setTempInCelsius(value: String?) {
+    text = resources.getString(R.string.celsius, value)
 }
 
 

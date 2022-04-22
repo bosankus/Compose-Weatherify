@@ -64,6 +64,7 @@ dependencies {
     // UI Testing
     androidTestImplementation(Deps.extJunit)
     androidTestImplementation(Deps.espressoCore)
+    androidTestImplementation(Deps.espressoContrib)
 
     // Core
     implementation(Deps.androidCore)

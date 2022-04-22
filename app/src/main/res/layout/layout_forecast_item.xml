@@ -35,7 +35,7 @@
             android:layout_marginEnd="@dimen/gap_16dp"
             android:layout_marginRight="@dimen/gap_16dp"
             android:fontFamily="@font/roboto_regular"
-            android:text="@{forecast.avgTemp}"
+            app:setTempInCelsius="@{forecast.avgTemp}"
             android:textColor="@color/light_grey"
             android:textSize="@dimen/text_16sp"
             app:layout_constraintBottom_toBottomOf="parent"

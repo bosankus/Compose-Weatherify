@@ -12,7 +12,7 @@ object Versions {
     const val turbine = "0.7.0"
     const val coroutineTest = "1.6.1"
     const val coreTesting = "2.1.0"
-    const val espressoCore = "3.4.0"
+    const val espresso = "3.4.0"
     const val mockitoInline = "3.10.0"
     const val mockitoNhaarman = "2.2.0"
     const val mockWebServer = "4.9.3"

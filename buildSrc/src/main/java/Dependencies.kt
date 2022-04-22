@@ -19,7 +19,8 @@ object Deps {
 
     // UI Testing
     val extJunit by lazy { "androidx.test.ext:junit:${Versions.extJunit}" }
-    val espressoCore by lazy { "androidx.test.espresso:espresso-core:${Versions.espressoCore}" }
+    val espressoCore by lazy { "androidx.test.espresso:espresso-core:${Versions.espresso}" }
+    val espressoContrib by lazy { "androidx.test.espresso:espresso-contrib:${Versions.espresso}" }
 
     // Core
     val androidCore by lazy { "androidx.core:core-ktx:${Versions.androidCore}" }
