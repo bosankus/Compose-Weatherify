@@ -16,6 +16,8 @@ data class CurrentTemperature(
     data class Main(
         @SerializedName("temp")
         val temp: Double?,
+        @SerializedName("humidity")
+        val humidity: Double?,
     )
     data class Weather(
         @SerializedName("icon")

@@ -49,6 +49,15 @@ fun TextView.setTempInCelsius(value: ResultData<*>) {
         else resources.getString(R.string.celsius, "0")
 }
 
+@BindingAdapter("setHumidity")
+fun TextView.setHumidity(value: ResultData<*>) {
+    text =
+        if (value is ResultData.Success<*> && value.data is CurrentTemperature)
+            value.data.main?.humidity.toString()
+
+        else "0"
+}
+
 
 @BindingAdapter("setTempInCelsius")
 fun TextView.setTempInCelsius(value: String?) {
@@ -79,7 +88,7 @@ fun TextView.setErrorText(tempErrMsg: ResultData<*>, forecastErrMsg: ResultData<
 fun ImageView.setIcon(result: ResultData<*>) {
     if (result is ResultData.Success && result.data is CurrentTemperature) {
         result.data.weather?.get(0)?.icon?.let {
-            val iconUrl = "https://openweathermap.org/img/w/${it}.png"
+            val iconUrl = "https://openweathermap.org/img/wn/${it}@2x.png"
             Glide.with(this.context)
                 .load(iconUrl)
                 .into(this)

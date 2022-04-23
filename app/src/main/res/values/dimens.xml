@@ -10,4 +10,6 @@
     <dimen name="gap_26dp">26dp</dimen>
     <dimen name="gap_44dp">44dp</dimen>
     <dimen name="text_16sp">16sp</dimen>
+    <dimen name="gap_3dp">3dp</dimen>
+    <dimen name="text_22sp">22sp</dimen>
 </resources>

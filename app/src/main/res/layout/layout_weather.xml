@@ -39,7 +39,7 @@
             android:layout_marginRight="@dimen/gap_16dp"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/light_grey"
-            android:textSize="@dimen/text_36sp"
+            android:textSize="@dimen/text_22sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:setTempInCelsius="@{viewmodel.temperature}" />
@@ -48,11 +48,34 @@
             android:id="@+id/layout_weather_current_temp_icon"
             android:layout_width="@dimen/gap_26dp"
             android:layout_height="@dimen/gap_26dp"
-            android:tint="@android:color/holo_blue_bright"
+            android:scaleType="fitXY"
+            app:layout_constraintBottom_toBottomOf="@+id/layout_weather_current_temp"
             app:layout_constraintEnd_toStartOf="@+id/layout_weather_current_temp"
             app:layout_constraintTop_toTopOf="@+id/layout_weather_current_temp"
-            app:layout_constraintBottom_toBottomOf="@+id/layout_weather_current_temp"
             app:setWeatherIcon="@{viewmodel.temperature}" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/layout_weather_humidity_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/gap_16dp"
+            android:layout_marginRight="@dimen/gap_16dp"
+            android:textSize="@dimen/text_22sp"
+            android:layout_marginTop="@dimen/gap_3dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_temp"
+            app:setHumidity="@{viewmodel.temperature}" />
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/layout_weather_humidity_anim"
+            android:layout_width="@dimen/gap_26dp"
+            android:layout_height="@dimen/gap_26dp"
+            android:layout_marginTop="@dimen/gap_3dp"
+            app:layout_constraintStart_toStartOf="@+id/layout_weather_current_temp_icon"
+            app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_temp_icon"
+            app:lottie_autoPlay="true"
+            app:lottie_fileName="humidity.json"
+            app:lottie_loop="true" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/layout_weather_recyclerview"
