@@ -6,6 +6,8 @@
     <dimen name="gap_36dp">36dp</dimen>
     <dimen name="text_54sp">54sp</dimen>
     <dimen name="gap_16dp">16dp</dimen>
+    <dimen name="gap_8dp">8dp</dimen>
+    <dimen name="gap_26dp">26dp</dimen>
     <dimen name="gap_44dp">44dp</dimen>
     <dimen name="text_16sp">16sp</dimen>
 </resources>

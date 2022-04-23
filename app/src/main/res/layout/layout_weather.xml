@@ -16,41 +16,43 @@
         app:isCurrentTempSuccess="@{viewmodel.temperature}"
         app:isWeatherForecastSuccess="@{viewmodel.forecast}">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/layout_weather_current_temp_icon"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="40dp"
-            android:layout_marginEnd="@dimen/gap_16dp"
-            android:layout_marginRight="@dimen/gap_16dp"
-            app:layout_constraintEnd_toEndOf="parent"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/layout_weather_current_city"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/gap_16dp"
+            android:layout_marginLeft="@dimen/gap_16dp"
+            android:layout_marginTop="@dimen/gap_36dp"
+            android:fontFamily="@font/roboto_thin"
+            android:textColor="@color/city_txt"
+            android:textSize="@dimen/text_36sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:setWeatherIcon="@{viewmodel.temperature}" />
+            app:setCurrentCity="@{viewmodel.temperature}" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/layout_weather_current_temp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_black"
+            android:layout_marginTop="@dimen/text_36sp"
+            android:layout_marginEnd="@dimen/gap_16dp"
+            android:layout_marginRight="@dimen/gap_16dp"
+            android:fontFamily="@font/roboto_regular"
             android:textColor="@color/light_grey"
-            android:textSize="@dimen/text_96sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_temp_icon"
-            app:setTempInCelsius="@{viewmodel.temperature}" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/layout_weather_current_city"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_thin"
-            android:textColor="@color/city_txt"
             android:textSize="@dimen/text_36sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layout_weather_current_temp"
-            app:setCurrentCity="@{viewmodel.temperature}" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:setTempInCelsius="@{viewmodel.temperature}" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/layout_weather_current_temp_icon"
+            android:layout_width="@dimen/gap_26dp"
+            android:layout_height="@dimen/gap_26dp"
+            android:tint="@android:color/holo_blue_bright"
+            app:layout_constraintEnd_toStartOf="@+id/layout_weather_current_temp"
+            app:layout_constraintTop_toTopOf="@+id/layout_weather_current_temp"
+            app:layout_constraintBottom_toBottomOf="@+id/layout_weather_current_temp"
+            app:setWeatherIcon="@{viewmodel.temperature}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/layout_weather_recyclerview"
