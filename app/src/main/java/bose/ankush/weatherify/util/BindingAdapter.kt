@@ -9,7 +9,7 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.model.model.AvgForecast
 import bose.ankush.weatherify.model.model.CurrentTemperature
 import bose.ankush.weatherify.util.Extension.toCelsius
-import bose.ankush.weatherify.view.ForecastAdapter
+import bose.ankush.weatherify.view.home.ForecastAdapter
 import com.bumptech.glide.Glide
 
 /**Created by
@@ -46,7 +46,7 @@ fun TextView.setTempInCelsius(value: ResultData<*>) {
     text =
         if (value is ResultData.Success<*> && value.data is CurrentTemperature)
             resources.getString(R.string.celsius, "${value.data.main?.temp?.toCelsius()}")
-        else resources.getString(R.string.celsius, "--")
+        else resources.getString(R.string.celsius, "0")
 }
 
 

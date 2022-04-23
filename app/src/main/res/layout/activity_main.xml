@@ -3,39 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="viewmodel"
-            type="bose.ankush.weatherify.view.MainViewModel" />
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/background_color"
         tools:context=".view.MainActivity">
 
-        <include
-            android:id="@+id/activity_main_layout_loading"
-            layout="@layout/layout_loading"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:viewmodel="@{viewmodel}" />
-
-        <include
-            android:id="@+id/activity_main_layout_error"
-            layout="@layout/layout_error"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:viewmodel="@{viewmodel}" />
-
-        <include
-            android:id="@+id/activity_main_layout_weather"
-            layout="@layout/layout_weather"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:viewmodel="@{viewmodel}" />
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_graph" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

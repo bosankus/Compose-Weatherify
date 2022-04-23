@@ -6,19 +6,12 @@ import bose.ankush.weatherify.MainCoroutineRule
 import bose.ankush.weatherify.model.repository.WeatherRepository
 import bose.ankush.weatherify.model.model.CurrentTemperature
 import bose.ankush.weatherify.util.ResultData
+import bose.ankush.weatherify.view.home.HomeViewModel
 import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.anyVararg
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,7 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
-class MainViewModelTest {
+class HomeViewModelTest {
 
     @get: Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -38,12 +31,12 @@ class MainViewModelTest {
 
     private val dataSource: WeatherRepository = mock()
 
-    private lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: HomeViewModel
 
     @Before
     fun setUp() {
         MockitoAnnotations.openMocks(this)
-        viewModel = MainViewModel(dataSource)
+        viewModel = HomeViewModel(dataSource)
     }
 
 

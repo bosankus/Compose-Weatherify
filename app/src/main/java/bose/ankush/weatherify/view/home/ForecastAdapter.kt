@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.view
+package bose.ankush.weatherify.view.home
 
 
 import android.view.LayoutInflater

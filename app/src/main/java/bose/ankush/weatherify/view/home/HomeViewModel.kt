@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.view
+package bose.ankush.weatherify.view.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +19,7 @@ Date: 05,May,2021
  **/
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val dataSource: WeatherRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(private val dataSource: WeatherRepository) : ViewModel() {
 
     private var _temperature =
         MutableStateFlow<ResultData<CurrentTemperature>>(ResultData.DoNothing)
