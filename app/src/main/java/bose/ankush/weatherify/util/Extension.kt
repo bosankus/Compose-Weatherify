@@ -38,7 +38,7 @@ object Extension {
                     if ((counter % 7) == 0) {
                         avgTemp = totalTemp / counter
                         dayName = DateTimeUtilsImpl.getDayNameFromEpoch(date)
-                        val avgForecast = AvgForecast(this.hashCode(), dayName, "$avgTemp C")
+                        val avgForecast = AvgForecast(this.hashCode(), dayName, "$avgTemp")
                         listOfAvgForecast.add(avgForecast)
                     }
                 }
