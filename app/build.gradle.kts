@@ -75,6 +75,7 @@ dependencies {
     // Compose
     implementation(Deps.composeUi)
     implementation(Deps.composeMaterial)
+    debugImplementation(Deps.composeUiTooling)
     implementation(Deps.composeUiToolingPreview)
 
     // Core

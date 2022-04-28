@@ -10,6 +10,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_forecast_cl_container"
         android:layout_width="match_parent"
         android:layout_height="80dp">
 
@@ -18,7 +19,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/gap_16dp"
-            android:layout_marginLeft="@dimen/gap_16dp"
             android:fontFamily="@font/roboto_regular"
             android:text="@{forecast.nameOfDay}"
             android:textColor="@color/light_grey"

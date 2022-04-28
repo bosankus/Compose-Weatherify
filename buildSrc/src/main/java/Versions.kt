@@ -6,6 +6,7 @@ object Versions {
 
     // Compose
     const val composeVersion = "1.1.1"
+    const val composeVersionBeta = "1.0.0-beta09"
 
     // Plugins
     const val buildGradle = "7.1.3"
