@@ -33,9 +33,14 @@ android {
         }
     }
 
-    // for dataBinding purpose
     buildFeatures {
         dataBinding = true
+        viewBinding = true
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = Versions.composeVersion
     }
 
     compileOptions {
@@ -65,6 +70,12 @@ dependencies {
     androidTestImplementation(Deps.extJunit)
     androidTestImplementation(Deps.espressoCore)
     androidTestImplementation(Deps.espressoContrib)
+    androidTestImplementation(Deps.composeUiTest)
+
+    // Compose
+    implementation(Deps.composeUi)
+    implementation(Deps.composeMaterial)
+    implementation(Deps.composeUiToolingPreview)
 
     // Core
     implementation(Deps.androidCore)

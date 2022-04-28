@@ -21,6 +21,12 @@ object Deps {
     val extJunit by lazy { "androidx.test.ext:junit:${Versions.extJunit}" }
     val espressoCore by lazy { "androidx.test.espresso:espresso-core:${Versions.espresso}" }
     val espressoContrib by lazy { "androidx.test.espresso:espresso-contrib:${Versions.espresso}" }
+    val composeUiTest by lazy { "androidx.compose.ui:ui-test-junit4:${Versions.composeVersion}" }
+
+    // Compose
+    val composeUi by lazy { "androidx.compose.ui:ui:${Versions.composeVersion}" }
+    val composeMaterial by lazy { "androidx.compose.material:material:${Versions.composeVersion}" }
+    val composeUiToolingPreview by lazy { "androidx.compose.ui:ui-tooling-preview:${Versions.composeVersion}" }
 
     // Core
     val androidCore by lazy { "androidx.core:core-ktx:${Versions.androidCore}" }

@@ -1,6 +1,12 @@
 
 object Versions {
 
+    // Kotlin
+    const val kotlin = "1.6.10"
+
+    // Compose
+    const val composeVersion = "1.1.1"
+
     // Plugins
     const val buildGradle = "7.1.3"
     const val navigationSafeArgs = "2.4.2"
