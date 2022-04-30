@@ -3,8 +3,10 @@ package bose.ankush.weatherify.presentation.details
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -14,19 +16,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.presentation.details.component.ForecastItem
 import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
 import bose.ankush.weatherify.presentation.ui.theme.ButtonBlue
 import bose.ankush.weatherify.presentation.ui.theme.CardBackgroundLightGrey
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 
-@Preview
 @Composable
-fun DetailsFragmentScreen() {
+fun DetailsFragmentScreen(
+    viewModel: DetailsViewModel = hiltViewModel()
+) {
     Box(
         modifier = Modifier
             .background(BackgroundGrey)
@@ -40,7 +45,7 @@ fun DetailsFragmentScreen() {
             WeatherPrecautionSection()
 
             // Show time wise temperature(min, max, feel) in list format
-            AllTimeForecastList()
+            AllTimeForecastList(viewModel)
         }
     }
 }
@@ -117,8 +122,9 @@ fun WeatherPrecautionSection(
 
 
 @Composable
-fun AllTimeForecastList() {
+fun AllTimeForecastList(viewModel: DetailsViewModel) {
+    val state = viewModel.state.value
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
-
+        items(state.forecasts) { forecast -> ForecastItem(forecastDto = forecast) }
     }
 }
