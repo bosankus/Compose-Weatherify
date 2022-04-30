@@ -90,3 +90,14 @@ data class WeatherDto(
         val speed: Double
     )
 }
+
+
+fun WeatherDto.toWeather(): Weather {
+    return Weather(
+        cod = cod,
+        temp = main.temp,
+        humidity = main.humidity,
+        name = name,
+        icon = weather[0].icon,
+    )
+}

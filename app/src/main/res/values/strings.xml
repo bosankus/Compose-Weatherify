@@ -7,5 +7,6 @@
     <string name="city_error_txt">City not found!</string>
     <string name="server_error_txt">Umm… Looks like server issue!</string>
     <string name="general_error_txt">Oops!..Something went wrong.</string>
+    <string name="empty_list">No details found. Try after sometime.</string>
     <string name="celsius">%1$s°C</string>
 </resources>

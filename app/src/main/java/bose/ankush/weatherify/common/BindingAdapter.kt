@@ -6,9 +6,9 @@ import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.RecyclerView
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.domain.model.Weather
-import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.presentation.home.ForecastAdapter
 import com.bumptech.glide.Glide
 
@@ -45,7 +45,7 @@ fun View.weatherVisibility(currentTempState: ResultData<*>, weatherForecastState
 fun TextView.setTempInCelsius(value: ResultData<*>) {
     text =
         if (value is ResultData.Success<*> && value.data is Weather)
-            resources.getString(R.string.celsius, "${value.data.main?.temp?.toCelsius()}")
+            resources.getString(R.string.celsius, "${value.data.temp?.toCelsius()}")
         else resources.getString(R.string.celsius, "0")
 }
 
@@ -53,8 +53,7 @@ fun TextView.setTempInCelsius(value: ResultData<*>) {
 fun TextView.setHumidity(value: ResultData<*>) {
     text =
         if (value is ResultData.Success<*> && value.data is Weather)
-            value.data.main?.humidity.toString()
-
+            value.data.humidity.toString()
         else "0"
 }
 
@@ -87,7 +86,7 @@ fun TextView.setErrorText(tempErrMsg: ResultData<*>, forecastErrMsg: ResultData<
 @BindingAdapter("setWeatherIcon")
 fun ImageView.setIcon(result: ResultData<*>) {
     if (result is ResultData.Success && result.data is Weather) {
-        result.data.weather?.get(0)?.icon?.let {
+        result.data.icon?.let {
             val iconUrl = "https://openweathermap.org/img/wn/${it}@2x.png"
             Glide.with(this.context)
                 .load(iconUrl)

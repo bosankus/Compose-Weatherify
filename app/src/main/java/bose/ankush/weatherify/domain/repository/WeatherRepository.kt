@@ -5,6 +5,7 @@ import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
+import bose.ankush.weatherify.data.remote.dto.WeatherDto
 import kotlinx.coroutines.flow.Flow
 
 /**Created by
@@ -14,11 +15,9 @@ Date: 05,May,2021
 
 interface WeatherRepository {
 
-    fun getCurrentTemperature(): Flow<ResultData<Weather>>
+    suspend fun getTodaysWeatherReport(): WeatherDto
 
-    fun getWeatherForecast(): Flow<ResultData<List<AvgForecast>>>
-
-    suspend fun getWeatherForecastList(): List<ForecastDto.ForecastList>
+    suspend fun getWeatherForecastList(): ForecastDto
 
     fun errorResponse(errorCode: Int): UiText.StringResource
 }

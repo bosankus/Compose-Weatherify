@@ -2,10 +2,11 @@ package bose.ankush.weatherify.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bose.ankush.weatherify.domain.repository.WeatherRepository
+import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.domain.model.Weather
-import bose.ankush.weatherify.common.ResultData
+import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetNextFourDaysWeatherForecast
+import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +20,10 @@ Date: 05,May,2021
  **/
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val dataSource: WeatherRepository) : ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val todaysWeatherReport: GetTodaysWeatherReport,
+    private val nextFourDaysWeatherForecast: GetNextFourDaysWeatherForecast,
+) : ViewModel() {
 
     private var _temperature =
         MutableStateFlow<ResultData<Weather>>(ResultData.DoNothing)
@@ -34,20 +38,20 @@ class HomeViewModel @Inject constructor(private val dataSource: WeatherRepositor
 
     fun fetchClimateDetails() {
         getTemperature()
-        getWeatherForecast()
+        next4DaysWeatherForecast()
     }
 
 
     private fun getTemperature() {
         viewModelScope.launch {
-            dataSource.getCurrentTemperature().collectLatest { data -> _temperature.value = data }
+            todaysWeatherReport().collectLatest { data -> _temperature.value = data }
         }
     }
 
 
-    private fun getWeatherForecast() {
+    private fun next4DaysWeatherForecast() {
         viewModelScope.launch {
-            dataSource.getWeatherForecast().collectLatest { data -> _forecast.value = data }
+            nextFourDaysWeatherForecast().collectLatest { data -> _forecast.value = data }
         }
     }
 }
