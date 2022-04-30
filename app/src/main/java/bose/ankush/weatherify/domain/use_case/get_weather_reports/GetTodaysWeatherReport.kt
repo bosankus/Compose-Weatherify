@@ -2,6 +2,7 @@ package bose.ankush.weatherify.domain.use_case.get_weather_reports
 
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
+import bose.ankush.weatherify.common.errorResponse
 import bose.ankush.weatherify.data.remote.dto.toWeather
 import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.domain.repository.WeatherRepository
@@ -20,7 +21,8 @@ class GetTodaysWeatherReport @Inject constructor(
             val weatherReport: Weather = repository.getTodaysWeatherReport().toWeather()
             emit(ResultData.Success(weatherReport))
         } catch (e: HttpException) {
-            emit(ResultData.Failed(UiText.DynamicText(e.message.toString())))
+            val message = errorResponse(e.code())
+            emit(ResultData.Failed(message))
         } catch (e: IOException) {
             emit(ResultData.Failed(UiText.DynamicText(e.message.toString())))
         }

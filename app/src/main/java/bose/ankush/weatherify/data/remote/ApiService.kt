@@ -22,7 +22,7 @@ interface ApiService {
 
     @GET("/data/2.5/forecast")
     suspend fun getWeatherForecastList(
-        @Query("q") location: String = "Kolkata",
+        @Query("q") location: String = "Ko",
         @Query("APPID") AppId: String = BuildConfig.APPID
     ): ForecastDto
 
