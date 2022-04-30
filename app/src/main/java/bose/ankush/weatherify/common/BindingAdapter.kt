@@ -69,7 +69,7 @@ fun TextView.setCurrentCity(value: ResultData<*>) {
     text =
         if (value is ResultData.Success<*> && value.data is Weather)
             value.data.name
-        else "..."
+        else "Loading..."
 }
 
 

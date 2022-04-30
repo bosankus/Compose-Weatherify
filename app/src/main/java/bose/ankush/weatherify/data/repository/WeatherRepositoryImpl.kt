@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**Created by
@@ -28,10 +29,10 @@ class WeatherRepositoryImpl @Inject constructor(
 
 
     override suspend fun getTodaysWeatherReport(): WeatherDto =
-        apiService.getTodaysWeatherReport()
+        withContext(dispatcher.io) { apiService.getTodaysWeatherReport() }
 
     override suspend fun getWeatherForecastList(): ForecastDto =
-        apiService.getWeatherForecastList()
+        withContext(dispatcher.io) { apiService.getWeatherForecastList() }
 
 
     override fun errorResponse(errorCode: Int): UiText.StringResource {
