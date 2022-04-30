@@ -7,12 +7,12 @@
 
     <fragment
         android:id="@+id/detailsFragment"
-        android:name="bose.ankush.weatherify.view.details.DetailsFragment"
+        android:name="bose.ankush.weatherify.presentation.details.DetailsFragment"
         android:label="DetailsFragment"
         tools:layout="@layout/fragment_details" />
     <fragment
         android:id="@+id/homeFragment"
-        android:name="bose.ankush.weatherify.view.home.HomeFragment"
+        android:name="bose.ankush.weatherify.presentation.home.HomeFragment"
         android:label="HomeFragment"
         tools:layout="@layout/fragment_home">
         <action

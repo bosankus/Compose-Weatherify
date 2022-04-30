@@ -1,7 +1,7 @@
 // Plugins
 object BuildPlugins {
     val buildGradle by lazy { "com.android.tools.build:gradle:${Versions.buildGradle}" }
-    val navigationSafeArgs by lazy { "androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.navigationSafeArgs}" }
+    val navigationSafeArgs by lazy { "androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.navigation}" }
     val hiltPlugin by lazy { "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}" }
 }
 
@@ -38,8 +38,10 @@ object Deps {
     val recyclerView by lazy { "androidx.recyclerview:recyclerview:${Versions.recyclerView}" }
     val fragment by lazy { "androidx.fragment:fragment-ktx:${Versions.fragment}" }
     val viewModel by lazy { "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifecycle}" }
-    val navigationFragment by lazy { "android.arch.navigation:navigation-fragment-ktx:${Versions.navigation}" }
-    val navigationUi by lazy { "android.arch.navigation:navigation-ui-ktx:${Versions.navigation}" }
+    val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }
+    val navigationFragment by lazy { "androidx.navigation:navigation-fragment-ktx:${Versions.navigation}" }
+    val navigationUi by lazy { "androidx.navigation:navigation-ui-ktx:${Versions.navigation}" }
+    val navigationCompose by lazy { "androidx.navigation:navigation-compose:${Versions.navigation}" }
 
     // Networking
     val okHttp3 by lazy { "com.squareup.okhttp3:okhttp:${Versions.okHttp3}" }
@@ -56,10 +58,12 @@ object Deps {
     val hilt by lazy { "com.google.dagger:hilt-android:${Versions.hilt}" }
     val hiltDaggerAndroidCompiler by lazy { "com.google.dagger:hilt-android-compiler:${Versions.hilt}" }
     val hiltAndroidxCompiler by lazy { "androidx.hilt:hilt-compiler:${Versions.hiltAndroidxCompiler}" }
+    val hiltNavigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.hiltCompose}" }
 
     // Miscellaneous
     val timber by lazy { "com.jakewharton.timber:timber:${Versions.timber}" }
     val lottie by lazy { "com.airbnb.android:lottie:${Versions.lottie}" }
+    val lottieCompose by lazy { "com.airbnb.android:lottie-compose:${Versions.lottie}" }
     val glide by lazy { "com.github.bumptech.glide:glide:${Versions.glide}" }
 
 }

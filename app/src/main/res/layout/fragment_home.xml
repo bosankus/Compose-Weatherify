@@ -5,7 +5,7 @@
     <data>
         <variable
             name="viewmodel"
-            type="bose.ankush.weatherify.view.home.HomeViewModel" />
+            type="bose.ankush.weatherify.presentation.home.HomeViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

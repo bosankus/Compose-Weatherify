@@ -2,10 +2,12 @@ package bose.ankush.weatherify.model.repository
 
 import app.cash.turbine.test
 import bose.ankush.weatherify.MainCoroutineRule
-import bose.ankush.weatherify.model.model.CurrentTemperature
-import bose.ankush.weatherify.model.network.ApiService
-import bose.ankush.weatherify.util.ResultData
-import bose.ankush.weatherify.util.TestDispatcher
+import bose.ankush.weatherify.domain.model.Weather
+import bose.ankush.weatherify.data.remote.ApiService
+import bose.ankush.weatherify.data.repository.WeatherRepositoryImpl
+import bose.ankush.weatherify.domain.repository.WeatherRepository
+import bose.ankush.weatherify.common.ResultData
+import bose.ankush.weatherify.common.TestDispatcher
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -78,11 +80,11 @@ class WeatherRepositoryTest {
             assertThat(first).isEqualTo(ResultData.Loading)
             val second = awaitItem()
             assertThat(second).isEqualTo(ResultData.Success(
-                CurrentTemperature(
+                Weather(
                     cod = 200,
-                    main = CurrentTemperature.Main(temp = 305.12),
+                    main = Weather.Main(temp = 305.12, humidity = 70.0),
                     name = "Kolkata",
-                    weather = listOf(CurrentTemperature.Weather(icon = "50d"))
+                    weather = listOf(Weather.Weather(icon = "50d"))
                 )
             ))
         } }

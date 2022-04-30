@@ -12,4 +12,5 @@ plugins {
     id ("com.android.application") version Versions.buildGradle apply false
     id ("com.android.library") version Versions.buildGradle apply false
     id ("org.jetbrains.kotlin.android") version Versions.kotlin apply false
+    id ("com.github.ben-manes.versions") version Versions.benManes
 }

@@ -6,7 +6,7 @@
 
         <variable
             name="viewmodel"
-            type="bose.ankush.weatherify.view.home.HomeViewModel" />
+            type="bose.ankush.weatherify.presentation.home.HomeViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,7 +21,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/gap_16dp"
-            android:layout_marginLeft="@dimen/gap_16dp"
             android:layout_marginTop="@dimen/gap_36dp"
             android:fontFamily="@font/roboto_thin"
             android:textColor="@color/city_txt"
@@ -36,7 +35,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/text_36sp"
             android:layout_marginEnd="@dimen/gap_16dp"
-            android:layout_marginRight="@dimen/gap_16dp"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/light_grey"
             android:textSize="@dimen/text_22sp"
@@ -59,7 +57,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/gap_16dp"
-            android:layout_marginRight="@dimen/gap_16dp"
             android:textSize="@dimen/text_22sp"
             android:layout_marginTop="@dimen/gap_3dp"
             app:layout_constraintEnd_toEndOf="parent"

@@ -6,7 +6,7 @@
 
         <variable
             name="forecast"
-            type="bose.ankush.weatherify.model.model.AvgForecast" />
+            type="bose.ankush.weatherify.domain.model.AvgForecast" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,7 +33,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/gap_16dp"
-            android:layout_marginRight="@dimen/gap_16dp"
             android:fontFamily="@font/roboto_regular"
             app:setTempInCelsius="@{forecast.avgTemp}"
             android:textColor="@color/light_grey"

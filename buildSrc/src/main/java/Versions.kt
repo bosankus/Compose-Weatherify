@@ -6,11 +6,11 @@ object Versions {
 
     // Compose
     const val composeVersion = "1.1.1"
-    const val composeVersionBeta = "1.0.0-beta09"
 
     // Plugins
     const val buildGradle = "7.1.3"
-    const val navigationSafeArgs = "2.4.2"
+    const val navigation = "2.4.2"
+    const val benManes = "0.42.0"
 
     // Testing
     const val junit = "4.13.2"
@@ -33,7 +33,6 @@ object Versions {
     const val recyclerView = "1.2.1"
     const val fragment = "1.4.1"
     const val lifecycle = "2.4.1"
-    const val navigation = "1.0.0"
 
     // Networking
     const val okHttp3 = "4.9.3"
@@ -46,6 +45,7 @@ object Versions {
 
     // Dependency Injection
     const val hilt = "2.41"
+    const val hiltCompose = "1.0.0"
     const val hiltAndroidxCompiler = "1.0.0"
 
     // Miscellaneous

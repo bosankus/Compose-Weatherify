@@ -87,8 +87,10 @@ dependencies {
     implementation(Deps.recyclerView)
     implementation(Deps.fragment)
     implementation(Deps.viewModel)
+    implementation(Deps.viewModelCompose)
     implementation(Deps.navigationFragment)
     implementation(Deps.navigationUi)
+    implementation(Deps.navigationCompose)
 
     // Networking
     implementation(Deps.okHttp3)
@@ -105,9 +107,11 @@ dependencies {
     implementation(Deps.hilt)
     kapt(Deps.hiltDaggerAndroidCompiler)
     kapt(Deps.hiltAndroidxCompiler)
+    implementation(Deps.hiltNavigationCompose)
 
     // Miscellaneous
     implementation(Deps.timber)
     implementation(Deps.lottie)
+    implementation(Deps.lottieCompose)
     implementation(Deps.glide)
 }
