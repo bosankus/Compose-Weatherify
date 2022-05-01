@@ -65,5 +65,5 @@ object Deps {
     val lottie by lazy { "com.airbnb.android:lottie:${Versions.lottie}" }
     val lottieCompose by lazy { "com.airbnb.android:lottie-compose:${Versions.lottie}" }
     val glide by lazy { "com.github.bumptech.glide:glide:${Versions.glide}" }
-
+    val coilCompose by lazy { "io.coil-kt:coil-compose:${Versions.coilCompose}" }
 }

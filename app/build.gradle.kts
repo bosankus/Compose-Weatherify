@@ -114,4 +114,5 @@ dependencies {
     implementation(Deps.lottie)
     implementation(Deps.lottieCompose)
     implementation(Deps.glide)
+    implementation(Deps.coilCompose)
 }

@@ -52,5 +52,5 @@ object Versions {
     const val timber = "5.0.1"
     const val lottie = "4.2.2"
     const val glide = "4.13.1"
-
+    const val coilCompose = "2.0.0-rc03"
 }
