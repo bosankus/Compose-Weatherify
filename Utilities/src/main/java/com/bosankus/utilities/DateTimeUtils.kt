@@ -31,13 +31,13 @@ object DateTimeUtils {
         val calendar = Calendar.getInstance()
         calendar.time = Date(epoch.toLong() * 1000)
         return when (calendar.get(Calendar.DAY_OF_WEEK)) {
-            1 -> "Sunday"
-            2 -> "Monday"
-            3 -> "Tuesday"
-            4 -> "Wednesday"
-            5 -> "Thursday"
-            6 -> "Friday"
-            7 -> "Saturday"
+            1 -> "Sun"
+            2 -> "Mon"
+            3 -> "Tue"
+            4 -> "Wed"
+            5 -> "Thu"
+            6 -> "Fri"
+            7 -> "Sat"
             else -> "..."
         }
     }
