@@ -23,3 +23,4 @@ val BlueViolet3 = Color(0xff8f98fd)*/
 
 val BackgroundGrey = Color(0xff242534)
 val CardBackgroundLightGrey = Color(0xff2E3341)
+val AccentColor = Color(0xffF45164)

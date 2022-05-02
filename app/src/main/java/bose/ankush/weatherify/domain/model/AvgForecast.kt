@@ -8,4 +8,5 @@ data class AvgForecast(
     val id: Int?,
     val nameOfDay: String?,
     val avgTemp: String?,
+    val feelsLike: String?,
 )

@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.common
 
-import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
+import bose.ankush.weatherify.domain.model.AvgForecast
 import com.bosankus.utilities.DateTimeUtils
 import java.util.*
 import kotlin.math.roundToInt
@@ -25,6 +25,7 @@ object Extension {
         val listOfAvgForecast = ArrayList<AvgForecast>()
         var avgTemp: Int
         var dayName: String
+        var feelsLike: String?
         for (i in 1..4 step 1) {
             var totalTemp = 0
             var counter = 0
@@ -32,12 +33,14 @@ object Extension {
                 val date = this[j].dt
                 if (date?.let { DateTimeUtils.getDayWiseDifferenceFromToday(it) } == i) {
                     val forecastObj = this[j]
+                    feelsLike = forecastObj.main?.feelsLike?.toCelsius()
                     totalTemp += forecastObj.main?.temp?.toCelsius()?.toInt()!!
                     counter++
                     if ((counter % 7) == 0) {
                         avgTemp = totalTemp / counter
                         dayName = DateTimeUtils.getDayNameFromEpoch(date)
-                        val avgForecast = AvgForecast(this.hashCode(), dayName, "$avgTemp")
+                        val avgForecast =
+                            AvgForecast(this.hashCode(), dayName, "$avgTemp", feelsLike)
                         listOfAvgForecast.add(avgForecast)
                     }
                 }

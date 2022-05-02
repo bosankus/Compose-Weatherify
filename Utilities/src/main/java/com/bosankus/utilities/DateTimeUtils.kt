@@ -3,17 +3,14 @@ package com.bosankus.utilities
 import android.os.Build
 import androidx.annotation.RequiresApi
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
 object DateTimeUtils {
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun getCurrentTimestamp(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            Instant.now().toEpochMilli().toString()
-        else (System.currentTimeMillis() / 1000).toString()
-    }
+    fun getCurrentTimestamp(): String = Instant.now().toEpochMilli().toString()
 
 
     fun getDayWiseDifferenceFromToday(day: Int): Int {
@@ -48,5 +45,14 @@ object DateTimeUtils {
         val calendarForToday = Calendar.getInstance()
         calendarForToday.time = todayDate
         return calendarForToday
+    }
+
+    fun getTimeFromEpoch(epoch: Int?, zone: String, format: String = "K:mm a"): String {
+        return epoch?.let {
+            val zoneId = ZoneId.of(zone)
+            val instant = Instant.ofEpochSecond(epoch.toLong())
+            val formatter = DateTimeFormatter.ofPattern(format, Locale.ENGLISH)
+            instant.atZone(zoneId).format(formatter)
+        }.toString()
     }
 }
