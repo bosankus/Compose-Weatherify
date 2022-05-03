@@ -2,8 +2,6 @@ package bose.ankush.weatherify.presentation.details
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -22,7 +20,7 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.presentation.details.component.ForecastNextFourDaysListItem
 import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
 import bose.ankush.weatherify.presentation.ui.theme.ButtonBlue
-import bose.ankush.weatherify.presentation.ui.theme.CardBackgroundLightGrey
+import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 
 @Composable
@@ -77,7 +75,7 @@ fun WeatherPrecautionSection(
         modifier = Modifier
             .padding(all = 16.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(CardBackgroundLightGrey)
+            .background(DefaultCardBackgroundLightGrey)
             .padding(horizontal = 15.dp, vertical = 20.dp)
             .fillMaxWidth()
     ) {
@@ -133,13 +131,6 @@ fun AllTimeForecastList(viewModel: DetailsViewModel) {
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
-        LazyRow(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 8.dp, end = 8.dp, top = 16.dp)
-        ) {
-            items(state.forecasts) { ForecastNextFourDaysListItem(state.forecasts) }
-        }
+        ForecastNextFourDaysListItem(state.forecasts)
     }
 }
