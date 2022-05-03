@@ -22,8 +22,9 @@ import bose.ankush.weatherify.presentation.ui.theme.AccentColor
 import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
 
 @Composable
-fun ForecastNextFourDaysListItem(
-    avgForecastList: List<AvgForecast>
+fun FutureForecastListItem(
+    avgForecastList: List<AvgForecast>,
+    onItemClick: (Int) -> Unit
 ) {
     var selectedItem by remember { mutableStateOf(0) }
     LazyRow(
@@ -36,7 +37,10 @@ fun ForecastNextFourDaysListItem(
                 modifier = Modifier
                     .padding(start = 8.dp, end = 8.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .clickable { selectedItem = it }
+                    .clickable {
+                        selectedItem = it
+                        onItemClick(it)
+                    }
                     .background(if (selectedItem == it) AccentColor else DefaultCardBackgroundLightGrey)
                     .padding(horizontal = 10.dp, vertical = 20.dp)
             ) {
@@ -45,11 +49,11 @@ fun ForecastNextFourDaysListItem(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = avgForecastList[it].nameOfDay ?: "--",
+                        text = avgForecastList[it].nameOfDay?.substring(0,3) ?: "--",
                         style = MaterialTheme.typography.body2,
                         overflow = TextOverflow.Ellipsis,
                         color = Color.White,
-                        modifier = Modifier.alpha(0.6f)
+                        modifier = Modifier.alpha(0.6f),
                     )
                     Text(
                         text = stringResource(

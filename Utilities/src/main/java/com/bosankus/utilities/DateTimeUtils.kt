@@ -1,10 +1,6 @@
 package com.bosankus.utilities
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -28,13 +24,13 @@ object DateTimeUtils {
         val calendar = Calendar.getInstance()
         calendar.time = Date(epoch.toLong() * 1000)
         return when (calendar.get(Calendar.DAY_OF_WEEK)) {
-            1 -> "Sun"
-            2 -> "Mon"
-            3 -> "Tue"
-            4 -> "Wed"
-            5 -> "Thu"
-            6 -> "Fri"
-            7 -> "Sat"
+            1 -> "Sunday"
+            2 -> "Monday"
+            3 -> "Tuesday"
+            4 -> "Wednesday"
+            5 -> "Thursday"
+            6 -> "Friday"
+            7 -> "Saturday"
             else -> "..."
         }
     }
@@ -47,12 +43,12 @@ object DateTimeUtils {
         return calendarForToday
     }
 
-    fun getTimeFromEpoch(epoch: Int?, zone: String, format: String = "K:mm a"): String {
+    /*fun getTimeFromEpoch(epoch: Int?, zone: String = "UTC", format: String = "K:mm a"): String {
         return epoch?.let {
             val zoneId = ZoneId.of(zone)
             val instant = Instant.ofEpochSecond(epoch.toLong())
             val formatter = DateTimeFormatter.ofPattern(format, Locale.ENGLISH)
             instant.atZone(zoneId).format(formatter)
         }.toString()
-    }
+    }*/
 }

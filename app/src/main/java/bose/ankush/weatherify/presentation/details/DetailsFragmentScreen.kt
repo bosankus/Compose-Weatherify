@@ -1,9 +1,11 @@
 package bose.ankush.weatherify.presentation.details
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -12,16 +14,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.presentation.details.component.ForecastNextFourDaysListItem
-import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
-import bose.ankush.weatherify.presentation.ui.theme.ButtonBlue
-import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
-import bose.ankush.weatherify.presentation.ui.theme.TextWhite
+import bose.ankush.weatherify.presentation.details.component.DetailedForecastListItem
+import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
+import bose.ankush.weatherify.presentation.ui.theme.*
 
 @Composable
 fun DetailsFragmentScreen(
@@ -40,7 +43,10 @@ fun DetailsFragmentScreen(
             WeatherPrecautionSection()
 
             // Show time wise temperature(min, max, feel) in list format
-            AllTimeForecastList(viewModel)
+            FutureForecastRow(viewModel)
+
+            // Show detailed forecast time wise when any above column item is selected
+            DetailedForecastList(viewModel)
         }
     }
 }
@@ -117,20 +123,77 @@ fun WeatherPrecautionSection(
 
 
 @Composable
-fun AllTimeForecastList(viewModel: DetailsViewModel) {
-    val state = viewModel.state.value
+fun FutureForecastRow(viewModel: DetailsViewModel) {
+    val context = LocalContext.current
+    val state = viewModel.futureForecastState.value
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Next 4 days average forecast",
+            text = stringResource(id = R.string.forecast_heading_txt),
             style = MaterialTheme.typography.subtitle1,
             color = Color.White,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
-        ForecastNextFourDaysListItem(state.forecasts)
+        FutureForecastListItem(state.forecasts) {
+            Toast.makeText(context, "Clicked on item $it", Toast.LENGTH_SHORT).show()
+        }
+        if (state.error != null) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = state.error.asString(context),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                )
+            }
+        }
+        if (state.isLoading)
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CircularProgressIndicator(
+                    color = AccentColor
+                )
+            }
     }
+}
+
+
+@Composable
+fun DetailedForecastList(viewModel: DetailsViewModel) {
+    val context = LocalContext.current
+    val state = viewModel.detailedForecastState.value
+    DetailedForecastListItem(state.forecasts)
+    if (state.error != null) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = state.error.asString(context),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            )
+        }
+    }
+    if (state.isLoading)
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CircularProgressIndicator(
+                color = AccentColor
+            )
+        }
 }

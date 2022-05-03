@@ -19,37 +19,48 @@ class DetailsViewModel @Inject constructor(
     private val getForecastDetailsUseCase: GetForecastDetails
 ) : ViewModel() {
 
-    private val _state = mutableStateOf(ForecastListState())
-    val state: State<ForecastListState> = _state
+    private val _futureForecastState = mutableStateOf(ForecastListState())
+    val futureForecastState: State<ForecastListState> = _futureForecastState
+
+    private val _detailedForecastState = mutableStateOf(DetailedForecastListState())
+    val detailedForecastState: State<DetailedForecastListState> = _detailedForecastState
 
     init {
-        getNext4DaysWeatherForecast()
+        getFutureForecast()
+        getForecastList()
     }
 
 
-    private fun getNext4DaysWeatherForecast() {
+    private fun getFutureForecast() {
         getNextFourDaysWeatherForecast().onEach { result ->
             when (result) {
-                is ResultData.Loading -> _state.value = ForecastListState(isLoading = true)
-                is ResultData.Success -> _state.value =
+                is ResultData.Loading -> _futureForecastState.value =
+                    ForecastListState(isLoading = true)
+                is ResultData.Success -> _futureForecastState.value =
                     ForecastListState(forecasts = result.data ?: emptyList())
-                is ResultData.Failed -> _state.value = ForecastListState(error = result.message)
-                else -> _state.value =
+                is ResultData.Failed -> _futureForecastState.value =
+                    ForecastListState(error = result.message)
+                else -> _futureForecastState.value =
                     ForecastListState(error = UiText.DynamicText("Something went wrong"))
             }
         }.launchIn(viewModelScope)
     }
 
 
-    /*private fun getForecastList() {
-        getForecastDetailsUseCase().onEach { result ->
-            when (result) {
-                is ResultData.Loading -> _state.value = ForecastListState(isLoading = true)
-                is ResultData.Success -> _state.value =
-                    ForecastListState(forecasts = result.data ?: emptyList())
-                is ResultData.Failed -> _state.value = ForecastListState(error = result.message)
-                is ResultData.DoNothing -> {}
-            }
-        }.launchIn(viewModelScope)
-    }*/
+    private fun getForecastList(dateQuery: Int? = 1651752000) { // Default parameter for testing
+        dateQuery?.let { date ->
+            getForecastDetailsUseCase(date).onEach { result ->
+                when (result) {
+                    is ResultData.Loading -> _detailedForecastState.value =
+                        DetailedForecastListState(isLoading = true)
+                    is ResultData.Success -> _detailedForecastState.value =
+                        DetailedForecastListState(forecasts = result.data ?: emptyList())
+                    is ResultData.Failed -> _detailedForecastState.value =
+                        DetailedForecastListState(error = result.message)
+                    is ResultData.DoNothing ->
+                        DetailedForecastListState(error = UiText.DynamicText("Something went wrong"))
+                }
+            }.launchIn(viewModelScope)
+        }
+    }
 }

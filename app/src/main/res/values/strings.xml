@@ -8,6 +8,7 @@
     <string name="server_error_txt">Umm… Looks like server issue!</string>
     <string name="general_error_txt">Oops!..Something went wrong.</string>
     <string name="empty_list">No details found. Try after sometime.</string>
+    <string name="forecast_heading_txt">Forecasts</string>
     <string name="celsius">%1$s°C</string>
     <string name="feels_like">feels like %1$s°C</string>
 </resources>
