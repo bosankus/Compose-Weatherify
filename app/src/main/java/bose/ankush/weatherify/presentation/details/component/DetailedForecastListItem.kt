@@ -33,7 +33,7 @@ fun DetailedForecastListItem(
                     .padding(bottom = 18.dp),
             ) {
                 Text(
-                    text = detailedForecastList[it].dt?.let { DateTimeUtils.getDayNameFromEpoch(it) }
+                    text = detailedForecastList[it].dt?.let { DateTimeUtils.getTimeFromEpoch(it) }
                         ?: "--",
                     style = MaterialTheme.typography.body1,
                     overflow = TextOverflow.Ellipsis,

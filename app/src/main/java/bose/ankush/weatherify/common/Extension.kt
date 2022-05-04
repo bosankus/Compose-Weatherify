@@ -40,7 +40,7 @@ object Extension {
                         avgTemp = totalTemp / counter
                         dayName = DateTimeUtils.getDayNameFromEpoch(date)
                         val avgForecast =
-                            AvgForecast(this.hashCode(), dayName, "$avgTemp", feelsLike)
+                            AvgForecast(this.hashCode(), date, dayName, "$avgTemp", feelsLike)
                         listOfAvgForecast.add(avgForecast)
                     }
                 }

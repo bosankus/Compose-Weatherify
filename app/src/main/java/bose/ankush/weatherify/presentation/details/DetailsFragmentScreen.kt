@@ -40,7 +40,7 @@ fun DetailsFragmentScreen(
             LocationNameSection("Kolkata")
 
             // Show precaution for today text as per weather
-            WeatherPrecautionSection()
+            WeatherAlertSection()
 
             // Show time wise temperature(min, max, feel) in list format
             FutureForecastRow(viewModel)
@@ -71,7 +71,7 @@ fun LocationNameSection(name: String) {
 
 
 @Composable
-fun WeatherPrecautionSection(
+fun WeatherAlertSection(
     heading: String = "Sample heading",
     content: String = "And some little bit of lulu content her eto show the UI and test it. huha!"
 ) {
@@ -139,7 +139,8 @@ fun FutureForecastRow(viewModel: DetailsViewModel) {
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
         FutureForecastListItem(state.forecasts) {
-            Toast.makeText(context, "Clicked on item $it", Toast.LENGTH_SHORT).show()
+            val selectedDate = viewModel.futureForecastState.value.forecasts[it].date
+            viewModel.getForecastList(selectedDate)
         }
         if (state.error != null) {
             Box(
@@ -161,6 +162,7 @@ fun FutureForecastRow(viewModel: DetailsViewModel) {
                 modifier = Modifier.fillMaxSize()
             ) {
                 CircularProgressIndicator(
+                    modifier = Modifier.size(26.dp),
                     color = AccentColor
                 )
             }
@@ -193,6 +195,7 @@ fun DetailedForecastList(viewModel: DetailsViewModel) {
             modifier = Modifier.fillMaxSize()
         ) {
             CircularProgressIndicator(
+                modifier = Modifier.size(26.dp),
                 color = AccentColor
             )
         }

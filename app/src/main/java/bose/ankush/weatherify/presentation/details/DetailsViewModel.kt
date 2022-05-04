@@ -47,7 +47,7 @@ class DetailsViewModel @Inject constructor(
     }
 
 
-    private fun getForecastList(dateQuery: Int? = 1651752000) { // Default parameter for testing
+    fun getForecastList(dateQuery: Int? = 1651752000) { // Default parameter for testing
         dateQuery?.let { date ->
             getForecastDetailsUseCase(date).onEach { result ->
                 when (result) {

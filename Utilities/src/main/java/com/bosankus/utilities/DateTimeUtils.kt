@@ -1,6 +1,8 @@
 package com.bosankus.utilities
 
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 
@@ -43,12 +45,13 @@ object DateTimeUtils {
         return calendarForToday
     }
 
-    /*fun getTimeFromEpoch(epoch: Int?, zone: String = "UTC", format: String = "K:mm a"): String {
+    fun getTimeFromEpoch(epoch: Int?, zone: String = "Asia/Kolkata"): String {
+        val format = "K:mm a"
         return epoch?.let {
             val zoneId = ZoneId.of(zone)
             val instant = Instant.ofEpochSecond(epoch.toLong())
             val formatter = DateTimeFormatter.ofPattern(format, Locale.ENGLISH)
             instant.atZone(zoneId).format(formatter)
         }.toString()
-    }*/
+    }
 }
