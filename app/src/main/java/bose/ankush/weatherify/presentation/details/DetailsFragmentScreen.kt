@@ -1,6 +1,5 @@
 package bose.ankush.weatherify.presentation.details
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -9,7 +8,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,14 +21,26 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
+import bose.ankush.weatherify.data.remote.dto.ForecastDto
+import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.presentation.details.component.DetailedForecastListItem
 import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
 import bose.ankush.weatherify.presentation.ui.theme.*
+
+private var fourDaysForecasts: List<AvgForecast> = listOf()
+private var dayWiseForecastDetails: List<ForecastDto.ForecastList>? = listOf()
 
 @Composable
 fun DetailsFragmentScreen(
     viewModel: DetailsViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    var networkState by remember { mutableStateOf(ForecastListState()) }
+    networkState = viewModel.state.value
+
+    // 1. provide the whole
+
     Box(
         modifier = Modifier
             .background(BackgroundGrey)
@@ -43,10 +54,35 @@ fun DetailsFragmentScreen(
             WeatherAlertSection()
 
             // Show time wise temperature(min, max, feel) in list format
-            FutureForecastRow(viewModel)
+            FourDaysForecastRow(viewModel, networkState.forecasts)
 
             // Show detailed forecast time wise when any above column item is selected
-            DetailedForecastList(viewModel)
+            /*DetailedForecastList(viewModel)*/
+        }
+
+        // Loading screen
+        if (networkState.isLoading) Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(26.dp),
+                color = AccentColor
+            )
+        }
+
+        // Error screen
+        if (networkState.error != null) Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Text(
+                text = checkNotNull(networkState.error).asString(context),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            )
         }
     }
 }
@@ -123,9 +159,13 @@ fun WeatherAlertSection(
 
 
 @Composable
-fun FutureForecastRow(viewModel: DetailsViewModel) {
-    val context = LocalContext.current
-    val state = viewModel.futureForecastState.value
+fun FourDaysForecastRow(
+    viewModel: DetailsViewModel,
+    forecastList: List<ForecastDto.ForecastList>
+) {
+    fourDaysForecasts = forecastList.getForecastListForNext4Days()
+    var selectedDate by remember { mutableStateOf(0) }
+    selectedDate = checkNotNull(forecastList[0].dt)
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
@@ -138,65 +178,20 @@ fun FutureForecastRow(viewModel: DetailsViewModel) {
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
-        FutureForecastListItem(state.forecasts) {
-            val selectedDate = viewModel.futureForecastState.value.forecasts[it].date
-            viewModel.getForecastList(selectedDate)
+        FutureForecastListItem(fourDaysForecasts) {
+            viewModel.getDayWiseDetailedForecast(selectedDate)
         }
-        if (state.error != null) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = state.error.asString(context),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                )
-            }
-        }
-        if (state.isLoading)
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(26.dp),
-                    color = AccentColor
-                )
-            }
+
     }
 }
 
 
 @Composable
-fun DetailedForecastList(viewModel: DetailsViewModel) {
-    val context = LocalContext.current
-    val state = viewModel.detailedForecastState.value
-    DetailedForecastListItem(state.forecasts)
-    if (state.error != null) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                text = state.error.asString(context),
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            )
-        }
-    }
-    if (state.isLoading)
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(26.dp),
-                color = AccentColor
-            )
-        }
+fun DetailedForecastList(
+    viewModel: DetailsViewModel
+) {
+    dayWiseForecastDetails = viewModel.getDayWiseDetailedForecast(fourDaysForecasts[0].date)
+    dayWiseForecastDetails?.let { DetailedForecastListItem(it) } ?: DetailedForecastListItem(
+        emptyList()
+    )
 }

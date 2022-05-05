@@ -1,6 +1,5 @@
 package bose.ankush.weatherify.domain.use_case.get_weather_forecasts
 
-import android.util.Log
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.common.ResultData
