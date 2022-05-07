@@ -180,16 +180,32 @@ fun FourDaysForecastRow(
 fun DayWiseDetailedForecastList(
     viewModel: DetailsViewModel
 ) {
-    val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
+    val context: Context = LocalContext.current
+    val state = viewModel.detailedForecastState.value
 
-    if (fourDaysForecasts.isNullOrEmpty()) DetailedForecastListItem(emptyList())
+    // List screen
+    if (state.forecastList.isNotEmpty())
+        DetailedForecastListItem(state.forecastList)
+
+    // Error screen
+    else if (state.error != null) Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text(
+            text = checkNotNull(state.error).asString(context),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        )
+    }
     else {
-        val dayDate = fourDaysForecasts[0].date
-        val forecasts =
-            dayDate?.let { viewModel.getDayWiseDetailedForecast(dayDate).value } ?: emptyList()
-
-        // UI not updating
-
-        DetailedForecastListItem(forecasts)
+        val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
+        if (fourDaysForecasts.isNullOrEmpty()) DetailedForecastListItem(emptyList())
+        else {
+            val dayDate = fourDaysForecasts[0].date
+            dayDate?.let { viewModel.getDayWiseDetailedForecast(dayDate) }
+        }
     }
 }

@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
-import bose.ankush.weatherify.common.logMessage
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
@@ -25,6 +24,9 @@ class DetailsViewModel @Inject constructor(
 
     private val _state = mutableStateOf(ForecastListState())
     val state: State<ForecastListState> = _state
+
+    private val _detailedForecastState = mutableStateOf(DetailedForecastListState())
+    val detailedForecastState: State<DetailedForecastListState> = _detailedForecastState
 
     var forecastList: MutableState<List<ForecastDto.ForecastList>> = mutableStateOf(listOf())
 
@@ -52,12 +54,16 @@ class DetailsViewModel @Inject constructor(
     }
 
 
-    fun getDayWiseDetailedForecast(dateQuery: Int): MutableState<List<ForecastDto.ForecastList>> {
-        val filteredList = forecastList.value.filter { list ->
-            getDayNameFromEpoch(list.dt!!) == getDayNameFromEpoch(dateQuery)
+    fun getDayWiseDetailedForecast(dateQuery: Int) {
+        try {
+            val filteredList = forecastList.value.filter { list ->
+                list.dt?.let { getDayNameFromEpoch(it) == getDayNameFromEpoch(dateQuery) } ?: false
+            }
+            _detailedForecastState.value = DetailedForecastListState(forecastList = filteredList)
+        } catch (e: Exception) {
+            _detailedForecastState.value =
+                DetailedForecastListState(error = UiText.DynamicText(e.message.toString()))
         }
-        logMessage(message = "$filteredList")
-        return mutableStateOf(filteredList)
     }
 
 }
