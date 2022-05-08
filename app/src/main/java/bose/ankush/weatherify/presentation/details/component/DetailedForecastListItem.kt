@@ -8,8 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import coil.compose.AsyncImage
@@ -45,15 +47,12 @@ fun DetailedForecastListItem(
                     style = MaterialTheme.typography.body1,
                     overflow = TextOverflow.Ellipsis,
                     color = Color.White,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
                 AsyncImage(
-                    model = "https://openweathermap.org/img/wn/${
-                        detailedForecastList[it].weather?.get(
-                            0
-                        )?.icon
-                    }@2x.png",
-                    contentDescription = "weather condition icon",
+                    model = "https://openweathermap.org/img/wn/" +
+                            "${detailedForecastList[it].weather?.get(0)?.icon}@2x.png",
+                    contentDescription = stringResource(id = R.string.weather_icon_content),
                 )
             }
         }

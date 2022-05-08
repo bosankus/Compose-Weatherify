@@ -9,8 +9,11 @@ import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
+import bose.ankush.weatherify.data.remote.dto.toCityName
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
+import bose.ankush.weatherify.presentation.details.state.DetailedForecastListState
+import bose.ankush.weatherify.presentation.details.state.ForecastListState
 import com.bosankus.utilities.DateTimeUtils.getDayNameFromEpoch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -22,26 +25,30 @@ class DetailsViewModel @Inject constructor(
     getForecastsUseCase: GetForecasts
 ) : ViewModel() {
 
-    private val _state = mutableStateOf(ForecastListState())
-    val state: State<ForecastListState> = _state
+    private val _forecastState = mutableStateOf(ForecastListState())
+    val forecastState: State<ForecastListState> = _forecastState
 
     private val _detailedForecastState = mutableStateOf(DetailedForecastListState())
     val detailedForecastState: State<DetailedForecastListState> = _detailedForecastState
 
-    var forecastList: MutableState<List<ForecastDto.ForecastList>> = mutableStateOf(listOf())
+    private val _cityName: MutableState<String?> = mutableStateOf("")
+    val cityName: State<String?> = _cityName
+
+    private val _forecastList: MutableState<List<ForecastDto.ForecastList>> =
+        mutableStateOf(listOf())
 
     init {
         getForecastsUseCase().onEach { result ->
             when (result) {
                 is ResultData.DoNothing -> {}
-                is ResultData.Loading -> _state.value = ForecastListState(isLoading = true)
+                is ResultData.Loading -> _forecastState.value = ForecastListState(isLoading = true)
                 is ResultData.Success -> {
-                    if (result.data?.isNotEmpty() == true) {
-                        forecastList.value = result.data
-                        _state.value = ForecastListState(forecasts = result.data)
-                    }
+                    val responseList = result.data?.list ?: emptyList()
+                    _forecastList.value = responseList
+                    _cityName.value = result.data?.toCityName()?.name
+                    _forecastState.value = ForecastListState(forecasts = responseList)
                 }
-                else -> _state.value =
+                else -> _forecastState.value =
                     ForecastListState(error = UiText.DynamicText("Something went wrong"))
             }
         }.launchIn(viewModelScope)
@@ -49,14 +56,14 @@ class DetailsViewModel @Inject constructor(
 
 
     fun getFourDaysAvgForecast(): List<AvgForecast> {
-        return if (forecastList.value.isNotEmpty()) forecastList.value.getForecastListForNext4Days()
+        return if (_forecastList.value.isNotEmpty()) _forecastList.value.getForecastListForNext4Days()
         else emptyList()
     }
 
 
     fun getDayWiseDetailedForecast(dateQuery: Int) {
         try {
-            val filteredList = forecastList.value.filter { list ->
+            val filteredList = _forecastList.value.filter { list ->
                 list.dt?.let { getDayNameFromEpoch(it) == getDayNameFromEpoch(dateQuery) } ?: false
             }
             _detailedForecastState.value = DetailedForecastListState(forecastList = filteredList)

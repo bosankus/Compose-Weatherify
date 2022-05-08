@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.presentation.details.component.DetailedForecastListItem
 import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
+import bose.ankush.weatherify.presentation.details.state.ForecastListState
 import bose.ankush.weatherify.presentation.ui.theme.*
 
 @Composable
@@ -31,7 +32,7 @@ fun DetailsFragmentScreen(
     viewModel: DetailsViewModel = hiltViewModel()
 ) {
     val context: Context = LocalContext.current
-    val state: ForecastListState = viewModel.state.value
+    val state: ForecastListState = viewModel.forecastState.value
 
     Box(
         modifier = Modifier
@@ -40,7 +41,7 @@ fun DetailsFragmentScreen(
     ) {
         Column {
             // Show location
-            LocationNameSection("Kolkata")
+            LocationNameSection(viewModel)
 
             // Show precaution for today text as per weather
             WeatherAlertSection()
@@ -81,7 +82,8 @@ fun DetailsFragmentScreen(
 
 
 @Composable
-fun LocationNameSection(name: String) {
+fun LocationNameSection(viewModel: DetailsViewModel) {
+    val cityName = viewModel.cityName.value
     Row(
         modifier = Modifier
             .padding(top = 16.dp)
@@ -90,7 +92,7 @@ fun LocationNameSection(name: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = name,
+            text = cityName ?: "--",
             style = MaterialTheme.typography.h6,
             color = TextWhite
         )
@@ -190,7 +192,7 @@ fun DayWiseDetailedForecastList(
     // Error screen
     else if (state.error != null) Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = checkNotNull(state.error).asString(context),
