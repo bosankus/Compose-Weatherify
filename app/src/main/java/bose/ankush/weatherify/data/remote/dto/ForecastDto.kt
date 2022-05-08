@@ -2,8 +2,6 @@ package bose.ankush.weatherify.data.remote.dto
 
 
 import bose.ankush.weatherify.domain.model.CityName
-import bose.ankush.weatherify.domain.model.ForecastDetails
-import com.bosankus.utilities.DateTimeUtils.getTimeFromEpoch
 import com.google.gson.annotations.SerializedName
 
 data class ForecastDto(

@@ -28,7 +28,7 @@ class DetailsFragment: Fragment() {
 
         binding?.fragmentDetailsComposeView?.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent { DetailsFragmentScreen() }
+            setContent { DetailsFragmentScreen(viewModel) }
         }
 
         return binding?.root

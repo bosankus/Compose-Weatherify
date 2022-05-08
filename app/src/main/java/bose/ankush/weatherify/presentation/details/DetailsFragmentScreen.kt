@@ -20,7 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.presentation.details.component.DetailedForecastListItem
 import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
@@ -28,9 +27,7 @@ import bose.ankush.weatherify.presentation.details.state.ForecastListState
 import bose.ankush.weatherify.presentation.ui.theme.*
 
 @Composable
-fun DetailsFragmentScreen(
-    viewModel: DetailsViewModel = hiltViewModel()
-) {
+fun DetailsFragmentScreen(viewModel: DetailsViewModel) {
     val context: Context = LocalContext.current
     val state: ForecastListState = viewModel.forecastState.value
 

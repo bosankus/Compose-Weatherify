@@ -1,10 +1,8 @@
 package bose.ankush.weatherify.data.remote
 
 import bose.ankush.weatherify.BuildConfig
-import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.data.remote.dto.WeatherDto
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
