@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -23,6 +24,7 @@ fun DetailedForecastListItem(
 ) {
     LazyColumn(
         modifier = Modifier
+            .padding(start = 10.dp)
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
@@ -50,8 +52,10 @@ fun DetailedForecastListItem(
                     modifier = Modifier.weight(1f),
                 )
                 AsyncImage(
+                    modifier = Modifier.weight(0.4f),
                     model = "https://openweathermap.org/img/wn/" +
                             "${detailedForecastList[it].weather?.get(0)?.icon}@2x.png",
+                    placeholder = painterResource(id = R.drawable.ic_sunny),
                     contentDescription = stringResource(id = R.string.weather_icon_content),
                 )
             }

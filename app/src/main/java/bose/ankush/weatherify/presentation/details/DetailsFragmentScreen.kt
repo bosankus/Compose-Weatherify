@@ -184,7 +184,9 @@ fun DayWiseDetailedForecastList(
 
     // List screen
     if (state.forecastList.isNotEmpty())
-        DetailedForecastListItem(state.forecastList)
+        DetailedForecastListItem(
+            detailedForecastList = state.forecastList
+        )
 
     // Error screen
     else if (state.error != null) Box(
@@ -201,7 +203,8 @@ fun DayWiseDetailedForecastList(
     }
     else {
         val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
-        if (fourDaysForecasts.isNullOrEmpty()) DetailedForecastListItem(emptyList())
+        if (fourDaysForecasts.isNullOrEmpty())
+            DetailedForecastListItem(detailedForecastList = emptyList())
         else {
             val dayDate = fourDaysForecasts[0].date
             dayDate?.let { viewModel.getDayWiseDetailedForecast(dayDate) }
