@@ -1,6 +1,7 @@
 package bose.ankush.weatherify.presentation.details
 
 import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +26,7 @@ import bose.ankush.weatherify.presentation.details.component.DetailedForecastLis
 import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
 import bose.ankush.weatherify.presentation.details.state.ForecastListState
 import bose.ankush.weatherify.presentation.ui.theme.*
+import coil.compose.AsyncImage
 
 @Composable
 fun DetailsFragmentScreen(viewModel: DetailsViewModel) {
@@ -83,12 +85,18 @@ fun LocationNameSection(viewModel: DetailsViewModel) {
     val cityName = viewModel.cityName.value
     Row(
         modifier = Modifier
-            .padding(top = 16.dp)
+            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
             .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_location),
+            tint = Color.White,
+            contentDescription = stringResource(id = R.string.location_icon_content)
+        )
         Text(
+            modifier = Modifier.padding(start = 10.dp),
             text = cityName ?: "--",
             style = MaterialTheme.typography.h6,
             color = TextWhite
@@ -119,7 +127,7 @@ fun WeatherAlertSection(
             Text(
                 text = heading,
                 style = MaterialTheme.typography.body2,
-                color = Color.White.copy(0.6f)
+                color = Color.White.copy(0.6f),
             )
             Text(
                 modifier = Modifier.padding(top = 3.dp),

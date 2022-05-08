@@ -15,4 +15,5 @@
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">weather condition icon</string>
+    <string name="location_icon_content">Location header icon</string>
 </resources>
