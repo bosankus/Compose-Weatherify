@@ -13,7 +13,7 @@ import bose.ankush.weatherify.databinding.FragmentDetailsBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DetailsFragment: Fragment() {
+class DetailsFragment : Fragment() {
 
     private var binding: FragmentDetailsBinding? = null
     private val viewModel: DetailsViewModel by viewModels()
@@ -28,7 +28,9 @@ class DetailsFragment: Fragment() {
 
         binding?.fragmentDetailsComposeView?.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent { DetailsFragmentScreen(viewModel) }
+            setContent {
+                DetailsFragmentScreen(viewModel)
+            }
         }
 
         return binding?.root

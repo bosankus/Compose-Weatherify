@@ -24,3 +24,5 @@ val BlueViolet3 = Color(0xff8f98fd)*/
 val BackgroundGrey = Color(0xff242534)
 val DefaultCardBackgroundLightGrey = Color(0xff2E3341)
 val AccentColor = Color(0xffF45164)
+val SeaGreen = Color(0xff36D1DC)
+val SeaGreenDark = Color(0xff5B86E5)
