@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.presentation.details.component.DetailedForecastListItem
 import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
+import bose.ankush.weatherify.presentation.details.component.TodaysForecastLayout
 import bose.ankush.weatherify.presentation.details.state.ForecastListState
 import bose.ankush.weatherify.presentation.ui.theme.*
 
@@ -81,7 +83,22 @@ fun DetailsFragmentScreen(viewModel: DetailsViewModel) {
 @Composable
 fun LocationNameSection(viewModel: DetailsViewModel) {
     val cityName = viewModel.cityName.value
-    Row(
+
+    TodaysForecastLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    listOf(
+                        SeaGreen,
+                        SeaGreenDark
+                    )
+                )
+            )
+    )
+
+    /*Row(
         modifier = Modifier
             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
             .fillMaxWidth(),
@@ -99,7 +116,7 @@ fun LocationNameSection(viewModel: DetailsViewModel) {
             style = MaterialTheme.typography.h6,
             color = TextWhite
         )
-    }
+    }*/
 }
 
 
