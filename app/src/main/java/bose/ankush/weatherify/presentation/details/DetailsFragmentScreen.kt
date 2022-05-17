@@ -3,7 +3,6 @@ package bose.ankush.weatherify.presentation.details
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -13,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -82,41 +80,11 @@ fun DetailsFragmentScreen(viewModel: DetailsViewModel) {
 
 @Composable
 fun LocationNameSection(viewModel: DetailsViewModel) {
-    val cityName = viewModel.cityName.value
 
     TodaysForecastLayout(
-        modifier = Modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-            .background(
-                brush = Brush.verticalGradient(
-                    listOf(
-                        SeaGreen,
-                        SeaGreenDark
-                    )
-                )
-            )
+        viewModel = viewModel,
+        modifier = Modifier.fillMaxWidth()
     )
-
-    /*Row(
-        modifier = Modifier
-            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_location),
-            tint = Color.White,
-            contentDescription = stringResource(id = R.string.location_icon_content)
-        )
-        Text(
-            modifier = Modifier.padding(start = 10.dp),
-            text = cityName ?: "--",
-            style = MaterialTheme.typography.h6,
-            color = TextWhite
-        )
-    }*/
 }
 
 
@@ -153,21 +121,15 @@ fun WeatherAlertSection(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Box(
+
+        Icon(
+            painter = painterResource(id = R.drawable.ic_alert),
+            contentDescription = "Play icon button",
             modifier = Modifier
-                .padding(start = 16.dp)
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(ButtonBlue)
-                .padding(3.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_rain),
-                contentDescription = "Play icon button",
-                modifier = Modifier.size(36.dp),
-                tint = Color.White
-            )
-        }
+                .size(46.dp)
+                .padding(start = 16.dp),
+            tint = RedError
+        )
     }
 }
 
@@ -226,7 +188,7 @@ fun DayWiseDetailedForecastList(
     }
     else {
         val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
-        if (fourDaysForecasts.isNullOrEmpty())
+        if (fourDaysForecasts.isEmpty())
             DetailedForecastListItem(detailedForecastList = emptyList())
         else {
             val dayDate = fourDaysForecasts[0].date

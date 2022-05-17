@@ -21,7 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/gap_36dp"
-            android:fontFamily="@font/roboto_thin"
             android:textColor="@color/white"
             android:textSize="@dimen/text_54sp"
             app:errorFetchingTemperature="@{viewmodel.temperature}"

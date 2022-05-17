@@ -2,27 +2,14 @@ package bose.ankush.weatherify.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val TextWhite = Color(0xffeeeeee)
-val ButtonBlue = Color(0xff505cf3)
-/*val DeepBlue = Color(0XFF06164C)
-val DarkerButtonBlue = Color(0xff566894)
-val LightRed = Color(0xfffc879a)
-val AquaBlue = Color(0xff9aa5c4)
-val OrangeYellow1 = Color(0xfff0bd28)
-val OrangeYellow2 = Color(0xfff1c746)
-val OrangeYellow3 = Color(0xfff4cf65)
-val Beige1 = Color(0xfffdbda1)
-val Beige2 = Color(0xfffcaf90)
-val Beige3 = Color(0xfff9a27b)
-val LightGreen1 = Color(0xff54e1b6)
-val LightGreen2 = Color(0xff36ddab)
-val LightGreen3 = Color(0xff11d79b)
-val BlueViolet1 = Color(0xffaeb4fd)
-val BlueViolet2 = Color(0xff9fa5fe)
-val BlueViolet3 = Color(0xff8f98fd)*/
+val AccentColor = Color(0xFFF45164)
 
-val BackgroundGrey = Color(0xff242534)
-val DefaultCardBackgroundLightGrey = Color(0xff2E3341)
-val AccentColor = Color(0xffF45164)
-val SeaGreen = Color(0xff36D1DC)
-val SeaGreenDark = Color(0xff5B86E5)
+val TextWhite = Color(0xFFEEEEEE)
+val ButtonBlue = Color(0xFF505CF3)
+
+val BackgroundGrey = Color(0xFF242534)
+val DefaultCardBackgroundLightGrey = Color(0xFF2E3341)
+
+val SeaGreen = Color(0xFF36D1DC)
+val SeaGreenDark = Color(0xFF5B86E5)
+val RedError = Color(0xFFEF5350)
