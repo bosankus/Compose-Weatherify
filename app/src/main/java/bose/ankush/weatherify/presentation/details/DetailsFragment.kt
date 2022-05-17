@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.databinding.FragmentDetailsBinding
+import bose.ankush.weatherify.presentation.ui.theme.WeatherifyTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -29,7 +30,9 @@ class DetailsFragment : Fragment() {
         binding?.fragmentDetailsComposeView?.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                DetailsFragmentScreen(viewModel)
+                WeatherifyTheme {
+                    DetailsFragmentScreen(viewModel)
+                }
             }
         }
 
