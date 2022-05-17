@@ -74,7 +74,7 @@ fun CloudConditionAnimatedLayout() {
     val compositionResult: LottieCompositionResult =
         rememberLottieComposition(
             spec = LottieCompositionSpec.Asset(
-                "thunderstorm.json"
+                "sunny_snowfall.json"
             )
         )
 
@@ -86,7 +86,7 @@ fun CloudConditionAnimatedLayout() {
 
     LottieAnimation(
         composition = compositionResult.value, progress = progress,
-        modifier = Modifier.padding(all = 20.dp)
+        modifier = Modifier.padding(all = 20.dp).size(120.dp)
     )
 }
 
@@ -94,7 +94,7 @@ fun CloudConditionAnimatedLayout() {
 @Composable
 fun CurrentTemperatureInCelsius(viewModel: DetailsViewModel) {
     Text(
-        modifier = Modifier.padding(top = 16.dp),
+        modifier = Modifier.padding(top = 10.dp),
         text = stringResource(id = R.string.celsius, "21"),
         style = MaterialTheme.typography.h1,
         color = Color.White
