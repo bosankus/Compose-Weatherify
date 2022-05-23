@@ -3,6 +3,7 @@ package bose.ankush.weatherify.presentation.details
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -16,62 +17,89 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.presentation.details.component.DetailedForecastListItem
+import bose.ankush.weatherify.common.Extension.toCelsius
+import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
 import bose.ankush.weatherify.presentation.details.component.TodaysForecastLayout
 import bose.ankush.weatherify.presentation.details.state.ForecastListState
 import bose.ankush.weatherify.presentation.ui.theme.*
+import coil.compose.AsyncImage
+import com.bosankus.utilities.DateTimeUtils
 
 @Composable
-fun DetailsFragmentScreen(viewModel: DetailsViewModel) {
+fun DetailsFragmentScreen(
+    viewModel: DetailsViewModel
+) {
     val context: Context = LocalContext.current
     val state: ForecastListState = viewModel.forecastState.value
+    val detailedForecastList = viewModel.detailedForecastState.value
 
-    Box(
+
+    // Screen Loading state
+    if (state.isLoading) ShowLoading(
         modifier = Modifier
-            .background(BackgroundGrey)
             .fillMaxSize()
+            .background(BackgroundGrey)
+    )
+    // Screen Error state
+    else if (!state.error?.asString(context).isNullOrEmpty()) ShowError(
+        error = state.error?.asString(context),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundGrey)
+    )
+    // Screen with data showing on UI state
+    else ShowUIContainer(
+        viewModel = viewModel,
+        detailedForecastList = detailedForecastList
+    )
+}
+
+
+@Composable
+fun ShowLoading(
+    modifier: Modifier
+) {
+    Box(modifier = modifier) {
+        CircularProgressIndicator(
+            modifier = Modifier
+                .size(26.dp)
+                .align(Alignment.Center),
+            color = AccentColor
+        )
+    }
+}
+
+
+@Composable
+fun ShowError(
+    error: String?,
+    modifier: Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
     ) {
-        Column {
-            // Show location
-            LocationNameSection(viewModel)
-
-            // Show precaution for today text as per weather
-            WeatherAlertSection()
-
-            // Show time wise temperature(min, max, feel) in list format
-            FourDaysForecastRow(viewModel)
-
-            // Show detailed forecast time wise when any above column item is selected
-            DayWiseDetailedForecastList(viewModel)
-        }
-
-        // Loading screen
-        if (state.isLoading) Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(26.dp),
-                color = AccentColor
-            )
-        }
-
-        // Error screen
-        if (state.error != null) Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(
-                text = checkNotNull(state.error).asString(context),
-                textAlign = TextAlign.Center,
+            Icon(
+                painter = painterResource(id = R.drawable.ic_error),
+                contentDescription = "Play icon button",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
+                    .size(46.dp)
+                    .padding(start = 16.dp),
+                tint = RedError
+            )
+            Text(
+                text = error ?: stringResource(id = R.string.no_internet_txt),
+                style = MaterialTheme.typography.h3,
+                color = TextWhite,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
@@ -79,8 +107,50 @@ fun DetailsFragmentScreen(viewModel: DetailsViewModel) {
 
 
 @Composable
-fun LocationNameSection(viewModel: DetailsViewModel) {
+fun ShowUIContainer(
+    viewModel: DetailsViewModel,
+    detailedForecastList: List<ForecastDto.ForecastList>
+) {
+    Box(
+        modifier = Modifier
+            .background(BackgroundGrey)
+            .fillMaxSize()
+    ) {
+        LazyColumn {
+            item { LocationNameSection(viewModel = viewModel) }
 
+            item { WeatherAlertSection() }
+
+            item { FourDaysForecastRow(viewModel = viewModel) }
+
+            if (detailedForecastList.isNotEmpty())
+                items(detailedForecastList.size) {
+                    DetailedForecastList(
+                        list = detailedForecastList,
+                        item = it
+                    )
+                }
+            else {
+                val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
+                if (fourDaysForecasts.isEmpty())
+                    items(emptyList<ForecastDto.ForecastList>().size) {
+                        DetailedForecastList(
+                            list = emptyList(),
+                            item = it
+                        )
+                    }
+                else {
+                    val dayDate = fourDaysForecasts[0].date
+                    dayDate?.let { viewModel.getDayWiseDetailedForecast(dayDate) }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun LocationNameSection(viewModel: DetailsViewModel) {
     TodaysForecastLayout(
         viewModel = viewModel,
         modifier = Modifier.fillMaxWidth()
@@ -113,11 +183,12 @@ fun WeatherAlertSection(
                 color = Color.White.copy(0.6f),
             )
             Text(
-                modifier = Modifier.padding(top = 3.dp),
+                modifier = Modifier
+                    .padding(top = 5.dp)
+                    .heightIn(50.dp),
                 text = content,
                 style = MaterialTheme.typography.body1,
                 color = TextWhite,
-                maxLines = 4,
                 overflow = TextOverflow.Ellipsis,
             )
         }
@@ -139,7 +210,6 @@ fun FourDaysForecastRow(
     viewModel: DetailsViewModel,
 ) {
     val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
-
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
@@ -161,38 +231,38 @@ fun FourDaysForecastRow(
 
 
 @Composable
-fun DayWiseDetailedForecastList(
-    viewModel: DetailsViewModel
-) {
-    val context: Context = LocalContext.current
-    val state = viewModel.detailedForecastState.value
-
-    // List screen
-    if (state.forecastList.isNotEmpty())
-        DetailedForecastListItem(
-            detailedForecastList = state.forecastList
-        )
-
-    // Error screen
-    else if (state.error != null) Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxWidth()
+fun DetailedForecastList(list: List<ForecastDto.ForecastList>, item: Int) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 8.dp)
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
-            text = checkNotNull(state.error).asString(context),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
+            text = list[item].dt?.let { DateTimeUtils.getTimeFromEpoch(it) }
+                ?: "--",
+            style = MaterialTheme.typography.body1,
+            overflow = TextOverflow.Ellipsis,
+            color = Color.White,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = "${list[item].main?.tempMax?.toCelsius()}°   ${list[item].main?.tempMin?.toCelsius()}°",
+            style = MaterialTheme.typography.body1,
+            overflow = TextOverflow.Ellipsis,
+            color = Color.White,
+            modifier = Modifier.weight(1f),
+        )
+        AsyncImage(
+            modifier = Modifier.weight(0.3f),
+            model = "https://openweathermap.org/img/wn/" +
+                    "${list[item].weather?.get(0)?.icon}@2x.png",
+            placeholder = painterResource(id = R.drawable.ic_sunny),
+            contentDescription = stringResource(id = R.string.weather_icon_content),
         )
     }
-    else {
-        val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
-        if (fourDaysForecasts.isEmpty())
-            DetailedForecastListItem(detailedForecastList = emptyList())
-        else {
-            val dayDate = fourDaysForecasts[0].date
-            dayDate?.let { viewModel.getDayWiseDetailedForecast(dayDate) }
-        }
-    }
 }
+

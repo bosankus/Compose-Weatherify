@@ -25,7 +25,7 @@ fun DetailedForecastListItem(
     LazyColumn(
         modifier = Modifier
             .padding(start = 10.dp)
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
         items(detailedForecastList.size) {

@@ -60,9 +60,9 @@ fun LocationNameSection(viewModel: DetailsViewModel) {
             contentDescription = stringResource(id = R.string.location_icon_content)
         )
         Text(
-            modifier = Modifier.padding(start = 10.dp),
+            modifier = Modifier.padding(start = 5.dp),
             text = cityName ?: "--",
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.h4,
             color = TextWhite
         )
     }

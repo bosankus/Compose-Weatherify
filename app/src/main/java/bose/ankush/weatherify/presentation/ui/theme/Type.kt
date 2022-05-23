@@ -16,8 +16,8 @@ val Glaind = FontFamily(
 val Typography = Typography(
     h1 = TextStyle(
         fontFamily = Glaind,
-        fontWeight = FontWeight.Bold,
-        fontSize = 30.sp,
+        fontWeight = FontWeight.Thin,
+        fontSize = 60.sp,
     ),
     h2 = TextStyle(
         fontFamily = Glaind,
