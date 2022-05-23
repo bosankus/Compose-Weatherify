@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -20,12 +19,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
+import bose.ankush.weatherify.presentation.details.component.ShowError
+import bose.ankush.weatherify.presentation.details.component.ShowLoading
 import bose.ankush.weatherify.presentation.details.component.TodaysForecastLayout
 import bose.ankush.weatherify.presentation.details.state.ForecastListState
-import bose.ankush.weatherify.presentation.ui.theme.*
+import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
+import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
+import bose.ankush.weatherify.presentation.ui.theme.RedError
+import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 import coil.compose.AsyncImage
 import com.bosankus.utilities.DateTimeUtils
 
@@ -37,72 +42,34 @@ fun DetailsFragmentScreen(
     val state: ForecastListState = viewModel.forecastState.value
     val detailedForecastList = viewModel.detailedForecastState.value
 
-
-    // Screen Loading state
-    if (state.isLoading) ShowLoading(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundGrey)
-    )
-    // Screen Error state
-    else if (!state.error?.asString(context).isNullOrEmpty()) ShowError(
-        error = state.error?.asString(context),
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundGrey)
-    )
-    // Screen with data showing on UI state
-    else ShowUIContainer(
-        viewModel = viewModel,
-        detailedForecastList = detailedForecastList
-    )
-}
-
-
-@Composable
-fun ShowLoading(
-    modifier: Modifier
-) {
-    Box(modifier = modifier) {
-        CircularProgressIndicator(
+    // Has internet
+    if (isNetworkAvailable(context)) {
+        // Screen Loading state
+        if (state.isLoading) ShowLoading(
             modifier = Modifier
-                .size(26.dp)
-                .align(Alignment.Center),
-            color = AccentColor
+                .fillMaxSize()
+                .background(BackgroundGrey)
+        )
+        // Screen Error state
+        else if (!state.error?.asString(context).isNullOrEmpty()) ShowError(
+            error = state.error?.asString(context),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BackgroundGrey)
+        )
+        // Screen with data showing on UI state
+        else ShowUIContainer(
+            viewModel = viewModel,
+            detailedForecastList = detailedForecastList
         )
     }
-}
-
-
-@Composable
-fun ShowError(
-    error: String?,
-    modifier: Modifier
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_error),
-                contentDescription = "Play icon button",
-                modifier = Modifier
-                    .size(46.dp)
-                    .padding(start = 16.dp),
-                tint = RedError
-            )
-            Text(
-                text = error ?: stringResource(id = R.string.no_internet_txt),
-                style = MaterialTheme.typography.h3,
-                color = TextWhite,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
+    // No internet connectivity
+    else ShowError(
+        error = stringResource(id = R.string.no_internet_txt),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundGrey)
+    )
 }
 
 
