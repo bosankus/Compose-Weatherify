@@ -97,6 +97,8 @@ fun WeatherDto.toWeather(): Weather {
         cod = cod,
         temp = main.temp,
         humidity = main.humidity,
+        wind = wind.speed,
+        windAngle = wind.deg,
         name = name,
         icon = weather[0].icon,
     )

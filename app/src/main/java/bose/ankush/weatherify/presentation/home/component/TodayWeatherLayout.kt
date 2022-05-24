@@ -98,10 +98,45 @@ fun CloudConditionAnimatedLayout() {
 fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
     val weather = viewModel.todaysWeather.value.weather
 
-    Text(
-        modifier = Modifier.padding(top = 10.dp),
-        text = stringResource(id = R.string.celsius, weather?.temp?.toCelsius() ?: "--"),
-        style = MaterialTheme.typography.h1,
-        color = Color.White
-    )
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier.padding(top = 10.dp),
+            text = stringResource(id = R.string.celsius, weather?.temp?.toCelsius() ?: "--"),
+            style = MaterialTheme.typography.h1,
+            color = TextWhite
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_humidity),
+                tint = Color.White,
+                contentDescription = stringResource(id = R.string.location_icon_content)
+            )
+            Text(
+                modifier = Modifier.padding(start = 5.dp),
+                text = stringResource(id = R.string.percent, weather?.humidity.toString()),
+                style = MaterialTheme.typography.h4,
+                color = TextWhite
+            )
+
+            Icon(
+                modifier = Modifier.padding(start = 20.dp),
+                painter = painterResource(id = R.drawable.ic_wind),
+                tint = Color.White,
+                contentDescription = stringResource(id = R.string.location_icon_content)
+            )
+            Text(
+                modifier = Modifier.padding(start = 5.dp),
+                text = stringResource(id = R.string.speed, weather?.wind.toString()),
+                style = MaterialTheme.typography.h4,
+                color = TextWhite
+            )
+        }
+    }
 }
