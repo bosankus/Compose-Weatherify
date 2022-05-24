@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.details.component
+package bose.ankush.weatherify.presentation.home.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
@@ -13,13 +13,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.presentation.details.DetailsViewModel
+import bose.ankush.weatherify.common.Extension.toCelsius
+import bose.ankush.weatherify.presentation.home.HomeViewModel
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 import com.airbnb.lottie.compose.*
 
 @Composable
 fun TodaysForecastLayout(
-    viewModel: DetailsViewModel,
+    viewModel: HomeViewModel,
     modifier: Modifier
 ) {
     Box(
@@ -45,7 +46,7 @@ fun TodaysForecastLayout(
 
 
 @Composable
-fun LocationNameSection(viewModel: DetailsViewModel) {
+fun LocationNameSection(viewModel: HomeViewModel) {
     val cityName = viewModel.cityName.value
     Row(
         modifier = Modifier
@@ -86,16 +87,20 @@ fun CloudConditionAnimatedLayout() {
 
     LottieAnimation(
         composition = compositionResult.value, progress = progress,
-        modifier = Modifier.padding(all = 20.dp).size(120.dp)
+        modifier = Modifier
+            .padding(all = 20.dp)
+            .size(120.dp)
     )
 }
 
 
 @Composable
-fun CurrentTemperatureInCelsius(viewModel: DetailsViewModel) {
+fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
+    val weather = viewModel.todaysWeather.value.weather
+
     Text(
         modifier = Modifier.padding(top = 10.dp),
-        text = stringResource(id = R.string.celsius, "21"),
+        text = stringResource(id = R.string.celsius, weather?.temp?.toCelsius() ?: "--"),
         style = MaterialTheme.typography.h1,
         color = Color.White
     )

@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.details.component
+package bose.ankush.weatherify.presentation.home.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

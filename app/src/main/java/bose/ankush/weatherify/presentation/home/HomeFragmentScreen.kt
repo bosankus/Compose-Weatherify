@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.details
+package bose.ankush.weatherify.presentation.home
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -22,11 +22,11 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
-import bose.ankush.weatherify.presentation.details.component.FutureForecastListItem
-import bose.ankush.weatherify.presentation.details.component.ShowError
-import bose.ankush.weatherify.presentation.details.component.ShowLoading
-import bose.ankush.weatherify.presentation.details.component.TodaysForecastLayout
-import bose.ankush.weatherify.presentation.details.state.ForecastListState
+import bose.ankush.weatherify.presentation.home.component.FutureForecastListItem
+import bose.ankush.weatherify.presentation.home.component.ShowError
+import bose.ankush.weatherify.presentation.home.component.ShowLoading
+import bose.ankush.weatherify.presentation.home.component.TodaysForecastLayout
+import bose.ankush.weatherify.presentation.home.state.ForecastListState
 import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
 import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
 import bose.ankush.weatherify.presentation.ui.theme.RedError
@@ -36,7 +36,7 @@ import com.bosankus.utilities.DateTimeUtils
 
 @Composable
 fun DetailsFragmentScreen(
-    viewModel: DetailsViewModel
+    viewModel: HomeViewModel
 ) {
     val context: Context = LocalContext.current
     val state: ForecastListState = viewModel.forecastState.value
@@ -75,7 +75,7 @@ fun DetailsFragmentScreen(
 
 @Composable
 fun ShowUIContainer(
-    viewModel: DetailsViewModel,
+    viewModel: HomeViewModel,
     detailedForecastList: List<ForecastDto.ForecastList>
 ) {
     Box(
@@ -117,7 +117,7 @@ fun ShowUIContainer(
 
 
 @Composable
-fun LocationNameSection(viewModel: DetailsViewModel) {
+fun LocationNameSection(viewModel: HomeViewModel) {
     TodaysForecastLayout(
         viewModel = viewModel,
         modifier = Modifier.fillMaxWidth()
@@ -174,7 +174,7 @@ fun WeatherAlertSection(
 
 @Composable
 fun FourDaysForecastRow(
-    viewModel: DetailsViewModel,
+    viewModel: HomeViewModel,
 ) {
     val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
     Column(

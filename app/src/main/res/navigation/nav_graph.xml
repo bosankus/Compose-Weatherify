@@ -7,16 +7,7 @@
 
     <fragment
         android:id="@+id/detailsFragment"
-        android:name="bose.ankush.weatherify.presentation.details.DetailsFragment"
-        android:label="DetailsFragment"
-        tools:layout="@layout/fragment_details" />
-    <fragment
-        android:id="@+id/homeFragment"
         android:name="bose.ankush.weatherify.presentation.home.HomeFragment"
-        android:label="HomeFragment"
-        tools:layout="@layout/fragment_home">
-        <action
-            android:id="@+id/action_homeFragment_to_detailsFragment"
-            app:destination="@id/detailsFragment" />
-    </fragment>
+        android:label="DetailsFragment"
+        tools:layout="@layout/fragment_home" />
 </navigation>

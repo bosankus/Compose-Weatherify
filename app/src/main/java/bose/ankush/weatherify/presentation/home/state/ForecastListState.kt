@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.details.state
+package bose.ankush.weatherify.presentation.home.state
 
 import bose.ankush.weatherify.common.UiText
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
