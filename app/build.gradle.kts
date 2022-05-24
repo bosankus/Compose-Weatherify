@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("kotlin-kapt")
-    id("androidx.navigation.safeargs.kotlin")
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("com.google.secrets_gradle_plugin") version "0.6.1"
@@ -81,15 +80,8 @@ dependencies {
     // Core
     implementation(Deps.androidCore)
     implementation(Deps.appCompat)
-    implementation(Deps.multiDex)
     implementation(Deps.androidMaterial)
-    implementation(Deps.constraintLayout)
-    implementation(Deps.recyclerView)
-    implementation(Deps.fragment)
-    implementation(Deps.viewModel)
     implementation(Deps.viewModelCompose)
-    implementation(Deps.navigationFragment)
-    implementation(Deps.navigationUi)
     implementation(Deps.navigationCompose)
 
     // Networking
@@ -111,8 +103,9 @@ dependencies {
 
     // Miscellaneous
     implementation(Deps.timber)
-    implementation(Deps.lottie)
     implementation(Deps.lottieCompose)
-    implementation(Deps.glide)
     implementation(Deps.coilCompose)
+
+    // Memory leak
+    debugImplementation(Deps.leakCanary)
 }

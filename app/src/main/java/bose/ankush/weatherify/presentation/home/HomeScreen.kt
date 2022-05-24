@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.Extension.toCelsius
@@ -35,8 +36,8 @@ import coil.compose.AsyncImage
 import com.bosankus.utilities.DateTimeUtils
 
 @Composable
-fun DetailsFragmentScreen(
-    viewModel: HomeViewModel
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context: Context = LocalContext.current
     val state: ForecastListState = viewModel.forecastState.value

@@ -1,7 +1,6 @@
 // Plugins
 object BuildPlugins {
     val buildGradle by lazy { "com.android.tools.build:gradle:${Versions.buildGradle}" }
-    val navigationSafeArgs by lazy { "androidx.navigation:navigation-safe-args-gradle-plugin:${Versions.navigation}" }
     val hiltPlugin by lazy { "com.google.dagger:hilt-android-gradle-plugin:${Versions.hilt}" }
 }
 
@@ -32,15 +31,8 @@ object Deps {
     // Core
     val androidCore by lazy { "androidx.core:core-ktx:${Versions.androidCore}" }
     val appCompat by lazy { "androidx.appcompat:appcompat:${Versions.appCompat}" }
-    val multiDex by lazy { "com.android.support:multidex:${Versions.multiDex}" }
     val androidMaterial by lazy { "com.google.android.material:material:${Versions.androidMaterial}" }
-    val constraintLayout by lazy { "androidx.constraintlayout:constraintlayout:${Versions.constraintLayout}" }
-    val recyclerView by lazy { "androidx.recyclerview:recyclerview:${Versions.recyclerView}" }
-    val fragment by lazy { "androidx.fragment:fragment-ktx:${Versions.fragment}" }
-    val viewModel by lazy { "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifecycle}" }
     val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }
-    val navigationFragment by lazy { "androidx.navigation:navigation-fragment-ktx:${Versions.navigation}" }
-    val navigationUi by lazy { "androidx.navigation:navigation-ui-ktx:${Versions.navigation}" }
     val navigationCompose by lazy { "androidx.navigation:navigation-compose:${Versions.navigation}" }
 
     // Networking
@@ -62,8 +54,9 @@ object Deps {
 
     // Miscellaneous
     val timber by lazy { "com.jakewharton.timber:timber:${Versions.timber}" }
-    val lottie by lazy { "com.airbnb.android:lottie:${Versions.lottie}" }
     val lottieCompose by lazy { "com.airbnb.android:lottie-compose:${Versions.lottie}" }
-    val glide by lazy { "com.github.bumptech.glide:glide:${Versions.glide}" }
     val coilCompose by lazy { "io.coil-kt:coil-compose:${Versions.coilCompose}" }
+
+    // Memory Leak
+    val leakCanary by lazy { "com.squareup.leakcanary:leakcanary-android:${Versions.leakCanary}" }
 }

@@ -27,11 +27,7 @@ object Versions {
     // Core
     const val androidCore = "1.7.0"
     const val appCompat = "1.4.1"
-    const val multiDex = "1.0.3"
     const val androidMaterial = "1.5.0"
-    const val constraintLayout = "2.1.3"
-    const val recyclerView = "1.2.1"
-    const val fragment = "1.4.1"
     const val lifecycle = "2.4.1"
 
     // Networking
@@ -51,6 +47,8 @@ object Versions {
     // Miscellaneous
     const val timber = "5.0.1"
     const val lottie = "4.2.2"
-    const val glide = "4.13.1"
     const val coilCompose = "2.0.0-rc03"
+
+    // Memory leak
+    const val leakCanary = "2.9.1"
 }
