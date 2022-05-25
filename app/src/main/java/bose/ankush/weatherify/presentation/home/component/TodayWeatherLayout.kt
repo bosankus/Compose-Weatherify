@@ -62,7 +62,7 @@ fun LocationNameSection(viewModel: HomeViewModel) {
         )
         Text(
             modifier = Modifier.padding(start = 5.dp),
-            text = cityName ?: "--",
+            text = cityName ?: stringResource(id = R.string.not_available),
             style = MaterialTheme.typography.h4,
             color = TextWhite
         )
@@ -104,7 +104,7 @@ fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
     ) {
         Text(
             modifier = Modifier.padding(top = 10.dp),
-            text = stringResource(id = R.string.celsius, weather?.temp?.toCelsius() ?: "--"),
+            text = stringResource(id = R.string.celsius, weather?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)),
             style = MaterialTheme.typography.h1,
             color = TextWhite
         )

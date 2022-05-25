@@ -11,6 +11,7 @@
 
     <string name="empty_list">No details found. Try after sometime.</string>
     <string name="forecast_heading_txt">Forecasts</string>
+    <string name="not_available">--</string>
     <string name="celsius">%1$s°C</string>
     <string name="percent">%1$s%%</string>
     <string name="speed">%1$skm/h</string>

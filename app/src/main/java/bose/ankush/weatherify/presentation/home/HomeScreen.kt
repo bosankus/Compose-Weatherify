@@ -211,7 +211,7 @@ fun DetailedForecastList(list: List<ForecastDto.ForecastList>, item: Int) {
     ) {
         Text(
             text = list[item].dt?.let { DateTimeUtils.getTimeFromEpoch(it) }
-                ?: "--",
+                ?: stringResource(id = R.string.not_available),
             style = MaterialTheme.typography.body1,
             overflow = TextOverflow.Ellipsis,
             color = Color.White,

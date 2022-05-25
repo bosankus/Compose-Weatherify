@@ -49,7 +49,7 @@ fun FutureForecastListItem(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = avgForecastList[it].nameOfDay?.substring(0,3) ?: "--",
+                        text = avgForecastList[it].nameOfDay?.substring(0,3) ?: stringResource(id = R.string.not_available),
                         style = MaterialTheme.typography.body2,
                         overflow = TextOverflow.Ellipsis,
                         color = Color.White,
@@ -58,7 +58,7 @@ fun FutureForecastListItem(
                     Text(
                         text = stringResource(
                             id = R.string.celsius,
-                            avgForecastList[it].avgTemp ?: "--"
+                            avgForecastList[it].avgTemp ?: stringResource(id = R.string.not_available)
                         ),
                         style = MaterialTheme.typography.h6,
                         overflow = TextOverflow.Ellipsis,
@@ -68,7 +68,7 @@ fun FutureForecastListItem(
                     Text(
                         text = stringResource(
                             id = R.string.feels_like,
-                            avgForecastList[it].feelsLike ?: "--"
+                            avgForecastList[it].feelsLike ?: stringResource(id = R.string.not_available)
                         ),
                         style = MaterialTheme.typography.caption,
                         overflow = TextOverflow.Ellipsis,
