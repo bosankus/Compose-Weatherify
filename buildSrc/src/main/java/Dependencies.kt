@@ -34,6 +34,8 @@ object Deps {
     val androidMaterial by lazy { "com.google.android.material:material:${Versions.androidMaterial}" }
     val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }
     val navigationCompose by lazy { "androidx.navigation:navigation-compose:${Versions.navigation}" }
+    val inAppUpdate by lazy { "com.google.android.play:app-update:${Versions.googlePlayCore}" }
+    val inAppUpdateKtx by lazy { "com.google.android.play:app-update-ktx:${Versions.googlePlayCore}" }
 
     // Networking
     val okHttp3 by lazy { "com.squareup.okhttp3:okhttp:${Versions.okHttp3}" }

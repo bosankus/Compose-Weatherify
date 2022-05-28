@@ -83,6 +83,8 @@ dependencies {
     implementation(Deps.androidMaterial)
     implementation(Deps.viewModelCompose)
     implementation(Deps.navigationCompose)
+    implementation(Deps.inAppUpdate)
+    implementation(Deps.inAppUpdateKtx)
 
     // Networking
     implementation(Deps.okHttp3)
