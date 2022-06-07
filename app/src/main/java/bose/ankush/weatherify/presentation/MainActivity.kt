@@ -3,6 +3,7 @@ package bose.ankush.weatherify.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import bose.ankush.weatherify.common.startInAppUpdate
 import bose.ankush.weatherify.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.ui.theme.WeatherifyTheme
@@ -10,6 +11,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
+@ExperimentalAnimationApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 

@@ -8,6 +8,7 @@
     <string name="server_error_txt">Umm… Looks like server issue!</string>
     <string name="no_internet_txt">Umm… Can you re-check internet connectivity!</string>
     <string name="general_error_txt">Oops!..Something went wrong.</string>
+    <string name="empty_city_list_error_txt">Oh no! No cities found at this moment. Check back later</string>
 
     <string name="empty_list">No details found. Try after sometime.</string>
     <string name="forecast_heading_txt">Forecasts</string>
@@ -17,9 +18,11 @@
     <string name="speed">%1$skm/h</string>
     <string name="angle">%1$s°</string>
     <string name="feels_like">feels like %1$s°C</string>
+    <string name="select_city">Select city</string>
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">weather condition icon</string>
     <string name="location_icon_content">Location header icon</string>
     <string name="error_icon_content">Error icon</string>
+    <string name="close_icon_content">Close button icon</string>
 </resources>

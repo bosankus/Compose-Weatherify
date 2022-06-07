@@ -1,5 +1,6 @@
 package bose.ankush.weatherify.presentation.home.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -11,9 +12,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.toCelsius
+import bose.ankush.weatherify.navigation.Screen
 import bose.ankush.weatherify.presentation.home.HomeViewModel
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 import com.airbnb.lottie.compose.*
@@ -21,7 +25,8 @@ import com.airbnb.lottie.compose.*
 @Composable
 fun TodaysForecastLayout(
     viewModel: HomeViewModel,
-    modifier: Modifier
+    modifier: Modifier,
+    navController: NavController
 ) {
     Box(
         modifier = modifier
@@ -31,7 +36,7 @@ fun TodaysForecastLayout(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Show location details
-            LocationNameSection(viewModel)
+            LocationNameSection(viewModel, navController)
 
             // Show animated condition of cloud using Lottie
             CloudConditionAnimatedLayout()
@@ -46,30 +51,31 @@ fun TodaysForecastLayout(
 
 
 @Composable
-fun LocationNameSection(viewModel: HomeViewModel) {
-    val cityName = viewModel.cityName.value
+fun LocationNameSection(viewModel: HomeViewModel, navController: NavController) {
+    val cityName = viewModel.cityName.value ?: stringResource(id = R.string.not_available)
     Row(
         modifier = Modifier
             .padding(all = 16.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable { navController.navigate(Screen.CitiesListScreen.route) },
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_location),
             tint = Color.White,
-            contentDescription = stringResource(id = R.string.location_icon_content)
+            contentDescription = stringResource(id = R.string.location_icon_content),
         )
         Text(
             modifier = Modifier.padding(start = 5.dp),
-            text = cityName ?: stringResource(id = R.string.not_available),
+            text = cityName,
             style = MaterialTheme.typography.h4,
-            color = TextWhite
+            color = TextWhite,
         )
     }
 }
 
-
+@Preview
 @Composable
 fun CloudConditionAnimatedLayout() {
     val compositionResult: LottieCompositionResult =
@@ -104,7 +110,10 @@ fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
     ) {
         Text(
             modifier = Modifier.padding(top = 10.dp),
-            text = stringResource(id = R.string.celsius, weather?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)),
+            text = stringResource(
+                id = R.string.celsius,
+                weather?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
+            ),
             style = MaterialTheme.typography.h1,
             color = TextWhite
         )

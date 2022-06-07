@@ -5,12 +5,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
-import bose.ankush.weatherify.data.remote.dto.toCityName
-import bose.ankush.weatherify.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
@@ -75,11 +74,11 @@ class HomeViewModel @Inject constructor(
                     is ResultData.Success -> {
                         val responseList = result.data?.list ?: emptyList()
                         _forecastList.value = responseList
-                        _cityName.value = result.data?.toCityName()?.name
+                        _cityName.value = result.data?.city?.name
                         _forecastState.value = ForecastListState(forecasts = responseList)
                     }
                     else -> _forecastState.value =
-                        ForecastListState(error = UiText.DynamicText("Something went wrong"))
+                        ForecastListState(error = UiText.StringResource(R.string.general_error_txt))
                 }
             }.launchIn(viewModelScope)
         }

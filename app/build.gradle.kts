@@ -85,6 +85,7 @@ dependencies {
     implementation(Deps.navigationCompose)
     implementation(Deps.inAppUpdate)
     implementation(Deps.inAppUpdateKtx)
+    implementation(Deps.animatedNavigation)
 
     // Networking
     implementation(Deps.okHttp3)

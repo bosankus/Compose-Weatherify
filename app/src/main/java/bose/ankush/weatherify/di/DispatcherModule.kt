@@ -18,12 +18,4 @@ object DispatcherModule {
     @Singleton
     @Provides
     fun provideDispatcherProvider(): DispatcherProvider = AppDispatcher()
-
-    @Singleton
-    @Provides
-    fun provideWeatherRepository(
-        apiService: ApiService,
-        dispatcherProvider: DispatcherProvider
-    ): WeatherRepository =
-        WeatherRepositoryImpl(apiService, dispatcherProvider)
 }

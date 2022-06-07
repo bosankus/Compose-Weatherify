@@ -17,8 +17,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.Extension.toCelsius
@@ -37,6 +39,7 @@ import com.bosankus.utilities.DateTimeUtils
 
 @Composable
 fun HomeScreen(
+    navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context: Context = LocalContext.current
@@ -61,6 +64,7 @@ fun HomeScreen(
         // Screen with data showing on UI state
         else ShowUIContainer(
             viewModel = viewModel,
+            navController = navController,
             detailedForecastList = detailedForecastList
         )
     }
@@ -75,8 +79,9 @@ fun HomeScreen(
 
 
 @Composable
-fun ShowUIContainer(
+private fun ShowUIContainer(
     viewModel: HomeViewModel,
+    navController: NavController,
     detailedForecastList: List<ForecastDto.ForecastList>
 ) {
     Box(
@@ -85,7 +90,13 @@ fun ShowUIContainer(
             .fillMaxSize()
     ) {
         LazyColumn {
-            item { LocationNameSection(viewModel = viewModel) }
+            item {
+                TodaysForecastLayout(
+                    viewModel = viewModel,
+                    modifier = Modifier.fillMaxWidth(),
+                    navController = navController
+                )
+            }
 
             item { WeatherAlertSection() }
 
@@ -116,18 +127,9 @@ fun ShowUIContainer(
     }
 }
 
-
+@Preview
 @Composable
-fun LocationNameSection(viewModel: HomeViewModel) {
-    TodaysForecastLayout(
-        viewModel = viewModel,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-
-@Composable
-fun WeatherAlertSection(
+private fun WeatherAlertSection(
     heading: String = "Sample heading",
     content: String = "And some little bit of lulu content her eto show the UI and test it. huha!"
 ) {
@@ -174,7 +176,7 @@ fun WeatherAlertSection(
 
 
 @Composable
-fun FourDaysForecastRow(
+private fun FourDaysForecastRow(
     viewModel: HomeViewModel,
 ) {
     val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
@@ -199,7 +201,7 @@ fun FourDaysForecastRow(
 
 
 @Composable
-fun DetailedForecastList(list: List<ForecastDto.ForecastList>, item: Int) {
+private fun DetailedForecastList(list: List<ForecastDto.ForecastList>, item: Int) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

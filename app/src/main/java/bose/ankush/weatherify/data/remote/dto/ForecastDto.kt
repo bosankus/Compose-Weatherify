@@ -114,10 +114,3 @@ data class ForecastDto(
         )
     }
 }
-
-
-fun ForecastDto.toCityName() : CityName {
-    return CityName(
-        name = city?.name
-    )
-}
