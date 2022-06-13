@@ -15,10 +15,10 @@ import javax.inject.Inject
 class GetForecasts @Inject constructor(
     private val repository: WeatherRepository
 ) {
-    operator fun invoke(): Flow<ResultData<ForecastDto>> = flow {
+    operator fun invoke(cityName: String): Flow<ResultData<ForecastDto>> = flow {
         try {
             emit(ResultData.Loading)
-            val forecast: ForecastDto = repository.getWeatherForecastList()
+            val forecast: ForecastDto = repository.getWeatherForecastList(cityName)
             if (!forecast.list.isNullOrEmpty()) emit(ResultData.Success(forecast))
             else emit(ResultData.Failed(UiText.StringResource(R.string.empty_list)))
         } catch (e: HttpException) {

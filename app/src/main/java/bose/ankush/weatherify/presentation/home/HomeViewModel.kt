@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
@@ -30,8 +31,8 @@ Date: 05,May,2021
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    getTodaysWeatherUseCase: GetTodaysWeatherReport,
-    getForecastsUseCase: GetForecasts,
+    private val getTodaysWeatherUseCase: GetTodaysWeatherReport,
+    private val getForecastsUseCase: GetForecasts,
 ) : ViewModel() {
 
     private var _todaysWeather = mutableStateOf(TodaysWeatherState())
@@ -49,10 +50,15 @@ class HomeViewModel @Inject constructor(
     private val _forecastList: MutableState<List<ForecastDto.ForecastList>> =
         mutableStateOf(listOf())
 
-    init {
+    /*init {
+        fetchWeatherDetails(DEFAULT_CITY_NAME)
+    }*/
+
+
+    fun fetchWeatherDetails(cityName: String) {
         viewModelScope.launch {
-            val todaysWeather = async { getTodaysWeatherUseCase() }
-            val forecast = async { getForecastsUseCase() }
+            val todaysWeather = async { getTodaysWeatherUseCase(cityName) }
+            val forecast = async { getForecastsUseCase(cityName) }
 
             todaysWeather.await().onEach { result ->
                 when (result) {

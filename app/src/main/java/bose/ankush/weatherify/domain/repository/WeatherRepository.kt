@@ -10,7 +10,7 @@ Date: 05,May,2021
 
 interface WeatherRepository {
 
-    suspend fun getTodaysWeatherReport(): WeatherDto
+    suspend fun getTodaysWeatherReport(cityName: String): WeatherDto
 
-    suspend fun getWeatherForecastList(): ForecastDto
+    suspend fun getWeatherForecastList(cityName: String): ForecastDto
 }

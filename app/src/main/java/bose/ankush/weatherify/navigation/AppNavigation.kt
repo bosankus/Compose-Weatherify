@@ -13,13 +13,24 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
+const val HOME_ARGUMENT_KEY = "city_name"
+
 @ExperimentalAnimationApi
 @Composable
 fun AppNavigation() {
     val navController = rememberAnimatedNavController()
-    AnimatedNavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
+    AnimatedNavHost(
+        navController = navController,
+        startDestination = Screen.HomeScreen.route + "/{$HOME_ARGUMENT_KEY}"
+    ) {
         composable(
-            route = Screen.HomeScreen.route,
+            route = Screen.HomeScreen.route + "/{$HOME_ARGUMENT_KEY}", // optional argument url
+            arguments = listOf(navArgument(HOME_ARGUMENT_KEY) {
+                type = NavType.StringType
+                defaultValue = DEFAULT_CITY_NAME
+                nullable = true
+            }
+            ),
             enterTransition = {
                 slideIntoContainer(
                     towards = AnimatedContentScope.SlideDirection.Up,
@@ -44,8 +55,11 @@ fun AppNavigation() {
                     animationSpec = tween(500)
                 )
             },
-        ) {
-            HomeScreen(navController = navController)
+        ) { backStackEntry ->
+            HomeScreen(
+                navController = navController,
+                cityName = backStackEntry.arguments?.getString(HOME_ARGUMENT_KEY) ?: DEFAULT_CITY_NAME
+            )
         }
         composable(
             route = Screen.CitiesListScreen.route,

@@ -9,6 +9,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
+import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.presentation.home.component.FutureForecastListItem
@@ -40,7 +42,8 @@ import com.bosankus.utilities.DateTimeUtils
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel()
+    cityName: String = DEFAULT_CITY_NAME,
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val context: Context = LocalContext.current
     val state: ForecastListState = viewModel.forecastState.value
@@ -48,6 +51,11 @@ fun HomeScreen(
 
     // Has internet
     if (isNetworkAvailable(context)) {
+        // make network call
+        LaunchedEffect(Unit) {
+            viewModel.fetchWeatherDetails(cityName)
+        }
+
         // Screen Loading state
         if (state.isLoading) ShowLoading(
             modifier = Modifier
@@ -192,7 +200,7 @@ private fun FourDaysForecastRow(
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
-        FutureForecastListItem(fourDaysForecasts) {
+        FutureForecastListItem(avgForecastList = fourDaysForecasts) {
             val selectedDate = fourDaysForecasts[it].date
             selectedDate?.let { date -> viewModel.getDayWiseDetailedForecast(date) }
         }

@@ -14,13 +14,13 @@ interface ApiService {
 
     @GET("/data/2.5/weather")
     suspend fun getTodaysWeatherReport(
-        @Query("q") location: String = "Kolkata",
+        @Query("q") location: String,
         @Query("APPID") AppId: String = BuildConfig.APPID
     ): WeatherDto
 
     @GET("/data/2.5/forecast")
     suspend fun getWeatherForecastList(
-        @Query("q") location: String = "Kolkata",
+        @Query("q") location: String,
         @Query("APPID") AppId: String = BuildConfig.APPID
     ): ForecastDto
 

@@ -7,28 +7,29 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.domain.model.CityName
-import bose.ankush.weatherify.R
+import bose.ankush.weatherify.presentation.ui.theme.AccentColor
 
 @Composable
 fun CityListItem(
     cityNameList: List<CityName>,
     position: Int,
-    onItemClick: (Int) -> Unit
+    onItemClick: (Int, String) -> Unit
 ) {
-
-    // it will be large and clear.
-    // selected city name will have bordered box in AccentColor
-
+    var selectedItem by remember { mutableStateOf(0) }
+    val cityName = cityNameList[position].name ?: DEFAULT_CITY_NAME
     Text(
-        text = cityNameList[position].name ?: stringResource(id = R.string.not_available),
+        text = cityName,
         style = MaterialTheme.typography.h3,
-        color = Color.White,
         modifier = Modifier
             .padding(all = 16.dp)
-            .clickable { onItemClick(position) }
+            .clickable {
+                selectedItem = position
+                onItemClick(position, cityName)
+            },
+        color = if (selectedItem == position) AccentColor else Color.White
     )
 
 }

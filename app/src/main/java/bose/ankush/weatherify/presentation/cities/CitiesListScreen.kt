@@ -20,7 +20,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
-import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.navigation.Screen
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
 import bose.ankush.weatherify.presentation.cities.state.CityNameState
@@ -86,8 +85,8 @@ private fun ShowUIContainer(
 
             if (state.names.isNotEmpty()) {
                 items(state.names.size) {
-                    CityListItem(cityNameList = state.names, position = it) {
-                        navController.navigate(Screen.HomeScreen.route)
+                    CityListItem(cityNameList = state.names, position = it) { _, name ->
+                        navController.navigate(Screen.HomeScreen.withArgs(name))
                     }
                 }
             }
@@ -112,7 +111,7 @@ private fun CityNameHeader(navController: NavController) {
                 tint = Color.White,
                 contentDescription = stringResource(id = R.string.close_icon_content),
                 modifier = Modifier.clickable {
-                    navController.navigate(Screen.HomeScreen.route)
+                    navController.popBackStack()
                 }
             )
             Text(

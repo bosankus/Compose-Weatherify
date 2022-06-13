@@ -4,6 +4,7 @@ import bose.ankush.weatherify.data.remote.ApiService
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.data.remote.dto.WeatherDto
 import bose.ankush.weatherify.dispatcher.DispatcherProvider
+import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -19,11 +20,11 @@ class WeatherRepositoryImpl @Inject constructor(
 ) : WeatherRepository {
 
 
-    override suspend fun getTodaysWeatherReport(): WeatherDto =
-        withContext(dispatcher.io) { apiService.getTodaysWeatherReport() }
+    override suspend fun getTodaysWeatherReport(cityName: String): WeatherDto =
+        withContext(dispatcher.io) { apiService.getTodaysWeatherReport(location = cityName) }
 
-    override suspend fun getWeatherForecastList(): ForecastDto =
-        withContext(dispatcher.io) { apiService.getWeatherForecastList() }
+    override suspend fun getWeatherForecastList(cityName: String): ForecastDto =
+        withContext(dispatcher.io) { apiService.getWeatherForecastList(location = cityName) }
 
 }
 
