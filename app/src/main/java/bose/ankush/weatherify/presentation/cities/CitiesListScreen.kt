@@ -80,13 +80,15 @@ private fun ShowUIContainer(
             .background(BackgroundGrey)
             .fillMaxSize()
     ) {
-        LazyColumn {
-            item { CityNameHeader(navController) }
+        Column{
+            CityNameHeader(navController)
 
-            if (state.names.isNotEmpty()) {
-                items(state.names.size) {
-                    CityListItem(cityNameList = state.names, position = it) { _, name ->
-                        navController.navigate(Screen.HomeScreen.withArgs(name))
+            LazyColumn {
+                if (state.names.isNotEmpty()) {
+                    items(state.names.size) {
+                        CityListItem(cityNameList = state.names, position = it) { _, name ->
+                            navController.navigate(Screen.HomeScreen.withArgs(name))
+                        }
                     }
                 }
             }
@@ -102,23 +104,25 @@ private fun CityNameHeader(navController: NavController) {
             .fillMaxWidth()
     ) {
         Row(
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(all = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.CenterEnd)
+                .padding(all = 16.dp)
         ) {
+            Text(
+                text = stringResource(id = R.string.select_city),
+                style = MaterialTheme.typography.h3,
+                color = TextWhite
+            )
             Icon(
                 painter = painterResource(id = R.drawable.ic_close),
-                tint = Color.White,
+                tint = TextWhite,
                 contentDescription = stringResource(id = R.string.close_icon_content),
-                modifier = Modifier.clickable {
-                    navController.popBackStack()
-                }
-            )
-            Text(
-                modifier = Modifier.padding(start = 25.dp),
-                text = stringResource(id = R.string.select_city),
-                style = MaterialTheme.typography.h4,
-                color = TextWhite
+                modifier = Modifier
+                    .clickable { navController.popBackStack() }
+
             )
         }
     }
