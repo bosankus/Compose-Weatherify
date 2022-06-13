@@ -1,6 +1,8 @@
 package bose.ankush.weatherify.presentation.home
 
+import android.app.Activity
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,6 +50,10 @@ fun HomeScreen(
     val context: Context = LocalContext.current
     val state: ForecastListState = viewModel.forecastState.value
     val detailedForecastList = viewModel.detailedForecastState.value
+
+    BackHandler() {
+        (context as? Activity)?.finish()
+    }
 
     // Has internet
     if (isNetworkAvailable(context)) {
