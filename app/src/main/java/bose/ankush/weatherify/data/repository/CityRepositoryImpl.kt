@@ -16,8 +16,9 @@ class CityRepositoryImpl @Inject constructor(
             .bufferedReader()
             .use { it.readText() }
 
-        val listCountryType = object : TypeToken<List<CityDto>>() {}.type
-        return Gson().fromJson(jsonString, listCountryType)
+        val cityNameListType = object : TypeToken<List<CityDto>>() {}.type
+
+        return Gson().fromJson<List<CityDto>?>(jsonString, cityNameListType).sortedBy { it.name }
     }
 
 }
