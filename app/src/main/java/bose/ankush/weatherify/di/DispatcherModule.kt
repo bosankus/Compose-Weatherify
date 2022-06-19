@@ -2,9 +2,6 @@ package bose.ankush.weatherify.di
 
 import bose.ankush.weatherify.dispatcher.AppDispatcher
 import bose.ankush.weatherify.dispatcher.DispatcherProvider
-import bose.ankush.weatherify.data.remote.ApiService
-import bose.ankush.weatherify.domain.repository.WeatherRepository
-import bose.ankush.weatherify.data.repository.WeatherRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -10,6 +10,7 @@ object Versions {
     // Plugins
     const val buildGradle = "7.1.3"
     const val navigation = "2.4.2"
+    const val secretPlugin = "2.0.1"
     const val benManes = "0.42.0"
 
     // Testing

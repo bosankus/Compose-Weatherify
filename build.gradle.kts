@@ -8,8 +8,9 @@ buildscript {
     }
 }// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    id ("com.android.application") version Versions.buildGradle apply false
-    id ("com.android.library") version Versions.buildGradle apply false
-    id ("org.jetbrains.kotlin.android") version Versions.kotlin apply false
-    id ("com.github.ben-manes.versions") version Versions.benManes
+    id("com.android.application") version Versions.buildGradle apply false
+    id("com.android.library") version Versions.buildGradle apply false
+    id("org.jetbrains.kotlin.android") version Versions.kotlin apply false
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version Versions.secretPlugin apply false
+    id("com.github.ben-manes.versions") version Versions.benManes
 }

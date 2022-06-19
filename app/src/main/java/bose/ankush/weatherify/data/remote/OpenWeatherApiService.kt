@@ -10,18 +10,18 @@ import retrofit2.http.Query
 Author: Ankush Bose
 Date: 05,May,2021
  **/
-interface ApiService {
+interface OpenWeatherApiService {
 
     @GET("/data/2.5/weather")
     suspend fun getTodaysWeatherReport(
         @Query("q") location: String,
-        @Query("APPID") AppId: String = BuildConfig.APPID
+        @Query("APPID") AppId: String = BuildConfig.OPEN_WEATHER_API
     ): WeatherDto
 
     @GET("/data/2.5/forecast")
     suspend fun getWeatherForecastList(
         @Query("q") location: String,
-        @Query("APPID") AppId: String = BuildConfig.APPID
+        @Query("APPID") AppId: String = BuildConfig.OPEN_WEATHER_API
     ): ForecastDto
 
 }
