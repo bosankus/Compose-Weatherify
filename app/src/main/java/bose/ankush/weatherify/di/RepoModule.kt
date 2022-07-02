@@ -2,6 +2,7 @@ package bose.ankush.weatherify.di
 
 import android.content.Context
 import bose.ankush.weatherify.data.remote.OpenWeatherApiService
+import bose.ankush.weatherify.data.remote.WeatherBitApiService
 import bose.ankush.weatherify.data.repository.CityRepositoryImpl
 import bose.ankush.weatherify.data.repository.WeatherRepositoryImpl
 import bose.ankush.weatherify.dispatcher.DispatcherProvider
@@ -22,9 +23,10 @@ object RepoModule {
     @Provides
     fun provideWeatherRepository(
         openWeatherApiService: OpenWeatherApiService,
+        weatherBitApiService: WeatherBitApiService,
         dispatcherProvider: DispatcherProvider
     ): WeatherRepository =
-        WeatherRepositoryImpl(openWeatherApiService, dispatcherProvider)
+        WeatherRepositoryImpl(openWeatherApiService, weatherBitApiService, dispatcherProvider)
 
     @Singleton
     @Provides
