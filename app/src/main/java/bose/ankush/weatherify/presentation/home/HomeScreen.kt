@@ -29,11 +29,11 @@ import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
+import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.home.component.FutureForecastListItem
 import bose.ankush.weatherify.presentation.home.component.ShowError
 import bose.ankush.weatherify.presentation.home.component.ShowLoading
 import bose.ankush.weatherify.presentation.home.component.TodaysForecastLayout
-import bose.ankush.weatherify.presentation.home.state.ForecastListState
 import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
 import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
 import bose.ankush.weatherify.presentation.ui.theme.RedError
@@ -48,7 +48,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val context: Context = LocalContext.current
-    val state: ForecastListState = viewModel.forecastState.value
+    val state: UIState<List<ForecastDto.ForecastList>> = viewModel.forecastState.value
     val detailedForecastList = viewModel.detailedForecastState.value
 
     BackHandler() {

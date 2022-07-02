@@ -11,7 +11,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -20,9 +19,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
+import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.navigation.Screen
+import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
-import bose.ankush.weatherify.presentation.cities.state.CityNameState
 import bose.ankush.weatherify.presentation.home.component.ShowError
 import bose.ankush.weatherify.presentation.home.component.ShowLoading
 import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
@@ -40,7 +40,7 @@ fun CitiesListScreen(
     )
 
     val context: Context = LocalContext.current
-    val state: CityNameState = viewModel.cityNameState.value
+    val state: UIState<List<CityName>> = viewModel.cityNameState.value
 
     // Has internet
     if (isNetworkAvailable(context)) {
@@ -58,7 +58,7 @@ fun CitiesListScreen(
                 .background(BackgroundGrey)
         )
         else ShowUIContainer(
-            state = state,
+            cityList = state.data ?: emptyList(),
             navController = navController
         )
     } else ShowError(
@@ -72,7 +72,7 @@ fun CitiesListScreen(
 
 @Composable
 private fun ShowUIContainer(
-    state: CityNameState,
+    cityList: List<CityName>,
     navController: NavController,
 ) {
     Box(
@@ -80,13 +80,13 @@ private fun ShowUIContainer(
             .background(BackgroundGrey)
             .fillMaxSize()
     ) {
-        Column{
+        Column {
             CityNameHeader(navController)
 
             LazyColumn {
-                if (state.names.isNotEmpty()) {
-                    items(state.names.size) {
-                        CityListItem(cityNameList = state.names, position = it) { _, name ->
+                if (cityList.isNotEmpty()) {
+                    items(cityList.size) {
+                        CityListItem(cityNameList = cityList, position = it) { _, name ->
                             navController.navigate(Screen.HomeScreen.withArgs(name))
                         }
                     }

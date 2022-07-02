@@ -102,7 +102,7 @@ fun CloudConditionAnimatedLayout() {
 
 @Composable
 fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
-    val weather = viewModel.todaysWeather.value.weather
+    val weather = viewModel.todaysWeather.value.data
 
     Column(
         verticalArrangement = Arrangement.Center,

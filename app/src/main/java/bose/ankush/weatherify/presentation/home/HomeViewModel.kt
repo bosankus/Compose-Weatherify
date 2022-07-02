@@ -6,16 +6,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.domain.model.AvgForecast
+import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
-import bose.ankush.weatherify.presentation.home.state.ForecastListState
-import bose.ankush.weatherify.presentation.home.state.TodaysWeatherState
+import bose.ankush.weatherify.presentation.UIState
 import com.bosankus.utilities.DateTimeUtils.getDayNameFromEpoch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -35,11 +34,11 @@ class HomeViewModel @Inject constructor(
     private val getForecastsUseCase: GetForecasts,
 ) : ViewModel() {
 
-    private var _todaysWeather = mutableStateOf(TodaysWeatherState())
-    val todaysWeather: State<TodaysWeatherState> = _todaysWeather
+    private var _todaysWeather = mutableStateOf(UIState<Weather>())
+    val todaysWeather: State<UIState<Weather>> = _todaysWeather
 
-    private val _forecastState = mutableStateOf(ForecastListState())
-    val forecastState: State<ForecastListState> = _forecastState
+    private val _forecastState = mutableStateOf(UIState<List<ForecastDto.ForecastList>>())
+    val forecastState: State<UIState<List<ForecastDto.ForecastList>>> = _forecastState
 
     private val _detailedForecastState = mutableStateOf(listOf<ForecastDto.ForecastList>())
     val detailedForecastState: State<List<ForecastDto.ForecastList>> = _detailedForecastState
@@ -64,11 +63,11 @@ class HomeViewModel @Inject constructor(
                 when (result) {
                     is ResultData.DoNothing -> {}
                     is ResultData.Loading -> _todaysWeather.value =
-                        TodaysWeatherState(isLoading = true)
+                        UIState(isLoading = true)
                     is ResultData.Success -> _todaysWeather.value =
-                        TodaysWeatherState(weather = result.data)
+                        UIState(data = result.data)
                     is ResultData.Failed -> _todaysWeather.value =
-                        TodaysWeatherState(error = UiText.DynamicText(result.message.toString()))
+                        UIState(error = UiText.DynamicText(result.message.toString()))
                 }
             }.launchIn(viewModelScope)
 
@@ -76,15 +75,15 @@ class HomeViewModel @Inject constructor(
                 when (result) {
                     is ResultData.DoNothing -> {}
                     is ResultData.Loading -> _forecastState.value =
-                        ForecastListState(isLoading = true)
+                        UIState(isLoading = true)
                     is ResultData.Success -> {
                         val responseList = result.data?.list ?: emptyList()
                         _forecastList.value = responseList
                         _cityName.value = result.data?.city?.name
-                        _forecastState.value = ForecastListState(forecasts = responseList)
+                        _forecastState.value = UIState(data = responseList)
                     }
                     else -> _forecastState.value =
-                        ForecastListState(error = UiText.StringResource(R.string.general_error_txt))
+                        UIState(error = UiText.StringResource(R.string.general_error_txt))
                 }
             }.launchIn(viewModelScope)
         }
