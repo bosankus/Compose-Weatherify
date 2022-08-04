@@ -5,7 +5,8 @@ object Versions {
     const val kotlin = "1.6.10"
 
     // Compose
-    const val composeVersion = "1.1.1"
+    const val composeVersion = "1.2.0"
+    const val composeMaterial3 = "1.0.0-alpha15"
 
     // Plugins
     const val buildGradle = "7.1.3"
@@ -54,4 +55,7 @@ object Versions {
 
     // Memory leak
     const val leakCanary = "2.9.1"
+
+    /*For Dialog module*/
+    const val composeRuntime = "1.2.0"
 }

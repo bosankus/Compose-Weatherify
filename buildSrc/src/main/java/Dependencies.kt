@@ -28,6 +28,7 @@ object Deps {
     val composeMaterial by lazy { "androidx.compose.material:material:${Versions.composeVersion}" }
     val composeUiTooling by lazy { "androidx.compose.ui:ui-tooling:${Versions.composeVersion}" }
     val composeUiToolingPreview by lazy { "androidx.compose.ui:ui-tooling-preview:${Versions.composeVersion}" }
+    val composeMaterial3 by lazy { "androidx.compose.material3:material3:${Versions.composeMaterial3}" }
 
     // Core
     val androidCore by lazy { "androidx.core:core-ktx:${Versions.androidCore}" }
@@ -63,4 +64,7 @@ object Deps {
 
     // Memory Leak
     val leakCanary by lazy { "com.squareup.leakcanary:leakcanary-android:${Versions.leakCanary}" }
+
+    /*For Dialog module*/
+    val composeRuntime by lazy { "androidx.compose.runtime:runtime:${Versions.composeVersion}" }
 }
