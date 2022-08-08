@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 
@@ -19,13 +20,14 @@ fun DialogBoxPreview() {
     val context = LocalContext.current
     val message = "This is sample message"
     val toastLength = Toast.LENGTH_SHORT
+    val dialogState = remember { mutableStateOf(false) }
     DialogBox(
         icon = R.drawable.ic_info,
         headingText = dialogHeading,
         descriptionText = dialogDesc,
-        negativeButtonText = "Deny",
-        positiveButtonText = "Allow",
-        positiveOnClick = { Toast.makeText(context, message, toastLength).show() },
-        openDialogBox = mutableStateOf(false),
+        dismissButtonText = "Deny",
+        confirmButtonText = "Allow",
+        confirmOnClick = { Toast.makeText(context, message, toastLength).show() },
+        dialogState = dialogState,
     )
 }

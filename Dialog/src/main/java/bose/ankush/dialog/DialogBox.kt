@@ -2,12 +2,7 @@ package bose.ankush.dialog
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -24,6 +20,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.SecureFlagPolicy
 import bose.ankush.dialog.theme.AccentColor
 import bose.ankush.dialog.theme.BackgroundGrey
 import bose.ankush.dialog.theme.DefaultCardBackgroundLightGrey
@@ -38,21 +36,27 @@ fun DialogBox(
     icon: Int = R.drawable.ic_info,
     headingText: String = "Dialog heading",
     descriptionText: String = "Dialog description text",
-    negativeButtonText: String = "Cancel",
-    positiveButtonText: String = "Allow",
-    positiveOnClick: () -> Unit,
-    openDialogBox: MutableState<Boolean>,
+    confirmButtonText: String = "Allow",
+    dismissButtonText: String = "Cancel",
+    confirmOnClick: () -> Unit,
+    dialogState: MutableState<Boolean>,
 ) {
-    Dialog(onDismissRequest = { openDialogBox.value = false }) {
+    Dialog(
+        onDismissRequest = { dialogState.value = false },
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
+        ),
+    ) {
         DialogBoxUi(
             modifier = modifier,
             icon = icon,
             headingText = headingText,
             descriptionText = descriptionText,
-            positiveOnClick = positiveOnClick,
-            negativeButtonText = negativeButtonText,
-            positiveButtonText = positiveButtonText,
-            openDialogBox = openDialogBox,
+            negativeButtonText = dismissButtonText,
+            positiveButtonText = confirmButtonText,
+            positiveOnClick = confirmOnClick,
+            dialogState = dialogState ,
         )
     }
 }
@@ -66,7 +70,7 @@ fun DialogBoxUi(
     negativeButtonText: String,
     positiveButtonText: String,
     positiveOnClick: () -> Unit,
-    openDialogBox: MutableState<Boolean>,
+    dialogState: MutableState<Boolean>,
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -117,7 +121,8 @@ fun DialogBoxUi(
                     .padding(top = 10.dp)
                     .background(DefaultCardBackgroundLightGrey)
             ) {
-                TextButton(onClick = { openDialogBox.value = false }) {
+                // Dismiss button
+                TextButton(onClick = { dialogState.value = false }) {
                     Text(
                         text = negativeButtonText,
                         fontWeight = FontWeight.Bold,
@@ -125,10 +130,8 @@ fun DialogBoxUi(
                         modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
                     )
                 }
-                TextButton(onClick = {
-                    positiveOnClick()
-                    openDialogBox.value = false
-                }) {
+                // Confirm button
+                TextButton(onClick = { positiveOnClick() }) {
                     Text(
                         text = positiveButtonText,
                         fontWeight = FontWeight.ExtraBold,
