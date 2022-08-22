@@ -23,8 +23,8 @@ import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.navigation.Screen
 import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
-import bose.ankush.weatherify.presentation.home.component.ShowError
-import bose.ankush.weatherify.presentation.home.component.ShowLoading
+import bose.ankush.weatherify.presentation.home.state.ShowError
+import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 

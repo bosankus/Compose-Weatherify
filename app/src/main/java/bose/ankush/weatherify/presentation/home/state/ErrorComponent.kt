@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.home.component
+package bose.ankush.weatherify.presentation.home.state
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon

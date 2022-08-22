@@ -18,8 +18,34 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.domain.model.AvgForecast
+import bose.ankush.weatherify.presentation.home.HomeViewModel
 import bose.ankush.weatherify.presentation.ui.theme.AccentColor
 import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
+
+@Composable
+fun FourDaysForecastLayout(
+    viewModel: HomeViewModel,
+) {
+    val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
+    Column(
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(id = R.string.forecast_heading_txt),
+            style = MaterialTheme.typography.subtitle1,
+            color = Color.White,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+        )
+        FutureForecastListItem(avgForecastList = fourDaysForecasts) {
+            val selectedDate = fourDaysForecasts[it].date
+            selectedDate?.let { date -> viewModel.getDayWiseDetailedForecast(date) }
+        }
+    }
+}
+
 
 @Composable
 fun FutureForecastListItem(
