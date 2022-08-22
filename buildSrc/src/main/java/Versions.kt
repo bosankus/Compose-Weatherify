@@ -2,14 +2,14 @@
 object Versions {
 
     // Kotlin
-    const val kotlin = "1.6.10"
+    const val kotlin = "1.7.0"
 
     // Compose
     const val composeVersion = "1.2.0"
     const val composeMaterial3 = "1.0.0-alpha15"
 
     // Plugins
-    const val buildGradle = "7.1.3"
+    const val buildGradle = "7.2.1"
     const val navigation = "2.5.0"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.42.0"
@@ -25,6 +25,7 @@ object Versions {
     const val mockitoInline = "4.6.1"
     const val mockitoNhaarman = "2.2.0"
     const val mockWebServer = "4.9.3"
+    const val mockk = "1.12.5"
 
     // Core
     const val androidCore = "1.7.0"

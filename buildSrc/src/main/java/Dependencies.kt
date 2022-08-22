@@ -16,6 +16,7 @@ object Deps {
     val mockitoInline by lazy { "org.mockito:mockito-inline:${Versions.mockitoInline}" }
     val mockitoNhaarman by lazy { "com.nhaarman.mockitokotlin2:mockito-kotlin:${Versions.mockitoNhaarman}" }
     val mockWebServer by lazy { "com.squareup.okhttp3:mockwebserver:${Versions.mockWebServer}" }
+    val mockk by lazy { "io.mockk:mockk:${Versions.mockk}" }
 
     // UI Testing
     val extJunit by lazy { "androidx.test.ext:junit:${Versions.extJunit}" }
@@ -39,6 +40,7 @@ object Deps {
     val inAppUpdate by lazy { "com.google.android.play:app-update:${Versions.googlePlayCore}" }
     val inAppUpdateKtx by lazy { "com.google.android.play:app-update-ktx:${Versions.googlePlayCore}" }
     val animatedNavigation by lazy { "com.google.accompanist:accompanist-navigation-animation:${Versions.accompanist}" }
+    val composePermission by lazy { "com.google.accompanist:accompanist-permissions:${Versions.accompanist}" }
 
     // Networking
     val okHttp3 by lazy { "com.squareup.okhttp3:okhttp:${Versions.okHttp3}" }

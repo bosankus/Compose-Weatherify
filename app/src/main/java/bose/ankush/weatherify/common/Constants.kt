@@ -5,6 +5,7 @@ Author: Ankush Bose
 Date: 05,May,2021
  **/
 
+/*General constants*/
 const val OPEN_WEATHER_BASE_URL = "https://api.openweathermap.org/"
 const val WEATHER_BIT_BASE_URL = "https://api.weatherbit.io/v2.0/"
 const val DEFAULT_CITY_NAME = "Kolkata"

@@ -2,6 +2,7 @@ package bose.ankush.weatherify.presentation.home
 
 import android.app.Activity
 import android.content.Context
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -28,6 +29,7 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.common.Extension.toCelsius
+import bose.ankush.weatherify.common.PermissionManager
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.home.component.FutureForecastListItem
@@ -40,6 +42,7 @@ import bose.ankush.weatherify.presentation.ui.theme.RedError
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 import coil.compose.AsyncImage
 import com.bosankus.utilities.DateTimeUtils
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @Composable
 fun HomeScreen(
@@ -141,12 +144,25 @@ private fun ShowUIContainer(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Preview
 @Composable
 private fun WeatherAlertSection(
     heading: String = "Sample heading",
     content: String = "And some little bit of lulu content her eto show the UI and test it. huha!"
 ) {
+    val context: Context = LocalContext.current
+
+    val permissionList = listOf(
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        android.Manifest.permission.ACCESS_FINE_LOCATION,
+    )
+
+    PermissionManager.RequestPermission(
+        permissions = permissionList,
+        onPermissionGranted = { Toast.makeText(context, "Permission granted", Toast.LENGTH_SHORT).show() }
+    )
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

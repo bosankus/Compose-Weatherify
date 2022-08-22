@@ -55,6 +55,7 @@ android {
 dependencies {
 
     api(project(":Utilities"))
+    api(project(":Dialog"))
 
     // Unit Testing
     testImplementation(Deps.junit)
@@ -87,6 +88,7 @@ dependencies {
     implementation(Deps.inAppUpdate)
     implementation(Deps.inAppUpdateKtx)
     implementation(Deps.animatedNavigation)
+    implementation(Deps.composePermission)
 
     // Networking
     implementation(Deps.okHttp3)
