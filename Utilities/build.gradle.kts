@@ -28,7 +28,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 }
 
@@ -37,6 +37,7 @@ dependencies {
     // Unit Testing
     testImplementation(Deps.junit)
     testImplementation(Deps.truth)
+    testImplementation(Deps.mockk)
 
     // Core
     implementation(Deps.androidCore)

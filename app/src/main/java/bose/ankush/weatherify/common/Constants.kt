@@ -11,3 +11,10 @@ const val WEATHER_BIT_BASE_URL = "https://api.weatherbit.io/v2.0/"
 const val DEFAULT_CITY_NAME = "Kolkata"
 const val KELVIN_CONSTANT = 273.15
 const val APP_UPDATE_REQ_CODE = 111
+
+/* Permission constants */
+/*private const val ACCESS_FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
+private const val ACCESS_COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION
+private const val PERMISSION_DENIED = 0
+private const val PERMISSION_GIVEN = 1
+private const val REQUEST_PERMISSION = 2*/
