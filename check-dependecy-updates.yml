@@ -1,0 +1,27 @@
+name: Check Dependency Updates
+on:
+  schedule:
+    - cron: "37 13 * * SAT"
+  workflow_dispatch:
+jobs:
+  dependency-updates:
+    runs-on: ubuntu-latest
+    steps:
+      # Removed some steps for brevity
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Check Dependency Updates
+        run: ./gradlew dependencyUpdates
+      - name: Log dependency update report
+        run: cat build/dependencyUpdates/dependency_update_report.txt
+      - name: 💌 Send email report
+        if: ${{ github.event_name == 'schedule' }}
+        uses: actions/github-script@v3
+        env:
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+        with:
+          script: |
+            const scriptPath = '/./.github/scripts/dependency-update-report-mail-sender.js'
+            const script = require(`${process.env.GITHUB_WORKSPACE}${scriptPath}`)
+            script({ })

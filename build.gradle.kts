@@ -16,3 +16,12 @@ plugins {
     id("com.diffplug.spotless") version Versions.spotlessVersion apply false
     id("com.github.ben-manes.versions") version Versions.benManes
 }
+
+tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("dependencyUpdates").configure {
+    checkForGradleUpdate = true
+    gradleReleaseChannel = com.github.benmanes.gradle.versions.updates.gradle.GradleReleaseChannel.RELEASE_CANDIDATE.id
+    revision = "integration" // See available revisions
+    outputFormatter = "plain" // xml and json available too
+    outputDir = "build/dependencyUpdates"
+    reportfileName = "dependency_update_report"
+}
