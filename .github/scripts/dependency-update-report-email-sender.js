@@ -8,7 +8,7 @@ module.exports = ({ }) => {
         secureConnection: false,
         tls: {
                     ciphers: 'SSLv3'
-                }
+                },
         auth: {
             user: `${process.env.MAIL_USERNAME}`, // I am using hotmail. You can use gmail, yandex etc.
             pass: `${process.env.MAIL_PASSWORD}` // You can use token too. I use mail and password
