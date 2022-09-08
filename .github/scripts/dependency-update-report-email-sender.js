@@ -3,18 +3,19 @@ module.exports = ({ }) => {
     execSync(`npm install nodemailer`) // Install nodemailer
     const nodemailer = require('nodemailer')
     const transporter = nodemailer.createTransport({
-        host: "smtp.secureserver.net", // Host for hotmail
+        host: "smtpout.secureserver.net", // Host for hotmail
         port: 465,
-        secureConnection: true,
+        secure: true,
+        secureConnection: false,
         tls: {
             ciphers: 'SSLv3'
         },
+        requireTLS: true,
+        debug: false,
         auth: {
             user: `${process.env.MAIL_USERNAME}`, // I am using hotmail. You can use gmail, yandex etc.
             pass: `${process.env.MAIL_PASSWORD}` // You can use token too. I use mail and password
-        },
-        requireTLS: true,
-        debug: false,
+        }
     });
     const report = require('fs').readFileSync('build/dependencyUpdates/dependency_update_report.txt', 'utf8')
 
@@ -28,9 +29,10 @@ module.exports = ({ }) => {
         text: `${report}`
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.log(error)
-        }
-    });
+    transporter.sendMail(mailOptions).then(() => {
+              console.log('Email sent successfully');
+           }).catch((err) => {
+              console.log('Failed to send email');
+              console.error(err);
+           });
 }
