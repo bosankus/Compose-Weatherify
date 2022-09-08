@@ -4,15 +4,17 @@ module.exports = ({ }) => {
     const nodemailer = require('nodemailer')
     const transporter = nodemailer.createTransport({
         host: "smtpout.secureserver.net", // Host for hotmail
-        port: 587,
+        port: 465,
         secureConnection: false,
+        tls: {
+                    ciphers: 'SSLv3'
+                }
         auth: {
             user: `${process.env.MAIL_USERNAME}`, // I am using hotmail. You can use gmail, yandex etc.
             pass: `${process.env.MAIL_PASSWORD}` // You can use token too. I use mail and password
         },
-        tls: {
-            ciphers: 'SSLv3'
-        }
+        requireTLS: true,
+        debug: false,
     });
     const report = require('fs').readFileSync('build/dependencyUpdates/dependency_update_report.txt', 'utf8')
 
