@@ -27,12 +27,14 @@ jobs:
         uses: devellany/send-mail@v1.0.2
         with:
           host: smtpout.secureserver.net
+          port: 465
           account: ${{secrets.MAIL_ADDRESS}}
           password: ${{secrets.MAIL_PASSWORD}}
           sender: Androidplay
           from: ${{secrets.MAIL_ADDRESS}}
           subject: Sample report
           body: Test email
+          contentType: text/plain
           to: ankushbose5@gmail.com
       - name: Share dependency update reports
         uses: actions/upload-artifact@v3
