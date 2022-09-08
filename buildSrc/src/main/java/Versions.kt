@@ -13,6 +13,8 @@ object Versions {
     const val navigation = "2.5.0"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.42.0"
+    const val spotlessVersion = "6.10.0"
+    const val ktLintVersion = "11.0.0"
 
     // Testing
     const val junit = "4.13.2"
