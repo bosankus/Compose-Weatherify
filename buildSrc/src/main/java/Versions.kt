@@ -47,7 +47,6 @@ object Versions {
     // Dependency Injection
     const val hilt = "2.42"
     const val hiltCompose = "1.0.0"
-    const val hiltAndroidxCompiler = "1.0.0"
 
     // Miscellaneous
     const val timber = "5.0.1"
