@@ -5,7 +5,7 @@ module.exports = ({ }) => {
     const transporter = nodemailer.createTransport({
         host: "smtp.secureserver.net", // Host for hotmail
         port: 465,
-        secureConnection: false,
+        secureConnection: true,
         tls: {
                     ciphers: 'SSLv3'
                 },
