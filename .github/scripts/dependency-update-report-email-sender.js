@@ -3,15 +3,8 @@ module.exports = ({ }) => {
     execSync(`npm install nodemailer`) // Install nodemailer
     const nodemailer = require('nodemailer')
     const transporter = nodemailer.createTransport({
-        host: "smtpout.secureserver.net", // Host for hotmail
-        port: 465,
-        secure: true,
-        secureConnection: false,
-        tls: {
-            ciphers: 'SSLv3'
-        },
-        requireTLS: true,
-        debug: false,
+        host: "smtpout.secureserver.net",
+        port: 587,
         auth: {
             user: `${process.env.MAIL_USERNAME}`, // I am using hotmail. You can use gmail, yandex etc.
             pass: `${process.env.MAIL_PASSWORD}` // You can use token too. I use mail and password
