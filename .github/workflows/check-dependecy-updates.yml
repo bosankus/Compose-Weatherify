@@ -24,17 +24,14 @@ jobs:
         run: cat build/dependencyUpdates/dependency_update_report.txt
       - name: Send email report
         if: ${{ github.event_name == 'schedule' }}
-        uses: actions/github-script@v6
-        env:
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+      - name: Send email
+        uses: devellany/send-mail@v1.0.2
         with:
-          script: |
-            const scriptPath = '/./.github/scripts/dependency-update-report-email-sender.js'
-            const script = require(`${process.env.GITHUB_WORKSPACE}${scriptPath}`)
-            script({ })
-      - name: Share dependency update reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: dependency-update-reports
-          path: build/dependencyUpdates
+          host: smtpout.secureserver.net
+          account: ${{secrets.MAIL_ADDRESS}}
+          password: ${{secrets.MAIL_PASSWORD}}
+          sender: Weatherify-MVVM
+          from: ${{secrets.MAIL_ADDRESS}}
+          subject: Dependency update report
+          body: file://./.github/scripts/dependency-update-report-email-sender.js
+          to: ankushbose5@gmail.com
