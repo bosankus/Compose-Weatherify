@@ -103,9 +103,8 @@ dependencies {
 
     // Dependency Injection
     implementation(Deps.hilt)
-    kapt(Deps.hiltDaggerAndroidCompiler)
-    kapt(Deps.hiltAndroidxCompiler)
     implementation(Deps.hiltNavigationCompose)
+    kapt(Deps.hiltDaggerAndroidCompiler)
 
     // Miscellaneous
     implementation(Deps.timber)
