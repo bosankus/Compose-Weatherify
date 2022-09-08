@@ -14,14 +14,14 @@ jobs:
         run: ./gradlew dependencyUpdates
       - name: Log dependency update report
         run: cat build/dependencyUpdates/dependency_update_report.txt
-      - name: 💌 Send email report
+      - name: Send email report
         if: ${{ github.event_name == 'schedule' }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v6
         env:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
         with:
           script: |
-            const scriptPath = '/./.github/scripts/dependency-update-report-mail-sender.js'
+            const scriptPath = '/./.github/scripts/dependency-update-report-email-sender.js'
             const script = require(`${process.env.GITHUB_WORKSPACE}${scriptPath}`)
             script({ })
