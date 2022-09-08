@@ -25,9 +25,6 @@ jobs:
       - name: Send email report
         if: ${{ github.event_name == 'schedule' }}
         uses: devellany/send-mail@v1.0.2
-        env:
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
         with:
           host: smtpout.secureserver.net
           account: ${{secrets.MAIL_ADDRESS}}
