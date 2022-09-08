@@ -3,7 +3,7 @@ module.exports = ({ }) => {
     execSync(`npm install nodemailer`) // Install nodemailer
     const nodemailer = require('nodemailer')
     const transporter = nodemailer.createTransport({
-        host: "smtpout.secureserver.net", // Host for hotmail
+        host: "smtp.secureserver.net", // Host for hotmail
         port: 465,
         secureConnection: false,
         tls: {
