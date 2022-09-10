@@ -39,13 +39,13 @@ fun DialogBox(
     confirmButtonText: String = "Allow",
     dismissButtonText: String = "Cancel",
     confirmOnClick: () -> Unit,
-    dialogState: MutableState<Boolean>,
+    closeOnClick: MutableState<Boolean>,
 ) {
     Dialog(
-        onDismissRequest = { dialogState.value = false },
+        onDismissRequest = { closeOnClick.value },
         properties = DialogProperties(
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
         ),
     ) {
         DialogBoxUi(
@@ -56,7 +56,7 @@ fun DialogBox(
             negativeButtonText = dismissButtonText,
             positiveButtonText = confirmButtonText,
             positiveOnClick = confirmOnClick,
-            dialogState = dialogState ,
+            negativeOnClick = closeOnClick ,
         )
     }
 }
@@ -70,7 +70,7 @@ fun DialogBoxUi(
     negativeButtonText: String,
     positiveButtonText: String,
     positiveOnClick: () -> Unit,
-    dialogState: MutableState<Boolean>,
+    negativeOnClick: MutableState<Boolean>,
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
@@ -122,7 +122,7 @@ fun DialogBoxUi(
                     .background(DefaultCardBackgroundLightGrey)
             ) {
                 // Dismiss button
-                TextButton(onClick = { dialogState.value = false }) {
+                TextButton(onClick = { negativeOnClick.value = false }) {
                     Text(
                         text = negativeButtonText,
                         fontWeight = FontWeight.Bold,
