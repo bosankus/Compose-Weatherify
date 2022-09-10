@@ -1,5 +1,9 @@
 package bose.ankush.weatherify.common
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.domain.model.AvgForecast
 import com.bosankus.utilities.DateTimeUtils
@@ -61,6 +65,13 @@ object Extension {
             DateTimeUtils.getTodayDateInCalenderFormat().get(Calendar.DAY_OF_MONTH + 1)
         val differenceOfDate = DateTimeUtils.getDayWiseDifferenceFromToday(this)
         return (givenDateNumber > todayDateNumber && givenYear == currentYear && (differenceOfDate <= 4))
+    }
+
+    fun Context.openAppSystemSettings() {
+        startActivity(Intent().apply {
+            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            data = Uri.fromParts("package", packageName, null)
+        })
     }
 
 }

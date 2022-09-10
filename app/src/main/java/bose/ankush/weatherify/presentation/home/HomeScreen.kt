@@ -27,6 +27,7 @@ import bose.ankush.weatherify.presentation.home.component.TodaysForecastLayout
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @Composable
 fun HomeScreen(
@@ -79,6 +80,7 @@ fun HomeScreen(
 }
 
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun ShowUIContainer(
     viewModel: HomeViewModel,
