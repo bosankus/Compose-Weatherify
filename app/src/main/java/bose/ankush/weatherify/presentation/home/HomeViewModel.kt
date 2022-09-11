@@ -12,12 +12,14 @@ import bose.ankush.weatherify.common.UiText
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.domain.model.Weather
+import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
 import bose.ankush.weatherify.presentation.UIState
 import com.bosankus.utilities.DateTimeUtils.getDayNameFromEpoch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -32,6 +34,7 @@ Date: 05,May,2021
 class HomeViewModel @Inject constructor(
     private val getTodaysWeatherUseCase: GetTodaysWeatherReport,
     private val getForecastsUseCase: GetForecasts,
+    private val getAirQuality: GetAirQuality
 ) : ViewModel() {
 
     private var _todaysWeather = mutableStateOf(UIState<Weather>())
@@ -49,11 +52,9 @@ class HomeViewModel @Inject constructor(
     private val _forecastList: MutableState<List<ForecastDto.ForecastList>> =
         mutableStateOf(listOf())
 
-    /*init {
-        fetchWeatherDetails(DEFAULT_CITY_NAME)
-    }*/
-
-
+    /**
+     * Fetch weather report from network
+     */
     fun fetchWeatherDetails(cityName: String) {
         viewModelScope.launch {
             val todaysWeather = async { getTodaysWeatherUseCase(cityName) }
@@ -88,6 +89,24 @@ class HomeViewModel @Inject constructor(
             }.launchIn(viewModelScope)
         }
     }
+
+
+    /**
+     * Fetch air quality report from network
+     */
+    fun fetchAirQuality(lat: String, lang: String) {
+        viewModelScope.launch {
+            getAirQuality(lat, lang).collect { result ->
+                when(result) {
+                    is ResultData.DoNothing -> {}
+                    is ResultData.Loading -> {}
+                    is ResultData.Success -> {}
+                    is ResultData.Failed -> {}
+                }
+            }
+        }
+    }
+
 
 
     fun getFourDaysAvgForecast(): List<AvgForecast> {

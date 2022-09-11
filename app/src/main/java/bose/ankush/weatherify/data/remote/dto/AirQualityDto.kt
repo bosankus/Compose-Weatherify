@@ -49,6 +49,7 @@ data class AirQualityDto(
 }
 
 fun AirQualityDto.toAirQuality(): AirQuality = AirQuality(
+    cityName = cityName,
     aqi = data[0].aqi,
     co = data[0].co,
     no2 = data[0].no2,
