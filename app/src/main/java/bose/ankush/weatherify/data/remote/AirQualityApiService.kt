@@ -11,7 +11,7 @@ import retrofit2.http.Query
 Author: Ankush Bose
 Date: 05,May,2021
  **/
-interface WeatherBitApiService {
+interface AirQualityApiService {
 
     @GET("current/airquality")
     suspend fun getCurrentAirQuality(
