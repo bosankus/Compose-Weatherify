@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.domain.model
 
 data class AirQuality(
-    val cityName: String?,
+    val latLang: String?,
     val aqi: Int?,
     val co: Int?,
     val no2: Double?,

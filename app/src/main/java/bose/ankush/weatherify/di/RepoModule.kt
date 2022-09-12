@@ -1,8 +1,8 @@
 package bose.ankush.weatherify.di
 
 import android.content.Context
-import bose.ankush.weatherify.data.remote.OpenWeatherApiService
-import bose.ankush.weatherify.data.remote.AirQualityApiService
+import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
+import bose.ankush.weatherify.data.remote.api.AirQualityApiService
 import bose.ankush.weatherify.data.repository.CityRepositoryImpl
 import bose.ankush.weatherify.data.repository.WeatherRepositoryImpl
 import bose.ankush.weatherify.dispatcher.DispatcherProvider

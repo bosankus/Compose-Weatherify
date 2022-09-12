@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.data.remote
+package bose.ankush.weatherify.data.remote.api
 
 import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.data.remote.dto.AirQualityDto
@@ -13,11 +13,11 @@ Date: 05,May,2021
  **/
 interface AirQualityApiService {
 
-    @GET("current/airquality")
+    @GET("air_pollution")
     suspend fun getCurrentAirQuality(
         @Query("lat") latitude: String,
         @Query("lon") longitude: String,
-        @Query("key") AppId: String = BuildConfig.WEATHERBIT_API
+        @Query("appid") AppId: String = BuildConfig.OPEN_WEATHER_API
     ): AirQualityDto
 
 }

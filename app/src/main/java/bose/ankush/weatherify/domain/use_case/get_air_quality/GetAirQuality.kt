@@ -20,7 +20,7 @@ class GetAirQuality @Inject constructor(
         try {
             emit(ResultData.Loading)
             val response: AirQuality = weatherRepository.getAirQualityReport(lat, lang).toAirQuality()
-            if (response.cityName.isNullOrEmpty()) emit(ResultData.Success(response))
+            if (response.latLang.isNullOrEmpty()) emit(ResultData.Success(response))
             emit(ResultData.Failed(UiText.StringResource(resId = R.string.general_error_txt)))
         } catch (e: HttpException) {
             val message = errorResponse(e.code())
