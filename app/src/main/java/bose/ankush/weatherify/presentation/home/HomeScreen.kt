@@ -101,7 +101,7 @@ private fun ShowUIContainer(
                 )
             }
 
-            item { AirQualityLayout() }
+            item { AirQualityLayout(viewModel.locationManager) }
 
             item { FourDaysForecastLayout(viewModel = viewModel) }
 

@@ -49,20 +49,20 @@ object LocationPermissionManager {
                 Manifest.permission.ACCESS_COARSE_LOCATION -> {
                     when {
                         it.status.isGranted -> {
-                            /* Permission has been granted by the user.
+                            /** Permission has been granted by the user.
                                Hence getting the current lat, lang.
                             */
                             actionPermissionGranted()
                         }
                         it.status.shouldShowRationale -> {
-                            /* Happens if a user denies the permission two times.
+                            /** Happens if a user denies the permission two times.
                                Hence needs to show why permission is required.
                                On action button click request permission.
                              */
                             MandatoryPermissionDescriptionContent(canClose = true) { actionPermissionDenied() }
                         }
                         !it.status.isGranted && !it.status.shouldShowRationale -> {
-                            /* If the permission is denied and the should not show rationale
+                            /** If the permission is denied and the should not show rationale
                                Hence we can only allow the permission manually through app settings.
                                On action button click go to settings page
                              */
@@ -73,20 +73,20 @@ object LocationPermissionManager {
                 Manifest.permission.ACCESS_FINE_LOCATION -> {
                     when {
                         it.status.isGranted -> {
-                            /* Permission has been granted by the user.
+                            /** Permission has been granted by the user.
                                Hence getting the current lat, lang.
                             */
                             actionPermissionGranted()
                         }
                         it.status.shouldShowRationale -> {
-                            /* Happens if a user denies the permission two times.
+                            /** Happens if a user denies the permission two times.
                                Hence needs to show why permission is required.
                              */
                             MandatoryPermissionDescriptionContent(canClose = true) { actionPermissionDenied() }
 
                         }
                         !it.status.isGranted && !it.status.shouldShowRationale -> {
-                            /* If the permission is denied and the should not show rationale
+                            /** If the permission is denied and the should not show rationale
                                Hence we can only allow the permission manually through app settings
                              */
                             MandatoryPermissionDescriptionContent(canClose = true) { actionPermissionDenied() }

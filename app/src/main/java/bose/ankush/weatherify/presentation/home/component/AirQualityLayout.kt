@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -14,35 +13,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import bose.ankush.weatherify.R
-import bose.ankush.weatherify.common.Extension.openAppSystemSettings
-import bose.ankush.weatherify.common.LocationPermissionManager
+import bose.ankush.weatherify.common.Coordinates
+import bose.ankush.weatherify.common.LocationManager
 import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
-import bose.ankush.weatherify.presentation.ui.theme.RedError
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import timber.log.Timber
 
 val showUIForAirQualityLayout = mutableStateOf(false)
 
 @ExperimentalPermissionsApi
-@Preview
 @Composable
-fun AirQualityLayout() {
-    // Getting local context
+fun AirQualityLayout(locationManager: LocationManager) {
     val context: Context = LocalContext.current
 
-    // Checking location permission to show data
-    LocationPermissionManager.RequestPermission(
-        actionPermissionGranted = { showUIForAirQualityLayout.value = true },
-        actionPermissionDenied = { context.openAppSystemSettings() }
-    )
+    val coordinates: Coordinates = locationManager.getLatLang(context = context)
 
-    // Setting up UI
-    ShowUI()
+    if (coordinates.lat != 0.0 && coordinates.long != 0.0) {
+        Timber.d("Current location: $coordinates")
+        ShowUI()
+    }
 }
 
 
@@ -79,13 +71,13 @@ fun ShowUI() {
                 )
             }
 
-            Icon(
+            /*Icon(
                 painter = painterResource(id = R.drawable.ic_alert),
                 contentDescription = "Play icon button",
                 modifier = Modifier
                     .size(46.dp)
                     .padding(start = 16.dp),
                 tint = RedError
-            )
+            )*/
         }
 }

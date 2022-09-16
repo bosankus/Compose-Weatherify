@@ -37,6 +37,7 @@ object Deps {
     val navigationCompose by lazy { "androidx.navigation:navigation-compose:${Versions.navigation}" }
     val inAppUpdate by lazy { "com.google.android.play:app-update:${Versions.googlePlayCore}" }
     val inAppUpdateKtx by lazy { "com.google.android.play:app-update-ktx:${Versions.googlePlayCore}" }
+    val googlePlayLocation by lazy { "com.google.android.gms:play-services-location:${Versions.googlePlayLocation}" }
     val animatedNavigation by lazy { "com.google.accompanist:accompanist-navigation-animation:${Versions.accompanist}" }
     val composePermission by lazy { "com.google.accompanist:accompanist-permissions:${Versions.accompanist}" }
 
