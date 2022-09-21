@@ -1,7 +1,6 @@
 package bose.ankush.weatherify.di
 
 import android.content.Context
-import bose.ankush.weatherify.common.LocationManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.Module
@@ -18,11 +17,4 @@ object LocationModule {
     @Provides
     fun provideFusedLocationProviderClient(context: Context): FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
-
-    @Singleton
-    @Provides
-    fun provideLocationManager(
-        fusedLocationProviderClient: FusedLocationProviderClient
-    ): LocationManager =
-        LocationManager(fusedLocationProviderClient)
 }
