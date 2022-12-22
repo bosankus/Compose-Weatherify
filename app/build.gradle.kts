@@ -112,6 +112,9 @@ dependencies {
     implementation(Deps.lottieCompose)
     implementation(Deps.coilCompose)
 
+    // Debug bridge
+    implementation(Deps.stetho)
+
     // Memory leak
     debugImplementation(Deps.leakCanary)
 }
