@@ -36,8 +36,8 @@ jobs:
           body: Test email
           contentType: text/plain
           to: ankushbose5@gmail.com
-          attachments: ${{secrets.MAIL_USERNAME}}
-          priority: high
+          attachments: build/dependencyUpdates/dependency_update_report.txt
+          priority: low
       - name: Share dependency update reports
         uses: actions/upload-artifact@v3
         with:
