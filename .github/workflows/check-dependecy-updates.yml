@@ -7,7 +7,6 @@ jobs:
   dependency-updates:
     runs-on: ubuntu-latest
     steps:
-      # Removed some steps for brevity
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Use Java 11
@@ -24,18 +23,21 @@ jobs:
         run: cat build/dependencyUpdates/dependency_update_report.txt
       - name: Send email report
         if: ${{ github.event_name == 'schedule' }}
-        uses: devellany/send-mail@v1.0.2
+        uses: dawidd6/action-send-mail@v3.7.1
         with:
-          host: smtpout.secureserver.net
-          port: 465
-          account: ${{secrets.MAIL_USERNAME}}
+          server_address: smtpout.secureserver.net
+          server_port: 465
+          secure: true
+          username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
-          sender: Androidplay
-          from: ${{secrets.MAIL_USERNAME}}
-          subject: Sample report
+          from: Androidplay
+          subject: Dep update | Weatherify MVVM
+          in_reply_to: ${{secrets.MAIL_USERNAME}}
           body: Test email
           contentType: text/plain
           to: ankushbose5@gmail.com
+          attachments: ${{secrets.MAIL_USERNAME}}
+          priority: high
       - name: Share dependency update reports
         uses: actions/upload-artifact@v3
         with:
