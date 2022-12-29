@@ -25,7 +25,7 @@ jobs:
         if: ${{ github.event_name == 'schedule' }}
         uses: dawidd6/action-send-mail@v3.7.1
         with:
-          server_address: smtpout.secureserver.net
+          server_address: smtp.gmail.com
           server_port: 465
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
