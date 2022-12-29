@@ -22,15 +22,15 @@ jobs:
       - name: Log dependency update report
         run: cat build/dependencyUpdates/dependency_update_report.txt
       - name: Send email report
-        if: always()
+        if: ${{ github.event_name == 'schedule' }}
         uses: dawidd6/action-send-mail@v3.7.1
         with:
           server_address: smtpout.secureserver.net
           server_port: 465
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
-          to: ankushbose5@gmail.com
-          from: Androidplay
+          to: ankush@androidplay.in
+          from: Weatherify MVVM
           subject: Dep update | Weatherify MVVM
           body: Test email
           priority: low
