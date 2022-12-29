@@ -22,18 +22,17 @@ jobs:
       - name: Log dependency update report
         run: cat build/dependencyUpdates/dependency_update_report.txt
       - name: Send email report
-        if: ${{ github.event_name == 'schedule' }}
+        if: always()
         uses: dawidd6/action-send-mail@v3.7.1
         with:
           server_address: smtpout.secureserver.net
           server_port: 465
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
+          to: ankushbose5@gmail.com
           from: Androidplay
           subject: Dep update | Weatherify MVVM
-          in_reply_to: ${{secrets.MAIL_USERNAME}}
           body: Test email
-          to: ankushbose5@gmail.com
           priority: low
       - name: Share dependency update reports
         uses: actions/upload-artifact@v3
