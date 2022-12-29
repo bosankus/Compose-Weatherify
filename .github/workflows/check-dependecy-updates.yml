@@ -27,14 +27,12 @@ jobs:
         with:
           server_address: smtpout.secureserver.net
           server_port: 465
-          secure: true
           username: ${{secrets.MAIL_USERNAME}}
           password: ${{secrets.MAIL_PASSWORD}}
           from: Androidplay
           subject: Dep update | Weatherify MVVM
           in_reply_to: ${{secrets.MAIL_USERNAME}}
           body: Test email
-          contentType: text/plain
           to: ankushbose5@gmail.com
           priority: low
       - name: Share dependency update reports
