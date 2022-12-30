@@ -32,7 +32,7 @@ jobs:
       # Then start the emulator and run the Instrumentation tests!
       - android/start-emulator-and-run-tests:
           test-command: ./gradlew connectedDebugAndroidTest
-          system-image: system-images;android-25;google_apis;x86
+          system-image: system-images;android-26;google_apis;x86
 
       # And finally run the release build
       - run:
@@ -43,7 +43,6 @@ jobs:
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
-  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
-    # Inside the workflow, you define the jobs you want to run.
+  Running test cases:
     jobs:
       - build-and-test
