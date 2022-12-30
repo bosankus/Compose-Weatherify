@@ -28,6 +28,6 @@ fun DialogBoxPreview() {
         dismissButtonText = "Deny",
         confirmButtonText = "Allow",
         confirmOnClick = { Toast.makeText(context, message, toastLength).show() },
-        dialogState = dialogState,
+        closeOnClick = dialogState,
     )
 }
