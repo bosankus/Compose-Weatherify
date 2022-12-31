@@ -36,6 +36,9 @@ class HomeViewModelTest {
 
     private lateinit var viewModel: HomeViewModel
 
+    /**
+     * this method is helps to initiate mockk and setup mocked objects before tests are run
+     */
     @Before
     fun setup() {
         MockKAnnotations.init(this)
@@ -43,12 +46,19 @@ class HomeViewModelTest {
         viewModel = HomeViewModel(getTodaysWeatherUseCase, getForecastsUseCase)
     }
 
+    /**
+     * this method runs at the end of tests to unmockk all mocked objects
+     */
     @After
     fun teardown() {
         unmockkAll()
     }
 
-
+    /**
+     * testing main method to fetch weather details.
+     * this tests that the use cases are working as expected and returning series of flows
+     * contains loading, success and failure states
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `fetchWeatherDetails, calls uses cases and fetch flow data successfully`() =

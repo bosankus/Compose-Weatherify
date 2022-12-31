@@ -7,6 +7,10 @@ import kotlinx.coroutines.test.*
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
+/**
+ * MainCoroutineRule installs a TestCoroutineDispatcher for Disptachers.Main.
+ * It extends TestScope, we can launch coroutine directly with this.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainCoroutineRule(
     private val dispatcher: CoroutineDispatcher = StandardTestDispatcher(),
