@@ -21,7 +21,7 @@ object Versions {
     const val extJunit = "1.1.3"
     const val truth = "1.1.3"
     const val turbine = "0.8.0"
-    const val coroutineTest = "1.6.3"
+    const val coroutineTest = "1.6.4"
     const val coreTesting = "2.1.0"
     const val espresso = "3.4.0"
     const val mockitoInline = "4.6.1"
