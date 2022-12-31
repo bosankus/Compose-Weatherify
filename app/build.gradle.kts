@@ -66,6 +66,7 @@ dependencies {
     testImplementation(Deps.mockitoInline)
     testImplementation(Deps.mockitoNhaarman)
     testImplementation(Deps.mockWebServer)
+    testImplementation(Deps.mockk)
 
     // UI Testing
     androidTestImplementation(Deps.extJunit)
