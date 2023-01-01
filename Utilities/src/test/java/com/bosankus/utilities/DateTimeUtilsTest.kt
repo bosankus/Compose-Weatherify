@@ -71,14 +71,14 @@ class DateTimeUtilsTest {
     @Test
     fun `verify that getTodayDateInCalenderFormat returns correct year number`() {
         val todaysDate = DateTimeUtils.getTodayDateInCalenderFormat().get(Calendar.YEAR)
-        assertThat(todaysDate).isEqualTo(2022)
+        assertThat(todaysDate).isEqualTo(2023)
     }
 
     /**
      * this test verifies getDayNameFromEpoch returns correct day name as per given epoch
      */
     @Test
-    fun `verfiy that getDayNameFromEpoch returns correct day name`() {
+    fun `verify that getDayNameFromEpoch returns correct day name`() {
         val dayName = DateTimeUtils.getDayNameFromEpoch(now.toInt())
         assertThat(dayName).isEqualTo("Thursday")
     }
