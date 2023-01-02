@@ -18,6 +18,7 @@ import bose.ankush.weatherify.presentation.UIState
 import com.bosankus.utilities.DateTimeUtils.getDayNameFromEpoch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -64,7 +65,7 @@ class HomeViewModel @Inject constructor(
                     is ResultData.Failed -> _todaysWeather.value =
                         UIState(error = UiText.DynamicText(result.message.toString()))
                 }
-            }
+            }.launchIn(viewModelScope)
 
             forecast.await().onEach { result ->
                 when (result) {
@@ -80,7 +81,7 @@ class HomeViewModel @Inject constructor(
                     else -> _forecastState.value =
                         UIState(error = UiText.StringResource(R.string.general_error_txt))
                 }
-            }
+            }.launchIn(viewModelScope)
         }
     }
 
