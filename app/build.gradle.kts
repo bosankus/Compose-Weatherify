@@ -19,7 +19,7 @@ android {
         versionCode = ConfigData.versionCode
         versionName = ConfigData.versionName
         multiDexEnabled = ConfigData.multiDexEnabled
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "bose.ankush.weatherify.presentation.HiltTestRunner"
     }
 
     buildTypes {
@@ -72,7 +72,10 @@ dependencies {
     androidTestImplementation(Deps.extJunit)
     androidTestImplementation(Deps.espressoCore)
     androidTestImplementation(Deps.espressoContrib)
-    androidTestImplementation(Deps.composeUiTest)
+    androidTestImplementation(Deps.composeUiTestJunit4)
+    androidTestImplementation(Deps.hiltTesting)
+    androidTestImplementation(Deps.composeUiTestManifest)
+    kaptAndroidTest(Deps.hiltDaggerAndroidCompiler)
 
     // Compose
     implementation(Deps.composeUi)
