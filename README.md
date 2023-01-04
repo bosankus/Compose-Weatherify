@@ -5,6 +5,10 @@
 # Weatherify-MVVM-Clean-Architecture
 An android application for cosuming REST api from https://openweathermap.org and show today's average temperature, along with next 4 days average temperature in recyclerview.
 
+Download latest version of the App
+
+[![Download APK](https://img.shields.io/badge/download-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)]( )
+
 ### Build status
 [![CircleCI](https://dl.circleci.com/insights-snapshot/gh/bosankus/Weatherify-MVVM-Clean-Architecture/develop/Weatherify-pipeline/badge.svg?window=24h)](https://app.circleci.com/insights/github/bosankus/Weatherify-MVVM-Clean-Architecture/workflows/Weatherify-pipeline/overview?branch=develop&reporting-window=last-24-hours&insights-snapshot=true)
 
