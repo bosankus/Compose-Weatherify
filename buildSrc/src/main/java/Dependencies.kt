@@ -1,6 +1,7 @@
 // Plugins
 object BuildPlugins {
     val buildGradle by lazy { "com.android.tools.build:gradle:${Versions.buildGradle}" }
+    val kotlinGradlePlugin by lazy { "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}" }
 }
 
 // Dependencies
@@ -68,4 +69,7 @@ object Deps {
 
     /*For Dialog module*/
     val composeRuntime by lazy { "androidx.compose.runtime:runtime:${Versions.composeVersion}" }
+
+    /*For Payment module*/
+    val razorPay by lazy { "com.razorpay:checkout:${Versions.razorPay}" }
 }
