@@ -1,8 +1,7 @@
-package bose.ankush.weatherify.presentation
+package bose.ankush.weatherify.helper
 
 import bose.ankush.weatherify.WeatherifyApplicationCore
 import dagger.hilt.android.testing.CustomTestApplication
 
-@SuppressWarnings("Unused symbol")
 @CustomTestApplication(WeatherifyApplicationCore::class)
 interface HiltTestApplication
