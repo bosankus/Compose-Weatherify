@@ -2,8 +2,10 @@ package bose.ankush.weatherify.data.remote
 
 import bose.ankush.weatherify.MockWebServerUtil.enqueueResponse
 import bose.ankush.weatherify.data.remote.dto.ForecastTestResponse
+import bose.ankush.weatherify.data.remote.dto.toAirQuality
 import bose.ankush.weatherify.data.remote.dto.toForecastTestResponse
 import bose.ankush.weatherify.data.remote.dto.toWeather
+import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.domain.model.Weather
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.runBlocking
@@ -22,8 +24,6 @@ class OpenWeatherApiServiceTest {
 
     private lateinit var client: OkHttpClient
     private lateinit var openWeatherApiService: OpenWeatherApiService
-    private lateinit var weatherBitApiService: WeatherBitApiService
-
 
     @Before
     fun setup() {
@@ -41,13 +41,6 @@ class OpenWeatherApiServiceTest {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenWeatherApiService::class.java)
-
-        weatherBitApiService = Retrofit.Builder()
-            .baseUrl(mockWebServer.url("/"))
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(WeatherBitApiService::class.java)
     }
 
     @After
@@ -95,5 +88,27 @@ class OpenWeatherApiServiceTest {
                 e.printStackTrace()
             }
         }
-}
 
+    @Test
+    fun `getCurrentAirQuality should fetch response successfully with 200 code`() = runBlocking {
+        try {
+            mockWebServer.enqueueResponse("air_quality.json", 200)
+            val actualResponse = openWeatherApiService.getCurrentAirQuality(
+                latitude = "22.48",
+                longitude = "88.40"
+            ).toAirQuality()
+            val expectedResponse = AirQuality(
+                aqi = 5,
+                co = 1441.96,
+                no2 = 40.44,
+                o3 = 34.69,
+                so2 = 16.45,
+                pm10 = 237.01,
+                pm25 = 165.02
+            )
+            assertThat(actualResponse).isEqualTo(expectedResponse)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+}
