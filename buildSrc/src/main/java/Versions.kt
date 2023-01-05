@@ -6,7 +6,7 @@ object Versions {
 
     // Compose
     const val composeVersion = "1.2.0"
-    const val composeMaterial3 = "1.0.0-alpha15"
+    const val composeMaterial3 = "1.0.1"
 
     // Plugins
     const val buildGradle = "7.2.1"
@@ -60,4 +60,7 @@ object Versions {
 
     /*For Dialog module*/
     const val composeRuntime = "1.2.0"
+
+    /*For Payment module*/
+    const val razorPay = "1.6.26"
 }
