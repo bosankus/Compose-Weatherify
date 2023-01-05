@@ -49,10 +49,6 @@ class HomeViewModel @Inject constructor(
     private val _forecastList: MutableState<List<ForecastDto.ForecastList>> =
         mutableStateOf(listOf())
 
-    /*init {
-        fetchWeatherDetails(DEFAULT_CITY_NAME)
-    }*/
-
 
     fun fetchWeatherDetails(cityName: String) {
         viewModelScope.launch {

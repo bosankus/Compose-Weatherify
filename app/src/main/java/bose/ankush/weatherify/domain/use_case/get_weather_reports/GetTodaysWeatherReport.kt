@@ -4,7 +4,6 @@ import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
 import bose.ankush.weatherify.common.errorResponse
 import bose.ankush.weatherify.data.remote.dto.toWeather
-import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import kotlinx.coroutines.flow.Flow

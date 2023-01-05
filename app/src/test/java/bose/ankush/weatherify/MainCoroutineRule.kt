@@ -8,20 +8,21 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
 /**
- * Document for this class is yet to be written
+ * MainCoroutineRule installs a TestCoroutineDispatcher for Disptachers.Main.
+ * It extends TestScope, we can launch coroutine directly with this.
  */
-
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainCoroutineRule(
-    private val dispatcher: CoroutineDispatcher = StandardTestDispatcher()
+    private val dispatcher: CoroutineDispatcher = StandardTestDispatcher(),
+    val testScope: TestScope = TestScope(dispatcher)
 ) : TestWatcher() {
 
-    override fun starting(description: Description?) {
+    override fun starting(description: Description) {
         super.starting(description)
         Dispatchers.setMain(dispatcher)
     }
 
-    override fun finished(description: Description?) {
+    override fun finished(description: Description) {
         super.finished(description)
         Dispatchers.resetMain()
     }
