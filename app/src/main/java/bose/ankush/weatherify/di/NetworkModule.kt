@@ -1,11 +1,9 @@
 package bose.ankush.weatherify.di
 
 import bose.ankush.weatherify.common.OPEN_WEATHER_BASE_URL
-import bose.ankush.weatherify.common.WEATHER_BIT_BASE_URL
 import bose.ankush.weatherify.data.remote.OpenWeatherApiService
 import bose.ankush.weatherify.data.remote.LoggingInterceptor.logBodyInterceptor
 import bose.ankush.weatherify.data.remote.NetworkInterceptor.onlineInterceptor
-import bose.ankush.weatherify.data.remote.WeatherBitApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -55,18 +53,5 @@ object NetworkModule {
             .client(okHttpClient)
             .build()
             .create(OpenWeatherApiService::class.java)
-    }
-
-    @Provides
-    fun getWeatherBitApiService(
-        converterFactory: Converter.Factory,
-        okHttpClient: OkHttpClient
-    ): WeatherBitApiService {
-        return Retrofit.Builder()
-            .baseUrl(WEATHER_BIT_BASE_URL)
-            .addConverterFactory(converterFactory)
-            .client(okHttpClient)
-            .build()
-            .create(WeatherBitApiService::class.java)
     }
 }
