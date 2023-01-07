@@ -41,6 +41,7 @@ object Deps {
     val inAppUpdateKtx by lazy { "com.google.android.play:app-update-ktx:${Versions.googlePlayCore}" }
     val animatedNavigation by lazy { "com.google.accompanist:accompanist-navigation-animation:${Versions.accompanist}" }
     val composePermission by lazy { "com.google.accompanist:accompanist-permissions:${Versions.accompanist}" }
+    val constrainLayout by lazy { "androidx.constraintlayout:constraintlayout:${Versions.constrainLayout}" }
 
     // Networking
     val okHttp3 by lazy { "com.squareup.okhttp3:okhttp:${Versions.okHttp3}" }
