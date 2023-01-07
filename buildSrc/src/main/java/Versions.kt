@@ -32,10 +32,11 @@ object Versions {
     // Core
     const val androidCore = "1.7.0"
     const val appCompat = "1.4.1"
-    const val androidMaterial = "1.5.0"
+    const val androidMaterial = "1.7.0"
     const val lifecycle = "2.4.1"
     const val googlePlayCore = "2.0.0"
     const val accompanist = "0.24.13-rc"
+    const val constrainLayout = "2.1.4"
 
     // Networking
     const val okHttp3 = "4.9.3"
