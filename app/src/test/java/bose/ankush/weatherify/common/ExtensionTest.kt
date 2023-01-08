@@ -24,8 +24,8 @@ class ExtensionTest {
 
     @Test
     fun toCelsius_WhenKelvinTempProvided_ReturnsCelsiusString() {
-        val farTemp = 67.0
-        val celsiusTemp = farTemp.toCelsius()
-        assertThat(celsiusTemp).isEqualTo("19")
+        val kelvinTemp = 289.12
+        val celsiusTemp = kelvinTemp.toCelsius()
+        assertThat(celsiusTemp).isEqualTo("16")
     }
 }
