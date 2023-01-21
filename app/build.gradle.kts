@@ -8,6 +8,7 @@ plugins {
     id("com.github.ben-manes.versions")
 }
 
+@Suppress("UnstableApiUsage")
 android {
     compileSdk = ConfigData.compileSdkVersion
     buildToolsVersion = ConfigData.buildToolsVersion
