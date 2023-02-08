@@ -24,7 +24,7 @@ object Versions {
     const val coroutineTest = "1.6.4"
     const val coreTesting = "2.1.0"
     const val espresso = "3.5.1"
-    const val mockitoInline = "4.11.0"
+    const val mockitoInline = "5.0.0"
     const val mockitoNhaarman = "2.2.0"
     const val mockWebServer = "4.9.3"
     const val mockk = "1.13.3"
