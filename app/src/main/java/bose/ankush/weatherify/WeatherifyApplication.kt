@@ -1,6 +1,5 @@
 package bose.ankush.weatherify
 
-import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
@@ -10,7 +9,7 @@ Date: 05,May,2021
  **/
 
 @HiltAndroidApp
-class WeatherifyApplication: Application() {
+class WeatherifyApplication: WeatherifyApplicationCore() {
 
     override fun onCreate() {
         super.onCreate()

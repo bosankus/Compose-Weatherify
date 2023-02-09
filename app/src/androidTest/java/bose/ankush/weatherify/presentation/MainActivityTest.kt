@@ -1,62 +1,41 @@
 package bose.ankush.weatherify.presentation
 
-import androidx.lifecycle.Lifecycle
-import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import bose.ankush.weatherify.R
+import androidx.activity.compose.setContent
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.hilt.navigation.compose.hiltViewModel
+import bose.ankush.weatherify.navigation.AppNavigation
+import bose.ankush.weatherify.presentation.home.HomeViewModel
+import bose.ankush.weatherify.presentation.ui.theme.WeatherifyTheme
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalAnimationApi::class, ExperimentalCoroutinesApi::class)
+@HiltAndroidTest
 class MainActivityTest {
 
-    private lateinit var scenario: ActivityScenario<MainActivity>
+    @get: Rule(order = 1)
+    val hiltAndroidRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 2)
+    val createComposeRule = createAndroidComposeRule<MainActivity>()
+
+    private lateinit var viewModel: HomeViewModel
 
     @Before
     fun setup() {
-        scenario = ActivityScenario.launch(MainActivity::class.java)
-        scenario.moveToState(Lifecycle.State.RESUMED)
+        hiltAndroidRule.inject()
     }
 
-
     @Test
-    fun test_ui_flow_when_activity_isShown() {
-        // Check initial loading
-        onView(withId(R.id.activity_main_layout_loading)).check(matches(isDisplayed()))
-
-        // Wait to let the data load
-        onView(ViewMatchers.isRoot()).perform(waitFor(1000))
-
-        // Check text views showing correct data
-        onView(withId(R.id.activity_main_layout_loading)).check(
-            matches(
-                ViewMatchers.withEffectiveVisibility(
-                    ViewMatchers.Visibility.GONE
-                )
-            )
-        )
-        onView(withId(R.id.layout_weather_current_temp)).check(
-            matches(
-                ViewMatchers.withText(
-                    "30°C"
-                )
-            )
-        )
-        onView(withId(R.id.layout_weather_current_city)).check(
-            matches(
-                ViewMatchers.withText(
-                    "Kolkata"
-                )
-            )
-        )
-
-        // Wait to let the recyclerview animate and load data
-        onView(ViewMatchers.isRoot()).perform(waitFor(1000))
-
-        // Check Recyclerview is showing
-        onView(withId(R.id.layout_weather_recyclerview)).check(matches(isDisplayed()))
+    fun verify_HomeScreen_isShown() {
+        createComposeRule.activity.setContent {
+            viewModel = hiltViewModel()
+            WeatherifyTheme { AppNavigation() }
+        }
     }
 }

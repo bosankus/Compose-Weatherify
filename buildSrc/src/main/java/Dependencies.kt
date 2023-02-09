@@ -20,7 +20,8 @@ object Deps {
     val extJunit by lazy { "androidx.test.ext:junit:${Versions.extJunit}" }
     val espressoCore by lazy { "androidx.test.espresso:espresso-core:${Versions.espresso}" }
     val espressoContrib by lazy { "androidx.test.espresso:espresso-contrib:${Versions.espresso}" }
-    val composeUiTest by lazy { "androidx.compose.ui:ui-test-junit4:${Versions.composeVersion}" }
+    val composeUiTestJunit4 by lazy { "androidx.compose.ui:ui-test-junit4:${Versions.composeVersion}" }
+    val composeUiTestManifest by lazy { "androidx.compose.ui:ui-test-manifest:${Versions.composeVersion}" }
 
     // Compose
     val composeUi by lazy { "androidx.compose.ui:ui:${Versions.composeVersion}" }
@@ -54,6 +55,7 @@ object Deps {
 
     // Dependency Injection
     val hilt by lazy { "com.google.dagger:hilt-android:${Versions.hilt}" }
+    val hiltTesting by lazy { "com.google.dagger:hilt-android-testing:${Versions.hilt}" }
     val hiltDaggerAndroidCompiler by lazy { "com.google.dagger:hilt-android-compiler:${Versions.hilt}" }
     val hiltNavigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.hiltCompose}" }
 

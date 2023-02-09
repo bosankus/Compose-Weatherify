@@ -17,7 +17,7 @@ Date: 06,May,2021
 
 object Extension {
 
-    fun Double.toCelsius(): String = (this - KELVIN_CONSTANT).roundToInt().toString()
+    fun Double.toCelsius(): String = (((this - 32) * 5)/9).roundToInt().toString()
 
     fun List<ForecastDto.ForecastList>.getForecastListForNext4Days():
             List<AvgForecast> {

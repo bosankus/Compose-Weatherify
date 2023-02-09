@@ -1,0 +1,56 @@
+{
+  "cod": "200",
+  "message": 0,
+  "cnt": 1,
+  "list": [
+    {
+      "dt": 1672606800,
+      "main": {
+        "temp": 292.16,
+        "feels_like": 291.32,
+        "temp_min": 291.71,
+        "temp_max": 292.16,
+        "pressure": 1017,
+        "sea_level": 1017,
+        "grnd_level": 1016,
+        "humidity": 46,
+        "temp_kf": 0.45
+      },
+      "weather": [
+        {
+          "id": 800,
+          "main": "Clear",
+          "description": "clear sky",
+          "icon": "01n"
+        }
+      ],
+      "clouds": {
+        "all": 0
+      },
+      "wind": {
+        "speed": 2.46,
+        "deg": 81,
+        "gust": 2.88
+      },
+      "visibility": 10000,
+      "pop": 0,
+      "sys": {
+        "pod": "n"
+      },
+      "dt_txt": "2023-01-01 21:00:00"
+    }
+  ],
+  "city": {
+    "id": 1275004,
+    "name": "Kolkata",
+    "coord": {
+      "lat": 22.48,
+      "lon": 88.4
+    },
+    "country": "IN",
+    "population": 4631392,
+    "timezone": 19800,
+    "sunrise": 1672620384,
+    "sunset": 1672659212
+  }
+}

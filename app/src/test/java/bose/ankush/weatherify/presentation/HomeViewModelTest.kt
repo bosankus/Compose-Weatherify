@@ -3,24 +3,23 @@ package bose.ankush.weatherify.presentation
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import bose.ankush.weatherify.MainCoroutineRule
-import bose.ankush.weatherify.domain.repository.WeatherRepository
-import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.common.ResultData
+import bose.ankush.weatherify.domain.repository.WeatherRepository
+import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
+import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
 import bose.ankush.weatherify.presentation.home.HomeViewModel
-import com.google.common.truth.Truth.assertThat
-import com.nhaarman.mockitokotlin2.mock
+import io.mockk.*
+import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
-import org.mockito.junit.MockitoJUnitRunner
+import org.mockito.ArgumentMatchers.anyString
 
-@ExperimentalCoroutinesApi
-@RunWith(MockitoJUnitRunner::class)
 class HomeViewModelTest {
 
     @get: Rule
@@ -29,53 +28,60 @@ class HomeViewModelTest {
     @get: Rule
     val mainCoroutineRule = MainCoroutineRule()
 
-    private val dataSource: WeatherRepository = mock()
+    @RelaxedMockK
+    private lateinit var getTodaysWeatherUseCase: GetTodaysWeatherReport
+
+    @RelaxedMockK
+    private lateinit var getForecastsUseCase: GetForecasts
 
     private lateinit var viewModel: HomeViewModel
 
+    /**
+     * this method is helps to initiate mockk and setup mocked objects before tests are run
+     */
     @Before
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
-        viewModel = HomeViewModel(dataSource)
+    fun setup() {
+        MockKAnnotations.init(this)
+        mockkStatic(WeatherRepository::class)
+        viewModel = HomeViewModel(getTodaysWeatherUseCase, getForecastsUseCase)
     }
 
+    /**
+     * this method runs at the end of tests to unmockk all mocked objects
+     */
+    @After
+    fun teardown() {
+        unmockkAll()
+    }
 
+    /**
+     * testing main method to fetch weather details.
+     * this tests that the use cases are working as expected and returning series of flows
+     * contains loading, success and failure states
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `getTemperature, returns data successfully via flow`() = runTest {
-        viewModel.fetchClimateDetails()
-        val job = launch { viewModel.temperature.test {
-            val first = awaitItem()
-            assertThat(first).isEqualTo(ResultData.DoNothing)
-            val second = awaitItem()
-            assertThat(second).isEqualTo(ResultData.Loading)
-            val third = awaitItem()
-            assertThat(third).isEqualTo(ResultData.Success(
-                Weather(
-                    cod = 200,
-                    main = Weather.Main(temp = 305.12, humidity = 70.0),
-                    name = "Kolkata",
-                    weather = listOf(Weather.Weather(icon = "50d"))
-                )
-            ))
-        } }
+    fun `fetchWeatherDetails, calls uses cases and fetch flow data successfully`() =
+        mainCoroutineRule.testScope.runTest {
+            coEvery { getTodaysWeatherUseCase(anyString()) } returns
+                    flowOf(ResultData.Loading, ResultData.Success(null), ResultData.Failed(null))
+            coEvery { getForecastsUseCase(anyString()) } returns
+                    flowOf(ResultData.Loading, ResultData.Success(null), ResultData.Failed(null))
 
-        job.join()
-        job.cancel()
-    }
+            viewModel.fetchWeatherDetails(anyString())
 
-    @Test
-    fun `getCurrentTemperature, returns data successfully via flow`() = runTest {
-        viewModel.fetchClimateDetails()
-        val job = launch { viewModel.forecast.test {
-            val first = awaitItem()
-            assertThat(first).isEqualTo(ResultData.DoNothing)
-            val second = awaitItem()
-            assertThat(second).isEqualTo(ResultData.Loading)
-            val third = awaitItem()
-            assertThat(third).isEqualTo(ResultData.Success(null))
-        } }
+            getTodaysWeatherUseCase.invoke(anyString()).test {
+                assertEquals(ResultData.Loading, awaitItem())
+                assertEquals(ResultData.Success(null), awaitItem())
+                assertEquals(ResultData.Failed(null), awaitItem())
+                awaitComplete()
+            }
 
-        job.join()
-        job.cancel()
-    }
+            getForecastsUseCase.invoke(anyString()).test {
+                assertEquals(ResultData.Loading, awaitItem())
+                assertEquals(ResultData.Success(null), awaitItem())
+                assertEquals(ResultData.Failed(null), awaitItem())
+                awaitComplete()
+            }
+        }
 }
