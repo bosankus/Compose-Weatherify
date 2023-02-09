@@ -27,7 +27,7 @@ import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGr
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.Priority
 import timber.log.Timber
 
 @SuppressLint("MissingPermission")
@@ -46,7 +46,7 @@ fun AirQualityLayout(viewModel: HomeViewModel) {
      */
     LocationPermissionManager.RequestPermission(
         actionPermissionGranted = {
-            viewModel.fusedLocation.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
+            viewModel.fusedLocation.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                 .addOnSuccessListener { location ->
                     if (location != null) {
                         latLang.value = latLang.value.copy(first = location.latitude)
@@ -59,7 +59,7 @@ fun AirQualityLayout(viewModel: HomeViewModel) {
     )
 
     /**
-     * checker to not make network call when location details are not yet fetched
+     * If location details are fetched, then only make data request
      * 0.0 is default value for both latitude and longitude.
      */
     if (latLang.value.first != 0.0 && latLang.value.second != 0.0)
