@@ -24,10 +24,10 @@ object Versions {
     const val coroutineTest = "1.6.4"
     const val coreTesting = "2.1.0"
     const val espresso = "3.5.1"
-    const val mockitoInline = "5.0.0"
+    const val mockitoInline = "5.1.1"
     const val mockitoNhaarman = "2.2.0"
     const val mockWebServer = "4.9.3"
-    const val mockk = "1.13.3"
+    const val mockk = "1.13.4"
 
     // Core
     const val androidCore = "1.9.0"
@@ -49,7 +49,7 @@ object Versions {
     const val coroutines = "1.6.4"
 
     // Dependency Injection
-    const val hilt = "2.44.2"
+    const val hilt = "2.45"
     const val hiltCompose = "1.0.0"
 
     // Miscellaneous
