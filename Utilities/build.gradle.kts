@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
 }
 
+@Suppress("UnstableApiUsage")
 android {
     compileSdk = ConfigData.compileSdkVersion
 
@@ -30,6 +31,8 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
+
+    namespace = "com.bosankus.utilities"
 }
 
 dependencies {
