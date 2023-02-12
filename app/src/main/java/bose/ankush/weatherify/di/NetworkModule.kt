@@ -1,9 +1,9 @@
 package bose.ankush.weatherify.di
 
 import bose.ankush.weatherify.common.OPEN_WEATHER_BASE_URL
-import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.remote.LoggingInterceptor.logBodyInterceptor
 import bose.ankush.weatherify.data.remote.NetworkInterceptor.onlineInterceptor
+import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

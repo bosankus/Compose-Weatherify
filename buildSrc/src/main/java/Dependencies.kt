@@ -1,6 +1,7 @@
 // Plugins
 object BuildPlugins {
     val buildGradle by lazy { "com.android.tools.build:gradle:${Versions.buildGradle}" }
+    val kotlinGradlePlugin by lazy { "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}" }
 }
 
 // Dependencies
@@ -41,6 +42,7 @@ object Deps {
     val googlePlayLocation by lazy { "com.google.android.gms:play-services-location:${Versions.googlePlayLocation}" }
     val animatedNavigation by lazy { "com.google.accompanist:accompanist-navigation-animation:${Versions.accompanist}" }
     val composePermission by lazy { "com.google.accompanist:accompanist-permissions:${Versions.accompanist}" }
+    val constrainLayout by lazy { "androidx.constraintlayout:constraintlayout:${Versions.constrainLayout}" }
 
     // Networking
     val okHttp3 by lazy { "com.squareup.okhttp3:okhttp:${Versions.okHttp3}" }
@@ -69,4 +71,7 @@ object Deps {
 
     /*For Dialog module*/
     val composeRuntime by lazy { "androidx.compose.runtime:runtime:${Versions.composeVersion}" }
+
+    /*For Payment module*/
+    val razorPay by lazy { "com.razorpay:checkout:${Versions.razorPay}" }
 }

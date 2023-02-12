@@ -55,8 +55,8 @@ android {
 
 dependencies {
 
-    api(project(":Utilities"))
-    api(project(":Dialog"))
+    api(project(":utilities"))
+    api(project(":dialog"))
 
     // Unit Testing
     testImplementation(Deps.junit)
