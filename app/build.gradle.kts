@@ -8,6 +8,7 @@ plugins {
     id("com.github.ben-manes.versions")
 }
 
+@Suppress("UnstableApiUsage")
 android {
     compileSdk = ConfigData.compileSdkVersion
     buildToolsVersion = ConfigData.buildToolsVersion
@@ -115,9 +116,6 @@ dependencies {
     implementation(Deps.timber)
     implementation(Deps.lottieCompose)
     implementation(Deps.coilCompose)
-
-    // Debug bridge
-    implementation(Deps.stetho)
 
     // Memory leak
     debugImplementation(Deps.leakCanary)

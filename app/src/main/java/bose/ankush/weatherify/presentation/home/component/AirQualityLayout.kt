@@ -46,7 +46,10 @@ fun AirQualityLayout(viewModel: HomeViewModel) {
      */
     LocationPermissionManager.RequestPermission(
         actionPermissionGranted = {
-            viewModel.fusedLocation.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+            viewModel.fusedLocationProviderClient.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                null
+            )
                 .addOnSuccessListener { location ->
                     if (location != null) {
                         latLang.value = latLang.value.copy(first = location.latitude)
@@ -86,7 +89,7 @@ fun ShowUI(aq: AirQuality) {
             .fillMaxWidth()
     ) {
         Text(
-            text = aq.aqi?.let { getAQIAnalysedText(it) } ?: "Something went wrong",
+            text = aq.aqi?.let { getAQIAnalysedText(it) }?.first ?: "Something went wrong",
             style = MaterialTheme.typography.body1,
             color = TextWhite,
             overflow = TextOverflow.Ellipsis,

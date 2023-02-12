@@ -1,6 +1,5 @@
 package bose.ankush.weatherify.data.repository
 
-import bose.ankush.weatherify.data.remote.api.AirQualityApiService
 import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.remote.dto.AirQualityDto
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
@@ -17,7 +16,6 @@ Date: 05,May,2021
 
 class WeatherRepositoryImpl @Inject constructor(
     private val openWeatherApiService: OpenWeatherApiService,
-    private val airQualityApiService: AirQualityApiService,
     private val dispatcher: DispatcherProvider,
 ) : WeatherRepository {
 
@@ -31,8 +29,7 @@ class WeatherRepositoryImpl @Inject constructor(
     // TODO: Implementation is dependent on lat,lang
     override suspend fun getAirQualityReport(lat: String, lang: String): AirQualityDto =
         withContext(dispatcher.io) {
-            airQualityApiService.getCurrentAirQuality(latitude = lat, longitude = lang)
+            openWeatherApiService.getCurrentAirQuality(latitude = lat, longitude = lang)
         }
 }
-
 

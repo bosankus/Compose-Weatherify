@@ -10,12 +10,15 @@ import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
+import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.domain.model.Weather
+import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
 import bose.ankush.weatherify.presentation.UIState
 import com.bosankus.utilities.DateTimeUtils.getDayNameFromEpoch
+import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.launchIn
@@ -32,10 +35,12 @@ Date: 05,May,2021
 class HomeViewModel @Inject constructor(
     private val getTodaysWeatherUseCase: GetTodaysWeatherReport,
     private val getForecastsUseCase: GetForecasts,
+    private val getAirQuality: GetAirQuality,
+    val fusedLocationProviderClient: FusedLocationProviderClient
 ) : ViewModel() {
 
-    private var _todaysWeather = mutableStateOf(UIState<Weather>())
-    val todaysWeather: State<UIState<Weather>> = _todaysWeather
+    private var _todayWeather = mutableStateOf(UIState<Weather>())
+    val todayWeather: State<UIState<Weather>> = _todayWeather
 
     private val _forecastState = mutableStateOf(UIState<List<ForecastDto.ForecastList>>())
     val forecastState: State<UIState<List<ForecastDto.ForecastList>>> = _forecastState
@@ -43,26 +48,46 @@ class HomeViewModel @Inject constructor(
     private val _detailedForecastState = mutableStateOf(listOf<ForecastDto.ForecastList>())
     val detailedForecastState: State<List<ForecastDto.ForecastList>> = _detailedForecastState
 
+    private val _airQuality = mutableStateOf(UIState<AirQuality>())
+    val airQuality: State<UIState<AirQuality>> = _airQuality
+
     private val _cityName: MutableState<String?> = mutableStateOf("")
     val cityName: State<String?> = _cityName
 
     private val _forecastList: MutableState<List<ForecastDto.ForecastList>> =
         mutableStateOf(listOf())
 
+    fun fetchAirQuality(lat: Double, lang: Double) {
+        viewModelScope.launch {
+            getAirQuality(lat, lang).collect { result ->
+                when (result) {
+                    is ResultData.DoNothing -> {}
+                    is ResultData.Loading -> _airQuality.value = UIState(isLoading = true)
+                    is ResultData.Success -> {
+                        val airQualityReport = result.data
+                        if (airQualityReport != null) _airQuality.value = UIState(data = airQualityReport)
+                    }
+                    is ResultData.Failed -> {
+                        _airQuality.value = UIState(error = UiText.DynamicText(result.message.toString()))
+                    }
+                }
+            }
+        }
+    }
 
     fun fetchWeatherDetails(cityName: String) {
         viewModelScope.launch {
-            val todaysWeather = async { getTodaysWeatherUseCase(cityName) }
+            val todayWeather = async { getTodaysWeatherUseCase(cityName) }
             val forecast = async { getForecastsUseCase(cityName) }
 
-            todaysWeather.await().onEach { result ->
+            todayWeather.await().onEach { result ->
                 when (result) {
                     is ResultData.DoNothing -> {}
-                    is ResultData.Loading -> _todaysWeather.value =
+                    is ResultData.Loading -> _todayWeather.value =
                         UIState(isLoading = true)
-                    is ResultData.Success -> _todaysWeather.value =
+                    is ResultData.Success -> _todayWeather.value =
                         UIState(data = result.data)
-                    is ResultData.Failed -> _todaysWeather.value =
+                    is ResultData.Failed -> _todayWeather.value =
                         UIState(error = UiText.DynamicText(result.message.toString()))
                 }
             }.launchIn(viewModelScope)

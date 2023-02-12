@@ -67,9 +67,6 @@ object Deps {
     // Memory Leak
     val leakCanary by lazy { "com.squareup.leakcanary:leakcanary-android:${Versions.leakCanary}" }
 
-    // Debug bridge
-    val stetho by lazy { "com.facebook.stetho:stetho:${Versions.stetho}" }
-
     /*For Dialog module*/
     val composeRuntime by lazy { "androidx.compose.runtime:runtime:${Versions.composeVersion}" }
 }

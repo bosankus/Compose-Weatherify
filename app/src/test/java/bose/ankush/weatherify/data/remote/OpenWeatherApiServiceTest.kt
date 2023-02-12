@@ -1,6 +1,7 @@
 package bose.ankush.weatherify.data.remote
 
 import bose.ankush.weatherify.MockWebServerUtil.enqueueResponse
+import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.remote.dto.ForecastTestResponse
 import bose.ankush.weatherify.data.remote.dto.toForecastTestResponse
 import bose.ankush.weatherify.data.remote.dto.toWeather
@@ -22,7 +23,6 @@ class OpenWeatherApiServiceTest {
 
     private lateinit var client: OkHttpClient
     private lateinit var openWeatherApiService: OpenWeatherApiService
-    private lateinit var weatherBitApiService: WeatherBitApiService
 
 
     @Before
@@ -41,13 +41,6 @@ class OpenWeatherApiServiceTest {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenWeatherApiService::class.java)
-
-        weatherBitApiService = Retrofit.Builder()
-            .baseUrl(mockWebServer.url("/"))
-            .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(WeatherBitApiService::class.java)
     }
 
     @After

@@ -35,6 +35,7 @@ object Versions {
     const val androidMaterial = "1.5.0"
     const val lifecycle = "2.4.1"
     const val googlePlayCore = "2.0.0"
+    const val googlePlayLocation = "21.0.1"
     const val accompanist = "0.24.13-rc"
 
     // Networking

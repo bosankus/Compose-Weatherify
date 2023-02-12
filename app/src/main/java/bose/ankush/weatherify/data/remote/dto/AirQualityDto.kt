@@ -8,7 +8,7 @@ data class AirQualityDto(
     @SerializedName("coord")
     val coord: Coord,
     @SerializedName("list")
-    val list: List<Quality>
+    val data: List<AirData>
 ) {
     data class Coord(
         @SerializedName("lat")
@@ -17,7 +17,7 @@ data class AirQualityDto(
         val lon: Double
     )
 
-    data class Quality(
+    data class AirData(
         @SerializedName("components")
         val components: Components,
         @SerializedName("dt")
@@ -51,13 +51,12 @@ data class AirQualityDto(
     }
 }
 
-fun AirQualityDto.toAirQuality(): AirQuality = AirQuality(
-    latLang = "${coord.lat}, ${coord.lon}",
-    aqi = list[0].main.aqi,
-    co = list[0].components.co.toInt(),
-    no2 = list[0].components.no2,
-    o3 = list[0].components.o3,
-    so2 = list[0].components.so2,
-    pm10 = list[0].components.pm10,
-    pm25 = list[0].components.pm25
+internal fun AirQualityDto.toAirQuality(): AirQuality = AirQuality(
+    aqi = data[0].main.aqi,
+    co = data[0].components.co,
+    no2 = data[0].components.no2,
+    o3 = data[0].components.o3,
+    so2 = data[0].components.o3,
+    pm10 = data[0].components.pm10,
+    pm25 = data[0].components.pm25
 )

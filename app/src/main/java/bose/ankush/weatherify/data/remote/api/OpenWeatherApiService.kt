@@ -1,6 +1,7 @@
 package bose.ankush.weatherify.data.remote.api
 
 import bose.ankush.weatherify.BuildConfig
+import bose.ankush.weatherify.data.remote.dto.AirQualityDto
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.data.remote.dto.WeatherDto
 import retrofit2.http.GET
@@ -12,16 +13,22 @@ Date: 05,May,2021
  **/
 interface OpenWeatherApiService {
 
-    @GET("weather")
+    @GET("data/2.5/weather")
     suspend fun getTodaysWeatherReport(
         @Query("q") location: String,
         @Query("APPID") AppId: String = BuildConfig.OPEN_WEATHER_API
     ): WeatherDto
 
-    @GET("forecast")
+    @GET("data/2.5/forecast")
     suspend fun getWeatherForecastList(
         @Query("q") location: String,
         @Query("APPID") AppId: String = BuildConfig.OPEN_WEATHER_API
     ): ForecastDto
 
+    @GET("/data/2.5/air_pollution")
+    suspend fun getCurrentAirQuality(
+        @Query("lat") latitude: String,
+        @Query("lon") longitude: String,
+        @Query("appid") AppId: String = BuildConfig.OPEN_WEATHER_API
+    ): AirQualityDto
 }
