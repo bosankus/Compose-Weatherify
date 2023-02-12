@@ -39,7 +39,7 @@ fun HomeScreen(
     val state: UIState<List<ForecastDto.ForecastList>> = viewModel.forecastState.value
     val detailedForecastList = viewModel.detailedForecastState.value
 
-    BackHandler() {
+    BackHandler {
         (context as? Activity)?.finish()
     }
 
@@ -101,7 +101,7 @@ private fun ShowUIContainer(
                 )
             }
 
-            item { AirQualityLayout() }
+            item { AirQualityLayout(viewModel = viewModel) }
 
             item { FourDaysForecastLayout(viewModel = viewModel) }
 

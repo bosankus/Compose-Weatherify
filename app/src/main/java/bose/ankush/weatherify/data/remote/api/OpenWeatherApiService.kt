@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.data.remote
+package bose.ankush.weatherify.data.remote.api
 
 import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.data.remote.dto.AirQualityDto

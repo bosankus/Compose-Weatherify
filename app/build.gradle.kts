@@ -92,6 +92,7 @@ dependencies {
     implementation(Deps.navigationCompose)
     implementation(Deps.inAppUpdate)
     implementation(Deps.inAppUpdateKtx)
+    implementation(Deps.googlePlayLocation)
     implementation(Deps.animatedNavigation)
     implementation(Deps.composePermission)
 

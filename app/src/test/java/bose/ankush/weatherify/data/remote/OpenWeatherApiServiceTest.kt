@@ -2,6 +2,7 @@ package bose.ankush.weatherify.data.remote
 
 import bose.ankush.weatherify.MainCoroutineRule
 import bose.ankush.weatherify.MockWebServerUtil.enqueueResponse
+import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.remote.dto.ForecastTestResponse
 import bose.ankush.weatherify.data.remote.dto.toAirQuality
 import bose.ankush.weatherify.data.remote.dto.toForecastTestResponse

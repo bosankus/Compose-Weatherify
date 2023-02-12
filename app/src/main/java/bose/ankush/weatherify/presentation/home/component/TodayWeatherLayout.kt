@@ -92,7 +92,7 @@ fun CloudConditionAnimatedLayout() {
     )
 
     LottieAnimation(
-        composition = compositionResult.value, progress = progress,
+        composition = compositionResult.value, progress = { progress },
         modifier = Modifier
             .padding(all = 20.dp)
             .size(120.dp)
@@ -102,7 +102,7 @@ fun CloudConditionAnimatedLayout() {
 
 @Composable
 fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
-    val weather = viewModel.todaysWeather.value.data
+    val weather = viewModel.todayWeather.value.data
 
     Column(
         verticalArrangement = Arrangement.Center,

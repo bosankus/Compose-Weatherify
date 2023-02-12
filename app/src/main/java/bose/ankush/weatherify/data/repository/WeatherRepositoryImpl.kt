@@ -1,6 +1,6 @@
 package bose.ankush.weatherify.data.repository
 
-import bose.ankush.weatherify.data.remote.OpenWeatherApiService
+import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.remote.dto.AirQualityDto
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.data.remote.dto.WeatherDto
