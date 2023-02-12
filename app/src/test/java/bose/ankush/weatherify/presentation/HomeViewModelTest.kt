@@ -5,9 +5,11 @@ import app.cash.turbine.test
 import bose.ankush.weatherify.MainCoroutineRule
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.domain.repository.WeatherRepository
+import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
 import bose.ankush.weatherify.presentation.home.HomeViewModel
+import com.google.android.gms.location.FusedLocationProviderClient
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,10 +31,16 @@ class HomeViewModelTest {
     val mainCoroutineRule = MainCoroutineRule()
 
     @RelaxedMockK
-    private lateinit var getTodaysWeatherUseCase: GetTodaysWeatherReport
+    private lateinit var getTodayWeatherUseCase: GetTodaysWeatherReport
 
     @RelaxedMockK
     private lateinit var getForecastsUseCase: GetForecasts
+
+    @RelaxedMockK
+    private lateinit var getAirQuality: GetAirQuality
+
+    @RelaxedMockK
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private lateinit var viewModel: HomeViewModel
 
@@ -43,7 +51,12 @@ class HomeViewModelTest {
     fun setup() {
         MockKAnnotations.init(this)
         mockkStatic(WeatherRepository::class)
-        viewModel = HomeViewModel(getTodaysWeatherUseCase, getForecastsUseCase)
+        viewModel = HomeViewModel(
+            getTodayWeatherUseCase,
+            getForecastsUseCase,
+            getAirQuality,
+            fusedLocationProviderClient
+        )
     }
 
     /**
@@ -63,14 +76,14 @@ class HomeViewModelTest {
     @Test
     fun `fetchWeatherDetails, calls uses cases and fetch flow data successfully`() =
         mainCoroutineRule.testScope.runTest {
-            coEvery { getTodaysWeatherUseCase(anyString()) } returns
+            coEvery { getTodayWeatherUseCase(anyString()) } returns
                     flowOf(ResultData.Loading, ResultData.Success(null), ResultData.Failed(null))
             coEvery { getForecastsUseCase(anyString()) } returns
                     flowOf(ResultData.Loading, ResultData.Success(null), ResultData.Failed(null))
 
             viewModel.fetchWeatherDetails(anyString())
 
-            getTodaysWeatherUseCase.invoke(anyString()).test {
+            getTodayWeatherUseCase.invoke(anyString()).test {
                 assertEquals(ResultData.Loading, awaitItem())
                 assertEquals(ResultData.Success(null), awaitItem())
                 assertEquals(ResultData.Failed(null), awaitItem())
