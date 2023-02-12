@@ -5,17 +5,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
@@ -25,8 +31,7 @@ import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
-import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
-import bose.ankush.weatherify.presentation.ui.theme.TextWhite
+import bose.ankush.weatherify.presentation.ui.theme.*
 
 @Composable
 fun CitiesListScreen(
@@ -83,7 +88,9 @@ private fun ShowUIContainer(
         Column {
             CityNameHeader(navController)
 
-            LazyColumn {
+            CityNameSearchBar()
+
+            /*LazyColumn {
                 if (cityList.isNotEmpty()) {
                     items(cityList.size) {
                         CityListItem(cityNameList = cityList, position = it) { _, name ->
@@ -91,7 +98,7 @@ private fun ShowUIContainer(
                         }
                     }
                 }
-            }
+            }*/
         }
     }
 }
@@ -124,6 +131,61 @@ private fun CityNameHeader(navController: NavController) {
                     .clickable { navController.popBackStack() }
 
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun CityNameSearchBar() {
+    val viewModels = viewModel<CitiesViewModel>()
+    val searchText by viewModels.searchText.collectAsState()
+    val isSearching by viewModels.isSearching.collectAsState()
+    val cityName by viewModels.cityName.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+    ) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp)),
+            value = searchText,
+            onValueChange = viewModels::onSearchTextChange,
+            placeholder = { Text(text = "search city...") },
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = DefaultCardBackgroundLightGrey,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = TextWhite,
+                textColor = TextWhite,
+                placeholderColor = SeaGreenDark
+            )
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        if (isSearching) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                items(cityName) { name ->
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp, horizontal = 16.dp),
+                        text = "${name.name}",
+                        style = MaterialTheme.typography.h4,
+                        color = TextWhite,
+                    )
+                }
+            }
         }
     }
 }
