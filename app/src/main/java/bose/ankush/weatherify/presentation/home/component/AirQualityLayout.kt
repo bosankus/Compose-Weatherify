@@ -2,7 +2,6 @@ package bose.ankush.weatherify.presentation.home.component
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,8 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.common.LocationPermissionManager
 import bose.ankush.weatherify.domain.model.AirQuality
@@ -25,7 +26,7 @@ import bose.ankush.weatherify.presentation.analyzer.AirQualityIndexAnalyser.getA
 import bose.ankush.weatherify.presentation.home.HomeViewModel
 import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.location.Priority
 import timber.log.Timber
@@ -82,11 +83,11 @@ fun ShowUI(aq: AirQuality) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .fillMaxWidth()
             .padding(all = 16.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(DefaultCardBackgroundLightGrey)
             .padding(horizontal = 15.dp, vertical = 20.dp)
-            .fillMaxWidth()
     ) {
         Text(
             text = aq.aqi?.let { getAQIAnalysedText(it) }?.first ?: "Something went wrong",
@@ -94,12 +95,10 @@ fun ShowUI(aq: AirQuality) {
             color = TextWhite,
             overflow = TextOverflow.Ellipsis,
         )
-
-        Image(
-            painter = rememberAsyncImagePainter(model = "https://img.icons8.com/windows/26/f45164/wind.svg"),
-            contentDescription = null,
-            modifier = Modifier.size(26.dp)
+        AsyncImage(
+            modifier = Modifier.size(16.dp),
+            model = R.drawable.ic_chevron_right,
+            contentDescription = stringResource(id = R.string.weather_icon_content),
         )
-
     }
 }

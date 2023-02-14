@@ -5,8 +5,9 @@ data class CityName(
 ) {
     fun doesMatchSearchQuery(query: String): Boolean {
         val matchingCombinations = listOf(
-            "${name?.first()}",
             "$name",
+            "${name?.first()}",
+            "${name?.last()}"
         )
         return matchingCombinations.any {
             it.contains(query, ignoreCase = true)
