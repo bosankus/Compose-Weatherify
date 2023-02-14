@@ -51,6 +51,8 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
+
+    namespace = "bose.ankush.weatherify"
 }
 
 dependencies {
@@ -120,3 +122,4 @@ dependencies {
     // Memory leak
     debugImplementation(Deps.leakCanary)
 }
+

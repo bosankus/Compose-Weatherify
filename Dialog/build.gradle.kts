@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+@Suppress("UnstableApiUsage")
 android {
     compileSdk = ConfigData.compileSdkVersion
 
@@ -40,6 +41,8 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
+
+    namespace = "bose.ankush.dialog"
 }
 
 dependencies {

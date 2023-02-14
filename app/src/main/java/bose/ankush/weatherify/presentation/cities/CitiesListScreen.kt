@@ -1,79 +1,34 @@
 package bose.ankush.weatherify.presentation.cities
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
-import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.navigation.Screen
-import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
-import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
-import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
-import bose.ankush.weatherify.presentation.ui.theme.TextWhite
+import bose.ankush.weatherify.presentation.ui.theme.*
 
 @Composable
 fun CitiesListScreen(
     navController: NavController,
     viewModel: CitiesViewModel = hiltViewModel()
-) {
-    ShowLoading(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundGrey)
-    )
-
-    val context: Context = LocalContext.current
-    val state: UIState<List<CityName>> = viewModel.cityNameState.value
-
-    // Has internet
-    if (isNetworkAvailable(context)) {
-        // Screen Loading state
-        if (state.isLoading) ShowLoading(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(BackgroundGrey)
-        )
-        // Screen Error state
-        else if (!state.error?.asString(context).isNullOrEmpty()) ShowError(
-            error = state.error?.asString(context),
-            modifier = Modifier
-                .fillMaxSize()
-                .background(BackgroundGrey)
-        )
-        else ShowUIContainer(
-            cityList = state.data ?: emptyList(),
-            navController = navController
-        )
-    } else ShowError(
-        error = stringResource(id = R.string.no_internet_txt),
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundGrey)
-    )
-}
-
-
-@Composable
-private fun ShowUIContainer(
-    cityList: List<CityName>,
-    navController: NavController,
 ) {
     Box(
         modifier = Modifier
@@ -83,19 +38,10 @@ private fun ShowUIContainer(
         Column {
             CityNameHeader(navController)
 
-            LazyColumn {
-                if (cityList.isNotEmpty()) {
-                    items(cityList.size) {
-                        CityListItem(cityNameList = cityList, position = it) { _, name ->
-                            navController.navigate(Screen.HomeScreen.withArgs(name))
-                        }
-                    }
-                }
-            }
+            CityNameSearchBarWithList(navController)
         }
     }
 }
-
 
 @Composable
 private fun CityNameHeader(navController: NavController) {
@@ -124,6 +70,57 @@ private fun CityNameHeader(navController: NavController) {
                     .clickable { navController.popBackStack() }
 
             )
+        }
+    }
+}
+
+@Composable
+fun CityNameSearchBarWithList(navController: NavController) {
+    val viewModels = viewModel<CitiesViewModel>()
+    val searchText by viewModels.searchText.collectAsState()
+    val isSearching by viewModels.isSearching.collectAsState()
+    val cityName by viewModels.cityName.collectAsState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+    ) {
+        TextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp)),
+            value = searchText,
+            onValueChange = viewModels::onSearchTextChange,
+            placeholder = { Text(text = "search city...") },
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = DefaultCardBackgroundLightGrey,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = TextWhite,
+                textColor = TextWhite,
+                placeholderColor = SeaGreenDark
+            )
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        if (isSearching) {
+            ShowLoading(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(BackgroundGrey)
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                items(cityName.size) {
+                    CityListItem(cityNameList = cityName, position = it) { _, name ->
+                        navController.navigate(Screen.HomeScreen.withArgs(name))
+                    }
+                }
+            }
         }
     }
 }
