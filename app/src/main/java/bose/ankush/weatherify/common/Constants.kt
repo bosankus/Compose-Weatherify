@@ -6,7 +6,10 @@ Date: 05,May,2021
  **/
 
 /*General constants*/
-const val OPEN_WEATHER_BASE_URL = "https://api.openweathermap.org/"
+const val OPEN_WEATHER_HOSTNAME = "openweathermap.org"
+const val OPEN_WEATHER_BASE_URL = "https://api.$OPEN_WEATHER_HOSTNAME/"
+const val OPEN_WEATHER_CERT_PIN = "sha256/47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU="
+
 const val DEFAULT_CITY_NAME = "Kolkata"
 const val APP_UPDATE_REQ_CODE = 111
 
