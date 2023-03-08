@@ -20,7 +20,7 @@ import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.presentation.UIState
-import bose.ankush.weatherify.presentation.home.component.AirQualityLayout
+import bose.ankush.weatherify.presentation.home.component.AirQualityCardLayout
 import bose.ankush.weatherify.presentation.home.component.DetailedForecastLayout
 import bose.ankush.weatherify.presentation.home.component.FourDaysForecastLayout
 import bose.ankush.weatherify.presentation.home.component.TodaysForecastLayout
@@ -58,24 +58,27 @@ fun HomeScreen(
         )
         // Screen Error state
         else if (!state.error?.asString(context).isNullOrEmpty()) ShowError(
-            error = state.error?.asString(context),
             modifier = Modifier
                 .fillMaxSize()
-                .background(BackgroundGrey)
+                .background(BackgroundGrey),
+            msg = state.error?.asString(context),
+            buttonText = stringResource(id = R.string.retry_btn_txt),
+            buttonAction = { viewModel.fetchWeatherDetails(cityName) }
         )
         // Screen with data showing on UI state
         else ShowUIContainer(
-            viewModel = viewModel,
             navController = navController,
             detailedForecastList = detailedForecastList
         )
     }
     // No internet connectivity
     else ShowError(
-        error = stringResource(id = R.string.no_internet_txt),
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundGrey)
+            .background(BackgroundGrey),
+        msg = stringResource(id = R.string.no_internet_txt),
+        buttonText = stringResource(id = R.string.retry_btn_txt),
+        buttonAction = { }
     )
 }
 
@@ -113,16 +116,14 @@ private fun ShowUIContainer(
                 }
             else {
                 val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
-                if (fourDaysForecasts.isEmpty())
-                    items(emptyList<ForecastDto.ForecastList>().size) {
-                        DetailedForecastLayout(
-                            list = emptyList(),
-                            item = it
-                        )
-                    }
-                else {
+                if (fourDaysForecasts.isNotEmpty()) {
                     val dayDate = fourDaysForecasts[0].date
                     dayDate?.let { viewModel.getDayWiseDetailedForecast(dayDate) }
+                } else items(0) {
+                    DetailedForecastLayout(
+                        list = emptyList(),
+                        item = it
+                    )
                 }
             }
         }
