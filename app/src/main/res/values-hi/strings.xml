@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--General Texts-->
-    <string name="app_name">Weatherify</string>
+    <string name="app_name">मौसमify</string>
     <string name="retry_btn_txt">पुन: प्रयास करें</string>
     <string name="forecast_heading_txt">पूर्वानुमान</string>
     <string name="not_available">--</string>
@@ -12,12 +12,14 @@
     <string name="feels_like">%1$s° की तरह लगता</string>
     <string name="select_city">शहर चुनें</string>
     <string name="default_city">Kolkata</string>
+    <string name="go_back">वापस जाएं</string>
+    <string name="got_it">समझ गया</string>
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">अनधिकृत पहुंच!</string>
     <string name="city_error_txt">शहर नहीं मिला!</string>
-    <string name="server_error_txt">उम्म… लगता है सर्वर में समस्या है!</string>
-    <string name="no_internet_txt">उम्म… क्या आप इंटरनेट कनेक्टिविटी की दोबारा जांच कर सकते हैं!</string>
+    <string name="server_error_txt">लगता है सर्वर में समस्या है!</string>
+    <string name="no_internet_txt">क्या आप इंटरनेट कनेक्टिविटी की दोबारा जांच कर सकते हैं!</string>
     <string name="general_error_txt">ओह! कुछ गलत हो गया है।</string>
     <string name="default_coordinates_txt">स्थान निर्देशांक अभी तक अपडेट नहीं किए गए हैं।</string>
     <string name="empty_city_list_error_txt">ओह तेरी! इस समय कोई शहर नहीं मिला। बाद में जांचें</string>
