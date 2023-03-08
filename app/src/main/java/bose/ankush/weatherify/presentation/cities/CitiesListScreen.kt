@@ -28,7 +28,6 @@ import bose.ankush.weatherify.presentation.ui.theme.*
 @Composable
 fun CitiesListScreen(
     navController: NavController,
-    viewModel: CitiesViewModel = hiltViewModel()
 ) {
     Box(
         modifier = Modifier
@@ -92,7 +91,7 @@ fun CityNameSearchBarWithList(navController: NavController) {
                 .clip(RoundedCornerShape(10.dp)),
             value = searchText,
             onValueChange = viewModels::onSearchTextChange,
-            placeholder = { Text(text = "search city...") },
+            placeholder = { Text(text = stringResource(id = R.string.select_city) + "...") },
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = DefaultCardBackgroundLightGrey,
                 focusedIndicatorColor = Color.Transparent,
