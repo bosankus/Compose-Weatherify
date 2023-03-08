@@ -65,5 +65,6 @@ internal fun WeatherDto.toWeather(): Weather {
         windAngle = wind.deg,
         name = name,
         icon = weather[0].icon,
+        description = weather[0].description
     )
 }

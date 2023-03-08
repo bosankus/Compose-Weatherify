@@ -8,4 +8,5 @@ data class Weather(
     val humidity: Int? = 0,
     val name: String? = "",
     val icon: String? = "",
+    val description: String? = ""
 )
