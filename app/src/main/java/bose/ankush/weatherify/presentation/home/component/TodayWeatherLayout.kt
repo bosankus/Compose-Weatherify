@@ -14,6 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.toCelsius
@@ -24,7 +25,7 @@ import com.airbnb.lottie.compose.*
 
 @Composable
 fun TodaysForecastLayout(
-    viewModel: HomeViewModel,
+    viewModel: HomeViewModel = hiltViewModel(),
     modifier: Modifier,
     navController: NavController
 ) {
@@ -44,7 +45,7 @@ fun TodaysForecastLayout(
             // Show today's current temperature & weather state
             CurrentTemperatureInCelsius(viewModel)
 
-            // Show Wind speed, humidity, and some other feature in row
+            // TODO: Show Wind speed, humidity, and some other feature in row
         }
     }
 }
@@ -80,9 +81,7 @@ fun LocationNameSection(viewModel: HomeViewModel, navController: NavController) 
 fun CloudConditionAnimatedLayout() {
     val compositionResult: LottieCompositionResult =
         rememberLottieComposition(
-            spec = LottieCompositionSpec.Asset(
-                "sunny_snowfall.json"
-            )
+            spec = LottieCompositionSpec.RawRes(R.raw.sunny_snowfall)
         )
 
     val progress by animateLottieCompositionAsState(
