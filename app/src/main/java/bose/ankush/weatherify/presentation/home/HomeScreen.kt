@@ -83,7 +83,7 @@ fun HomeScreen(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun ShowUIContainer(
-    viewModel: HomeViewModel,
+    viewModel: HomeViewModel = hiltViewModel(),
     navController: NavController,
     detailedForecastList: List<ForecastDto.ForecastList>
 ) {
@@ -95,15 +95,14 @@ private fun ShowUIContainer(
         LazyColumn {
             item {
                 TodaysForecastLayout(
-                    viewModel = viewModel,
                     modifier = Modifier.fillMaxWidth(),
                     navController = navController
                 )
             }
 
-            item { AirQualityLayout(viewModel = viewModel) }
+            item { AirQualityCardLayout() }
 
-            item { FourDaysForecastLayout(viewModel = viewModel) }
+            item { FourDaysForecastLayout() }
 
             if (detailedForecastList.isNotEmpty())
                 items(detailedForecastList.size) {

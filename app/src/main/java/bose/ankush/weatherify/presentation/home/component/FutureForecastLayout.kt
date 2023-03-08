@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.presentation.home.HomeViewModel
@@ -24,7 +25,7 @@ import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGr
 
 @Composable
 fun FourDaysForecastLayout(
-    viewModel: HomeViewModel,
+    viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
     Column(
