@@ -122,13 +122,9 @@ fun AppNavigation() {
 }
 
 class DoubleNavType : NavType<Double>(isNullableAllowed = false) {
-    override fun get(bundle: Bundle, key: String): Double {
-        return bundle.getDouble(key)
-    }
+    override fun get(bundle: Bundle, key: String): Double = bundle.getDouble(key)
 
-    override fun parseValue(value: String): Double {
-        return value.toDouble()
-    }
+    override fun parseValue(value: String): Double = value.toDouble()
 
     override fun put(bundle: Bundle, key: String, value: Double) {
         bundle.putDouble(key, value)
