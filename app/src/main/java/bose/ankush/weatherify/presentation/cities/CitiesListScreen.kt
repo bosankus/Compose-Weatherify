@@ -1,6 +1,5 @@
 package bose.ankush.weatherify.presentation.cities
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,23 +16,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.navigation.Screen
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
-import bose.ankush.weatherify.presentation.ui.theme.*
+import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
+import bose.ankush.weatherify.presentation.ui.theme.SeaGreenDark
+import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 
 @Composable
 fun CitiesListScreen(
     navController: NavController,
-    viewModel: CitiesViewModel = hiltViewModel()
 ) {
     Box(
-        modifier = Modifier
-            .background(BackgroundGrey)
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         Column {
             CityNameHeader(navController)
@@ -75,8 +72,8 @@ private fun CityNameHeader(navController: NavController) {
 }
 
 @Composable
-fun CityNameSearchBarWithList(navController: NavController) {
-    val viewModels = viewModel<CitiesViewModel>()
+private fun CityNameSearchBarWithList(navController: NavController) {
+    val viewModels: CitiesViewModel = hiltViewModel()
     val searchText by viewModels.searchText.collectAsState()
     val isSearching by viewModels.isSearching.collectAsState()
     val cityName by viewModels.cityName.collectAsState()
@@ -92,7 +89,7 @@ fun CityNameSearchBarWithList(navController: NavController) {
                 .clip(RoundedCornerShape(10.dp)),
             value = searchText,
             onValueChange = viewModels::onSearchTextChange,
-            placeholder = { Text(text = "search city...") },
+            placeholder = { Text(text = stringResource(id = R.string.select_city) + "...") },
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = DefaultCardBackgroundLightGrey,
                 focusedIndicatorColor = Color.Transparent,
@@ -104,11 +101,7 @@ fun CityNameSearchBarWithList(navController: NavController) {
         )
         Spacer(modifier = Modifier.height(10.dp))
         if (isSearching) {
-            ShowLoading(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(BackgroundGrey)
-            )
+            ShowLoading(modifier = Modifier.fillMaxSize())
         } else {
             LazyColumn(
                 modifier = Modifier

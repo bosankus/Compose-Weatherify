@@ -2,8 +2,8 @@ package bose.ankush.weatherify.presentation.home.component
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -16,8 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.common.LocationPermissionManager
 import bose.ankush.weatherify.domain.model.AirQuality
@@ -25,15 +28,22 @@ import bose.ankush.weatherify.presentation.analyzer.AirQualityIndexAnalyser.getA
 import bose.ankush.weatherify.presentation.home.HomeViewModel
 import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
 import bose.ankush.weatherify.presentation.ui.theme.TextWhite
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.location.Priority
 import timber.log.Timber
 
+/**
+ * This composable is response to show air quality card on HomeScreen.
+ * Shows what is the current air quality based return value of [getAQIAnalysedText]
+ */
 @SuppressLint("MissingPermission")
 @ExperimentalPermissionsApi
 @Composable
-fun AirQualityLayout(viewModel: HomeViewModel) {
+fun AirQualityCardLayout(
+    viewModel: HomeViewModel = hiltViewModel(),
+    onCardClick: (Double, Double) -> Unit
+) {
 
     val airQualityReport = viewModel.airQuality.value
     val context: Context = LocalContext.current
@@ -70,23 +80,34 @@ fun AirQualityLayout(viewModel: HomeViewModel) {
             viewModel.fetchAirQuality(latLang.value.first, latLang.value.second)
         }
 
-    // if air quality report is not empty, UI will show
+    // if air quality report is not empty, show UI
     if (airQualityReport.data != null)
-        ShowUI(aq = airQualityReport.data)
+        ShowUI(
+            aq = airQualityReport.data,
+            onItemClick = onCardClick
+        )
 }
 
-// Air quality UI composable
+/**
+ * Air quality UI composable
+ * This composable has onClick listener, with action to navigate to AirQualityDetailsScreen,
+ * and carry latitude and longitude as navigation arguments
+ */
 @Composable
-fun ShowUI(aq: AirQuality) {
+fun ShowUI(
+    aq: AirQuality,
+    onItemClick: (Double, Double) -> Unit
+) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .fillMaxWidth()
             .padding(all = 16.dp)
+            .clickable { onItemClick(aq.coord.first, aq.coord.second) }
             .clip(RoundedCornerShape(10.dp))
             .background(DefaultCardBackgroundLightGrey)
             .padding(horizontal = 15.dp, vertical = 20.dp)
-            .fillMaxWidth()
     ) {
         Text(
             text = aq.aqi?.let { getAQIAnalysedText(it) }?.first ?: "Something went wrong",
@@ -94,12 +115,10 @@ fun ShowUI(aq: AirQuality) {
             color = TextWhite,
             overflow = TextOverflow.Ellipsis,
         )
-
-        Image(
-            painter = rememberAsyncImagePainter(model = "https://img.icons8.com/windows/26/f45164/wind.svg"),
-            contentDescription = null,
-            modifier = Modifier.size(26.dp)
+        AsyncImage(
+            modifier = Modifier.size(16.dp),
+            model = R.drawable.ic_chevron_right,
+            contentDescription = stringResource(id = R.string.weather_icon_content),
         )
-
     }
 }

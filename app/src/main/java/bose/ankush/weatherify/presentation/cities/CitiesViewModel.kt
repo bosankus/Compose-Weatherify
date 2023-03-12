@@ -1,12 +1,9 @@
 package bose.ankush.weatherify.presentation.cities
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.domain.use_case.get_cities.GetCityNames
-import bose.ankush.weatherify.presentation.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
@@ -16,9 +13,6 @@ import javax.inject.Inject
 class CitiesViewModel @Inject constructor(
     getCityNames: GetCityNames
 ) : ViewModel() {
-
-    private val _cityNameState = mutableStateOf(UIState<List<CityName>>())
-    val cityNameState: State<UIState<List<CityName>>> = _cityNameState
 
     private val _searchText = MutableStateFlow("")
     val searchText: StateFlow<String> = _searchText

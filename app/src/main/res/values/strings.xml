@@ -1,6 +1,19 @@
 <resources>
-    <string name="app_name">Weatherify MVVM</string>
+    <!--General Texts-->
+    <string name="app_name">Weatherify</string>
     <string name="retry_btn_txt">Retry</string>
+    <string name="forecast_heading_txt">Forecasts</string>
+    <string name="not_available">--</string>
+    <string name="celsius">%1$s°C</string>
+    <string name="percent">%1$s%%</string>
+    <string name="speed">%1$skm/h</string>
+    <string name="angle">%1$s°</string>
+    <string name="feels_like">feels like %1$s°C</string>
+    <string name="select_city">Select city</string>
+    <string name="default_city">Kolkata</string>
+    <string name="go_back">Go back</string>
+    <string name="got_it">Got it</string>
+
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">Unauthorised access!</string>
@@ -10,16 +23,7 @@
     <string name="general_error_txt">Oops!..Something went wrong.</string>
     <string name="default_coordinates_txt">Location coordinates not yet updated.</string>
     <string name="empty_city_list_error_txt">Oh no! No cities found at this moment. Check back later</string>
-
     <string name="empty_list">No details found. Try after sometime.</string>
-    <string name="forecast_heading_txt">Forecasts</string>
-    <string name="not_available">--</string>
-    <string name="celsius">%1$s°C</string>
-    <string name="percent">%1$s%%</string>
-    <string name="speed">%1$skm/h</string>
-    <string name="angle">%1$s°</string>
-    <string name="feels_like">feels like %1$s°C</string>
-    <string name="select_city">Select city</string>
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">weather condition icon</string>
