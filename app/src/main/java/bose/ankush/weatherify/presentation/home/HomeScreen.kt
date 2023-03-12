@@ -3,7 +3,6 @@ package bose.ankush.weatherify.presentation.home
 import android.app.Activity
 import android.content.Context
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,14 +18,11 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
+import bose.ankush.weatherify.navigation.Screen
 import bose.ankush.weatherify.presentation.UIState
-import bose.ankush.weatherify.presentation.home.component.AirQualityCardLayout
-import bose.ankush.weatherify.presentation.home.component.DetailedForecastLayout
-import bose.ankush.weatherify.presentation.home.component.FourDaysForecastLayout
-import bose.ankush.weatherify.presentation.home.component.TodaysForecastLayout
+import bose.ankush.weatherify.presentation.home.component.*
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
-import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @Composable
@@ -51,20 +47,18 @@ fun HomeScreen(
         }
 
         // Screen Loading state
-        if (state.isLoading) ShowLoading(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(BackgroundGrey)
-        )
+        if (state.isLoading) {
+            ShowLoading(modifier = Modifier.fillMaxSize())
+        }
         // Screen Error state
-        else if (!state.error?.asString(context).isNullOrEmpty()) ShowError(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(BackgroundGrey),
-            msg = state.error?.asString(context),
-            buttonText = stringResource(id = R.string.retry_btn_txt),
-            buttonAction = { viewModel.fetchWeatherDetails(cityName) }
-        )
+        else if (!state.error?.asString(context).isNullOrEmpty()) {
+            ShowError(
+                modifier = Modifier.fillMaxSize(),
+                msg = state.error?.asString(context),
+                buttonText = stringResource(id = R.string.retry_btn_txt),
+                buttonAction = { viewModel.fetchWeatherDetails(cityName) }
+            )
+        }
         // Screen with data showing on UI state
         else ShowUIContainer(
             navController = navController,
@@ -73,9 +67,7 @@ fun HomeScreen(
     }
     // No internet connectivity
     else ShowError(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundGrey),
+        modifier = Modifier.fillMaxSize(),
         msg = stringResource(id = R.string.no_internet_txt),
         buttonText = stringResource(id = R.string.retry_btn_txt),
         buttonAction = { }
@@ -86,27 +78,31 @@ fun HomeScreen(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun ShowUIContainer(
-    viewModel: HomeViewModel = hiltViewModel(),
     navController: NavController,
     detailedForecastList: List<ForecastDto.ForecastList>
 ) {
-    Box(
-        modifier = Modifier
-            .background(BackgroundGrey)
-            .fillMaxSize()
-    ) {
+    val viewModel: HomeViewModel = hiltViewModel()
+    Box {
+
         LazyColumn {
+
+            // Show header location name
+            item { LocationNameLayout(navController = navController) }
+
+            // Show today's forecasts
+            item { TodaysForecastLayout(modifier = Modifier.fillMaxWidth()) }
+
+            // Show current air quality condition details
             item {
-                TodaysForecastLayout(
-                    modifier = Modifier.fillMaxWidth(),
-                    navController = navController
-                )
+                AirQualityCardLayout { lat, lon ->
+                    navController.navigate(Screen.AirQualityDetailsScreen.withArgs(lat, lon))
+                }
             }
 
-            item { AirQualityCardLayout() }
-
+            // Show next 4 day's average forecast
             item { FourDaysForecastLayout() }
 
+            // Show next 4 day's hourly forecast
             if (detailedForecastList.isNotEmpty())
                 items(detailedForecastList.size) {
                     DetailedForecastLayout(

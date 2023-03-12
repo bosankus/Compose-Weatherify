@@ -4,8 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import bose.ankush.weatherify.common.startInAppUpdate
 import bose.ankush.weatherify.navigation.AppNavigation
+import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
 import bose.ankush.weatherify.presentation.ui.theme.WeatherifyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,7 +24,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             WeatherifyTheme {
-                AppNavigation()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(BackgroundGrey)
+                ) {
+                    AppNavigation()
+                }
             }
         }
 

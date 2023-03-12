@@ -58,5 +58,6 @@ internal fun AirQualityDto.toAirQuality(): AirQuality = AirQuality(
     o3 = data[0].components.o3,
     so2 = data[0].components.o3,
     pm10 = data[0].components.pm10,
-    pm25 = data[0].components.pm25
+    pm25 = data[0].components.pm25,
+    coord = Pair(coord.lat, coord.lon)
 )

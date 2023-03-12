@@ -7,5 +7,6 @@ data class AirQuality(
     val o3 : Double? = 0.0,
     val so2: Double? = 0.0,
     val pm10: Double? = 0.0,
-    val pm25: Double? = 0.0
+    val pm25: Double? = 0.0,
+    val coord: Pair<Double, Double> = Pair(0.0, 0.0)
 )
