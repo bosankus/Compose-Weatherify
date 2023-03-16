@@ -22,9 +22,9 @@ object Versions {
     const val truth = "1.1.3"
     const val turbine = "0.12.1"
     const val coroutineTest = "1.6.4"
-    const val coreTesting = "2.1.0"
+    const val coreTesting = "2.2.0"
     const val espresso = "3.5.1"
-    const val mockitoInline = "5.1.1"
+    const val mockitoInline = "5.2.0"
     const val mockitoNhaarman = "2.2.0"
     const val mockWebServer = "4.9.3"
     const val mockk = "1.13.4"
@@ -33,7 +33,7 @@ object Versions {
     const val androidCore = "1.9.0"
     const val appCompat = "1.4.1"
     const val androidMaterial = "1.7.0"
-    const val lifecycle = "2.4.1"
+    const val lifecycle = "2.6.0"
     const val googlePlayCore = "2.0.1"
     const val googlePlayLocation = "21.0.1"
     const val accompanist = "0.28.0"
@@ -54,7 +54,7 @@ object Versions {
 
     // Miscellaneous
     const val timber = "5.0.1"
-    const val lottie = "5.2.0"
+    const val lottie = "6.0.0"
     const val coilCompose = "2.2.2"
 
     // Memory leak
