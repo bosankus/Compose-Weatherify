@@ -5,7 +5,8 @@ object Versions {
     const val kotlin = "1.8.0"
 
     // Compose
-    const val composeVersion = "1.2.0"
+    const val composeVersion = "1.4.0"
+    const val compilerExtensionVersion = "1.4.0"
     const val composeMaterial3 = "1.0.1"
 
     // Plugins
