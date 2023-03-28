@@ -60,6 +60,10 @@ object Deps {
     val hiltTesting by lazy { "com.google.dagger:hilt-android-testing:${Versions.hilt}" }
     val hiltDaggerAndroidCompiler by lazy { "com.google.dagger:hilt-android-compiler:${Versions.hilt}" }
     val hiltNavigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.hiltCompose}" }
+    // Dagger 2.45
+    val dagger by lazy { "com.google.dagger:dagger:${Versions.hilt}" }
+    val daggerCompiler by lazy { "com.google.dagger:dagger-compiler:${Versions.hilt}" }
+
 
     // Miscellaneous
     val timber by lazy { "com.jakewharton.timber:timber:${Versions.timber}" }
