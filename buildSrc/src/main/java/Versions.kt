@@ -66,4 +66,7 @@ object Versions {
 
     /*For Payment module*/
     const val razorPay = "1.6.26"
+
+    /*For Language module*/
+    const val lingver = "1.3.0"
 }

@@ -78,4 +78,7 @@ object Deps {
 
     /*For Payment module*/
     val razorPay by lazy { "com.razorpay:checkout:${Versions.razorPay}" }
+
+    /*For Language module*/
+    val lingver by lazy { "com.github.YarikSOffice:lingver:${Versions.lingver}" }
 }
