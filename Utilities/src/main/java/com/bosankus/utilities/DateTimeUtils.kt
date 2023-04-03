@@ -1,6 +1,7 @@
 package com.bosankus.utilities
 
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Date
@@ -10,7 +11,7 @@ import java.util.Locale
 
 object DateTimeUtils {
 
-    fun getCurrentTimestamp(): String = Instant.now().toEpochMilli().toString()
+    fun getCurrentTimestamp(): Long = Instant.now().toEpochMilli()
 
 
     fun getDayWiseDifferenceFromToday(day: Int): Int {
@@ -55,5 +56,21 @@ object DateTimeUtils {
             val formatter = DateTimeFormatter.ofPattern(format, Locale.ENGLISH)
             instant.atZone(zoneId).format(formatter)
         }.toString()
+    }
+
+    fun getFormattedDateTimeFromEpoch(epoch: Long?): String {
+        epoch?.let {
+            val instant = Instant.ofEpochSecond(it)
+            val zoneId = ZoneId.systemDefault()
+
+            // convert instant to local date time
+            val localDateTime = LocalDateTime.ofInstant(instant, zoneId)
+
+            // creating desired date time format
+            val dateTimeFormat = DateTimeFormatter.ofPattern("EEE, dd MMM")
+
+            return dateTimeFormat.format(localDateTime)
+        } ?:
+        return "Date & Time is unavailable at this moment"
     }
 }
