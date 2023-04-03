@@ -4,9 +4,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 
 @Composable
-fun WeatherifyTheme(content: @Composable() () -> Unit) {
+fun WeatherifyTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        typography = Typography,
+        typography = SFCompactDisplayTypography,
         content = content
     )
 }
