@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -87,10 +86,10 @@ private fun ShowUIContainer(
         LazyColumn {
 
             // Show header location name
-            item { LocationNameLayout(navController = navController) }
+            item { TopScreenLayout(navController = navController) }
 
             // Show today's forecasts
-            item { TodaysForecastLayout(modifier = Modifier.fillMaxWidth()) }
+            item { TodaysForecastLayout() }
 
             // Show current air quality condition details
             item {
@@ -102,6 +101,7 @@ private fun ShowUIContainer(
             // Show next 4 day's average forecast
             item { FourDaysForecastLayout() }
 
+            // TODO: As per current change in the UI scope, this part will be moved to a separate screen.
             // Show next 4 day's hourly forecast
             if (detailedForecastList.isNotEmpty())
                 items(detailedForecastList.size) {

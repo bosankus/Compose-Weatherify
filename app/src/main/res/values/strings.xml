@@ -4,6 +4,7 @@
     <string name="retry_btn_txt">Retry</string>
     <string name="forecast_heading_txt">Forecasts</string>
     <string name="not_available">--</string>
+    <string name="degree">%1$s°</string>
     <string name="celsius">%1$s°C</string>
     <string name="percent">%1$s%%</string>
     <string name="speed">%1$skm/h</string>
@@ -27,7 +28,10 @@
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">weather condition icon</string>
-    <string name="location_icon_content">Location header icon</string>
+    <string name="language_icon_content">Language icon</string>
+    <string name="menu_icon_content">Menu icon</string>
+    <string name="wind_icon_content">Wind icon</string>
+    <string name="humidity_icon_content">Humidity icon</string>
     <string name="error_icon_content">Error icon</string>
     <string name="close_icon_content">Close button icon</string>
 </resources>
