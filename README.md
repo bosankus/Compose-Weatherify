@@ -9,6 +9,7 @@ Download latest version of the App
 
 [![Download APK](https://img.shields.io/badge/download-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)]( )
 
-Language Change Implementation using [Per App Language Preference](https://developer.android.com/guide/topics/resources/app-languages#androidx-impl)
+App language change implementated using [Per App Language Preference](https://developer.android.com/guide/topics/resources/app-languages#androidx-impl)
 
-[Uploading language_change.webm…]()
+
+[language_change.webm](https://user-images.githubusercontent.com/46471379/232668914-23ff41d5-420b-45d5-bc48-afbe1d166ead.webm)
