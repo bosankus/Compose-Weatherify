@@ -5,14 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import bose.ankush.weatherify.navigation.Screen
-import bose.ankush.weatherify.presentation.ui.theme.TextWhite
+import bose.ankush.weatherify.presentation.navigation.Screen
 
 @Composable
 fun AirQualityDetailsScreen(
@@ -30,8 +29,8 @@ fun AirQualityDetailsScreen(
         ) {
             Text(
                 text = "lat = $lat, lon = $lon",
-                style = MaterialTheme.typography.h3,
-                color = TextWhite,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.clickable { navController.navigate(Screen.HomeScreen.withArgs("Adra")) }
             )
         }

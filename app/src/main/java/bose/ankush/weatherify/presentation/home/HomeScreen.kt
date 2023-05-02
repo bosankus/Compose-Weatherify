@@ -17,7 +17,7 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
-import bose.ankush.weatherify.navigation.Screen
+import bose.ankush.weatherify.presentation.navigation.Screen
 import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.home.component.*
 import bose.ankush.weatherify.presentation.home.state.ShowError

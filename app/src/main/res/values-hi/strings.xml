@@ -33,5 +33,5 @@
     <string name="wind_icon_content">पवन चिह्न</string>
     <string name="humidity_icon_content">आर्द्रता चिह्न</string>
     <string name="error_icon_content">त्रुटि चिह्</string>
-    <string name="close_icon_content">आइकन बंद करें बटन</string>
+    <string name="close_icon_content">बंद करें चिह्</string>
 </resources>

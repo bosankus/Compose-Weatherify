@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.base.language
+package bose.ankush.weatherify.base
 
 import android.content.Context
 import bose.ankush.weatherify.domain.model.Country

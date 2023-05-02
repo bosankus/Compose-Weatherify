@@ -42,6 +42,7 @@ object Deps {
     val googlePlayLocation by lazy { "com.google.android.gms:play-services-location:${Versions.googlePlayLocation}" }
     val animatedNavigation by lazy { "com.google.accompanist:accompanist-navigation-animation:${Versions.accompanist}" }
     val composePermission by lazy { "com.google.accompanist:accompanist-permissions:${Versions.accompanist}" }
+    val systemUIController by lazy { "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}" }
     val constrainLayout by lazy { "androidx.constraintlayout:constraintlayout:${Versions.constrainLayout}" }
 
     // Networking

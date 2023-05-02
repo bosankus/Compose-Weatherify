@@ -2,12 +2,11 @@ package bose.ankush.weatherify.presentation.home.component
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -17,13 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.presentation.home.HomeViewModel
-import bose.ankush.weatherify.presentation.ui.theme.AppDefaultColor
-import bose.ankush.weatherify.presentation.ui.theme.BaseTextColor
-import bose.ankush.weatherify.presentation.ui.theme.Black
-import bose.ankush.weatherify.presentation.ui.theme.TextWhite
-import com.airbnb.lottie.compose.*
 import com.bosankus.utilities.DateTimeUtils
-import kotlin.text.Typography
 
 @Composable
 fun TodaysForecastLayout(
@@ -51,16 +44,17 @@ fun TodaysForecastLayout(
 fun CurrentDate() {
     Surface(
         modifier = Modifier.padding(top = 20.dp),
-        color = Black,
-        shape = RoundedCornerShape(20.dp)
+        color = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp),
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = 10.dp
     ) {
         val epoch = DateTimeUtils.getCurrentTimestamp()
         val currentDateTime = remember { DateTimeUtils.getFormattedDateTimeFromEpoch(epoch) }
         Text(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
             text = currentDateTime,
-            style = MaterialTheme.typography.h4,
-            color = AppDefaultColor,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
     }
@@ -80,9 +74,9 @@ fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
                 id = R.string.degree,
                 weather?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
             ),
-            style = MaterialTheme.typography.h1,
-            fontSize = 200.sp,
-            color = Black
+            style = MaterialTheme.typography.displayLarge,
+            fontSize = 150.sp,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Row(
@@ -91,27 +85,27 @@ fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_humidity),
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = stringResource(id = R.string.humidity_icon_content)
             )
             Text(
                 modifier = Modifier.padding(start = 5.dp),
                 text = stringResource(id = R.string.percent, weather?.humidity.toString()),
-                style = MaterialTheme.typography.h4,
-                color = TextWhite
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
 
             Icon(
                 modifier = Modifier.padding(start = 20.dp),
                 painter = painterResource(id = R.drawable.ic_wind),
-                tint = Color.White,
+                tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = stringResource(id = R.string.wind_icon_content)
             )
             Text(
                 modifier = Modifier.padding(start = 5.dp),
                 text = stringResource(id = R.string.speed, weather?.wind.toString()),
-                style = MaterialTheme.typography.h4,
-                color = TextWhite
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     }

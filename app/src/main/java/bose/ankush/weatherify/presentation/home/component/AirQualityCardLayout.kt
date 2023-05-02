@@ -6,8 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,10 +25,8 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.common.LocationPermissionManager
 import bose.ankush.weatherify.domain.model.AirQuality
-import bose.ankush.weatherify.presentation.analyzer.AirQualityIndexAnalyser.getAQIAnalysedText
+import bose.ankush.weatherify.presentation.air_quality.AirQualityIndexAnalyser.getAQIAnalysedText
 import bose.ankush.weatherify.presentation.home.HomeViewModel
-import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
-import bose.ankush.weatherify.presentation.ui.theme.TextWhite
 import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.location.Priority
@@ -106,18 +105,19 @@ fun ShowUI(
             .padding(all = 16.dp)
             .clickable { onItemClick(aq.coord.first, aq.coord.second) }
             .clip(RoundedCornerShape(10.dp))
-            .background(DefaultCardBackgroundLightGrey)
+            .background(MaterialTheme.colorScheme.primary)
             .padding(horizontal = 15.dp, vertical = 20.dp)
     ) {
         Text(
             text = aq.aqi?.let { getAQIAnalysedText(it) }?.first ?: "Something went wrong",
-            style = MaterialTheme.typography.body1,
-            color = TextWhite,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.inversePrimary,
             overflow = TextOverflow.Ellipsis,
         )
         AsyncImage(
             modifier = Modifier.size(16.dp),
             model = R.drawable.ic_chevron_right,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.inversePrimary),
             contentDescription = stringResource(id = R.string.weather_icon_content),
         )
     }

@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,16 +34,16 @@ fun DetailedForecastLayout(list: List<ForecastDto.ForecastList>, item: Int) {
         Text(
             text = list[item].dt?.let { DateTimeUtils.getTimeFromEpoch(it) }
                 ?: stringResource(id = R.string.not_available),
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyMedium,
             overflow = TextOverflow.Ellipsis,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f)
         )
         Text(
             text = "${list[item].main?.tempMax?.toCelsius()}°   ${list[item].main?.tempMin?.toCelsius()}°",
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyMedium,
             overflow = TextOverflow.Ellipsis,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f),
         )
         AsyncImage(

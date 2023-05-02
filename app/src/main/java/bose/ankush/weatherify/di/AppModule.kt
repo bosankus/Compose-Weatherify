@@ -2,8 +2,8 @@ package bose.ankush.weatherify.di
 
 import android.app.Application
 import android.content.Context
-import bose.ankush.weatherify.base.language.DeviceService
-import bose.ankush.weatherify.base.language.LocaleService
+import bose.ankush.weatherify.base.DeviceService
+import bose.ankush.weatherify.base.LocaleService
 import bose.ankush.weatherify.domain.model.Country
 import bose.ankush.weatherify.preferences.UserPreferences
 import dagger.Module

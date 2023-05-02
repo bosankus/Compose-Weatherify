@@ -15,4 +15,6 @@ class WeatherifyApplication: WeatherifyApplicationCore() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
     }
+
+
 }

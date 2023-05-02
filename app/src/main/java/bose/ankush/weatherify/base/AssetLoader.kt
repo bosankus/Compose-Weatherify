@@ -1,26 +1,14 @@
 package bose.ankush.weatherify.base
 
-import bose.ankush.weatherify.base.configuration.ConfigurationLoader
-import bose.ankush.weatherify.base.configuration.RawStringConfigurationLoader
-import bose.ankush.weatherify.base.configuration.requireConfig
-import bose.ankush.weatherify.domain.model.Country
+import android.content.Context
+import com.google.gson.Gson
+import java.io.IOException
 
-interface AssetLoader {
-
-    fun getCountryConfiguration(): Country
-}
-
-class ApplicationAssetLoader(
-   private val configurationLoader: ConfigurationLoader,
-   private val rawStringConfigurationLoader: RawStringConfigurationLoader
-): AssetLoader {
-
-    override fun getCountryConfiguration(): Country = loadConfig(fileName = "countryConfig.json")
-
-    private inline fun <reified T: Any> loadConfig(fileName: String): T {
-        if (T::class == String::class) {
-            return rawStringConfigurationLoader.loadRawString(fileName) as T
+class AssetLoader(val context: Context) {
+    @Throws(IOException::class)
+    inline fun <reified T> loadJSONAndConvertToObject(fileName: String): T {
+        return context.assets.open(fileName).use { inputStream ->
+            Gson().fromJson(inputStream.bufferedReader().use { it.readText() }, T::class.java)
         }
-        return configurationLoader.requireConfig(fileName)
     }
 }

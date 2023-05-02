@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.navigation
+package bose.ankush.weatherify.presentation.navigation
 
 import android.os.Bundle
 import androidx.compose.animation.AnimatedContentScope
@@ -7,6 +7,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import bose.ankush.language.presentation.LANGUAGE_ARGUMENT_KEY
+import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.presentation.air_quality.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
@@ -36,7 +38,7 @@ fun AppNavigation() {
             }
             ),
 
-        ) { entry ->
+            ) { entry ->
             HomeScreen(
                 navController = navController,
                 cityName = entry.arguments?.getString(HOME_ARGUMENT_KEY)
@@ -118,6 +120,46 @@ fun AppNavigation() {
                 )
             }
         }
+        composable(
+            route = Screen.LanguageScreen.route + "/{$LANGUAGE_ARGUMENT_KEY}",
+            arguments = listOf(navArgument(LANGUAGE_ARGUMENT_KEY) {
+                type = StringListType()
+                nullable = false
+            }),
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentScope.SlideDirection.Left,
+                    animationSpec = tween(500)
+                )
+            },
+            popEnterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentScope.SlideDirection.Left,
+                    animationSpec = tween(500)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentScope.SlideDirection.Right,
+                    animationSpec = tween(500)
+                )
+            },
+            popExitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentScope.SlideDirection.Right,
+                    animationSpec = tween(500)
+                )
+            }
+        ) { entry ->
+            entry.arguments?.let {
+                it.getStringArray(LANGUAGE_ARGUMENT_KEY)?.let { listOfString ->
+                    LanguageScreen(
+                        languages = listOfString,
+                        navController = navController
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -129,5 +171,19 @@ class DoubleNavType : NavType<Double>(isNullableAllowed = false) {
     override fun put(bundle: Bundle, key: String, value: Double) {
         bundle.putDouble(key, value)
     }
+}
 
+class StringListType : NavType<List<String>>(isNullableAllowed = false) {
+    override fun get(bundle: Bundle, key: String): List<String> {
+        val stringArray = bundle.getStringArray(key)
+        return stringArray?.toList() ?: emptyList()
+    }
+
+    override fun parseValue(value: String): List<String> {
+        return value.split(",").map { it.trim() }
+    }
+
+    override fun put(bundle: Bundle, key: String, value: List<String>) {
+        bundle.putStringArray(key, value.toTypedArray())
+    }
 }

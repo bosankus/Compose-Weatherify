@@ -1,11 +1,10 @@
-@file:Suppress("UnstableApiUsage")
-
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("kotlin-kapt")
 }
 
+@Suppress("UnstableApiUsage")
 android {
     namespace = "bose.ankush.language"
     compileSdk = 33
@@ -27,10 +26,19 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+    buildFeatures {
+        compose = true
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = Versions.composeVersion
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -38,18 +46,26 @@ android {
 
 dependencies {
 
+    // Testing
+    testImplementation(Deps.junit)
+
+    // UI Testing
+    androidTestImplementation(Deps.extJunit)
+
     // Core
     implementation(Deps.androidCore)
     implementation(Deps.appCompat)
-
-    // Testing
-    testImplementation(Deps.junit)
-    androidTestImplementation(Deps.extJunit)
+    implementation(Deps.composeRuntime)
+    implementation(Deps.composeUiTooling)
+    implementation(Deps.composeUiToolingPreview)
+    implementation(Deps.composeUi)
+    implementation(Deps.composeMaterial3)
+    implementation(Deps.navigationCompose)
+    implementation(Deps.animatedNavigation)
 
     // DI
     implementation(Deps.dagger)
     kapt(Deps.daggerCompiler)
 
-    // Lingver
-    implementation(Deps.lingver)
+    implementation(Deps.retrofitGson)
 }

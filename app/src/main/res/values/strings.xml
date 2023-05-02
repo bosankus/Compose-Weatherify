@@ -1,12 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--General Texts-->
     <string name="app_name">Weatherify</string>
     <string name="retry_btn_txt">Retry</string>
     <string name="forecast_heading_txt">Forecasts</string>
-    <string name="not_available">--</string>
-    <string name="degree">%1$s°</string>
-    <string name="celsius">%1$s°C</string>
-    <string name="percent">%1$s%%</string>
+    <string name="not_available" translatable="false">--</string>
+    <string name="degree" translatable="false">%1$s°</string>
+    <string name="celsius" translatable="false">%1$s°C</string>
+    <string name="percent" translatable="false">%1$s%%</string>
     <string name="speed">%1$skm/h</string>
     <string name="angle">%1$s°</string>
     <string name="feels_like">feels like %1$s°C</string>
@@ -14,7 +15,6 @@
     <string name="default_city">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>
-
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">Unauthorised access!</string>
@@ -33,5 +33,5 @@
     <string name="wind_icon_content">Wind icon</string>
     <string name="humidity_icon_content">Humidity icon</string>
     <string name="error_icon_content">Error icon</string>
-    <string name="close_icon_content">Close button icon</string>
+    <string name="close_icon_content">Close icon</string>
 </resources>
