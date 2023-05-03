@@ -12,6 +12,7 @@
     <string name="angle">%1$s°</string>
     <string name="feels_like">%1$s° נראה כמוC</string>
     <string name="select_city">בחר עיר</string>
+    <string name="air_quality">איכות אוויר</string>
     <string name="default_city">Kolkata</string>
     <string name="go_back">תחזור</string>
     <string name="got_it">הבנת</string>

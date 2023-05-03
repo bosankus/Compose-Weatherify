@@ -12,6 +12,7 @@
     <string name="angle">%1$s°</string>
     <string name="feels_like">%1$s° की तरह लगता</string>
     <string name="select_city">शहर चुनें</string>
+    <string name="air_quality">हवा की गुणवत्ता</string>
     <string name="default_city">Kolkata</string>
     <string name="go_back">वापस जाएं</string>
     <string name="got_it">समझ गया</string>

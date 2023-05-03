@@ -12,6 +12,7 @@
     <string name="angle" translatable="false">%1$s°</string>
     <string name="feels_like">feels like %1$s°C</string>
     <string name="select_city">Select city</string>
+    <string name="air_quality">Air Quality</string>
     <string name="default_city" translatable="false">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>

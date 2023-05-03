@@ -1,28 +1,26 @@
 package bose.ankush.weatherify.presentation.cities
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.presentation.navigation.Screen
+import bose.ankush.weatherify.common.component.ScreenTopAppBar
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
+import bose.ankush.weatherify.presentation.navigation.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitiesListScreen(
     navController: NavController,
@@ -30,38 +28,20 @@ fun CitiesListScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        Column {
-            CityNameHeader(navController)
-
-            CityNameSearchBarWithList(navController)
-        }
-    }
-}
-
-@Composable
-private fun CityNameHeader(navController: NavController) {
-    Row(
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 13.dp, end = 16.dp, top = 16.dp)
-    ) {
-        Icon(
-            painter = painterResource(id = bose.ankush.language.R.drawable.ic_back),
-            tint = MaterialTheme.colorScheme.onBackground,
-            contentDescription = stringResource(id = R.string.close_icon_content),
-            modifier = Modifier
-                .clip(CircleShape)
-                .clickable { navController.popBackStack() }
-                .padding(all = 3.dp)
-
-        )
-        Text(
-            text = stringResource(id = R.string.select_city),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(start = 16.dp)
+        Scaffold(
+            topBar = {
+                ScreenTopAppBar(
+                    headlineId = R.string.select_city,
+                    navIconAction = { navController.popBackStack() },
+                )
+            },
+            content = { innerPadding ->
+                Column(
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    CityNameSearchBarWithList(navController)
+                }
+            }
         )
     }
 }
