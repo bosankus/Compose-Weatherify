@@ -155,7 +155,7 @@ fun AppNavigation() {
                 it.getStringArray(LANGUAGE_ARGUMENT_KEY)?.let { listOfString ->
                     LanguageScreen(
                         languages = listOfString,
-                        navController = navController
+                        navAction = { navController.popBackStack() }
                     )
                 }
             }
