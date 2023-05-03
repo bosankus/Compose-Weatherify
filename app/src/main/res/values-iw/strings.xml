@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--General Texts-->
+    <string name="app_name">וות\'ריפי</string>
+    <string name="retry_btn_txt">נסה שוב</string>
+    <string name="forecast_heading_txt">תחזיות</string>
+    <string name="not_available" translatable="false">--</string>
+    <string name="degree" translatable="false">%1$s°</string>
+    <string name="celsius" translatable="false">%1$s°C</string>
+    <string name="percent" translatable="false">%1$s%%</string>
+    <string name="speed">%1$sקמ\"ש</string>
+    <string name="angle">%1$s°</string>
+    <string name="feels_like">%1$s° נראה כמוC</string>
+    <string name="select_city">בחר עיר</string>
+    <string name="default_city">Kolkata</string>
+    <string name="go_back">תחזור</string>
+    <string name="got_it">הבנת</string>
+
+    <!--Error Texts-->
+    <string name="unauthorised_access_txt">גישה לא מורשית!</string>
+    <string name="city_error_txt">העיר לא נמצאה!</string>
+    <string name="server_error_txt">מתמודד עם בעיה בשרת</string>
+    <string name="no_internet_txt">האם תוכל לבדוק מחדש את חיבור האינטרנט!</string>
+    <string name="general_error_txt">אופס!..משהו השתבש.</string>
+    <string name="default_coordinates_txt">קואורדינטות המיקום עדיין לא עודכנו.</string>
+    <string name="empty_city_list_error_txt">גישה לא מורשית!</string>
+    <string name="empty_list">לא נמצאו פרטים. נסה שוב מאוחר יותר</string>
+
+    <!--Content Descriptions-->
+    <string name="weather_icon_content">סמל מצב מזג האוויר</string>
+    <string name="language_icon_content">סמל שפה</string>
+    <string name="menu_icon_content">סמל תפריט</string>
+    <string name="wind_icon_content">סמל רוח</string>
+    <string name="humidity_icon_content">סמל לחות</string>
+    <string name="error_icon_content">סמל שגיאה</string>
+    <string name="close_icon_content">סמל סגירה</string>
+</resources>

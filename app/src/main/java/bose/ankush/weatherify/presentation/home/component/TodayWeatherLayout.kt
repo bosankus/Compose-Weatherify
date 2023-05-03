@@ -49,7 +49,7 @@ fun CurrentDate() {
         shadowElevation = 10.dp
     ) {
         val epoch = DateTimeUtils.getCurrentTimestamp()
-        val currentDateTime = remember { DateTimeUtils.getFormattedDateTimeFromEpoch(epoch) }
+        val currentDateTime = remember { DateTimeUtils.getFormattedDateTimeFromEpoch(epoch.toLong()) }
         Text(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
             text = currentDateTime,

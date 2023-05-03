@@ -9,10 +9,10 @@
     <string name="celsius" translatable="false">%1$s°C</string>
     <string name="percent" translatable="false">%1$s%%</string>
     <string name="speed">%1$skm/h</string>
-    <string name="angle">%1$s°</string>
+    <string name="angle" translatable="false">%1$s°</string>
     <string name="feels_like">feels like %1$s°C</string>
     <string name="select_city">Select city</string>
-    <string name="default_city">Kolkata</string>
+    <string name="default_city" translatable="false">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>
 

@@ -3,7 +3,8 @@
   "codeA2": "in",
   "languages": [
     "en",
-    "hi"
+    "hi",
+    "iw"
   ],
   "defaultLanguage": "en",
   "localCurrency": ["INR"]

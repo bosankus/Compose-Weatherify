@@ -21,7 +21,7 @@ android {
         versionName = ConfigData.versionName
         multiDexEnabled = ConfigData.multiDexEnabled
         testInstrumentationRunner = "bose.ankush.weatherify.helper.HiltTestRunner"
-        resourceConfigurations.addAll(listOf("en", "hi"))
+        resourceConfigurations.addAll(listOf("en", "hi", "iw"))
     }
 
     buildTypes {
