@@ -1,6 +1,5 @@
 package bose.ankush.language.presentation
 
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,8 +21,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.os.LocaleListCompat
 import bose.ankush.language.R
+import bose.ankush.language.presentation.LocaleHelper.changeLanguageTo
+import bose.ankush.language.presentation.LocaleHelper.getDisplayName
 
 const val LANGUAGE_ARGUMENT_KEY = "country_config"
 
@@ -85,7 +85,7 @@ fun LanguageChangeSetting(languages: Array<String>, navAction: () -> Unit) {
     ) {
         items(languages.size) {
             Text(
-                text = languages[it],
+                text = languages[it].getDisplayName(),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
@@ -93,10 +93,8 @@ fun LanguageChangeSetting(languages: Array<String>, navAction: () -> Unit) {
                     .padding(top = 16.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .clickable {
-                        // kick locale to change itself
-                        AppCompatDelegate.setApplicationLocales(
-                            LocaleListCompat.forLanguageTags(languages[it])
-                        )
+                        // change language
+                        changeLanguageTo(languages[it])
                         // pop backstack
                         navAction.invoke()
                     }
