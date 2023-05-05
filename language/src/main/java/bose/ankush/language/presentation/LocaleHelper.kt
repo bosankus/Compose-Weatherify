@@ -1,7 +1,5 @@
 package bose.ankush.language.presentation
 
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import java.util.Locale
 
 object LocaleHelper {
@@ -11,9 +9,9 @@ object LocaleHelper {
         return locale.displayName
     }
 
-    fun changeLanguageTo(languageCode: String) {
+    /*fun changeLanguageTo(languageCode: String) {
         AppCompatDelegate.setApplicationLocales(
             LocaleListCompat.forLanguageTags(languageCode)
         )
-    }
+    }*/
 }
