@@ -4,9 +4,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.hilt.navigation.compose.hiltViewModel
-import bose.ankush.weatherify.navigation.AppNavigation
+import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.home.HomeViewModel
-import bose.ankush.weatherify.presentation.ui.theme.WeatherifyTheme
+import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi

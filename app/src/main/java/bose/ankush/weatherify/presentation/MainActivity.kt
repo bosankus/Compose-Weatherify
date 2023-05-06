@@ -1,33 +1,36 @@
 package bose.ankush.weatherify.presentation
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import bose.ankush.weatherify.common.startInAppUpdate
-import bose.ankush.weatherify.navigation.AppNavigation
-import bose.ankush.weatherify.presentation.ui.theme.BackgroundGrey
-import bose.ankush.weatherify.presentation.ui.theme.WeatherifyTheme
+import bose.ankush.weatherify.presentation.navigation.AppNavigation
+import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import timber.log.Timber
+import java.util.Date
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
-
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Timber.d("getApplicationLocales: ${AppCompatDelegate.getApplicationLocales()}")
         setContent {
             WeatherifyTheme {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(BackgroundGrey)
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
                     AppNavigation()
                 }

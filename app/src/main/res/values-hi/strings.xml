@@ -5,12 +5,14 @@
     <string name="retry_btn_txt">पुन: प्रयास करें</string>
     <string name="forecast_heading_txt">पूर्वानुमान</string>
     <string name="not_available">--</string>
+    <string name="degree">%1$s°</string>
     <string name="celsius">%1$s°C</string>
     <string name="percent">%1$s%%</string>
     <string name="speed">%1$sकिमी/घं</string>
     <string name="angle">%1$s°</string>
     <string name="feels_like">%1$s° की तरह लगता</string>
     <string name="select_city">शहर चुनें</string>
+    <string name="air_quality">हवा की गुणवत्ता</string>
     <string name="default_city">Kolkata</string>
     <string name="go_back">वापस जाएं</string>
     <string name="got_it">समझ गया</string>
@@ -27,7 +29,10 @@
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">मौसम की स्थिति आइकन</string>
-    <string name="location_icon_content">स्थान शीर्षलेख आइकन</string>
+    <string name="language_icon_content">भाषा परिवर्तन चिह्न</string>
+    <string name="menu_icon_content">मेनू आइकन</string>
+    <string name="wind_icon_content">पवन चिह्न</string>
+    <string name="humidity_icon_content">आर्द्रता चिह्न</string>
     <string name="error_icon_content">त्रुटि चिह्</string>
-    <string name="close_icon_content">आइकन बंद करें बटन</string>
+    <string name="close_icon_content">बंद करें चिह्</string>
 </resources>

@@ -1,0 +1,11 @@
+{
+  "code": "india",
+  "codeA2": "in",
+  "languages": [
+    "en",
+    "hi",
+    "iw"
+  ],
+  "defaultLanguage": "en",
+  "localCurrency": ["INR"]
+}

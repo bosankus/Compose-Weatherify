@@ -5,14 +5,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -20,8 +19,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.presentation.home.HomeViewModel
-import bose.ankush.weatherify.presentation.ui.theme.AccentColor
-import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
 
 @Composable
 fun FourDaysForecastLayout(
@@ -34,8 +31,8 @@ fun FourDaysForecastLayout(
     ) {
         Text(
             text = stringResource(id = R.string.forecast_heading_txt),
-            style = MaterialTheme.typography.subtitle1,
-            color = Color.White,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
@@ -68,7 +65,7 @@ fun FutureForecastListItem(
                         selectedItem = it
                         onItemClick(it)
                     }
-                    .background(if (selectedItem == it) AccentColor else DefaultCardBackgroundLightGrey)
+                    .background(if (selectedItem == it) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
                     .padding(horizontal = 10.dp, vertical = 20.dp)
             ) {
                 Column(
@@ -77,9 +74,9 @@ fun FutureForecastListItem(
                 ) {
                     Text(
                         text = avgForecastList[it].nameOfDay?.substring(0,3) ?: stringResource(id = R.string.not_available),
-                        style = MaterialTheme.typography.body2,
+                        style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.alpha(0.6f),
                     )
                     Text(
@@ -87,9 +84,9 @@ fun FutureForecastListItem(
                             id = R.string.celsius,
                             avgForecastList[it].avgTemp ?: stringResource(id = R.string.not_available)
                         ),
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.bodyMedium,
                         overflow = TextOverflow.Ellipsis,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.padding(top = 16.dp)
                     )
                     Text(
@@ -97,9 +94,9 @@ fun FutureForecastListItem(
                             id = R.string.feels_like,
                             avgForecastList[it].feelsLike ?: stringResource(id = R.string.not_available)
                         ),
-                        style = MaterialTheme.typography.caption,
+                        style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier
                             .padding(top = 16.dp)
                             .alpha(0.6f),

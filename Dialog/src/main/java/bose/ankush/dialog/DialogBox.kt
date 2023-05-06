@@ -2,9 +2,14 @@ package bose.ankush.dialog
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
+import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -54,7 +59,7 @@ fun DialogBox(
             negativeButtonText = dismissButtonText,
             positiveButtonText = confirmButtonText,
             positiveOnClick = confirmOnClick,
-            negativeOnClick = closeOnClick ,
+            negativeOnClick = closeOnClick,
         )
     }
 }
@@ -72,8 +77,7 @@ fun DialogBoxUi(
 ) {
     Card(
         shape = RoundedCornerShape(10.dp),
-        modifier = Modifier.padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 10.dp),
-        elevation = 8.dp
+        modifier = Modifier.padding(start = 10.dp, top = 5.dp, end = 10.dp, bottom = 10.dp)
     ) {
         Column(
             modifier = modifier.background(BackgroundGrey)

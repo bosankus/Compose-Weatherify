@@ -21,6 +21,7 @@ android {
         versionName = ConfigData.versionName
         multiDexEnabled = ConfigData.multiDexEnabled
         testInstrumentationRunner = "bose.ankush.weatherify.helper.HiltTestRunner"
+        resourceConfigurations.addAll(listOf("en", "hi", "iw"))
     }
 
     buildTypes {
@@ -35,13 +36,11 @@ android {
     }
 
     buildFeatures {
-        dataBinding = true
-        viewBinding = true
         compose = true
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = Versions.composeVersion
+        kotlinCompilerExtensionVersion = Versions.compilerExtensionVersion
     }
 
     compileOptions {
@@ -59,6 +58,7 @@ dependencies {
 
     api(project(":utilities"))
     api(project(":dialog"))
+    api(project(":language"))
 
     // Unit Testing
     testImplementation(Deps.junit)
@@ -82,9 +82,9 @@ dependencies {
 
     // Compose
     implementation(Deps.composeUi)
-    implementation(Deps.composeMaterial)
     debugImplementation(Deps.composeUiTooling)
     implementation(Deps.composeUiToolingPreview)
+    implementation(Deps.composeMaterial3)
 
     // Core
     implementation(Deps.androidCore)
@@ -96,6 +96,7 @@ dependencies {
     implementation(Deps.inAppUpdateKtx)
     implementation(Deps.googlePlayLocation)
     implementation(Deps.animatedNavigation)
+    implementation(Deps.systemUIController)
     implementation(Deps.composePermission)
 
     // Networking

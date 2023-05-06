@@ -13,6 +13,9 @@ const val OPEN_WEATHER_CERT_PIN = "sha256/47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3
 const val DEFAULT_CITY_NAME = "Kolkata"
 const val APP_UPDATE_REQ_CODE = 111
 
+/*Shared Preference Keys*/
+const val APP_PREFERENCE_KEY = "app_preferences"
+
 /* Permission constants */
 /*private const val ACCESS_FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
 private const val ACCESS_COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION

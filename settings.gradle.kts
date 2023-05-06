@@ -18,4 +18,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Weatherify"
-include (":app", ":utilities", ":dialog", ":payment")
+include (":app", ":utilities", ":dialog", ":payment", ":language")

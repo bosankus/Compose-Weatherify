@@ -6,12 +6,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.base.AssetLoader
 import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
 import bose.ankush.weatherify.common.ResultData
 import bose.ankush.weatherify.common.UiText
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.domain.model.AvgForecast
+import bose.ankush.weatherify.domain.model.Country
 import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
@@ -36,7 +38,7 @@ class HomeViewModel @Inject constructor(
     private val getTodaysWeatherUseCase: GetTodaysWeatherReport,
     private val getForecastsUseCase: GetForecasts,
     private val getAirQuality: GetAirQuality,
-    val fusedLocationProviderClient: FusedLocationProviderClient
+    val fusedLocationProviderClient: FusedLocationProviderClient,
 ) : ViewModel() {
 
     private var _todayWeather = mutableStateOf(UIState<Weather>())

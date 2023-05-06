@@ -1,30 +1,26 @@
 package bose.ankush.weatherify.presentation.cities
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.navigation.Screen
+import bose.ankush.weatherify.common.component.ScreenTopAppBar
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
-import bose.ankush.weatherify.presentation.ui.theme.DefaultCardBackgroundLightGrey
-import bose.ankush.weatherify.presentation.ui.theme.SeaGreenDark
-import bose.ankush.weatherify.presentation.ui.theme.TextWhite
+import bose.ankush.weatherify.presentation.navigation.Screen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitiesListScreen(
     navController: NavController,
@@ -32,45 +28,25 @@ fun CitiesListScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        Column {
-            CityNameHeader(navController)
-
-            CityNameSearchBarWithList(navController)
-        }
+        Scaffold(
+            topBar = {
+                ScreenTopAppBar(
+                    headlineId = R.string.select_city,
+                    navIconAction = { navController.popBackStack() },
+                )
+            },
+            content = { innerPadding ->
+                Column(
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    CityNameSearchBarWithList(navController)
+                }
+            }
+        )
     }
 }
 
-@Composable
-private fun CityNameHeader(navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterEnd)
-                .padding(all = 16.dp)
-        ) {
-            Text(
-                text = stringResource(id = R.string.select_city),
-                style = MaterialTheme.typography.h3,
-                color = TextWhite
-            )
-            Icon(
-                painter = painterResource(id = R.drawable.ic_close),
-                tint = TextWhite,
-                contentDescription = stringResource(id = R.string.close_icon_content),
-                modifier = Modifier
-                    .clickable { navController.popBackStack() }
-
-            )
-        }
-    }
-}
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CityNameSearchBarWithList(navController: NavController) {
     val viewModels: CitiesViewModel = hiltViewModel()
@@ -91,12 +67,12 @@ private fun CityNameSearchBarWithList(navController: NavController) {
             onValueChange = viewModels::onSearchTextChange,
             placeholder = { Text(text = stringResource(id = R.string.select_city) + "...") },
             colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = DefaultCardBackgroundLightGrey,
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = TextWhite,
-                textColor = TextWhite,
-                placeholderColor = SeaGreenDark
+                cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                textColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                placeholderColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
         )
         Spacer(modifier = Modifier.height(10.dp))
