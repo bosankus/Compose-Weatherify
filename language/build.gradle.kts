@@ -62,10 +62,4 @@ dependencies {
     implementation(Deps.composeMaterial3)
     implementation(Deps.navigationCompose)
     implementation(Deps.animatedNavigation)
-
-    // DI
-    implementation(Deps.dagger)
-    kapt(Deps.daggerCompiler)
-
-    implementation(Deps.retrofitGson)
 }
