@@ -14,3 +14,6 @@ Download latest version of the App
 - App language change implementated using [Per App Language Preference](https://developer.android.com/guide/topics/resources/app-languages#androidx-impl)
 - Material 3 migration
 - Added dynamic theme
+
+### Screen Video (Language Chang feature)
+[POC-1.webm](https://github.com/bosankus/Compose-Weatherify/assets/46471379/455f1c9d-f1e5-482d-9c29-a1c23b4e3679)
