@@ -1,5 +1,6 @@
 package bose.ankush.weatherify.presentation.home.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -46,16 +47,16 @@ fun CurrentDate() {
         modifier = Modifier.padding(top = 20.dp),
         color = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp),
         shape = RoundedCornerShape(20.dp),
-        shadowElevation = 10.dp
     ) {
         val epoch = DateTimeUtils.getCurrentTimestamp()
         val currentDateTime = remember { DateTimeUtils.getFormattedDateTimeFromEpoch(epoch.toLong()) }
         Text(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 5.dp),
             text = currentDateTime,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }

@@ -28,6 +28,7 @@ object Deps {
     val composeUi by lazy { "androidx.compose.ui:ui:${Versions.composeVersion}" }
     val composeUiTooling by lazy { "androidx.compose.ui:ui-tooling:${Versions.composeVersion}" }
     val composeUiToolingPreview by lazy { "androidx.compose.ui:ui-tooling-preview:${Versions.composeVersion}" }
+    val composeMaterial1 by lazy { "androidx.compose.material:material:${Versions.composeMaterial1}" }
     val composeMaterial3 by lazy { "androidx.compose.material3:material3:${Versions.composeMaterial3}" }
 
     // Core
@@ -60,10 +61,6 @@ object Deps {
     val hiltTesting by lazy { "com.google.dagger:hilt-android-testing:${Versions.hilt}" }
     val hiltDaggerAndroidCompiler by lazy { "com.google.dagger:hilt-android-compiler:${Versions.hilt}" }
     val hiltNavigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.hiltCompose}" }
-    // Dagger 2.45
-    val dagger by lazy { "com.google.dagger:dagger:${Versions.hilt}" }
-    val daggerCompiler by lazy { "com.google.dagger:dagger-compiler:${Versions.hilt}" }
-
 
     // Miscellaneous
     val timber by lazy { "com.jakewharton.timber:timber:${Versions.timber}" }

@@ -6,7 +6,7 @@ plugins {
 
 @Suppress("UnstableApiUsage")
 android {
-    namespace = "bose.ankush.language"
+    namespace = "bose.ankush.splash"
     compileSdk = 33
 
     defaultConfig {
@@ -45,6 +45,7 @@ android {
 }
 
 dependencies {
+
     // Testing
     testImplementation(Deps.junit)
 
@@ -58,7 +59,6 @@ dependencies {
     implementation(Deps.composeUiTooling)
     implementation(Deps.composeUiToolingPreview)
     implementation(Deps.composeUi)
-    implementation(Deps.composeMaterial1)
     implementation(Deps.composeMaterial3)
     implementation(Deps.navigationCompose)
     implementation(Deps.animatedNavigation)

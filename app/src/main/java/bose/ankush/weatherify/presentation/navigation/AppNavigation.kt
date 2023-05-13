@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import bose.ankush.language.presentation.LANGUAGE_ARGUMENT_KEY
+import bose.ankush.language.presentation.LanguageBottomSheetScreen
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.presentation.air_quality.AirQualityDetailsScreen
@@ -160,6 +161,12 @@ fun AppNavigation() {
                 }
             }
         }
+        /*composable(
+            route = Screen.SplashScreen.route,
+            arguments = listOf(navArgument(""){
+
+            })
+        )*/
     }
 }
 

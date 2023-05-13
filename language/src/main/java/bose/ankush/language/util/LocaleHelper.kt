@@ -1,4 +1,4 @@
-package bose.ankush.language.presentation
+package bose.ankush.language.util
 
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat

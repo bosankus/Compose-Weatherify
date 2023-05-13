@@ -59,6 +59,7 @@ dependencies {
     api(project(":utilities"))
     api(project(":dialog"))
     api(project(":language"))
+    api(project(":splash"))
 
     // Unit Testing
     testImplementation(Deps.junit)

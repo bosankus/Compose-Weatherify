@@ -22,8 +22,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import bose.ankush.language.R
-import bose.ankush.language.presentation.LocaleHelper.changeLanguageTo
-import bose.ankush.language.presentation.LocaleHelper.getDisplayName
+import bose.ankush.language.util.LocaleHelper.changeLanguageTo
+import bose.ankush.language.util.LocaleHelper.getDisplayName
 
 const val LANGUAGE_ARGUMENT_KEY = "country_config"
 
