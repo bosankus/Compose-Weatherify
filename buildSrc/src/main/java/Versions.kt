@@ -16,6 +16,7 @@ object Versions {
     const val benManes = "0.42.0"
     const val spotlessVersion = "6.18.0"
     const val ktLintVersion = "11.3.2"
+    const val googleServices = "4.3.15"
 
     // Testing
     const val junit = "4.13.2"
@@ -46,6 +47,9 @@ object Versions {
     const val retrofitCoroutineAdapter = "0.9.2"
     const val okhttpInterceptor = "4.9.3"
 
+    // Firebase
+    const val firebaseBom = "32.0.0"
+
     // Coroutines
     const val coroutines = "1.6.4"
 
@@ -66,7 +70,4 @@ object Versions {
 
     /*For Payment module*/
     const val razorPay = "1.6.30"
-
-    /*For Language module*/
-    const val lingver = "1.3.0"
 }

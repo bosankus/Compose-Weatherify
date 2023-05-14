@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
@@ -104,6 +105,11 @@ dependencies {
     implementation(Deps.retrofit)
     implementation(Deps.retrofitGson)
     implementation(Deps.okhttpInterceptor)
+
+    // Firebase
+    implementation(platform(Deps.firebaseBom))
+    implementation(Deps.firebaseConfig)
+    implementation(Deps.firebaseAnalytics)
 
     // Coroutines
     implementation(Deps.retrofitCoroutineAdapter)

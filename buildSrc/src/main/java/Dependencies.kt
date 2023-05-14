@@ -2,6 +2,7 @@
 object BuildPlugins {
     val buildGradle by lazy { "com.android.tools.build:gradle:${Versions.buildGradle}" }
     val kotlinGradlePlugin by lazy { "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}" }
+    val googleServicePlugin by lazy { "com.google.gms:google-services:${Versions.googleServices}" }
 }
 
 // Dependencies
@@ -51,6 +52,11 @@ object Deps {
     val retrofitCoroutineAdapter by lazy { "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:${Versions.retrofitCoroutineAdapter}" }
     val okhttpInterceptor by lazy { "com.squareup.okhttp3:logging-interceptor:${Versions.okhttpInterceptor}" }
 
+    // Firebase
+    val firebaseBom by lazy { "com.google.firebase:firebase-bom:${Versions.firebaseBom}" }
+    val firebaseConfig by lazy { "com.google.firebase:firebase-config-ktx" }
+    val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics-ktx" }
+
     // Coroutines
     val coroutinesCore by lazy { "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}" }
     val coroutinesAndroid by lazy { "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutines}" }
@@ -60,10 +66,6 @@ object Deps {
     val hiltTesting by lazy { "com.google.dagger:hilt-android-testing:${Versions.hilt}" }
     val hiltDaggerAndroidCompiler by lazy { "com.google.dagger:hilt-android-compiler:${Versions.hilt}" }
     val hiltNavigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.hiltCompose}" }
-    // Dagger 2.45
-    val dagger by lazy { "com.google.dagger:dagger:${Versions.hilt}" }
-    val daggerCompiler by lazy { "com.google.dagger:dagger-compiler:${Versions.hilt}" }
-
 
     // Miscellaneous
     val timber by lazy { "com.jakewharton.timber:timber:${Versions.timber}" }
@@ -78,7 +80,4 @@ object Deps {
 
     /*For Payment module*/
     val razorPay by lazy { "com.razorpay:checkout:${Versions.razorPay}" }
-
-    /*For Language module*/
-    val lingver by lazy { "com.github.YarikSOffice:lingver:${Versions.lingver}" }
 }
