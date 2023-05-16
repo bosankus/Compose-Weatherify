@@ -22,8 +22,8 @@ object Versions {
     const val junit = "4.13.2"
     const val extJunit = "1.1.5"
     const val truth = "1.1.3"
-    const val turbine = "0.12.3"
-    const val coroutineTest = "1.6.4"
+    const val turbine = "0.13.0"
+    const val coroutineTest = "1.7.1"
     const val coreTesting = "2.2.0"
     const val espresso = "3.5.1"
     const val mockitoInline = "5.2.0"
@@ -54,7 +54,7 @@ object Versions {
     const val coroutines = "1.6.4"
 
     // Dependency Injection
-    const val hilt = "2.46"
+    const val hilt = "2.46.1"
     const val hiltCompose = "1.0.0"
 
     // Miscellaneous
