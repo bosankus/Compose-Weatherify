@@ -57,7 +57,6 @@ android {
 
 dependencies {
 
-    api(project(":utilities"))
     api(project(":language"))
 
     // Unit Testing
