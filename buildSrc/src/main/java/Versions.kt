@@ -65,9 +65,6 @@ object Versions {
     // Memory leak
     const val leakCanary = "2.10"
 
-    /*For Dialog module*/
-    const val composeRuntime = "1.2.0"
-
     /*For Payment module*/
     const val razorPay = "1.6.30"
 }

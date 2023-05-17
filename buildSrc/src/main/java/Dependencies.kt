@@ -75,9 +75,6 @@ object Deps {
     // Memory Leak
     val leakCanary by lazy { "com.squareup.leakcanary:leakcanary-android:${Versions.leakCanary}" }
 
-    /*For Dialog module*/
-    val composeRuntime by lazy { "androidx.compose.runtime:runtime:${Versions.composeVersion}" }
-
     /*For Payment module*/
     val razorPay by lazy { "com.razorpay:checkout:${Versions.razorPay}" }
 }
