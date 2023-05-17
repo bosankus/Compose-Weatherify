@@ -1,14 +1,14 @@
 package bose.ankush.weatherify.common
 
 import android.Manifest
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import bose.ankush.dialog.DialogBox
+import bose.ankush.weatherify.common.component.AppAlertDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -20,7 +20,7 @@ object LocationPermissionManager {
     @Composable
     fun RequestPermission(
         actionPermissionGranted: () -> Unit,
-        actionPermissionDenied: () -> Unit
+        actionPermissionDenied: () -> Unit,
     ) {
         val permissionStates = rememberMultiplePermissionsState(
             permissions = listOf(
@@ -50,47 +50,63 @@ object LocationPermissionManager {
                     when {
                         it.status.isGranted -> {
                             /** Permission has been granted by the user.
-                               Hence getting the current lat, lang.
-                            */
+                            Hence getting the current lat, lang.
+                             */
                             actionPermissionGranted()
                         }
+
                         it.status.shouldShowRationale -> {
                             /** Happens if a user denies the permission two times.
-                               Hence needs to show why permission is required.
-                               On action button click request permission.
+                            Hence needs to show why permission is required.
+                            On action button click request permission.
                              */
-                            MandatoryPermissionDescriptionContent(canClose = true) { actionPermissionDenied() }
+                            MandatoryPermissionDescriptionContent(
+                                confirmAction = actionPermissionDenied,
+                                shouldExitIfDialogDismissed = true
+                            )
                         }
+
                         !it.status.isGranted && !it.status.shouldShowRationale -> {
                             /** If the permission is denied and the should not show rationale
-                               Hence we can only allow the permission manually through app settings.
-                               On action button click go to settings page
+                            Hence we can only allow the permission manually through app settings.
+                            On action button click go to settings page
                              */
-                            MandatoryPermissionDescriptionContent(canClose = true) { actionPermissionDenied() }
+                            MandatoryPermissionDescriptionContent(
+                                confirmAction = actionPermissionDenied,
+                                shouldExitIfDialogDismissed = true
+                            )
                         }
                     }
                 }
+
                 Manifest.permission.ACCESS_FINE_LOCATION -> {
                     when {
                         it.status.isGranted -> {
                             /** Permission has been granted by the user.
-                               Hence getting the current lat, lang.
-                            */
+                            Hence getting the current lat, lang.
+                             */
                             actionPermissionGranted()
                         }
+
                         it.status.shouldShowRationale -> {
                             /** Happens if a user denies the permission two times.
-                               Hence needs to show why permission is required.
+                            Hence needs to show why permission is required.
                              */
-                            MandatoryPermissionDescriptionContent(canClose = true) { actionPermissionDenied() }
+                            MandatoryPermissionDescriptionContent(
+                                confirmAction = actionPermissionDenied,
+                                shouldExitIfDialogDismissed = true
+                            )
 
                         }
+
                         !it.status.isGranted && !it.status.shouldShowRationale -> {
                             /** If the permission is denied and the should not show rationale
-                               Hence we can only allow the permission manually through app settings
+                            Hence we can only allow the permission manually through app settings
                              */
-                            MandatoryPermissionDescriptionContent(canClose = true) { actionPermissionDenied() }
-
+                            MandatoryPermissionDescriptionContent(
+                                confirmAction = actionPermissionDenied,
+                                shouldExitIfDialogDismissed = true
+                            )
                         }
                     }
                 }
@@ -100,18 +116,19 @@ object LocationPermissionManager {
 
 
     @Composable
-    fun MandatoryPermissionDescriptionContent(canClose: Boolean, action: () -> Unit) {
-        val canCloseState = remember { mutableStateOf(canClose) }
-        if (canCloseState.value) {
-            DialogBox(
-                headingText = "Location permission Required",
-                descriptionText = "Location permission is applicable while showing you weather & air quality as per your current location. Without this permission few features won't be available. Click allow to open app settings screen for granting location permission.",
-                dismissButtonText = "Deny",
-                confirmButtonText = "Allow",
-                confirmOnClick = { action() },
-                closeOnClick = canCloseState
-            )
-        }
+    fun MandatoryPermissionDescriptionContent(
+        confirmAction: () -> Unit,
+        shouldExitIfDialogDismissed: Boolean
+    ) {
+        AppAlertDialog(
+            heroIcon = Icons.Outlined.LocationOn,
+            title = "Location permission required",
+            body = "Location permission is applicable while showing weather & air quality as per current location. Click allow to open app location settings.",
+            confirmBtnText = "Allow",
+            confirmBtnAction = confirmAction,
+            dismissBtnText = "Exit",
+            exitApp = shouldExitIfDialogDismissed
+        )
     }
 
 }

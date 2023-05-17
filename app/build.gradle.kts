@@ -58,7 +58,6 @@ android {
 dependencies {
 
     api(project(":utilities"))
-    api(project(":dialog"))
     api(project(":language"))
 
     // Unit Testing

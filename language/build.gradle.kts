@@ -55,7 +55,6 @@ dependencies {
     // Core
     implementation(Deps.androidCore)
     implementation(Deps.appCompat)
-    implementation(Deps.composeRuntime)
     implementation(Deps.composeUiTooling)
     implementation(Deps.composeUiToolingPreview)
     implementation(Deps.composeUi)
