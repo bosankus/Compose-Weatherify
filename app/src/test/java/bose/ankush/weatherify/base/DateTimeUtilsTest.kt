@@ -1,4 +1,4 @@
-package com.bosankus.utilities
+package bose.ankush.weatherify.base
 
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*

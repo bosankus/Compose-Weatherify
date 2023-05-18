@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.presentation.home.HomeViewModel
-import com.bosankus.utilities.DateTimeUtils
 
 @Composable
 fun TodaysForecastLayout(
