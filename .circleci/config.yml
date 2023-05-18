@@ -40,6 +40,10 @@ jobs:
           command: |
             ./gradlew assembleRelease
 
+      # Ignore vulnerable files on public repo
+      - do:
+          command: echo "google-services.json" >> .gitignore
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
