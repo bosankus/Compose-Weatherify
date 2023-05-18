@@ -25,6 +25,12 @@ jobs:
       # Checkout the code as the first step.
       - checkout
 
+      # Create a google-services.json file in the app directory of your project using the contents
+      # of the GOOGLE_SERVICES_JSON environment variable.
+      - run:
+          name: Create google-services.json file
+          command: echo $GOOGLE_SERVICES_JSON > app/google-services.json
+
       # The next step will run the unit tests
       - android/run-tests:
           test-command: ./gradlew lint testDebug --continue
@@ -39,10 +45,6 @@ jobs:
           name: Assemble release build
           command: |
             ./gradlew assembleRelease
-
-      # Ignore vulnerable files on public repo
-      - do:
-          command: echo "google-services.json" >> .gitignore
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
