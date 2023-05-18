@@ -10,7 +10,7 @@ object Versions {
     const val composeMaterial3 = "1.0.1"
 
     // Plugins
-    const val buildGradle = "7.2.1"
+    const val buildGradle = "7.4.1"
     const val navigation = "2.5.3"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.42.0"
