@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.domain.model.AvgForecast
-import com.bosankus.utilities.DateTimeUtils
 import java.util.*
 import kotlin.math.roundToInt
 

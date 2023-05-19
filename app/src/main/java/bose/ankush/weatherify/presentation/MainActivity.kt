@@ -16,7 +16,6 @@ import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
-import java.util.Date
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
@@ -39,7 +38,6 @@ class MainActivity : AppCompatActivity() {
 
         startInAppUpdate(this)
     }
-
 
     override fun onResume() {
         super.onResume()

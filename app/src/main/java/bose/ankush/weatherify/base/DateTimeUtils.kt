@@ -1,4 +1,4 @@
-package com.bosankus.utilities
+package bose.ankush.weatherify.base
 
 import java.time.Instant
 import java.time.LocalDateTime

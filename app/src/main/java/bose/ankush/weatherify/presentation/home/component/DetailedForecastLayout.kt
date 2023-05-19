@@ -9,16 +9,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import coil.compose.AsyncImage
-import com.bosankus.utilities.DateTimeUtils
 
 @Composable
 fun DetailedForecastLayout(list: List<ForecastDto.ForecastList>, item: Int) {

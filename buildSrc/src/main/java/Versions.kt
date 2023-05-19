@@ -11,19 +11,20 @@ object Versions {
     const val composeMaterial3 = "1.1.0"
 
     // Plugins
-    const val buildGradle = "7.2.1"
+    const val buildGradle = "7.4.1"
     const val navigation = "2.5.3"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.42.0"
     const val spotlessVersion = "6.18.0"
     const val ktLintVersion = "11.3.2"
+    const val googleServices = "4.3.15"
 
     // Testing
     const val junit = "4.13.2"
     const val extJunit = "1.1.5"
     const val truth = "1.1.3"
-    const val turbine = "0.12.3"
-    const val coroutineTest = "1.6.4"
+    const val turbine = "0.13.0"
+    const val coroutineTest = "1.7.1"
     const val coreTesting = "2.2.0"
     const val espresso = "3.5.1"
     const val mockitoInline = "5.2.0"
@@ -47,11 +48,14 @@ object Versions {
     const val retrofitCoroutineAdapter = "0.9.2"
     const val okhttpInterceptor = "4.9.3"
 
+    // Firebase
+    const val firebaseBom = "32.0.0"
+
     // Coroutines
     const val coroutines = "1.6.4"
 
     // Dependency Injection
-    const val hilt = "2.46"
+    const val hilt = "2.46.1"
     const val hiltCompose = "1.0.0"
 
     // Miscellaneous
@@ -62,12 +66,6 @@ object Versions {
     // Memory leak
     const val leakCanary = "2.10"
 
-    /*For Dialog module*/
-    const val composeRuntime = "1.2.0"
-
     /*For Payment module*/
     const val razorPay = "1.6.30"
-
-    /*For Language module*/
-    const val lingver = "1.3.0"
 }

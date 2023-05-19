@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
@@ -44,11 +45,11 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     namespace = "bose.ankush.weatherify"
@@ -56,8 +57,6 @@ android {
 
 dependencies {
 
-    api(project(":utilities"))
-    api(project(":dialog"))
     api(project(":language"))
     api(project(":splash"))
 
@@ -105,6 +104,11 @@ dependencies {
     implementation(Deps.retrofit)
     implementation(Deps.retrofitGson)
     implementation(Deps.okhttpInterceptor)
+
+    // Firebase
+    implementation(platform(Deps.firebaseBom))
+    implementation(Deps.firebaseConfig)
+    implementation(Deps.firebaseAnalytics)
 
     // Coroutines
     implementation(Deps.retrofitCoroutineAdapter)
