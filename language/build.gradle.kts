@@ -7,11 +7,10 @@ plugins {
 @Suppress("UnstableApiUsage")
 android {
     namespace = "bose.ankush.language"
-    compileSdk = 33
+    compileSdk = ConfigData.compileSdkVersion
 
     defaultConfig {
-        minSdk = 26
-        targetSdk = 33
+        minSdk = ConfigData.minSdkVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
