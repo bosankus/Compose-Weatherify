@@ -1,9 +1,18 @@
 package bose.ankush.weatherify.presentation.home.component
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -11,18 +20,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.common.Extension.toCelsius
-import bose.ankush.weatherify.presentation.home.HomeViewModel
+import bose.ankush.weatherify.domain.model.Weather
 
 @Composable
-fun TodaysForecastLayout(
-    viewModel: HomeViewModel = hiltViewModel(),
-) {
+fun TodayForecastLayout(weather: Weather? = Weather()) {
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -34,7 +41,7 @@ fun TodaysForecastLayout(
             CurrentDate()
 
             // Show today's current temperature & weather state
-            CurrentTemperatureInCelsius(viewModel)
+            CurrentTemperatureInCelsius(weather)
 
             // Show Wind speed, humidity, and some other feature in row
         }
@@ -49,7 +56,8 @@ fun CurrentDate() {
         shape = RoundedCornerShape(20.dp),
     ) {
         val epoch = DateTimeUtils.getCurrentTimestamp()
-        val currentDateTime = remember { DateTimeUtils.getFormattedDateTimeFromEpoch(epoch.toLong()) }
+        val currentDateTime =
+            remember { DateTimeUtils.getFormattedDateTimeFromEpoch(epoch.toLong()) }
         Text(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 5.dp),
@@ -62,8 +70,8 @@ fun CurrentDate() {
 }
 
 @Composable
-fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
-    val weather = viewModel.todayWeather.value.data
+fun CurrentTemperatureInCelsius(weatherData: Weather?) {
+    val weather = remember { weatherData }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -110,4 +118,10 @@ fun CurrentTemperatureInCelsius(viewModel: HomeViewModel) {
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun TodayForecastLayoutPreview() {
+    TodayForecastLayout(Weather())
 }

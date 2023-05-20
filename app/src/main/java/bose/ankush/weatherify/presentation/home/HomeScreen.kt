@@ -27,7 +27,7 @@ import bose.ankush.weatherify.presentation.home.component.AirQualityCardLayout
 import bose.ankush.weatherify.presentation.home.component.DetailedForecastLayout
 import bose.ankush.weatherify.presentation.home.component.FourDaysForecastLayout
 import bose.ankush.weatherify.presentation.home.component.HomeTopAppBar
-import bose.ankush.weatherify.presentation.home.component.TodaysForecastLayout
+import bose.ankush.weatherify.presentation.home.component.TodayForecastLayout
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.navigation.Screen
@@ -114,7 +114,7 @@ private fun ShowUIContainer(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     // Show today's forecasts
-                    item { TodaysForecastLayout() }
+                    item { TodayForecastLayout(viewModel.todayWeather.value.data) }
 
                     // Show current air quality condition details
                     item {

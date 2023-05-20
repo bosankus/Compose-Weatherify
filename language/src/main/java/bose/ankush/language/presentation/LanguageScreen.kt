@@ -27,7 +27,6 @@ import bose.ankush.language.util.LocaleHelper.getDisplayName
 
 const val LANGUAGE_ARGUMENT_KEY = "country_config"
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LanguageScreen(
     languages: Array<String>,
@@ -42,7 +41,9 @@ fun LanguageScreen(
                 Column(
                     modifier = Modifier.padding(innerPadding)
                 ) {
-                    LanguageChangeSetting(languages, navAction)
+                    LanguageChangeSetting(
+                        languages = languages,
+                        navAction = { /*not required*/ })
                 }
             }
         )
