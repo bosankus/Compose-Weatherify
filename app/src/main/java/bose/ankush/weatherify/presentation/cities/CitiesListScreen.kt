@@ -20,7 +20,6 @@ import bose.ankush.weatherify.presentation.cities.component.CityListItem
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.navigation.Screen
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitiesListScreen(
     navController: NavController,
@@ -46,7 +45,6 @@ fun CitiesListScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CityNameSearchBarWithList(navController: NavController) {
     val viewModels: CitiesViewModel = hiltViewModel()
@@ -66,13 +64,13 @@ private fun CityNameSearchBarWithList(navController: NavController) {
             value = searchText,
             onValueChange = viewModels::onSearchTextChange,
             placeholder = { Text(text = stringResource(id = R.string.select_city) + "...") },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                textColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                placeholderColor = MaterialTheme.colorScheme.onSecondaryContainer
+                focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
         )
         Spacer(modifier = Modifier.height(10.dp))

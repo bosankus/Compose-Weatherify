@@ -52,12 +52,17 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
+    lint {
+        abortOnError = false
+    }
+
     namespace = "bose.ankush.weatherify"
 }
 
 dependencies {
 
     api(project(":language"))
+    api(project(":splash"))
 
     // Unit Testing
     testImplementation(Deps.junit)

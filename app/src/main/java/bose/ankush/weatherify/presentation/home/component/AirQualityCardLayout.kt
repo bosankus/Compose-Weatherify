@@ -2,6 +2,7 @@ package bose.ankush.weatherify.presentation.home.component
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -44,8 +45,8 @@ fun AirQualityCardLayout(
     onCardClick: (Double, Double) -> Unit
 ) {
 
-    val airQualityReport = viewModel.airQuality.value
     val context: Context = LocalContext.current
+    val airQualityReport = remember { viewModel.airQuality.value }
     val latLang = remember { mutableStateOf(Pair(0.0, 0.0)) }
 
     /**
@@ -80,11 +81,14 @@ fun AirQualityCardLayout(
         }
 
     // if air quality report is not empty, show UI
-    if (airQualityReport.data != null)
+    AnimatedVisibility(
+        visible = airQualityReport.data != null
+    ) {
         ShowUI(
-            aq = airQualityReport.data,
+            aq = airQualityReport.data ?: AirQuality(),
             onItemClick = onCardClick
         )
+    }
 }
 
 /**

@@ -29,6 +29,7 @@ object Deps {
     val composeUi by lazy { "androidx.compose.ui:ui:${Versions.composeVersion}" }
     val composeUiTooling by lazy { "androidx.compose.ui:ui-tooling:${Versions.composeVersion}" }
     val composeUiToolingPreview by lazy { "androidx.compose.ui:ui-tooling-preview:${Versions.composeVersion}" }
+    val composeMaterial1 by lazy { "androidx.compose.material:material:${Versions.composeMaterial1}" }
     val composeMaterial3 by lazy { "androidx.compose.material3:material3:${Versions.composeMaterial3}" }
 
     // Core

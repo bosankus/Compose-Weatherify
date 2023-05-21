@@ -7,7 +7,8 @@ object Versions {
     // Compose
     const val composeVersion = "1.4.0"
     const val compilerExtensionVersion = "1.4.0"
-    const val composeMaterial3 = "1.0.1"
+    const val composeMaterial1 = "1.1.1"
+    const val composeMaterial3 = "1.1.0"
 
     // Plugins
     const val buildGradle = "7.4.1"
