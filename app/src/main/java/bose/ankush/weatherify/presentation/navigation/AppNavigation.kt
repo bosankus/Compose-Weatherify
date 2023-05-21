@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import bose.ankush.language.presentation.LANGUAGE_ARGUMENT_KEY
-import bose.ankush.language.presentation.LanguageBottomSheetScreen
 import bose.ankush.language.presentation.LanguageScreen
+import bose.ankush.splash.presentation.SplashScreen
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.presentation.air_quality.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
@@ -28,8 +28,13 @@ fun AppNavigation() {
     val navController = rememberAnimatedNavController()
     AnimatedNavHost(
         navController = navController,
-        startDestination = Screen.HomeScreen.route + "/{$HOME_ARGUMENT_KEY}"
+        startDestination = Screen.SplashScreen.route
     ) {
+        composable(
+            route = Screen.SplashScreen.route
+        ) {
+            SplashScreen(navAction = { navController.navigate(Screen.HomeScreen.withArgs(DEFAULT_CITY_NAME)) })
+        }
         composable(
             route = Screen.HomeScreen.route + "/{$HOME_ARGUMENT_KEY}",
             arguments = listOf(navArgument(HOME_ARGUMENT_KEY) {

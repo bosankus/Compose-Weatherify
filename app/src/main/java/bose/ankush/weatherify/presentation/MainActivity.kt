@@ -1,9 +1,8 @@
 package bose.ankush.weatherify.presentation
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -15,15 +14,14 @@ import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Timber.d("getApplicationLocales: ${AppCompatDelegate.getApplicationLocales()}")
         setContent {
             WeatherifyTheme {
                 Box(
