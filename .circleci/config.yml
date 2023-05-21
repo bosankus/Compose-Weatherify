@@ -25,12 +25,6 @@ jobs:
       # Checkout the code as the first step.
       - checkout
 
-      # Creating a dummy google-services.json file in the app directory using the contents
-      # of GOOGLE_SERVICES_JSON environment variable.
-      - run:
-          name: Create google-services.json file
-          command: echo $GOOGLE_SERVICES_JSON > app/google-services.json
-
       # The next step will run the unit tests
       - android/run-tests:
           test-command: ./gradlew lint testDebug --continue
