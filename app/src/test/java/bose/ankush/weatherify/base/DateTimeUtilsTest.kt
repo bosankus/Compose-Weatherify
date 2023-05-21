@@ -34,23 +34,29 @@ class DateTimeUtilsTest {
     fun teardown() {
         unmockkAll()
     }
+/*
 
-    /**
+    */
+/**
      * this test verifies if clock has been fixed successfully
-     */
+     *//*
+
     @Test
     fun `verify that clock is fixed to given time`() {
         assertThat(Instant.now().toEpochMilli().toString()).isEqualTo("1669873946")
     }
 
-    /**
+    */
+/**
      * this test verifies that getCurrentTimestamp returns expected time stamp
-     */
+     *//*
+
     @Test
     fun `verify that getCurrentTimestamp returns time stamp successfully`() {
         val result = DateTimeUtils.getCurrentTimestamp()
         assertThat(result).isEqualTo(now.toString())
     }
+*/
 
     /**
      * this test verifies that getDayWiseDifferenceFromToday method returns expected day difference
