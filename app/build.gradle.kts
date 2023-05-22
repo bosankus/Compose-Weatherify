@@ -52,6 +52,14 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
+    kotlin {
+        sourceSets.all {
+            languageSettings {
+                languageVersion = Versions.kotlinCompiler
+            }
+        }
+    }
+
     lint {
         abortOnError = false
     }
