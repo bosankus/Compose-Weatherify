@@ -1,6 +1,6 @@
 package bose.ankush.weatherify.common.component
 
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -26,7 +26,7 @@ fun AppAlertDialog(
 
     // If user clicks on dismiss button, app should exist
     if (shouldExit.value) {
-        val context = LocalContext.current as AppCompatActivity
+        val context = LocalContext.current as ComponentActivity
         AlertDialog(
             onDismissRequest = { /*User can't close dialog when clicked outside*/ },
             title = { Text(text = title) },
