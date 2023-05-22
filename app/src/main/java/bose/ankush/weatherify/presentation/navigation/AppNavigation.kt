@@ -33,7 +33,10 @@ fun AppNavigation() {
         composable(
             route = Screen.SplashScreen.route
         ) {
-            SplashScreen(navAction = { navController.navigate(Screen.HomeScreen.withArgs(DEFAULT_CITY_NAME)) })
+            SplashScreen(navAction = {
+                navController.popBackStack()
+                navController.navigate(Screen.HomeScreen.withArgs(DEFAULT_CITY_NAME))
+            })
         }
         composable(
             route = Screen.HomeScreen.route + "/{$HOME_ARGUMENT_KEY}",
@@ -41,10 +44,7 @@ fun AppNavigation() {
                 type = NavType.StringType
                 defaultValue = DEFAULT_CITY_NAME
                 nullable = true
-            }
-            ),
-
-            ) { entry ->
+            }),) { entry ->
             HomeScreen(
                 navController = navController,
                 cityName = entry.arguments?.getString(HOME_ARGUMENT_KEY)
