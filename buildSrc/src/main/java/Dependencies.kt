@@ -7,6 +7,30 @@ object BuildPlugins {
 
 // Dependencies
 object Deps {
+    // Core
+    val androidCore by lazy { "androidx.core:core-ktx:${Versions.androidCore}" }
+    val appCompat by lazy { "androidx.appcompat:appcompat:${Versions.appCompat}" }
+    val androidMaterial by lazy { "com.google.android.material:material:${Versions.androidMaterial}" }
+    val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }
+    val navigationCompose by lazy { "androidx.navigation:navigation-compose:${Versions.navigation}" }
+    val inAppUpdate by lazy { "com.google.android.play:app-update:${Versions.googlePlayCore}" }
+    val inAppUpdateKtx by lazy { "com.google.android.play:app-update-ktx:${Versions.googlePlayCore}" }
+    val googlePlayLocation by lazy { "com.google.android.gms:play-services-location:${Versions.googlePlayLocation}" }
+    val animatedNavigation by lazy { "com.google.accompanist:accompanist-navigation-animation:${Versions.accompanist}" }
+    val composePermission by lazy { "com.google.accompanist:accompanist-permissions:${Versions.accompanist}" }
+    val systemUIController by lazy { "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}" }
+    val constrainLayout by lazy { "androidx.constraintlayout:constraintlayout:${Versions.constrainLayout}" }
+
+    // Compose
+    val composeBom by lazy { "androidx.compose:compose-bom:${Versions.composeBom}" }
+    val composeMaterial1 by lazy { "androidx.compose.material:material" }
+    val composeMaterial3 by lazy { "androidx.compose.material3:material3" }
+    val composeUi by lazy { "androidx.compose.ui:ui" }
+    val composeUiTooling by lazy { "androidx.compose.ui:ui-tooling" }
+    val composeUiToolingPreview by lazy { "androidx.compose.ui:ui-tooling-preview" }
+    // Compose testing
+    val composeUiTestManifest by lazy { "androidx.compose.ui:ui-test-manifest" }
+
     // Unit Testing
     val junit by lazy { "junit:junit:${Versions.junit}" }
     val truth by lazy { "com.google.truth:truth:${Versions.truth}" }
@@ -22,29 +46,6 @@ object Deps {
     val extJunit by lazy { "androidx.test.ext:junit:${Versions.extJunit}" }
     val espressoCore by lazy { "androidx.test.espresso:espresso-core:${Versions.espresso}" }
     val espressoContrib by lazy { "androidx.test.espresso:espresso-contrib:${Versions.espresso}" }
-    val composeUiTestJunit4 by lazy { "androidx.compose.ui:ui-test-junit4:${Versions.composeVersion}" }
-    val composeUiTestManifest by lazy { "androidx.compose.ui:ui-test-manifest:${Versions.composeVersion}" }
-
-    // Compose
-    val composeUi by lazy { "androidx.compose.ui:ui:${Versions.composeVersion}" }
-    val composeUiTooling by lazy { "androidx.compose.ui:ui-tooling:${Versions.composeVersion}" }
-    val composeUiToolingPreview by lazy { "androidx.compose.ui:ui-tooling-preview:${Versions.composeVersion}" }
-    val composeMaterial1 by lazy { "androidx.compose.material:material:${Versions.composeMaterial1}" }
-    val composeMaterial3 by lazy { "androidx.compose.material3:material3:${Versions.composeMaterial3}" }
-
-    // Core
-    val androidCore by lazy { "androidx.core:core-ktx:${Versions.androidCore}" }
-    val appCompat by lazy { "androidx.appcompat:appcompat:${Versions.appCompat}" }
-    val androidMaterial by lazy { "com.google.android.material:material:${Versions.androidMaterial}" }
-    val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }
-    val navigationCompose by lazy { "androidx.navigation:navigation-compose:${Versions.navigation}" }
-    val inAppUpdate by lazy { "com.google.android.play:app-update:${Versions.googlePlayCore}" }
-    val inAppUpdateKtx by lazy { "com.google.android.play:app-update-ktx:${Versions.googlePlayCore}" }
-    val googlePlayLocation by lazy { "com.google.android.gms:play-services-location:${Versions.googlePlayLocation}" }
-    val animatedNavigation by lazy { "com.google.accompanist:accompanist-navigation-animation:${Versions.accompanist}" }
-    val composePermission by lazy { "com.google.accompanist:accompanist-permissions:${Versions.accompanist}" }
-    val systemUIController by lazy { "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}" }
-    val constrainLayout by lazy { "androidx.constraintlayout:constraintlayout:${Versions.constrainLayout}" }
 
     // Networking
     val okHttp3 by lazy { "com.squareup.okhttp3:okhttp:${Versions.okHttp3}" }

@@ -3,16 +3,14 @@ object Versions {
 
     // Kotlin
     const val kotlin = "1.8.20"
-    const val kotlinCompiler = "2.0"
+    const val kotlinCompiler = "1.9"
 
     // Compose
-    const val composeVersion = "1.4.0"
-    const val compilerExtensionVersion = "1.4.0"
-    const val composeMaterial1 = "1.1.1"
-    const val composeMaterial3 = "1.1.0"
+    const val composeBom = "2023.05.01"
+    const val compilerExtensionVersion = "1.4.6"
 
     // Plugins
-    const val buildGradle = "7.4.1"
+    const val buildGradle = "8.0.0"
     const val navigation = "2.5.3"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.42.0"
