@@ -43,7 +43,7 @@ fun LanguageScreen(
                 ) {
                     LanguageChangeSetting(
                         languages = languages,
-                        navAction = { /*not required*/ })
+                        navAction = { navAction.invoke() })
                 }
             }
         )
@@ -84,7 +84,7 @@ fun LanguageChangeSetting(languages: Array<String>, navAction: () -> Unit) {
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp)
     ) {
-        items(languages.size) {position ->
+        items(languages.size) { position ->
             Text(
                 text = languages[position].getDisplayName(),
                 style = MaterialTheme.typography.bodyLarge,

@@ -3,7 +3,9 @@ package bose.ankush.weatherify.common
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.domain.model.AvgForecast
@@ -75,4 +77,15 @@ object Extension {
         })
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    fun Context.openAppLocaleSettings() {
+        startActivity(Intent().apply {
+            action = Settings.ACTION_APP_LOCALE_SETTINGS
+            data = Uri.fromParts("package", packageName, null)
+        })
+    }
+
+    fun isAndroid13OrAbove(): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+    }
 }

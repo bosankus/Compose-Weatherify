@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import java.util.Locale
 
-object LocaleHelper {
+internal object LocaleHelper {
 
     fun String.getDisplayName(): String {
         val locale = Locale(this)
