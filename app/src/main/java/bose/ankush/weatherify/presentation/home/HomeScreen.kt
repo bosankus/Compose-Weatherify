@@ -21,7 +21,7 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
-import bose.ankush.weatherify.common.Extension.isAndroid13OrAbove
+import bose.ankush.weatherify.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.common.Extension.openAppLocaleSettings
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.presentation.UIState
@@ -106,11 +106,12 @@ private fun ShowUIContainer(
                     leftNavAction = { /*Not yet implemented*/ },
                     titleNavAction = { navController.navigate(Screen.CitiesListScreen.route) },
                     rightNavAction = {
-                        if (isAndroid13OrAbove()){
-                            // Open Per App Language app language setting screen
+                        /*Language change setting*/
+                        if (isDeviceSDKAndroid13OrAbove()){
+                            // Open app language setting screen
                             context.openAppLocaleSettings()
                         } else {
-                            // Open
+                            // Open language change composable screen
                             navController.navigate(Screen.LanguageScreen.withArgs(languageList))
                         }
                     },

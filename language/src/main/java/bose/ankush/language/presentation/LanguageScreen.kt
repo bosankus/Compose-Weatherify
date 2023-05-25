@@ -1,5 +1,6 @@
 package bose.ankush.language.presentation
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,9 +42,7 @@ fun LanguageScreen(
                 Column(
                     modifier = Modifier.padding(innerPadding)
                 ) {
-                    LanguageChangeSetting(
-                        languages = languages,
-                        navAction = { navAction.invoke() })
+                    LanguageChangeSetting(languages = languages)
                 }
             }
         )
@@ -78,7 +77,7 @@ private fun SettingsHeader(navAction: () -> Unit) {
 
 
 @Composable
-fun LanguageChangeSetting(languages: Array<String>, navAction: () -> Unit) {
+fun LanguageChangeSetting(languages: Array<String>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -94,10 +93,8 @@ fun LanguageChangeSetting(languages: Array<String>, navAction: () -> Unit) {
                     .padding(top = 16.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .clickable {
-                        // change language
-                        changeLanguageTo(languages[position])
-                        // pop backstack
-                        navAction.invoke()
+                        val localeListCompat = changeLanguageTo(languages[position])
+                        Log.d("LanguageScreen", "LanguageChangeSetting: ${localeListCompat.toLanguageTags()}")
                     }
                     .padding(all = 5.dp)
             )

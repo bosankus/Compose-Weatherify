@@ -166,12 +166,6 @@ fun AppNavigation() {
                 }
             }
         }
-        /*composable(
-            route = Screen.SplashScreen.route,
-            arguments = listOf(navArgument(""){
-
-            })
-        )*/
     }
 }
 

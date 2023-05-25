@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:localeConfig="@xml/locales_config"
         android:theme="@style/Theme.Weatherify"
-        tools:ignore="AllowBackup">
+        tools:ignore="AllowBackup,UnusedAttribute">
         <activity android:name=".presentation.MainActivity"
             android:exported="true">
             <intent-filter>

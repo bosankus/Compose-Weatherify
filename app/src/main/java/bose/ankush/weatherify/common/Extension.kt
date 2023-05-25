@@ -85,7 +85,7 @@ object Extension {
         })
     }
 
-    fun isAndroid13OrAbove(): Boolean {
+    fun isDeviceSDKAndroid13OrAbove(): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
     }
 }
