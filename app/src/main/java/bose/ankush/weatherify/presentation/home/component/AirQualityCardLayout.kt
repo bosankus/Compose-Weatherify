@@ -40,7 +40,7 @@ import timber.log.Timber
 @SuppressLint("MissingPermission")
 @ExperimentalPermissionsApi
 @Composable
-fun AirQualityCardLayout(
+internal fun AirQualityCardLayout(
     viewModel: HomeViewModel = hiltViewModel(),
     onCardClick: (Double, Double) -> Unit
 ) {
@@ -97,7 +97,7 @@ fun AirQualityCardLayout(
  * and carry latitude and longitude as navigation arguments
  */
 @Composable
-fun ShowUI(
+private fun ShowUI(
     aq: AirQuality,
     onItemClick: (Double, Double) -> Unit
 ) {

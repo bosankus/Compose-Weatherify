@@ -29,7 +29,7 @@ import bose.ankush.weatherify.common.Extension.toCelsius
 import bose.ankush.weatherify.domain.model.Weather
 
 @Composable
-fun TodayForecastLayout(weather: Weather? = Weather()) {
+internal fun TodayForecastLayout(weather: Weather? = Weather()) {
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -49,7 +49,7 @@ fun TodayForecastLayout(weather: Weather? = Weather()) {
 }
 
 @Composable
-fun CurrentDate() {
+private fun CurrentDate() {
     Surface(
         modifier = Modifier.padding(top = 20.dp),
         color = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp),
@@ -70,7 +70,7 @@ fun CurrentDate() {
 }
 
 @Composable
-fun CurrentTemperatureInCelsius(weatherData: Weather?) {
+private fun CurrentTemperatureInCelsius(weatherData: Weather?) {
     val weather = remember { weatherData }
 
     Column(
@@ -122,6 +122,6 @@ fun CurrentTemperatureInCelsius(weatherData: Weather?) {
 
 @Preview
 @Composable
-fun TodayForecastLayoutPreview() {
+private fun TodayForecastLayoutPreview() {
     TodayForecastLayout(Weather())
 }

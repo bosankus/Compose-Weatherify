@@ -14,7 +14,7 @@ import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.domain.model.CityName
 
 @Composable
-fun CityListItem(
+internal fun CityListItem(
     cityNameList: List<CityName>,
     position: Int,
     onItemClick: (Int, String) -> Unit

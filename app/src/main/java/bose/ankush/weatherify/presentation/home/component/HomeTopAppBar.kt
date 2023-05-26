@@ -21,7 +21,7 @@ import bose.ankush.weatherify.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeTopAppBar(
+internal fun HomeTopAppBar(
     title: String,
     titleNavAction: () -> Unit,
     leftNavAction: () -> Unit,

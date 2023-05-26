@@ -6,7 +6,7 @@ object AirQualityIndexAnalyser {
      * Used to analyse the air quality index number,
      * and generate a string accordingly for UI to show
      */
-    fun getAQIAnalysedText(aqi: Int): Pair<String, Int> {
+    internal fun getAQIAnalysedText(aqi: Int): Pair<String, Int> {
         return when(aqi) {
             in 0..50-> Pair("Air quality is Good at this moment", aqi)
             in 51..100 -> Pair("Air quality is Moderate at this moment", aqi)

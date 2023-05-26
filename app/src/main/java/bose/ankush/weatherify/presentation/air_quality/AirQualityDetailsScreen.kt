@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -18,9 +17,8 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.common.component.ScreenTopAppBar
 import bose.ankush.weatherify.presentation.navigation.Screen
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AirQualityDetailsScreen(
+internal fun AirQualityDetailsScreen(
     lat: Double?,
     lon: Double?,
     navController: NavController,

@@ -75,7 +75,7 @@ private fun SettingsHeader(navAction: () -> Unit) {
 
 
 @Composable
-fun LanguageChangeSetting(languages: Array<String>) {
+private fun LanguageChangeSetting(languages: Array<String>) {
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()

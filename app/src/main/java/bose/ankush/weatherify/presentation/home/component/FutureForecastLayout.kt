@@ -21,7 +21,7 @@ import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.presentation.home.HomeViewModel
 
 @Composable
-fun FourDaysForecastLayout(
+internal fun FourDaysForecastLayout(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
@@ -46,7 +46,7 @@ fun FourDaysForecastLayout(
 
 
 @Composable
-fun FutureForecastListItem(
+private fun FutureForecastListItem(
     avgForecastList: List<AvgForecast>,
     onItemClick: (Int) -> Unit
 ) {

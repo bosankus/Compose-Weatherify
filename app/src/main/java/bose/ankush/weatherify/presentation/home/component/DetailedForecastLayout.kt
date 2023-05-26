@@ -20,7 +20,7 @@ import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import coil.compose.AsyncImage
 
 @Composable
-fun DetailedForecastLayout(list: List<ForecastDto.ForecastList>, item: Int) {
+internal fun DetailedForecastLayout(list: List<ForecastDto.ForecastList>, item: Int) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
