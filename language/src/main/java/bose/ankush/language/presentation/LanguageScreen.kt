@@ -26,8 +26,6 @@ import bose.ankush.language.R
 import bose.ankush.language.util.LocaleHelper.changeLanguageTo
 import bose.ankush.language.util.LocaleHelper.getDisplayName
 
-const val LANGUAGE_ARGUMENT_KEY = "country_config"
-
 @Composable
 fun LanguageScreen(
     languages: Array<String>,
@@ -94,7 +92,7 @@ fun LanguageChangeSetting(languages: Array<String>) {
                     .clip(RoundedCornerShape(5.dp))
                     .clickable {
                         val localeListCompat = changeLanguageTo(languages[position])
-                        Log.d("LanguageScreen", "LanguageChangeSetting: ${localeListCompat.toLanguageTags()}")
+                        Log.d("LanguageScreen", "LanguageChangeSetting: $localeListCompat")
                     }
                     .padding(all = 5.dp)
             )

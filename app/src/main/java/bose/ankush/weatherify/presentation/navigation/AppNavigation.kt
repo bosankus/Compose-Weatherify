@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import bose.ankush.language.presentation.LANGUAGE_ARGUMENT_KEY
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.splash.presentation.SplashScreen
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
@@ -19,6 +18,7 @@ import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 const val HOME_ARGUMENT_KEY = "city_name"
+const val LANGUAGE_ARGUMENT_KEY = "country_config"
 const val AQ_LAT_KEY = "location_latitude"
 const val AQ_LON_KEY = "location_longitude"
 
