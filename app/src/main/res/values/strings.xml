@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Screen Name-->
+    <string name="splash_screen">Splash</string>
+    <string name="home_screen">Home</string>
+    <string name="aq_screen">Air Quality</string>
+    <string name="city_screen">Cities</string>
+    <string name="account_screen">Profile</string>
+
     <!--General Texts-->
     <string name="app_name">Weatherify</string>
     <string name="retry_btn_txt">Retry</string>

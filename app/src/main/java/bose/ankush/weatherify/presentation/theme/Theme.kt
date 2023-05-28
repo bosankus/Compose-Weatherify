@@ -36,10 +36,17 @@ fun WeatherifyTheme(
     }
 
     SideEffect {
-        systemUiController.setSystemBarsColor(
-            color = colors.background,
-            darkIcons = !darkTheme
-        )
+        with(systemUiController) {
+            setStatusBarColor(
+                color = colors.surface,
+                darkIcons = !darkTheme
+            )
+            setNavigationBarColor(
+                color = colors.onSurface,
+                darkIcons = !darkTheme
+            )
+            isNavigationBarVisible = false
+        }
     }
 
     MaterialTheme(

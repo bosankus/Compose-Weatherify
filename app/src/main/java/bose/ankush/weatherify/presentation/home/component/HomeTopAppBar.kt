@@ -28,6 +28,7 @@ internal fun HomeTopAppBar(
     rightNavAction: () -> Unit,
 ) {
     /*App Bar*/
+
     CenterAlignedTopAppBar(
         title = {
             Text(

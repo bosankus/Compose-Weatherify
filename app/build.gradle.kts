@@ -94,6 +94,7 @@ dependencies {
     implementation(Deps.composeUiToolingPreview)
     implementation(Deps.composeMaterial3)
     // Compose Testing
+    androidTestImplementation(Deps.composeUiJunit4)
     debugImplementation(Deps.composeUiTestManifest)
 
     // Unit Testing

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Screen Name-->
+    <string name="splash_screen">स्प्लैश</string>
+    <string name="home_screen">मुख्य</string>
+    <string name="aq_screen">हवा गुणवत्ता</string>
+    <string name="city_screen">शहरों</string>
+    <string name="account_screen">प्रोफ़ाइल</string>
+
     <!--General Texts-->
     <string name="app_name">मौसमify</string>
     <string name="retry_btn_txt">पुन: प्रयास करें</string>

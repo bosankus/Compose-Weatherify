@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Screen Name-->
+    <string name="splash_screen">סֶנסַצִיָה</string>
+    <string name="home_screen">בית</string>
+    <string name="aq_screen">איכות אוויר</string>
+    <string name="city_screen">ערים</string>
+    <string name="account_screen">חֶשְׁבּוֹן</string>
+
     <!--General Texts-->
     <string name="app_name">וות\'ריפי</string>
     <string name="retry_btn_txt">נסה שוב</string>

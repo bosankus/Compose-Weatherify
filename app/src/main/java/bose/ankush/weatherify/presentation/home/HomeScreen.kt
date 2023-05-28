@@ -32,6 +32,7 @@ import bose.ankush.weatherify.presentation.home.component.HomeTopAppBar
 import bose.ankush.weatherify.presentation.home.component.TodayForecastLayout
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
+import bose.ankush.weatherify.presentation.navigation.AppBottomNavigation
 import bose.ankush.weatherify.presentation.navigation.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
@@ -162,6 +163,11 @@ private fun ShowUIContainer(
                         }
                     }
                 }
+            },
+            bottomBar = {
+                AppBottomNavigation(
+                    navController = navController
+                )
             }
         )
     }
