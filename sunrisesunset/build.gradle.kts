@@ -5,7 +5,7 @@ plugins {
 
 @Suppress("UnstableApiUsage")
 android {
-    namespace = "bose.ankush.splash"
+    namespace = "bose.ankush.sunrisesunset"
     compileSdk = ConfigData.compileSdkVersion
 
     defaultConfig {
@@ -24,6 +24,7 @@ android {
             )
         }
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -56,7 +57,6 @@ android {
 }
 
 dependencies {
-
     // Testing
     testImplementation(Deps.junit)
 
@@ -72,7 +72,9 @@ dependencies {
     implementation(Deps.composeUiTooling)
     implementation(Deps.composeUiToolingPreview)
     implementation(Deps.composeUi)
+    implementation(Deps.composeMaterial1)
     implementation(Deps.composeMaterial3)
     implementation(Deps.navigationCompose)
     implementation(Deps.animatedNavigation)
+
 }

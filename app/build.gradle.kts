@@ -72,6 +72,7 @@ dependencies {
 
     api(project(":language"))
     api(project(":splash"))
+    api(project(":sunrisesunset"))
 
 
     // Core

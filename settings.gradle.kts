@@ -23,5 +23,6 @@ include(
     ":splash",
     ":app",
     ":language",
-    ":payment"
+    ":payment",
+    ":sunrisesunset"
 )

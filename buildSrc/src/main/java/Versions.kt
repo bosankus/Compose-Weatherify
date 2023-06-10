@@ -3,6 +3,7 @@ object Versions {
 
     // Kotlin
     const val kotlin = "1.8.20"
+    // const val kspVersion = "1.8.20-1.0.10"
     const val kotlinCompiler = "1.9"
 
     // Compose
