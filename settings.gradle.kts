@@ -24,5 +24,4 @@ include(
     ":app",
     ":language",
     ":payment",
-    ":sunrisesunset"
 )
