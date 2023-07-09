@@ -24,13 +24,21 @@ android {
             )
         }
     }
+
     buildFeatures {
+        compose = true
         buildConfig = true
     }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = Versions.compilerExtensionVersion
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
@@ -50,17 +58,25 @@ android {
 
 dependencies {
 
-    // Core
-    implementation(Deps.androidCore)
-    implementation(Deps.appCompat)
-    implementation(Deps.constrainLayout)
-
-    // Unit Testing
+    // Testing
     testImplementation(Deps.junit)
 
     // UI Testing
     androidTestImplementation(Deps.extJunit)
-    androidTestImplementation(Deps.espressoCore)
+
+    // Core
+    implementation(Deps.androidCore)
+    implementation(Deps.appCompat)
+
+    // Compose
+    implementation(platform(Deps.composeBom))
+    implementation(Deps.composeUiTooling)
+    implementation(Deps.composeUiToolingPreview)
+    implementation(Deps.composeUi)
+    implementation(Deps.composeMaterial1)
+    implementation(Deps.composeMaterial3)
+    implementation(Deps.navigationCompose)
+    implementation(Deps.animatedNavigation)
 
     // payment sdk
     implementation(Deps.razorPay)
