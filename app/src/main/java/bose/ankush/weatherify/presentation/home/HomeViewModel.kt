@@ -1,7 +1,6 @@
 package bose.ankush.weatherify.presentation.home
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,6 +28,7 @@ import javax.inject.Inject
 /**Created by
 Author: Ankush Bose
 Date: 05,May,2021
+Updated: 09,July,2023
  **/
 
 @HiltViewModel
@@ -39,55 +39,65 @@ class HomeViewModel @Inject constructor(
     val fusedLocationProviderClient: FusedLocationProviderClient,
 ) : ViewModel() {
 
-    private var _todayWeather = mutableStateOf(UIState<Weather>())
-    val todayWeather: State<UIState<Weather>> = _todayWeather
+    /*For Home Screen*/
 
-    private val _forecastState = mutableStateOf(UIState<List<ForecastDto.ForecastList>>())
-    val forecastState: State<UIState<List<ForecastDto.ForecastList>>> = _forecastState
+    var todayWeather = mutableStateOf(UIState<Weather>())
+        private set
 
-    private val _detailedForecastState = mutableStateOf(listOf<ForecastDto.ForecastList>())
-    val detailedForecastState: State<List<ForecastDto.ForecastList>> = _detailedForecastState
+    var forecastState = mutableStateOf(UIState<List<ForecastDto.ForecastList>>())
+        private set
 
-    private val _airQuality = mutableStateOf(UIState<AirQuality>())
-    val airQuality: State<UIState<AirQuality>> = _airQuality
+    var detailedForecastState = mutableStateOf(listOf<ForecastDto.ForecastList>())
+        private set
 
-    private val _cityName: MutableState<String?> = mutableStateOf("")
-    val cityName: State<String?> = _cityName
+    var airQuality = mutableStateOf(UIState<AirQuality>())
+        private set
 
-    private val _forecastList: MutableState<List<ForecastDto.ForecastList>> =
+    var cityName: MutableState<String?> = mutableStateOf("")
+        private set
+
+    private val forecastList: MutableState<List<ForecastDto.ForecastList>> =
         mutableStateOf(listOf())
+
+    /*For City List Screen*/
+    // Refactor here details from city list view model
 
     fun fetchAirQuality(lat: Double, lang: Double) {
         viewModelScope.launch {
             getAirQuality(lat, lang).collect { result ->
                 when (result) {
                     is ResultData.DoNothing -> {}
-                    is ResultData.Loading -> _airQuality.value = UIState(isLoading = true)
+                    is ResultData.Loading -> airQuality.value = UIState(isLoading = true)
                     is ResultData.Success -> {
                         val airQualityReport = result.data
-                        if (airQualityReport != null) _airQuality.value = UIState(data = airQualityReport)
+                        if (airQualityReport != null) airQuality.value =
+                            UIState(data = airQualityReport)
                     }
+
                     is ResultData.Failed -> {
-                        _airQuality.value = UIState(error = UiText.DynamicText(result.message.toString()))
+                        airQuality.value =
+                            UIState(error = UiText.DynamicText(result.message.toString()))
                     }
                 }
             }
         }
     }
 
-    fun fetchWeatherDetails(cityName: String) {
+    fun fetchWeatherDetails(city: String) {
         viewModelScope.launch {
-            val todayWeather = async { getTodaysWeatherUseCase(cityName) }
-            val forecast = async { getForecastsUseCase(cityName) }
+            val cityWeather = async { getTodaysWeatherUseCase(city) }
+            val forecast = async { getForecastsUseCase(city) }
 
-            todayWeather.await().onEach { result ->
+            cityWeather.await().onEach { result ->
                 when (result) {
                     is ResultData.DoNothing -> {}
-                    is ResultData.Loading -> _todayWeather.value =
+                    is ResultData.Loading -> todayWeather.value =
                         UIState(isLoading = true)
-                    is ResultData.Success -> _todayWeather.value =
+
+                    is ResultData.Success -> todayWeather.value =
                         UIState(data = result.data)
-                    is ResultData.Failed -> _todayWeather.value =
+
+                    is ResultData.Failed -> todayWeather.value =
                         UIState(error = UiText.DynamicText(result.message.toString()))
                 }
             }.launchIn(viewModelScope)
@@ -95,15 +105,17 @@ class HomeViewModel @Inject constructor(
             forecast.await().onEach { result ->
                 when (result) {
                     is ResultData.DoNothing -> {}
-                    is ResultData.Loading -> _forecastState.value =
+                    is ResultData.Loading -> forecastState.value =
                         UIState(isLoading = true)
+
                     is ResultData.Success -> {
                         val responseList = result.data?.list ?: emptyList()
-                        _forecastList.value = responseList
-                        _cityName.value = result.data?.city?.name
-                        _forecastState.value = UIState(data = responseList)
+                        forecastList.value = responseList
+                        cityName.value = result.data?.city?.name
+                        forecastState.value = UIState(data = responseList)
                     }
-                    else -> _forecastState.value =
+
+                    else -> forecastState.value =
                         UIState(error = UiText.StringResource(R.string.general_error_txt))
                 }
             }.launchIn(viewModelScope)
@@ -112,13 +124,13 @@ class HomeViewModel @Inject constructor(
 
 
     fun getFourDaysAvgForecast(): List<AvgForecast> {
-        return if (_forecastList.value.isNotEmpty()) _forecastList.value.getForecastListForNext4Days()
+        return if (forecastList.value.isNotEmpty()) forecastList.value.getForecastListForNext4Days()
         else emptyList()
     }
 
 
     fun getDayWiseDetailedForecast(dateQuery: Int) {
-        _detailedForecastState.value = _forecastList.value.filter { list ->
+        detailedForecastState.value = forecastList.value.filter { list ->
             list.dt?.let { getDayNameFromEpoch(it) == getDayNameFromEpoch(dateQuery) } ?: false
         }
     }
