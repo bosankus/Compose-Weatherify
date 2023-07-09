@@ -14,22 +14,22 @@ class CitiesViewModel @Inject constructor(
     getCityNames: GetCityNames
 ) : ViewModel() {
 
-    private val _searchText = MutableStateFlow("")
-    val searchText: StateFlow<String> = _searchText
+    var searchText = MutableStateFlow("")
+        private set
 
-    private val _isSearching = MutableStateFlow(false)
-    val isSearching: StateFlow<Boolean> = _isSearching
+    var isSearching = MutableStateFlow(false)
+        private set
 
     private val _cityName = MutableStateFlow(getCityNames())
     @OptIn(FlowPreview::class)
     val cityName: StateFlow<List<CityName>> = searchText
         .debounce(500L)
-        .onEach { _isSearching.update { true } }
+        .onEach { isSearching.update { true } }
         .combine(_cityName) { text, cityName ->
             if (text.isBlank()) cityName
             else cityName.filter { it.doesMatchSearchQuery(text) }
         }
-        .onEach { _isSearching.update { false } }
+        .onEach { isSearching.update { false } }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -37,6 +37,6 @@ class CitiesViewModel @Inject constructor(
         )
 
     fun onSearchTextChange(text: String) {
-        _searchText.value = text
+        searchText.value = text
     }
 }
