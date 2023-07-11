@@ -2,12 +2,21 @@ package bose.ankush.weatherify.presentation.home.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.material3.surfaceColorAtElevation
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -15,14 +24,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.domain.model.AvgForecast
 import bose.ankush.weatherify.presentation.home.HomeViewModel
 
 @Composable
 internal fun FourDaysForecastLayout(
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel
 ) {
     val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
     Column(
@@ -65,7 +73,7 @@ private fun FutureForecastListItem(
                         selectedItem = it
                         onItemClick(it)
                     }
-                    .background(if (selectedItem == it) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary)
+                    .background(if (selectedItem == it) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp))
                     .padding(horizontal = 10.dp, vertical = 20.dp)
             ) {
                 Column(
@@ -76,7 +84,7 @@ private fun FutureForecastListItem(
                         text = avgForecastList[it].nameOfDay?.substring(0,3) ?: stringResource(id = R.string.not_available),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.alpha(0.6f),
                     )
                     Text(
@@ -86,7 +94,7 @@ private fun FutureForecastListItem(
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(top = 16.dp)
                     )
                     Text(
@@ -96,7 +104,7 @@ private fun FutureForecastListItem(
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier
                             .padding(top = 16.dp)
                             .alpha(0.6f),
