@@ -86,6 +86,7 @@ dependencies {
     implementation(Deps.animatedNavigation)
     implementation(Deps.systemUIController)
     implementation(Deps.composePermission)
+    implementation(Deps.dataStore)
 
     // Compose
     implementation(platform(Deps.composeBom))

@@ -41,6 +41,7 @@ object Versions {
     const val googlePlayLocation = "21.0.1"
     const val accompanist = "0.28.0"
     const val constrainLayout = "2.1.4"
+    const val dataStore = "1.0.0"
 
     // Networking
     const val okHttp3 = "4.9.3"
