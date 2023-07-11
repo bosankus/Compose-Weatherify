@@ -16,6 +16,9 @@ const val APP_UPDATE_REQ_CODE = 111
 /*Shared Preference Keys*/
 const val APP_PREFERENCE_KEY = "app_preferences"
 
+/*Fallback user location coordinates*/
+val DEFAULT_LOCATION_COORDINATES = Pair(0.0, 0.0)
+
 /* Permission constants */
 /*private const val ACCESS_FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
 private const val ACCESS_COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION

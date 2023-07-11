@@ -1,5 +1,7 @@
 package bose.ankush.weatherify.domain.model
 
+import bose.ankush.weatherify.common.DEFAULT_LOCATION_COORDINATES
+
 data class AirQuality(
     val aqi: Int? = 0,
     val co: Double? = 0.0,
@@ -8,5 +10,5 @@ data class AirQuality(
     val so2: Double? = 0.0,
     val pm10: Double? = 0.0,
     val pm25: Double? = 0.0,
-    val coord: Pair<Double, Double> = Pair(0.0, 0.0)
+    val coord: Pair<Double, Double> = DEFAULT_LOCATION_COORDINATES
 )
