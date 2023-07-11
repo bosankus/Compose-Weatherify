@@ -11,7 +11,7 @@ object Versions {
     const val compilerExtensionVersion = "1.4.6"
 
     // Plugins
-    const val buildGradle = "8.0.0"
+    const val buildGradle = "8.0.2"
     const val navigation = "2.5.3"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.42.0"
