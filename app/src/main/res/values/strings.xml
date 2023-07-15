@@ -7,6 +7,11 @@
     <string name="city_screen">Cities</string>
     <string name="account_screen">Profile</string>
 
+    <!--Nested NavGraph group name-->
+    <string name="home_nested_nav">home_nested_nav</string>
+    <string name="run_nested_nav">run_nested_nav</string>
+    <string name="profile_nested_nav">profile_nested_nav</string>
+
     <!--General Texts-->
     <string name="app_name">Weatherify</string>
     <string name="retry_btn_txt">Retry</string>
