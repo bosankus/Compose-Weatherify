@@ -1,6 +1,5 @@
 package bose.ankush.weatherify.presentation.navigation
 
-import android.os.Bundle
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -8,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import bose.ankush.language.presentation.LanguageScreen
-import bose.ankush.splash.presentation.SplashScreen
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.presentation.air_quality.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
@@ -33,10 +31,10 @@ fun AppNavigation() {
         composable(
             route = Screen.SplashScreen.route
         ) {
-            SplashScreen(navAction = {
+            /*SplashScreen(navAction = {
                 navController.popBackStack()
                 navController.navigate(Screen.HomeScreen.withArgs(DEFAULT_CITY_NAME))
-            })
+            })*/
         }
         composable(
             route = Screen.HomeScreen.route + "/{$HOME_ARGUMENT_KEY}",
@@ -44,7 +42,8 @@ fun AppNavigation() {
                 type = NavType.StringType
                 defaultValue = DEFAULT_CITY_NAME
                 nullable = true
-            }),) { entry ->
+            }),
+        ) { entry ->
             HomeScreen(
                 navController = navController,
                 cityName = entry.arguments?.getString(HOME_ARGUMENT_KEY)
@@ -122,7 +121,7 @@ fun AppNavigation() {
                 AirQualityDetailsScreen(
                     lat = it.getDouble(AQ_LAT_KEY),
                     lon = it.getDouble(AQ_LON_KEY),
-                    navController = navController
+                    onNavAction = { navController.popBackStack() }
                 )
             }
         }
@@ -166,30 +165,5 @@ fun AppNavigation() {
                 }
             }
         }
-    }
-}
-
-class DoubleNavType : NavType<Double>(isNullableAllowed = false) {
-    override fun get(bundle: Bundle, key: String): Double = bundle.getDouble(key)
-
-    override fun parseValue(value: String): Double = value.toDouble()
-
-    override fun put(bundle: Bundle, key: String, value: Double) {
-        bundle.putDouble(key, value)
-    }
-}
-
-class StringListType : NavType<List<String>>(isNullableAllowed = false) {
-    override fun get(bundle: Bundle, key: String): List<String> {
-        val stringArray = bundle.getStringArray(key)
-        return stringArray?.toList() ?: emptyList()
-    }
-
-    override fun parseValue(value: String): List<String> {
-        return value.split(",").map { it.trim() }
-    }
-
-    override fun put(bundle: Bundle, key: String, value: List<String>) {
-        bundle.putStringArray(key, value.toTypedArray())
     }
 }
