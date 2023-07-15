@@ -23,14 +23,11 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
-import bose.ankush.weatherify.common.Extension.isDeviceSDKAndroid13OrAbove
-import bose.ankush.weatherify.common.Extension.openAppLocaleSettings
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.home.component.AirQualityCardLayout
 import bose.ankush.weatherify.presentation.home.component.DetailedForecastLayout
 import bose.ankush.weatherify.presentation.home.component.FourDaysForecastLayout
-import bose.ankush.weatherify.presentation.home.component.HomeTopAppBar
 import bose.ankush.weatherify.presentation.home.component.TodayForecastLayout
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
@@ -103,23 +100,6 @@ private fun ShowUIContainer(
 
     Box {
         Scaffold(
-            topBar = {
-                HomeTopAppBar(
-                    title = cityName,
-                    leftNavAction = { /*Not yet implemented*/ },
-                    titleNavAction = { navController.navigate(Screen.CitiesListScreen.route) },
-                    rightNavAction = {
-                        /*Language change setting*/
-                        if (isDeviceSDKAndroid13OrAbove()){
-                            // Open app language setting screen
-                            context.openAppLocaleSettings()
-                        } else {
-                            // Open language change composable screen
-                            navController.navigate(Screen.LanguageScreen.withArgs(languageList))
-                        }
-                    },
-                )
-            },
             content = { innerPadding ->
                 LazyColumn(
                     contentPadding = innerPadding,
