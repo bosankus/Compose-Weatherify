@@ -20,7 +20,6 @@ dependencyResolutionManagement {
 rootProject.name = "Weatherify"
 
 include(
-    ":splash",
     ":app",
     ":language",
     ":payment",

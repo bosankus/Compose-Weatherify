@@ -71,8 +71,6 @@ android {
 dependencies {
 
     api(project(":language"))
-    api(project(":splash"))
-
 
     // Core
     implementation(Deps.androidCore)
