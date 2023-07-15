@@ -32,7 +32,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 @ExperimentalPermissionsApi
 @Composable
 internal fun AirQualityCardLayout(
-    viewModel: HomeViewModel, onCardClick: (Double, Double) -> Unit
+    viewModel: HomeViewModel, onCardClick: () -> Unit
 ) {
     val airQualityReport = remember { viewModel.airQuality.value }
 
@@ -48,12 +48,11 @@ internal fun AirQualityCardLayout(
  */
 @Composable
 private fun ShowUI(
-    aq: AirQuality, onItemClick: (Double, Double) -> Unit
+    aq: AirQuality, onItemClick: () -> Unit
 ) {
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(all = 16.dp)
-        .clickable { onItemClick(aq.coord.first, aq.coord.second) }
         .clip(RoundedCornerShape(10.dp))
         .background(MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp))
         .padding(horizontal = 15.dp, vertical = 20.dp)) {
@@ -82,7 +81,7 @@ private fun ShowUI(
         )
         Surface(
             modifier = Modifier
-                .clickable { onItemClick(aq.coord.first, aq.coord.second) }
+                .clickable { onItemClick() }
                 .padding(top = 10.dp),
             color = MaterialTheme.colorScheme.primaryContainer,
             shape = RoundedCornerShape(20.dp),

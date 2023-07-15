@@ -6,6 +6,8 @@
     <string name="aq_screen">Air Quality</string>
     <string name="city_screen">Cities</string>
     <string name="account_screen">Profile</string>
+    <string name="run_screen">Run</string>
+    <string name="settings_screen">Setting</string>
 
     <!--Nested NavGraph group name-->
     <string name="home_nested_nav">home_nested_nav</string>

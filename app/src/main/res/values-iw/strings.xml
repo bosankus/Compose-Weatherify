@@ -6,6 +6,8 @@
     <string name="aq_screen">איכות אוויר</string>
     <string name="city_screen">ערים</string>
     <string name="account_screen">חֶשְׁבּוֹן</string>
+    <string name="run_screen">לָרוּץ</string>
+    <string name="settings_screen">הגדרה</string>
 
     <!--Nested NavGraph group name-->
     <string name="home_nested_nav">home_nested_nav</string>

@@ -52,7 +52,7 @@ fun SettingsScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             ScreenTopAppBar(
-                headlineId = R.string.app_name, // To be fixed
+                headlineId = R.string.settings_screen,
                 navIconAction = onNavAction
             )
         },

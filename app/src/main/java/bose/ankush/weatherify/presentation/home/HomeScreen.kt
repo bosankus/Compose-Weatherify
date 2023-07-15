@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
 import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
@@ -69,10 +67,7 @@ fun HomeScreen(
             )
         }
         // Screen with data showing on UI state
-        else ShowUIContainer(
-            context = context,
-            navController = navController,
-        )
+        else ShowUIContainer(navController = navController)
     }
     // No internet connectivity
     else ShowError(
@@ -84,19 +79,11 @@ fun HomeScreen(
 }
 
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-private fun ShowUIContainer(
-    context: Context,
-    navController: NavController,
-) {
+private fun ShowUIContainer(navController: NavController) {
     val viewModel: HomeViewModel = hiltViewModel()
     val detailedForecastList = viewModel.detailedForecastState.value
-    val cityName = viewModel.cityName.value ?: stringResource(id = R.string.not_available)
-    val languageList = LocaleConfigMapper.getAvailableLanguagesFromJson(
-        jsonFile = "countryConfig.json",
-        context = context
-    )
 
     Box {
         Scaffold(
@@ -110,13 +97,8 @@ private fun ShowUIContainer(
 
                     // Show current air quality condition details
                     item {
-                        AirQualityCardLayout(viewModel = viewModel) { lat, lon ->
-                            navController.navigate(
-                                Screen.AirQualityDetailsScreen.withArgs(
-                                    lat,
-                                    lon
-                                )
-                            )
+                        AirQualityCardLayout(viewModel = viewModel) {
+                            navController.navigate(Screen.AirQualityDetailsScreen.route)
                         }
                     }
 
