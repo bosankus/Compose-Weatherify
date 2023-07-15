@@ -11,6 +11,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -29,11 +31,10 @@ import bose.ankush.weatherify.presentation.home.component.AirQualityCardLayout
 import bose.ankush.weatherify.presentation.home.component.DetailedForecastLayout
 import bose.ankush.weatherify.presentation.home.component.FourDaysForecastLayout
 import bose.ankush.weatherify.presentation.home.component.HomeTopAppBar
-import bose.ankush.weatherify.presentation.home.component.SunriseSunsetLayout
 import bose.ankush.weatherify.presentation.home.component.TodayForecastLayout
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
-import bose.ankush.weatherify.presentation.navigation.AppBottomNavigation
+import bose.ankush.weatherify.presentation.navigation.AppBottomBar
 import bose.ankush.weatherify.presentation.navigation.Screen
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
@@ -127,14 +128,9 @@ private fun ShowUIContainer(
                     // Show today's forecasts
                     item { TodayForecastLayout(viewModel.todayWeather.value.data) }
 
-                    // Show sunrise sunset time animation
-                    item { SunriseSunsetLayout(
-
-                    ) }
-
                     // Show current air quality condition details
                     item {
-                        AirQualityCardLayout { lat, lon ->
+                        AirQualityCardLayout(viewModel = viewModel) { lat, lon ->
                             navController.navigate(
                                 Screen.AirQualityDetailsScreen.withArgs(
                                     lat,
@@ -145,7 +141,7 @@ private fun ShowUIContainer(
                     }
 
                     // Show next 4 day's average forecast
-                    item { FourDaysForecastLayout() }
+                    item { FourDaysForecastLayout(viewModel = viewModel) }
 
                     // TODO: As per current change in the UI scope, this part will be moved to a separate screen.
                     // Show next 4 day's hourly forecast
@@ -171,7 +167,8 @@ private fun ShowUIContainer(
                 }
             },
             bottomBar = {
-                AppBottomNavigation(
+                AppBottomBar(
+                    isVisible = rememberSaveable { mutableStateOf(true) },
                     navController = navController
                 )
             }
