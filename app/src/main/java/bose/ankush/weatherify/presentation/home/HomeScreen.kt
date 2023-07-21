@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.ConnectivityManager.isNetworkAvailable
@@ -42,7 +41,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
 ) {
     val context: Context = LocalContext.current
-    val permissionQueue = viewModel.permissionDialogQueue
+    // val permissionQueue = viewModel.permissionDialogQueue
 
     // Handle permission
     HandlePermissionRequests(viewModel = viewModel)
@@ -104,22 +103,31 @@ fun HandleFetchData(
             )
         }
         // Screen with data showing on UI state
-        else ShowUIContainer(navController = navController)
+        else if (!state.data.isNullOrEmpty()) {
+            ShowUIContainer(
+                navController = navController,
+                viewModel = viewModel
+            )
+        }
     }
     // No internet connectivity
-    else ShowError(
-        modifier = Modifier.fillMaxSize(),
-        msg = stringResource(id = R.string.no_internet_txt),
-        buttonText = stringResource(id = R.string.retry_btn_txt),
-        buttonAction = { /*Not yet implemented*/ }
-    )
+    else {
+        ShowError(
+            modifier = Modifier.fillMaxSize(),
+            msg = stringResource(id = R.string.no_internet_txt),
+            buttonText = stringResource(id = R.string.retry_btn_txt),
+            buttonAction = { /*Not yet implemented*/ }
+        )
+    }
 }
 
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-private fun ShowUIContainer(navController: NavController) {
-    val viewModel: HomeViewModel = hiltViewModel()
+private fun ShowUIContainer(
+    navController: NavController,
+    viewModel: HomeViewModel,
+) {
     val detailedForecastList = viewModel.detailedForecastState.value
 
     Box {
