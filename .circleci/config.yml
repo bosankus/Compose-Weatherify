@@ -19,7 +19,8 @@ jobs:
       image: 'ubuntu-2004:current'
     steps:
       - checkout
-      - qodana/scan
+      - qodana/scan:
+          args: -l jetbrains/qodana-jvm
   build-and-test:
 
     # These next lines define the Android machine image executor.
