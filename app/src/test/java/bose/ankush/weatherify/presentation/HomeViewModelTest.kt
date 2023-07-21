@@ -3,13 +3,14 @@ package bose.ankush.weatherify.presentation
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import bose.ankush.weatherify.MainCoroutineRule
-import bose.ankush.weatherify.common.ResultData
+import bose.ankush.weatherify.base.common.ResultData
+import bose.ankush.weatherify.base.location.LocationClient
+import bose.ankush.weatherify.data.preference.PreferenceManager
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
 import bose.ankush.weatherify.presentation.home.HomeViewModel
-import com.google.android.gms.location.FusedLocationProviderClient
 import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,10 +38,13 @@ class HomeViewModelTest {
     private lateinit var getForecastsUseCase: GetForecasts
 
     @RelaxedMockK
+    private lateinit var preferenceManager: PreferenceManager
+
+    @RelaxedMockK
     private lateinit var getAirQuality: GetAirQuality
 
     @RelaxedMockK
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var locationClient: LocationClient
 
     private lateinit var viewModel: HomeViewModel
 
@@ -55,7 +59,8 @@ class HomeViewModelTest {
             getTodayWeatherUseCase,
             getForecastsUseCase,
             getAirQuality,
-            fusedLocationProviderClient
+            locationClient,
+            preferenceManager
         )
     }
 

@@ -1,6 +1,7 @@
 package bose.ankush.weatherify.common
 
-import bose.ankush.weatherify.common.Extension.toCelsius
+import bose.ankush.weatherify.base.common.Extension
+import bose.ankush.weatherify.base.common.Extension.toCelsius
 import com.google.common.truth.Truth.assertThat
 import io.mockk.MockKAnnotations
 import io.mockk.mockkObject

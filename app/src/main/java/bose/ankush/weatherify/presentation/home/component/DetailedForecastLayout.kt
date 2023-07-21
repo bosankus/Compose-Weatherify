@@ -15,7 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils
-import bose.ankush.weatherify.common.Extension.toCelsius
+import bose.ankush.weatherify.base.common.Extension.toCelsius
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import coil.compose.AsyncImage
 

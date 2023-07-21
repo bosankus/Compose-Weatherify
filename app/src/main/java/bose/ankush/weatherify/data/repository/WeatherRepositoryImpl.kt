@@ -4,7 +4,7 @@ import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.remote.dto.AirQualityDto
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.data.remote.dto.WeatherDto
-import bose.ankush.weatherify.dispatcher.DispatcherProvider
+import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

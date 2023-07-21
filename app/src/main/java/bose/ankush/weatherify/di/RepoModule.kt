@@ -4,7 +4,7 @@ import android.content.Context
 import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.repository.CityRepositoryImpl
 import bose.ankush.weatherify.data.repository.WeatherRepositoryImpl
-import bose.ankush.weatherify.dispatcher.DispatcherProvider
+import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.domain.repository.CityRepository
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import dagger.Module

@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils
-import bose.ankush.weatherify.common.Extension.toCelsius
+import bose.ankush.weatherify.base.common.Extension.toCelsius
 import bose.ankush.weatherify.domain.model.Weather
 
 @Composable

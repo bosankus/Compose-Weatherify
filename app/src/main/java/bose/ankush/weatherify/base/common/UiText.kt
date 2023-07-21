@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.common
+package bose.ankush.weatherify.base.common
 
 import android.content.Context
 import androidx.annotation.StringRes

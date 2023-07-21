@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.preferences
+package bose.ankush.weatherify.base.preferences
 
 import android.content.SharedPreferences
 

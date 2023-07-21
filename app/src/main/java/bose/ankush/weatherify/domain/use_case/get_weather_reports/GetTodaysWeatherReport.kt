@@ -1,8 +1,8 @@
 package bose.ankush.weatherify.domain.use_case.get_weather_reports
 
-import bose.ankush.weatherify.common.ResultData
-import bose.ankush.weatherify.common.UiText
-import bose.ankush.weatherify.common.errorResponse
+import bose.ankush.weatherify.base.common.ResultData
+import bose.ankush.weatherify.base.common.UiText
+import bose.ankush.weatherify.base.common.errorResponse
 import bose.ankush.weatherify.data.remote.dto.toWeather
 import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.domain.repository.WeatherRepository

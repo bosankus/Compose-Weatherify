@@ -85,6 +85,7 @@ dependencies {
     implementation(Deps.systemUIController)
     implementation(Deps.composePermission)
     implementation(Deps.dataStore)
+    implementation(Deps.splashScreen)
 
     // Compose
     implementation(platform(Deps.composeBom))

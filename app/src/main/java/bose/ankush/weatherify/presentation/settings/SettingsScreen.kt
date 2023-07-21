@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.LocaleConfigMapper
-import bose.ankush.weatherify.common.component.ScreenTopAppBar
+import bose.ankush.weatherify.base.common.component.ScreenTopAppBar
 
 @Composable
 fun SettingsScreen(

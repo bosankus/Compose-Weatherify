@@ -1,8 +1,11 @@
 package bose.ankush.weatherify.presentation.home
 
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Activity
 import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,8 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.common.ConnectivityManager.isNetworkAvailable
-import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
+import bose.ankush.weatherify.base.common.ConnectivityManager.isNetworkAvailable
+import bose.ankush.weatherify.base.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.home.component.AirQualityCardLayout
@@ -36,15 +39,49 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 @Composable
 fun HomeScreen(
     navController: NavController,
-    cityName: String = DEFAULT_CITY_NAME,
-    viewModel: HomeViewModel = hiltViewModel(),
+    viewModel: HomeViewModel,
 ) {
     val context: Context = LocalContext.current
-    val state: UIState<List<ForecastDto.ForecastList>> = viewModel.forecastState.value
+    val permissionQueue = viewModel.permissionDialogQueue
 
+    // Handle permission
+    HandlePermissionRequests(viewModel = viewModel)
+
+    // Handle internet check and fetch data
+    HandleFetchData(context = context, viewModel = viewModel, navController = navController)
+
+    // Handle back button press to exit app
     BackHandler {
         (context as? Activity)?.finish()
     }
+}
+
+@Composable
+private fun HandlePermissionRequests(viewModel: HomeViewModel) {
+    // declare permission request launcher
+    val locationPermissionResultLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            viewModel.onPermissionResult(
+                permission = ACCESS_FINE_LOCATION,
+                isGranted = isGranted
+            )
+        }
+    )
+
+    LaunchedEffect(key1 = Unit) {
+        locationPermissionResultLauncher.launch(ACCESS_FINE_LOCATION)
+    }
+}
+
+@Composable
+fun HandleFetchData(
+    context: Context,
+    viewModel: HomeViewModel,
+    navController: NavController
+) {
+    val cityName = DEFAULT_CITY_NAME
+    val state: UIState<List<ForecastDto.ForecastList>> = viewModel.forecastState.value
 
     // Has internet
     if (isNetworkAvailable(context)) {

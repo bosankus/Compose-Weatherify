@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package bose.ankush.weatherify.common
+package bose.ankush.weatherify.base.common
 
 import android.annotation.SuppressLint
 import android.content.Context

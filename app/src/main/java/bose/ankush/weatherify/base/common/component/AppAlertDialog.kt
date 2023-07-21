@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.common.component
+package bose.ankush.weatherify.base.common.component
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.AlertDialog

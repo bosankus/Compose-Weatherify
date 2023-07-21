@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.domain.use_case.get_air_quality
 
-import bose.ankush.weatherify.common.ResultData
-import bose.ankush.weatherify.common.UiText
+import bose.ankush.weatherify.base.common.ResultData
+import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.data.remote.dto.toAirQuality
 import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.domain.repository.WeatherRepository

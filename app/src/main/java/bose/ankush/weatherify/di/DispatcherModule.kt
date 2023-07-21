@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.di
 
-import bose.ankush.weatherify.dispatcher.AppDispatcher
-import bose.ankush.weatherify.dispatcher.DispatcherProvider
+import bose.ankush.weatherify.base.dispatcher.AppDispatcher
+import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

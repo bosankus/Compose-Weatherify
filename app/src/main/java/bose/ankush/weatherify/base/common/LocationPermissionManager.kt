@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.common
+package bose.ankush.weatherify.base.common
 
 import android.Manifest
 import androidx.compose.material.icons.Icons
@@ -8,7 +8,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import bose.ankush.weatherify.common.component.AppAlertDialog
+import bose.ankush.weatherify.base.common.component.AppAlertDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState

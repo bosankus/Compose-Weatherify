@@ -1,15 +1,16 @@
 package bose.ankush.weatherify.presentation.home
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.getDayNameFromEpoch
-import bose.ankush.weatherify.common.DEFAULT_LOCATION_COORDINATES
-import bose.ankush.weatherify.common.Extension.getForecastListForNext4Days
-import bose.ankush.weatherify.common.ResultData
-import bose.ankush.weatherify.common.UiText
+import bose.ankush.weatherify.base.common.DEFAULT_LOCATION_COORDINATES
+import bose.ankush.weatherify.base.common.Extension.getForecastListForNext4Days
+import bose.ankush.weatherify.base.common.ResultData
+import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.data.preference.PreferenceManager
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.domain.model.AirQuality
@@ -18,8 +19,8 @@ import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
+import bose.ankush.weatherify.base.location.LocationClient
 import bose.ankush.weatherify.presentation.UIState
-import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,8 +40,8 @@ class HomeViewModel @Inject constructor(
     private val getTodaysWeatherUseCase: GetTodaysWeatherReport,
     private val getForecastsUseCase: GetForecasts,
     private val getAirQuality: GetAirQuality,
+    private val locationClient: LocationClient,
     private val preferenceManager: PreferenceManager,
-    val fusedLocationProviderClient: FusedLocationProviderClient,
 ) : ViewModel() {
 
     /*For Home Screen*/
@@ -65,26 +66,43 @@ class HomeViewModel @Inject constructor(
     var userLocationPreference = MutableStateFlow(DEFAULT_LOCATION_COORDINATES)
         private set
 
+    var permissionDialogQueue = mutableStateListOf<String>()
+        private set
+
     /*For City List Screen*/
     // Refactor here details from city list view model
 
     init {
         viewModelScope.launch {
-            preferenceManager.getLocationPreference.collect {
-                // fetch location from preference
+            locationClient.getCurrentLocation()?.let {
+                // set location to carry till UI
                 userLocationPreference.value = it
-                // fetch air quality as per location
-                fetchAirQuality(
-                    lat = it.first,
-                    lang = it.second
-                )
+                // save location in data store preference
+                preferenceManager.saveLocationPreferences(it)
+                // start fetching air quality based on location
+                fetchAirQuality(it)
             }
         }
     }
 
-    private fun fetchAirQuality(lat: Double, lang: Double) {
+    /*Permission block*/
+    fun dismissDialog() {
+        permissionDialogQueue.removeLast()
+    }
+
+    fun onPermissionResult(
+        permission: String,
+        isGranted: Boolean,
+    ) {
+        if (!isGranted) {
+            permissionDialogQueue.add(0, permission)
+        }
+    }
+
+    /*API call and data parsing block*/
+    private fun fetchAirQuality(location: Pair<Double, Double>) {
         viewModelScope.launch {
-            getAirQuality(lat, lang).collect { result ->
+            getAirQuality(location.first, location.second).collect { result ->
                 when (result) {
                     is ResultData.DoNothing -> {}
                     is ResultData.Loading -> airQuality.value = UIState(isLoading = true)
@@ -154,9 +172,4 @@ class HomeViewModel @Inject constructor(
             list.dt?.let { getDayNameFromEpoch(it) == getDayNameFromEpoch(dateQuery) } ?: false
         }
     }
-
-    fun saveUserLocationPreference(latLang: Pair<Double, Double>) {
-        viewModelScope.launch { preferenceManager.saveLocationPreferences(latLang) }
-    }
-
 }

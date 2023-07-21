@@ -18,7 +18,6 @@ import bose.ankush.weatherify.presentation.home.HomeScreen
 import bose.ankush.weatherify.presentation.home.HomeViewModel
 import bose.ankush.weatherify.presentation.run.RunScreen
 import bose.ankush.weatherify.presentation.settings.SettingsScreen
-import bose.ankush.weatherify.presentation.splash.SplashScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -35,24 +34,17 @@ fun AppNavigation() {
     ) {
         /*Home Screens*/
         navigation(
-            startDestination = Screen.SplashScreen.route,
+            startDestination = Screen.HomeScreen.route,
             route = Screen.HomeNestedNav.route
         ) {
             composable(
-                route = Screen.SplashScreen.route
+                route = Screen.HomeScreen.route,
             ) { entry ->
                 val viewModel = entry.sharedViewModel<HomeViewModel>(navController = navController)
-                SplashScreen(
+                HomeScreen(
                     viewModel = viewModel,
-                    navAction = {
-                        navController.popBackStack()
-                        navController.navigate(Screen.HomeScreen.route)
-                    })
-            }
-            composable(
-                route = Screen.HomeScreen.route,
-            ) {
-                HomeScreen(navController = navController)
+                    navController = navController
+                )
             }
             composable(
                 route = Screen.CitiesListScreen.route,

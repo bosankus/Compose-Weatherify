@@ -10,7 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import bose.ankush.weatherify.common.DEFAULT_CITY_NAME
+import bose.ankush.weatherify.base.common.DEFAULT_CITY_NAME
 import bose.ankush.weatherify.domain.model.CityName
 
 @Composable

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Weatherify.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_profile</item>
+        <item name="postSplashScreenTheme">@style/Theme.Weatherify</item>
+    </style>
+</resources>

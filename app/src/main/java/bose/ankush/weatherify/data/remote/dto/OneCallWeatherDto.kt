@@ -1,6 +1,7 @@
 package bose.ankush.weatherify.data.remote.dto
 
 data class OneCallWeatherDto(
+    val alerts: List<Alert?>?,
     val current: Current?,
     val daily: List<Daily?>?,
     val hourly: List<Hourly?>?,
@@ -10,6 +11,15 @@ data class OneCallWeatherDto(
     val timezone: String?,
     val timezone_offset: Int?
 ) {
+    data class Alert(
+        val description: String?,
+        val end: Int?,
+        val event: String?,
+        val sender_name: String?,
+        val start: Int?,
+        val tags: List<Any?>?
+    )
+
     data class Current(
         val clouds: Int?,
         val dew_point: Double?,
@@ -20,10 +30,11 @@ data class OneCallWeatherDto(
         val sunrise: Int?,
         val sunset: Int?,
         val temp: Double?,
-        val uvi: Int?,
+        val uvi: Double?,
         val visibility: Int?,
         val weather: List<Weather?>?,
         val wind_deg: Int?,
+        val wind_gust: Double?,
         val wind_speed: Double?
     ) {
         data class Weather(
@@ -88,19 +99,14 @@ data class OneCallWeatherDto(
         val humidity: Int?,
         val pop: Double?,
         val pressure: Int?,
-        val rain: Rain?,
         val temp: Double?,
-        val uvi: Double?,
+        val uvi: Int?,
         val visibility: Int?,
         val weather: List<Weather?>?,
         val wind_deg: Int?,
         val wind_gust: Double?,
         val wind_speed: Double?
     ) {
-        data class Rain(
-            val `1h`: Double?
-        )
-
         data class Weather(
             val description: String?,
             val icon: String?,

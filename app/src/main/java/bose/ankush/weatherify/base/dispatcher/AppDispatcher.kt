@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.dispatcher
+package bose.ankush.weatherify.base.dispatcher
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

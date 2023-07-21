@@ -1,6 +1,6 @@
 package bose.ankush.weatherify.common
 
-import bose.ankush.weatherify.dispatcher.DispatcherProvider
+import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
