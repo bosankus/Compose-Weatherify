@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.hilt.navigation.compose.hiltViewModel
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
-import bose.ankush.weatherify.presentation.home.HomeViewModel
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -24,7 +23,7 @@ class MainActivityTest {
     @get:Rule(order = 2)
     val createComposeRule = createAndroidComposeRule<MainActivity>()
 
-    private lateinit var viewModel: HomeViewModel
+    private lateinit var viewModel: MainViewModel
 
     @Before
     fun setup() {

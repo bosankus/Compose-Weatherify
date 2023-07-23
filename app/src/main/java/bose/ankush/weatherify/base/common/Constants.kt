@@ -20,8 +20,12 @@ val DEFAULT_LOCATION_COORDINATES = Pair(28.61792, 77.2079)
 const val DEFAULT_CITY_NAME = "New Delhi"
 
 /* Permission constants */
-private const val ACCESS_FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
-/*private const val ACCESS_COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION
-private const val PERMISSION_DENIED = 0
+const val ACCESS_FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
+const val ACCESS_COARSE_LOCATION = android.Manifest.permission.ACCESS_COARSE_LOCATION
+val PERMISSIONS_TO_REQUEST = arrayOf(
+    ACCESS_FINE_LOCATION,
+    ACCESS_COARSE_LOCATION
+)
+/*private const val PERMISSION_DENIED = 0
 private const val PERMISSION_GIVEN = 1
 private const val REQUEST_PERMISSION = 2*/
