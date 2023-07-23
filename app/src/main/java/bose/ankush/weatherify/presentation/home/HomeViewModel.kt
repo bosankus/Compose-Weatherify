@@ -1,7 +1,6 @@
 package bose.ankush.weatherify.presentation.home
 
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +18,6 @@ import bose.ankush.weatherify.domain.model.Weather
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_forecasts.GetForecasts
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetTodaysWeatherReport
-import bose.ankush.weatherify.base.location.LocationClient
 import bose.ankush.weatherify.presentation.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
@@ -40,7 +38,6 @@ class HomeViewModel @Inject constructor(
     private val getTodaysWeatherUseCase: GetTodaysWeatherReport,
     private val getForecastsUseCase: GetForecasts,
     private val getAirQuality: GetAirQuality,
-    private val locationClient: LocationClient,
     private val preferenceManager: PreferenceManager,
 ) : ViewModel() {
 
@@ -66,40 +63,25 @@ class HomeViewModel @Inject constructor(
     var userLocationPreference = MutableStateFlow(DEFAULT_LOCATION_COORDINATES)
         private set
 
-    var permissionDialogQueue = mutableStateListOf<String>()
-        private set
-
     /*For City List Screen*/
     // Refactor here details from city list view model
 
     init {
         viewModelScope.launch {
-            locationClient.getCurrentLocation()?.let {
-                // set location to carry till UI
-                userLocationPreference.value = it
-                // save location in data store preference
-                preferenceManager.saveLocationPreferences(it)
-                // start fetching air quality based on location
-                fetchAirQuality(it)
-            }
+            preferenceManager.getLocationPreference(object :
+                PreferenceManager.LocationPreferenceCallback {
+                override fun onLocationPreferenceSuccess(locationPreference: Pair<Double, Double>) {
+                    fetchAirQuality(locationPreference)
+                }
+
+                override fun onLocationPreferenceError(exception: Exception) {
+                    airQuality.value =
+                        UIState(error = UiText.DynamicText(exception.message.toString()))
+                }
+            })
         }
     }
 
-    /*Permission block*/
-    fun dismissDialog() {
-        permissionDialogQueue.removeLast()
-    }
-
-    fun onPermissionResult(
-        permission: String,
-        isGranted: Boolean,
-    ) {
-        if (!isGranted) {
-            permissionDialogQueue.add(0, permission)
-        }
-    }
-
-    /*API call and data parsing block*/
     private fun fetchAirQuality(location: Pair<Double, Double>) {
         viewModelScope.launch {
             getAirQuality(location.first, location.second).collect { result ->

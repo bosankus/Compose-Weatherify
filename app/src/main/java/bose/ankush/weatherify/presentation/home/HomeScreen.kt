@@ -1,11 +1,8 @@
 package bose.ankush.weatherify.presentation.home
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Activity
 import android.content.Context
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,43 +30,24 @@ import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
 import bose.ankush.weatherify.presentation.navigation.Screen
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    viewModel: HomeViewModel,
+    viewModel: HomeViewModel
 ) {
     val context: Context = LocalContext.current
-    // val permissionQueue = viewModel.permissionDialogQueue
-
-    // Handle permission
-    HandlePermissionRequests(viewModel = viewModel)
 
     // Handle internet check and fetch data
-    HandleFetchData(context = context, viewModel = viewModel, navController = navController)
+    HandleFetchData(
+        context = context,
+        viewModel = viewModel,
+        navController = navController,
+    )
 
     // Handle back button press to exit app
     BackHandler {
         (context as? Activity)?.finish()
-    }
-}
-
-@Composable
-private fun HandlePermissionRequests(viewModel: HomeViewModel) {
-    // declare permission request launcher
-    val locationPermissionResultLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            viewModel.onPermissionResult(
-                permission = ACCESS_FINE_LOCATION,
-                isGranted = isGranted
-            )
-        }
-    )
-
-    LaunchedEffect(key1 = Unit) {
-        locationPermissionResultLauncher.launch(ACCESS_FINE_LOCATION)
     }
 }
 
@@ -121,8 +99,6 @@ fun HandleFetchData(
     }
 }
 
-
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun ShowUIContainer(
     navController: NavController,
