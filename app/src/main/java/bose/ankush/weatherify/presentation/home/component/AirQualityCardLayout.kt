@@ -22,14 +22,12 @@ import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.presentation.air_quality.AirQualityIndexAnalyser.getAQIAnalysedText
 import bose.ankush.weatherify.presentation.air_quality.AirQualityIndexAnalyser.getFormattedAQI
 import bose.ankush.weatherify.presentation.home.HomeViewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 /**
  * This composable is response to show air quality card on HomeScreen.
  * Shows what is the current air quality based return value of [getAQIAnalysedText]
  */
 @SuppressLint("MissingPermission")
-@ExperimentalPermissionsApi
 @Composable
 internal fun AirQualityCardLayout(
     viewModel: HomeViewModel, onCardClick: () -> Unit
