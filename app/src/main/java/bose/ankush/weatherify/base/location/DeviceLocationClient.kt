@@ -12,12 +12,10 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,23 +24,6 @@ class DeviceLocationClient @Inject constructor(
     private val context: Context,
     private val client: FusedLocationProviderClient
 ) : LocationClient {
-
-    @SuppressLint("MissingPermission")
-    override suspend fun getCurrentLocation(): Pair<Double, Double>? {
-        withContext(Dispatchers.IO) {
-            if (!context.hasLocationPermission()) {
-                throw LocationClient.LocationException("Location permission is not given.")
-            }
-
-            client.lastLocation.apply {
-                if (isSuccessful) {
-                    result?.let { return@withContext Pair(it.latitude, it.longitude) }
-                        ?: throw LocationClient.LocationException("Unable to fetch current location")
-                }
-            }
-        }
-        return null
-    }
 
     @SuppressLint("MissingPermission")
     override fun getLocationUpdates(interval: Long): Flow<Location> {
