@@ -2,19 +2,19 @@
 object Versions {
 
     // Kotlin
-    const val kotlin = "1.8.20"
+    const val kotlin = "1.9.0"
     // const val kspVersion = "1.8.20-1.0.10"
     const val kotlinCompiler = "1.9"
 
     // Compose
-    const val composeBom = "2023.05.01"
-    const val compilerExtensionVersion = "1.4.6"
+    const val composeBom = "2023.06.01"
+    const val compilerExtensionVersion = "1.5.0"
 
     // Plugins
     const val buildGradle = "8.0.2"
     const val navigation = "2.5.3"
     const val secretPlugin = "2.0.1"
-    const val benManes = "0.42.0"
+    const val benManes = "0.47.0"
     const val spotlessVersion = "6.18.0"
     const val ktLintVersion = "11.3.2"
     const val googleServices = "4.3.15"
@@ -37,7 +37,7 @@ object Versions {
     const val appCompat = "1.6.1"
     const val androidMaterial = "1.7.0"
     const val lifecycle = "2.6.1"
-    const val googlePlayCore = "2.0.1"
+    const val googlePlayCore = "2.1.0"
     const val googlePlayLocation = "21.0.1"
     const val accompanist = "0.28.0"
     const val dataStore = "1.0.0"
@@ -50,22 +50,22 @@ object Versions {
     const val okhttpInterceptor = "4.9.3"
 
     // Firebase
-    const val firebaseBom = "32.0.0"
+    const val firebaseBom = "32.2.0"
 
     // Coroutines
     const val coroutines = "1.6.4"
 
     // Dependency Injection
-    const val hilt = "2.46.1"
+    const val hilt = "2.47"
     const val hiltCompose = "1.0.0"
 
     // Miscellaneous
     const val timber = "5.0.1"
     const val lottie = "6.0.0"
-    const val coilCompose = "2.3.0"
+    const val coilCompose = "2.4.0"
 
     // Memory leak
-    const val leakCanary = "2.10"
+    const val leakCanary = "2.12"
 
     /*For Payment module*/
     const val razorPay = "1.6.30"
