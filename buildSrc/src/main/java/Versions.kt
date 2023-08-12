@@ -16,7 +16,7 @@ object Versions {
     const val secretPlugin = "2.0.1"
     const val benManes = "0.47.0"
     const val spotlessVersion = "6.18.0"
-    const val ktLintVersion = "11.3.2"
+    const val ktLintVersion = "11.5.1"
     const val googleServices = "4.3.15"
 
     // Testing
