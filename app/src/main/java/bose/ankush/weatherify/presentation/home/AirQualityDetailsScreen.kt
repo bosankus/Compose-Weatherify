@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.air_quality
+package bose.ankush.weatherify.presentation.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,11 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.component.ScreenTopAppBar
-import bose.ankush.weatherify.presentation.home.HomeViewModel
 
 @Composable
 internal fun AirQualityDetailsScreen(
-    viewModel: HomeViewModel,
+    viewModel: WeatherViewModel,
     navController: NavController
 ) {
     val userLocation = remember { viewModel.userLocationPreference.value }
@@ -40,11 +39,14 @@ internal fun AirQualityDetailsScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
-                        text = "Your current location coordinate is: ${userLocation.first}, ${userLocation.second}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                    )
+                    if (userLocation.data != null) {
+                        Text(
+                            text = "Your current location coordinate is: ${userLocation.data.first}, ${userLocation.data.second}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                    }
+
                 }
             }
         )

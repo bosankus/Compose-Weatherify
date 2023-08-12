@@ -81,11 +81,15 @@ dependencies {
     implementation(Deps.inAppUpdate)
     implementation(Deps.inAppUpdateKtx)
     implementation(Deps.googlePlayLocation)
-    implementation(Deps.animatedNavigation)
     implementation(Deps.systemUIController)
     implementation(Deps.composePermission)
     implementation(Deps.dataStore)
     implementation(Deps.splashScreen)
+
+    // Room
+    implementation(Deps.room)
+    implementation(Deps.roomKtx)
+    kapt(Deps.roomCompiler)
 
     // Compose
     implementation(platform(Deps.composeBom))
@@ -94,8 +98,8 @@ dependencies {
     implementation(Deps.composeUiToolingPreview)
     implementation(Deps.composeMaterial3)
     // Compose Testing
-    androidTestImplementation(Deps.composeUiJunit4)
-    debugImplementation(Deps.composeUiTestManifest)
+    // androidTestImplementation(Deps.composeUiJunit4)
+    // debugImplementation(Deps.composeUiTestManifest)
 
     // Unit Testing
     testImplementation(Deps.junit)

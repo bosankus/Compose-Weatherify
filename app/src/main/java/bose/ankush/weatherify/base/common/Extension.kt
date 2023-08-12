@@ -4,14 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import bose.ankush.weatherify.base.DateTimeUtils
-import bose.ankush.weatherify.data.remote.dto.ForecastDto
-import bose.ankush.weatherify.domain.model.AvgForecast
-import java.util.*
 import kotlin.math.roundToInt
 
 /**Created by
@@ -21,10 +15,27 @@ Date: 06,May,2021
 
 object Extension {
 
-    //fun Double.toCelsius(): String = (((this - 32) * 5)/9).roundToInt().toString()
     fun Double.toCelsius(): String = (this - 273).roundToInt().toString()
 
-    fun List<ForecastDto.ForecastList>.getForecastListForNext4Days():
+    fun Context.openAppSystemSettings() {
+        startActivity(Intent().apply {
+            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            data = Uri.fromParts("package", packageName, null)
+        })
+    }
+
+    fun Context.hasLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    /*fun List<ForecastDto.ForecastList>.getForecastListForNext4Days():
             List<AvgForecast> {
         return filter { list -> (list.dt?.isNotMatchingWithTodayAndWithinNext4Days() == true) }
             .parseEachDayFromList()
@@ -58,7 +69,6 @@ object Extension {
         return listOfAvgForecast
     }
 
-
     private fun Int.isNotMatchingWithTodayAndWithinNext4Days(): Boolean {
         val givenDate = Date(this.toLong() * 1000)
         val givenDateCalender = Calendar.getInstance()
@@ -72,13 +82,6 @@ object Extension {
         return (givenDateNumber > todayDateNumber && givenYear == currentYear && (differenceOfDate <= 4))
     }
 
-    fun Context.openAppSystemSettings() {
-        startActivity(Intent().apply {
-            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            data = Uri.fromParts("package", packageName, null)
-        })
-    }
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun Context.openAppLocaleSettings() {
         startActivity(Intent().apply {
@@ -89,16 +92,5 @@ object Extension {
 
     fun isDeviceSDKAndroid13OrAbove(): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-    }
-
-    fun Context.hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-    }
+    }*/
 }

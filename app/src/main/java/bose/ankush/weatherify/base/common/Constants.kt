@@ -26,6 +26,10 @@ val PERMISSIONS_TO_REQUEST = arrayOf(
     ACCESS_FINE_LOCATION,
     ACCESS_COARSE_LOCATION
 )
+
+/*Room central db name*/
+const val DATABASE_NAME = "central_weather_table"
+
 /*private const val PERMISSION_DENIED = 0
 private const val PERMISSION_GIVEN = 1
 private const val REQUEST_PERMISSION = 2*/

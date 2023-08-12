@@ -76,7 +76,6 @@ dependencies {
     implementation(Deps.composeMaterial1)
     implementation(Deps.composeMaterial3)
     implementation(Deps.navigationCompose)
-    implementation(Deps.animatedNavigation)
 
     // payment sdk
     implementation(Deps.razorPay)

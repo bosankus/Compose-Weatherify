@@ -25,14 +25,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.domain.model.AvgForecast
-import bose.ankush.weatherify.presentation.home.HomeViewModel
+import bose.ankush.weatherify.base.DateTimeUtils.toFormattedTime
+import bose.ankush.weatherify.base.common.Extension.toCelsius
+import bose.ankush.weatherify.data.room.WeatherEntity
 
 @Composable
-internal fun FourDaysForecastLayout(
-    viewModel: HomeViewModel
+internal fun HourlyWeatherForecastReportLayout(
+    hourlyWeatherForecasts: List<WeatherEntity.Hourly?>
 ) {
-    val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
     Column(
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
@@ -45,17 +45,17 @@ internal fun FourDaysForecastLayout(
                 .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         )
-        FutureForecastListItem(avgForecastList = fourDaysForecasts) {
-            val selectedDate = fourDaysForecasts[it].date
-            selectedDate?.let { date -> viewModel.getDayWiseDetailedForecast(date) }
+        if (hourlyWeatherForecasts.isNotEmpty()) {
+            FutureForecastListItem(hourlyWeatherForecasts) { /*TODO: item on click action*/ }
         }
+
     }
 }
 
 
 @Composable
 private fun FutureForecastListItem(
-    avgForecastList: List<AvgForecast>,
+    weatherForecast: List<WeatherEntity.Hourly?>,
     onItemClick: (Int) -> Unit
 ) {
     var selectedItem by remember { mutableStateOf(0) }
@@ -64,7 +64,7 @@ private fun FutureForecastListItem(
             .fillMaxWidth()
             .padding(start = 8.dp, end = 8.dp, top = 16.dp)
     ) {
-        items(avgForecastList.size) {
+        items(weatherForecast.size) {
             Box(
                 modifier = Modifier
                     .padding(start = 8.dp, end = 8.dp)
@@ -73,7 +73,10 @@ private fun FutureForecastListItem(
                         selectedItem = it
                         onItemClick(it)
                     }
-                    .background(if (selectedItem == it) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp))
+                    .background(
+                        if (selectedItem == it) MaterialTheme.colorScheme.primaryContainer
+                        else MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
+                    )
                     .padding(horizontal = 10.dp, vertical = 20.dp)
             ) {
                 Column(
@@ -81,7 +84,8 @@ private fun FutureForecastListItem(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = avgForecastList[it].nameOfDay?.substring(0,3) ?: stringResource(id = R.string.not_available),
+                        text = weatherForecast[it]?.dt?.toFormattedTime()
+                            ?: stringResource(id = R.string.not_available),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -90,7 +94,8 @@ private fun FutureForecastListItem(
                     Text(
                         text = stringResource(
                             id = R.string.celsius,
-                            avgForecastList[it].avgTemp ?: stringResource(id = R.string.not_available)
+                            weatherForecast[it]?.temp?.toCelsius()
+                                ?: stringResource(id = R.string.not_available)
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         overflow = TextOverflow.Ellipsis,
@@ -100,7 +105,8 @@ private fun FutureForecastListItem(
                     Text(
                         text = stringResource(
                             id = R.string.feels_like,
-                            avgForecastList[it].feelsLike ?: stringResource(id = R.string.not_available)
+                            weatherForecast[it]?.feels_like
+                                ?: stringResource(id = R.string.not_available)
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,

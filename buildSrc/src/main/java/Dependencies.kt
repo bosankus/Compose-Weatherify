@@ -16,7 +16,6 @@ object Deps {
     val inAppUpdate by lazy { "com.google.android.play:app-update:${Versions.googlePlayCore}" }
     val inAppUpdateKtx by lazy { "com.google.android.play:app-update-ktx:${Versions.googlePlayCore}" }
     val googlePlayLocation by lazy { "com.google.android.gms:play-services-location:${Versions.googlePlayLocation}" }
-    val animatedNavigation by lazy { "com.google.accompanist:accompanist-navigation-animation:${Versions.accompanist}" }
     val composePermission by lazy { "com.google.accompanist:accompanist-permissions:${Versions.accompanist}" }
     val systemUIController by lazy { "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}" }
     val dataStore by lazy { "androidx.datastore:datastore-preferences:${Versions.dataStore}" }
@@ -43,6 +42,11 @@ object Deps {
     val mockitoNhaarman by lazy { "com.nhaarman.mockitokotlin2:mockito-kotlin:${Versions.mockitoNhaarman}" }
     val mockWebServer by lazy { "com.squareup.okhttp3:mockwebserver:${Versions.mockWebServer}" }
     val mockk by lazy { "io.mockk:mockk:${Versions.mockk}" }
+
+    // Room
+    val room by lazy { "androidx.room:room-runtime:${Versions.room}" }
+    val roomKtx by lazy { "androidx.room:room-ktx:${Versions.room}" }
+    val roomCompiler by lazy { "androidx.room:room-compiler:${Versions.room}" }
 
     // UI Testing
     val extJunit by lazy { "androidx.test.ext:junit:${Versions.extJunit}" }

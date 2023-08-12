@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.air_quality
+package bose.ankush.weatherify.base.common
 
 object AirQualityIndexAnalyser {
 

@@ -35,9 +35,9 @@ object DateTimeUtils {
      * Returns name of the day from given epoch. Epoch to be provided in Integer format
      * via argument
      */
-    fun getDayNameFromEpoch(epoch: Int): String {
+    fun Long.dayName(): String {
         val calendar = Calendar.getInstance()
-        calendar.time = Date(epoch.toLong() * 1000)
+        calendar.time = Date(this * 1000)
         return when (calendar.get(Calendar.DAY_OF_WEEK)) {
             1 -> "Sunday"
             2 -> "Monday"
@@ -72,6 +72,14 @@ object DateTimeUtils {
             val formatter = DateTimeFormatter.ofPattern(format, Locale.ENGLISH)
             instant.atZone(zoneId).format(formatter)
         }.toString()
+    }
+
+    fun Long.toFormattedTime(zone: String = "Asia/Kolkata"): String {
+        val format = "K:mm a"
+        val zoneId = ZoneId.of(zone)
+        val instant = Instant.ofEpochSecond(this)
+        val formatter = DateTimeFormatter.ofPattern(format, Locale.ENGLISH)
+        return instant.atZone(zoneId).format(formatter).toString()
     }
 
     fun getFormattedDateTimeFromEpoch(epoch: Long?): String {

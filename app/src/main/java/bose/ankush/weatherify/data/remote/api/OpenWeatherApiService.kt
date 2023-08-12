@@ -4,6 +4,7 @@ import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.data.remote.dto.AirQualityDto
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.data.remote.dto.WeatherDto
+import bose.ankush.weatherify.data.room.WeatherEntity
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -31,4 +32,12 @@ interface OpenWeatherApiService {
         @Query("lon") longitude: String,
         @Query("appid") AppId: String = BuildConfig.OPEN_WEATHER_API
     ): AirQualityDto
+
+    @GET("/data/3.0/onecall")
+    suspend fun getOneCallWeather(
+        @Query("lat") latitude: String,
+        @Query("lon") longitude: String,
+        @Query("exclude") exclude: String = "minutely",
+        @Query("appid") AppId: String = BuildConfig.OPEN_WEATHER_API
+    ): WeatherEntity
 }

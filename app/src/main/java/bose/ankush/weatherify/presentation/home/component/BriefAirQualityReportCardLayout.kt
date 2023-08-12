@@ -10,7 +10,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -18,10 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import bose.ankush.weatherify.base.common.AirQualityIndexAnalyser.getAQIAnalysedText
+import bose.ankush.weatherify.base.common.AirQualityIndexAnalyser.getFormattedAQI
 import bose.ankush.weatherify.domain.model.AirQuality
-import bose.ankush.weatherify.presentation.air_quality.AirQualityIndexAnalyser.getAQIAnalysedText
-import bose.ankush.weatherify.presentation.air_quality.AirQualityIndexAnalyser.getFormattedAQI
-import bose.ankush.weatherify.presentation.home.HomeViewModel
 
 /**
  * This composable is response to show air quality card on HomeScreen.
@@ -29,13 +27,13 @@ import bose.ankush.weatherify.presentation.home.HomeViewModel
  */
 @SuppressLint("MissingPermission")
 @Composable
-internal fun AirQualityCardLayout(
-    viewModel: HomeViewModel, onCardClick: () -> Unit
+internal fun BriefAirQualityReportCardLayout(
+    airQuality: AirQuality,
+    onCardClick: () -> Unit
 ) {
-    val airQualityReport = remember { viewModel.airQuality.value }
-
     ShowUI(
-        aq = airQualityReport.data ?: AirQuality(), onItemClick = onCardClick
+        aq = airQuality,
+        onItemClick = onCardClick
     )
 }
 
@@ -48,12 +46,14 @@ internal fun AirQualityCardLayout(
 private fun ShowUI(
     aq: AirQuality, onItemClick: () -> Unit
 ) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(all = 16.dp)
-        .clip(RoundedCornerShape(10.dp))
-        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp))
-        .padding(horizontal = 15.dp, vertical = 20.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = 16.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp))
+            .padding(horizontal = 15.dp, vertical = 20.dp)
+    ) {
         Text(
             modifier = Modifier.alpha(0.6f),
             text = aq.aqi?.getFormattedAQI() ?: "00",

@@ -7,12 +7,12 @@ object Versions {
     const val kotlinCompiler = "1.9"
 
     // Compose
-    const val composeBom = "2023.06.01"
+    const val composeBom = "2023.08.00"
     const val compilerExtensionVersion = "1.5.0"
 
     // Plugins
     const val buildGradle = "8.0.2"
-    const val navigation = "2.5.3"
+    const val navigation = "2.7.0"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.47.0"
     const val spotlessVersion = "6.18.0"
@@ -42,6 +42,9 @@ object Versions {
     const val accompanist = "0.28.0"
     const val dataStore = "1.0.0"
     const val splashScreen = "1.0.1"
+
+    // Room
+    const val room = "2.5.2"
 
     // Networking
     const val okHttp3 = "4.9.3"

@@ -1,6 +1,6 @@
 package bose.ankush.weatherify.presentation.navigation
 
-import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
@@ -9,26 +9,26 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import bose.ankush.language.presentation.LanguageScreen
-import bose.ankush.weatherify.presentation.air_quality.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
+import bose.ankush.weatherify.presentation.home.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.home.HomeScreen
-import bose.ankush.weatherify.presentation.home.HomeViewModel
+import bose.ankush.weatherify.presentation.home.WeatherViewModel
 import bose.ankush.weatherify.presentation.run.RunScreen
 import bose.ankush.weatherify.presentation.settings.SettingsScreen
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 const val LANGUAGE_ARGUMENT_KEY = "country_config"
 
 @ExperimentalAnimationApi
 @Composable
 fun AppNavigation() {
-    val navController = rememberAnimatedNavController()
-    AnimatedNavHost(
+    val navController = rememberNavController()
+    NavHost(
         navController = navController,
         startDestination = Screen.HomeNestedNav.route
     ) {
@@ -40,7 +40,8 @@ fun AppNavigation() {
             composable(
                 route = Screen.HomeScreen.route,
             ) { entry ->
-                val viewModel = entry.sharedViewModel<HomeViewModel>(navController = navController)
+                val viewModel =
+                    entry.sharedViewModel<WeatherViewModel>(navController = navController)
                 HomeScreen(
                     viewModel = viewModel,
                     navController = navController
@@ -50,25 +51,25 @@ fun AppNavigation() {
                 route = Screen.CitiesListScreen.route,
                 enterTransition = {
                     slideIntoContainer(
-                        towards = AnimatedContentScope.SlideDirection.Down,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
                         animationSpec = tween(500)
                     )
                 },
                 popEnterTransition = {
                     slideIntoContainer(
-                        towards = AnimatedContentScope.SlideDirection.Down,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
                         animationSpec = tween(500)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        towards = AnimatedContentScope.SlideDirection.Up,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
                         animationSpec = tween(500)
                     )
                 },
                 popExitTransition = {
                     slideOutOfContainer(
-                        towards = AnimatedContentScope.SlideDirection.Up,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
                         animationSpec = tween(500)
                     )
                 },
@@ -79,30 +80,31 @@ fun AppNavigation() {
                 route = Screen.AirQualityDetailsScreen.route,
                 enterTransition = {
                     slideIntoContainer(
-                        towards = AnimatedContentScope.SlideDirection.Left,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
                         animationSpec = tween(500)
                     )
                 },
                 popEnterTransition = {
                     slideIntoContainer(
-                        towards = AnimatedContentScope.SlideDirection.Left,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
                         animationSpec = tween(500)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        towards = AnimatedContentScope.SlideDirection.Right,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
                         animationSpec = tween(500)
                     )
                 },
                 popExitTransition = {
                     slideOutOfContainer(
-                        towards = AnimatedContentScope.SlideDirection.Right,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
                         animationSpec = tween(500)
                     )
                 }
             ) { entry ->
-                val viewModel = entry.sharedViewModel<HomeViewModel>(navController = navController)
+                val viewModel =
+                    entry.sharedViewModel<WeatherViewModel>(navController = navController)
                 AirQualityDetailsScreen(
                     viewModel = viewModel,
                     navController = navController
@@ -143,25 +145,25 @@ fun AppNavigation() {
                 }),
                 enterTransition = {
                     slideIntoContainer(
-                        towards = AnimatedContentScope.SlideDirection.Left,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
                         animationSpec = tween(500)
                     )
                 },
                 popEnterTransition = {
                     slideIntoContainer(
-                        towards = AnimatedContentScope.SlideDirection.Left,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
                         animationSpec = tween(500)
                     )
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        towards = AnimatedContentScope.SlideDirection.Right,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
                         animationSpec = tween(500)
                     )
                 },
                 popExitTransition = {
                     slideOutOfContainer(
-                        towards = AnimatedContentScope.SlideDirection.Right,
+                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
                         animationSpec = tween(500)
                     )
                 }

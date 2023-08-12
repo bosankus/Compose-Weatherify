@@ -36,17 +36,20 @@ class MainViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun fetchAndSaveLocationCoordinates() {
-        client.lastLocation.addOnSuccessListener { location ->
-            location?.let {
-                viewModelScope.launch {
-                    preferenceManager.saveLocationPreferences(
-                        Pair(
+        client.lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    viewModelScope.launch {
+                        val coordinates = Pair(
                             first = location.latitude,
                             second = location.longitude
                         )
-                    )
+                        preferenceManager.saveLocationPreferences(coordinates)
+                    }
                 }
             }
-        }
+            .addOnFailureListener { exception ->
+                exception.message
+            }
     }
 }

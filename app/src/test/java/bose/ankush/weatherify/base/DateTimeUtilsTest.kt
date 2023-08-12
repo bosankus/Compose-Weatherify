@@ -1,14 +1,19 @@
 package bose.ankush.weatherify.base
 
+import bose.ankush.weatherify.base.DateTimeUtils.dayName
 import com.google.common.truth.Truth.assertThat
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
-import java.util.*
+import java.util.Calendar
 
 
 class DateTimeUtilsTest {
@@ -85,7 +90,7 @@ class DateTimeUtilsTest {
      */
     @Test
     fun `verify that getDayNameFromEpoch returns correct day name`() {
-        val dayName = DateTimeUtils.getDayNameFromEpoch(now.toInt())
+        val dayName = now.dayName()
         assertThat(dayName).isEqualTo("Thursday")
     }
 }

@@ -14,22 +14,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.base.common.Extension.toCelsius
-import bose.ankush.weatherify.domain.model.Weather
+import bose.ankush.weatherify.data.room.WeatherEntity
 
 @Composable
-internal fun TodayForecastLayout(weather: Weather? = Weather()) {
+internal fun CurrentWeatherReportLayout(currentWeather: WeatherEntity.Current) {
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -38,30 +36,27 @@ internal fun TodayForecastLayout(weather: Weather? = Weather()) {
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Show today's date
-            CurrentDate()
+            CurrentDate(currentWeather.dt)
 
             // Show today's current temperature & weather state
-            CurrentTemperatureInCelsius(weather)
+            CurrentWeatherUI(currentWeather)
 
-            // Show Wind speed, humidity, and some other feature in row
+            // TODO: Show Wind speed, humidity, and some other feature in row
         }
     }
 }
 
 @Composable
-private fun CurrentDate() {
+private fun CurrentDate(dt: Long?) {
     Surface(
         modifier = Modifier.padding(top = 20.dp),
         color = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp),
         shape = RoundedCornerShape(20.dp),
     ) {
-        val epoch = DateTimeUtils.getCurrentTimestamp()
-        val currentDateTime =
-            remember { DateTimeUtils.getFormattedDateTimeFromEpoch(epoch.toLong()) }
         Text(
             modifier = Modifier
                 .padding(horizontal = 16.dp, vertical = 5.dp),
-            text = currentDateTime,
+            text = DateTimeUtils.getFormattedDateTimeFromEpoch(dt),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
@@ -70,9 +65,7 @@ private fun CurrentDate() {
 }
 
 @Composable
-private fun CurrentTemperatureInCelsius(weatherData: Weather?) {
-    val weather = remember { weatherData }
-
+private fun CurrentWeatherUI(weatherData: WeatherEntity.Current) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -81,7 +74,7 @@ private fun CurrentTemperatureInCelsius(weatherData: Weather?) {
             modifier = Modifier.padding(top = 20.dp),
             text = stringResource(
                 id = R.string.degree,
-                weather?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
+                weatherData.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
             ),
             style = MaterialTheme.typography.displayLarge,
             fontSize = 150.sp,
@@ -99,7 +92,7 @@ private fun CurrentTemperatureInCelsius(weatherData: Weather?) {
             )
             Text(
                 modifier = Modifier.padding(start = 5.dp),
-                text = stringResource(id = R.string.percent, weather?.humidity.toString()),
+                text = stringResource(id = R.string.percent, weatherData.humidity.toString()),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -112,16 +105,10 @@ private fun CurrentTemperatureInCelsius(weatherData: Weather?) {
             )
             Text(
                 modifier = Modifier.padding(start = 5.dp),
-                text = stringResource(id = R.string.speed, weather?.wind.toString()),
+                text = stringResource(id = R.string.speed, weatherData.wind_speed.toString()),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
         }
     }
-}
-
-@Preview
-@Composable
-private fun TodayForecastLayoutPreview() {
-    TodayForecastLayout(Weather())
 }

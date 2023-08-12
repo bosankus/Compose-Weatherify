@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -18,14 +18,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.base.common.ConnectivityManager.isNetworkAvailable
-import bose.ankush.weatherify.base.common.DEFAULT_CITY_NAME
-import bose.ankush.weatherify.data.remote.dto.ForecastDto
+import bose.ankush.weatherify.base.common.UiText
+import bose.ankush.weatherify.data.room.WeatherEntity
+import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.presentation.UIState
-import bose.ankush.weatherify.presentation.home.component.AirQualityCardLayout
-import bose.ankush.weatherify.presentation.home.component.DetailedForecastLayout
-import bose.ankush.weatherify.presentation.home.component.FourDaysForecastLayout
-import bose.ankush.weatherify.presentation.home.component.TodayForecastLayout
+import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportCardLayout
+import bose.ankush.weatherify.presentation.home.component.CurrentWeatherReportLayout
+import bose.ankush.weatherify.presentation.home.component.DailyWeatherForecastReportLayout
+import bose.ankush.weatherify.presentation.home.component.HourlyWeatherForecastReportLayout
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
@@ -33,17 +33,36 @@ import bose.ankush.weatherify.presentation.navigation.Screen
 
 @Composable
 fun HomeScreen(
-    navController: NavController,
-    viewModel: HomeViewModel
+    viewModel: WeatherViewModel,
+    navController: NavController
 ) {
     val context: Context = LocalContext.current
+    val weatherReports: UIState<WeatherEntity> = viewModel.weatherReport.collectAsState().value
+    val airQualityReports: UIState<AirQuality> = viewModel.airQualityReport.collectAsState().value
 
-    // Handle internet check and fetch data
-    HandleFetchData(
-        context = context,
-        viewModel = viewModel,
-        navController = navController,
+    // reacting as per response state change
+    if (weatherReports.isLoading || airQualityReports.isLoading) {
+        // Screen loading handler
+        HandleScreenLoading()
+    }
+    if (weatherReports.error?.asString(context).isNullOrEmpty() ||
+        weatherReports.error?.asString(context).isNullOrEmpty()
+    ) {
+        // Screen error handler
+        HandleScreenError(
+            context,
+            weatherReports.error,
+            airQualityReports.error
+        ) { viewModel.performInitialDataLoading() }
+    }
+
+    // Show data on UI
+    ShowUIContainer(
+        weatherReports.data,
+        airQualityReports.data,
+        navController
     )
+
 
     // Handle back button press to exit app
     BackHandler {
@@ -52,109 +71,66 @@ fun HomeScreen(
 }
 
 @Composable
-fun HandleFetchData(
+fun HandleScreenLoading() {
+    ShowLoading(modifier = Modifier.fillMaxSize())
+}
+
+@Composable
+fun HandleScreenError(
     context: Context,
-    viewModel: HomeViewModel,
-    navController: NavController
+    weatherReports: UiText?,
+    airQualityReports: UiText?,
+    onErrorAction: () -> Unit
 ) {
-    val cityName = DEFAULT_CITY_NAME
-    val state: UIState<List<ForecastDto.ForecastList>> = viewModel.forecastState.value
-
-    // Has internet
-    if (isNetworkAvailable(context)) {
-        // make network call
-        LaunchedEffect(Unit) {
-            viewModel.fetchWeatherDetails(cityName)
-        }
-
-        // Screen Loading state
-        if (state.isLoading) {
-            ShowLoading(modifier = Modifier.fillMaxSize())
-        }
-        // Screen Error state
-        else if (!state.error?.asString(context).isNullOrEmpty()) {
-            ShowError(
-                modifier = Modifier.fillMaxSize(),
-                msg = state.error?.asString(context),
-                buttonText = stringResource(id = R.string.retry_btn_txt),
-                buttonAction = { viewModel.fetchWeatherDetails(cityName) }
-            )
-        }
-        // Screen with data showing on UI state
-        else if (!state.data.isNullOrEmpty()) {
-            ShowUIContainer(
-                navController = navController,
-                viewModel = viewModel
-            )
-        }
-    }
-    // No internet connectivity
-    else {
-        ShowError(
-            modifier = Modifier.fillMaxSize(),
-            msg = stringResource(id = R.string.no_internet_txt),
-            buttonText = stringResource(id = R.string.retry_btn_txt),
-            buttonAction = { /*Not yet implemented*/ }
-        )
-    }
+    ShowError(
+        modifier = Modifier.fillMaxSize(),
+        msg =
+        weatherReports?.asString(context) ?: airQualityReports?.asString(context),
+        buttonText = stringResource(id = R.string.retry_btn_txt),
+        buttonAction = onErrorAction
+    )
 }
 
 @Composable
 private fun ShowUIContainer(
-    navController: NavController,
-    viewModel: HomeViewModel,
+    weatherReports: WeatherEntity?,
+    airQualityReports: AirQuality?,
+    navController: NavController
 ) {
-    val detailedForecastList = viewModel.detailedForecastState.value
-
     Box {
-        Scaffold(
-            content = { innerPadding ->
-                LazyColumn(
-                    contentPadding = innerPadding,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Show today's forecasts
-                    item { TodayForecastLayout(viewModel.todayWeather.value.data) }
+        Scaffold(content = { innerPadding ->
+            LazyColumn(
+                contentPadding = innerPadding, verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Show current weather report
+                item {
+                    weatherReports?.current?.let { CurrentWeatherReportLayout(it) }
+                }
 
-                    // Show current air quality condition details
-                    item {
-                        AirQualityCardLayout(viewModel = viewModel) {
+                // Show brief air quality report
+                item {
+                    airQualityReports?.let {
+                        BriefAirQualityReportCardLayout(airQualityReports) {
                             navController.navigate(Screen.AirQualityDetailsScreen.route)
                         }
                     }
-
-                    // Show next 4 day's average forecast
-                    item { FourDaysForecastLayout(viewModel = viewModel) }
-
-                    // TODO: As per current change in the UI scope, this part will be moved to a separate screen.
-                    // Show next 4 day's hourly forecast
-                    if (detailedForecastList.isNotEmpty())
-                        items(detailedForecastList.size) {
-                            DetailedForecastLayout(
-                                list = detailedForecastList,
-                                item = it
-                            )
-                        }
-                    else {
-                        val fourDaysForecasts = viewModel.getFourDaysAvgForecast()
-                        if (fourDaysForecasts.isNotEmpty()) {
-                            val dayDate = fourDaysForecasts[0].date
-                            dayDate?.let { viewModel.getDayWiseDetailedForecast(dayDate) }
-                        } else items(0) {
-                            DetailedForecastLayout(
-                                list = emptyList(),
-                                item = it
-                            )
-                        }
-                    }
                 }
-            },
-            bottomBar = {
-                AppBottomBar(
-                    isVisible = rememberSaveable { mutableStateOf(true) },
-                    navController = navController
-                )
+
+                // Show hourly weather forecast report
+                item {
+                    weatherReports?.hourly?.let { HourlyWeatherForecastReportLayout(it) }
+                }
+
+                // Show next 8 day's weather forecast report
+                weatherReports?.daily?.let { list ->
+                    items(list.size) { DailyWeatherForecastReportLayout(list, it) }
+                }
             }
-        )
+        }, bottomBar = {
+            AppBottomBar(
+                isVisible = rememberSaveable { mutableStateOf(true) },
+                navController = navController
+            )
+        })
     }
 }
