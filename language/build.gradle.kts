@@ -3,7 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-@Suppress("UnstableApiUsage")
 android {
     namespace = "bose.ankush.language"
     compileSdk = ConfigData.compileSdkVersion
