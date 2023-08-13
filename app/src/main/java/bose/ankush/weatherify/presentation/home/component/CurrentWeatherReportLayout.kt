@@ -23,8 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils
+import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
+import bose.ankush.weatherify.data.room.Weather
 import bose.ankush.weatherify.data.room.WeatherEntity
+import coil.compose.AsyncImage
 
 @Composable
 internal fun CurrentWeatherReportLayout(currentWeather: WeatherEntity.Current) {
@@ -37,6 +40,9 @@ internal fun CurrentWeatherReportLayout(currentWeather: WeatherEntity.Current) {
         ) {
             // Show today's date
             CurrentDate(currentWeather.dt)
+
+            // Show current weather icon and description
+            CurrentWeatherIconWithDescription(currentWeather.weather)
 
             // Show today's current temperature & weather state
             CurrentWeatherUI(currentWeather)
@@ -65,22 +71,38 @@ private fun CurrentDate(dt: Long?) {
 }
 
 @Composable
+fun CurrentWeatherIconWithDescription(weather: List<Weather?>?) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AsyncImage(
+            model = weather?.get(0)?.icon?.getIconUrl(),
+            placeholder = painterResource(id = R.drawable.ic_sunny),
+            contentDescription = stringResource(id = R.string.weather_icon_content),
+        )
+        Text(
+            text = weather?.get(0)?.description ?: stringResource(id = R.string.not_available),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+@Composable
 private fun CurrentWeatherUI(weatherData: WeatherEntity.Current) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
-            modifier = Modifier.padding(top = 20.dp),
             text = stringResource(
                 id = R.string.degree,
                 weatherData.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
             ),
             style = MaterialTheme.typography.displayLarge,
-            fontSize = 150.sp,
+            fontSize = 100.sp,
             color = MaterialTheme.colorScheme.onBackground
         )
-
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
