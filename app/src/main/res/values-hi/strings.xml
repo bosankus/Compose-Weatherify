@@ -17,7 +17,7 @@
     <!--General Texts-->
     <string name="app_name">मौसमify</string>
     <string name="retry_btn_txt">पुन: प्रयास करें</string>
-    <string name="forecast_heading_txt">पूर्वानुमान</string>
+    <string name="hourly_forecast_heading_txt">प्रति घंटा पूर्वानुमान</string>
     <string name="not_available">--</string>
     <string name="degree">%1$s°</string>
     <string name="celsius">%1$s°C</string>

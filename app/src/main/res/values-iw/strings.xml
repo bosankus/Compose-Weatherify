@@ -17,7 +17,7 @@
     <!--General Texts-->
     <string name="app_name">וות\'ריפי</string>
     <string name="retry_btn_txt">נסה שוב</string>
-    <string name="forecast_heading_txt">תחזיות</string>
+    <string name="hourly_forecast_heading_txt">תחזיות לפי שעה</string>
     <string name="not_available" translatable="false">--</string>
     <string name="degree" translatable="false">%1$s°</string>
     <string name="celsius" translatable="false">%1$s°C</string>
