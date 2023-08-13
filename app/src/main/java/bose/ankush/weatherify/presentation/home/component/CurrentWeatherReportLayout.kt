@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils
+import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
 import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
-import bose.ankush.weatherify.data.room.Weather
 import bose.ankush.weatherify.data.room.WeatherEntity
 import coil.compose.AsyncImage
 
@@ -38,17 +38,47 @@ internal fun CurrentWeatherReportLayout(currentWeather: WeatherEntity.Current) {
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Show today's date
-            CurrentDate(currentWeather.dt)
-
-            // Show current weather icon and description
-            CurrentWeatherIconWithDescription(currentWeather.weather)
+            // Show today's date & weather description with icon
+            CurrentWeatherStateBriefing(currentWeather)
 
             // Show today's current temperature & weather state
             CurrentWeatherUI(currentWeather)
 
             // TODO: Show Wind speed, humidity, and some other feature in row
         }
+    }
+}
+
+@Composable
+fun CurrentWeatherStateBriefing(currentWeather: WeatherEntity.Current) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = DateTimeUtils.getFormattedDateTimeFromEpoch(currentWeather.dt),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = "  |",
+            fontSize = 18.sp,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+        )
+        AsyncImage(
+            model = currentWeather.weather?.get(0)?.icon?.getIconUrl(),
+            placeholder = painterResource(id = R.drawable.ic_sunny),
+            contentDescription = stringResource(id = R.string.weather_icon_content),
+        )
+        Text(
+            text = (currentWeather.weather?.get(0)?.description
+                ?: stringResource(id = R.string.not_available)).formatTextCapitalization(),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
     }
 }
 
@@ -66,25 +96,6 @@ private fun CurrentDate(dt: Long?) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
-        )
-    }
-}
-
-@Composable
-fun CurrentWeatherIconWithDescription(weather: List<Weather?>?) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AsyncImage(
-            model = weather?.get(0)?.icon?.getIconUrl(),
-            placeholder = painterResource(id = R.drawable.ic_sunny),
-            contentDescription = stringResource(id = R.string.weather_icon_content),
-        )
-        Text(
-            text = weather?.get(0)?.description ?: stringResource(id = R.string.not_available),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onBackground,
         )
     }
 }

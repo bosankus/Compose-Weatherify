@@ -11,6 +11,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -26,7 +27,7 @@ fun AppBottomBar(
     isVisible: MutableState<Boolean>,
     navController: NavController
 ) {
-    val selectedItem = remember { mutableStateOf(0) }
+    val selectedItem = remember { mutableIntStateOf(0) }
     val screenItems = listOf(
         Screen.HomeNestedNav,
         Screen.RunNestedNav,
@@ -64,9 +65,9 @@ fun AppBottomBar(
                             )
                         }
                     },
-                    selected = selectedItem.value == index,
+                    selected = selectedItem.intValue == index,
                     onClick = {
-                        selectedItem.value = index
+                        selectedItem.intValue = index
                         navController.navigate(screen.route)
                     }
                 )

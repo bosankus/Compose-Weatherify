@@ -102,6 +102,8 @@ private fun ShowUIContainer(
             LazyColumn(
                 contentPadding = innerPadding, verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // TODO: Show custom top app bar with future decided icons
+
                 // Show current weather report
                 item {
                     weatherReports?.current?.let { CurrentWeatherReportLayout(it) }

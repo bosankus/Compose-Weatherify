@@ -68,7 +68,7 @@ class WeatherViewModel @Inject constructor(
                     // TODO: check if ('new location' - 'saved location') = X meters away
                     // hold value for UI reference
                     userLocationPreference.value = UIState(data = location)
-                    refreshWeatherReportInRoom(location)
+                    // refreshWeatherReportInRoom(location)
                     fetchAirQualityReport(location)
                 }
         }

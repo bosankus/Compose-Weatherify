@@ -58,5 +58,5 @@ class Converters (private val parser: Parser) {
         parser.fromJson(
             weatherString,
             object : TypeToken<List<Weather?>?>() {}.type
-        ) ?: emptyList()
+        )
 }
