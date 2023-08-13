@@ -5,8 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -21,13 +23,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.toFormattedTime
+import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
+import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
+import bose.ankush.weatherify.base.common.Extension.wrapText
 import bose.ankush.weatherify.data.room.WeatherEntity
+import coil.compose.AsyncImage
 
 @Composable
 internal fun HourlyWeatherForecastReportLayout(
@@ -38,7 +46,7 @@ internal fun HourlyWeatherForecastReportLayout(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.forecast_heading_txt),
+            text = stringResource(id = R.string.hourly_forecast_heading_txt),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier
@@ -80,6 +88,7 @@ private fun FutureForecastListItem(
                     .padding(horizontal = 10.dp, vertical = 20.dp)
             ) {
                 Column(
+                    modifier = Modifier.width(IntrinsicSize.Max),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -90,6 +99,11 @@ private fun FutureForecastListItem(
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.alpha(0.6f),
+                    )
+                    AsyncImage(
+                        model = weatherForecast[it]?.weather?.get(0)?.icon?.getIconUrl(),
+                        placeholder = painterResource(id = R.drawable.ic_sunny),
+                        contentDescription = stringResource(id = R.string.weather_icon_content),
                     )
                     Text(
                         text = stringResource(
@@ -103,17 +117,14 @@ private fun FutureForecastListItem(
                         modifier = Modifier.padding(top = 16.dp)
                     )
                     Text(
-                        text = stringResource(
-                            id = R.string.feels_like,
-                            weatherForecast[it]?.feels_like
-                                ?: stringResource(id = R.string.not_available)
-                        ),
+                        text = (weatherForecast[it]?.weather?.get(0)?.description
+                            ?: stringResource(id = R.string.not_available)).wrapText()
+                            .formatTextCapitalization(),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier
-                            .padding(top = 16.dp)
-                            .alpha(0.6f),
+                        modifier = Modifier.alpha(0.6f),
+                        textAlign = TextAlign.Center
                     )
                 }
             }

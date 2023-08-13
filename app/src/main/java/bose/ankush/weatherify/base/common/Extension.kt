@@ -37,6 +37,25 @@ object Extension {
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
+    fun String.getIconUrl(size: String = "@2x.png"): String {
+        return "$OPEN_WEATHER_IMG_URL$this$size"
+    }
+
+    fun String.wrapText(): String {
+        val words: List<String> = this.split(" ")
+        return if (words.size == 2) {
+            "${words[0]}\n${words[1]}"
+        } else {
+            this
+        }
+    }
+
+    fun String.formatTextCapitalization() : String {
+        val firstLetter = this[0].uppercaseChar()
+        val restOfString = this.substring(1)
+        return firstLetter + restOfString
+    }
+
     /*fun List<ForecastDto.ForecastList>.getForecastListForNext4Days():
             List<AvgForecast> {
         return filter { list -> (list.dt?.isNotMatchingWithTodayAndWithinNext4Days() == true) }

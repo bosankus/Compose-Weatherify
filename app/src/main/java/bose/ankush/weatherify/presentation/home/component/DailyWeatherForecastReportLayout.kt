@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.dayName
+import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
 import bose.ankush.weatherify.data.room.WeatherEntity
 import coil.compose.AsyncImage
@@ -46,8 +47,7 @@ internal fun DailyWeatherForecastReportLayout(list: List<WeatherEntity.Daily?>, 
         )
         AsyncImage(
             modifier = Modifier.weight(0.3f),
-            model = "https://openweathermap.org/img/wn/" +
-                    "${list[item]?.weathers?.get(0)?.icon}@2x.png",
+            model = list[item]?.weather?.get(0)?.icon?.getIconUrl(),
             placeholder = painterResource(id = R.drawable.ic_sunny),
             contentDescription = stringResource(id = R.string.weather_icon_content),
         )
