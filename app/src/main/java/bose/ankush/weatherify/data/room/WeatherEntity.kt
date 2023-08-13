@@ -32,7 +32,7 @@ data class WeatherEntity(
         val sunset: Int?,
         val temp: Double?,
         val uvi: Double?,
-        @field:TypeConverters(Converters::class) val weathers: List<Weather?>? = emptyList(),
+        @field:TypeConverters(Converters::class) val weather: List<Weather?>? = listOf(),
         val wind_gust: Double?,
         val wind_speed: Double?
     )
@@ -49,7 +49,7 @@ data class WeatherEntity(
         val sunset: Int?,
         @Embedded val temp: Temp?,
         val uvi: Double?,
-        @field:TypeConverters(Converters::class) val weathers: List<Weather?>? = emptyList(),
+        @field:TypeConverters(Converters::class) val weather: List<Weather?>? = listOf(),
         val wind_gust: Double?,
         val wind_speed: Double?
     ) {
@@ -69,7 +69,7 @@ data class WeatherEntity(
         val feels_like: Double?,
         val humidity: Int?,
         val temp: Double?,
-        @field:TypeConverters(Converters::class) val weathers: List<Weather?>? = emptyList(),
+        @field:TypeConverters(Converters::class) val weather: List<Weather?>? = listOf(),
     )
 }
 
