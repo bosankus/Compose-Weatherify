@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
 
@@ -80,7 +82,7 @@ object Extension {
             DateTimeUtils.getTodayDateInCalenderFormat().get(Calendar.DAY_OF_MONTH + 1)
         val differenceOfDate = DateTimeUtils.getDayWiseDifferenceFromToday(this)
         return (givenDateNumber > todayDateNumber && givenYear == currentYear && (differenceOfDate <= 4))
-    }
+    }*/
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun Context.openAppLocaleSettings() {
@@ -92,5 +94,5 @@ object Extension {
 
     fun isDeviceSDKAndroid13OrAbove(): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-    }*/
+    }
 }

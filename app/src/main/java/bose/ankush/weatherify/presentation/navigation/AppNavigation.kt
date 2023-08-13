@@ -1,10 +1,12 @@
 package bose.ankush.weatherify.presentation.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
@@ -15,6 +17,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import bose.ankush.language.presentation.LanguageScreen
+import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
+import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
 import bose.ankush.weatherify.presentation.home.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.home.HomeScreen
@@ -24,10 +28,12 @@ import bose.ankush.weatherify.presentation.settings.SettingsScreen
 
 const val LANGUAGE_ARGUMENT_KEY = "country_config"
 
+@SuppressLint("NewApi")
 @ExperimentalAnimationApi
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val context = LocalContext.current
     NavHost(
         navController = navController,
         startDestination = Screen.HomeNestedNav.route
@@ -134,7 +140,13 @@ fun AppNavigation() {
             ) {
                 SettingsScreen(
                     onNavAction = { navController.popBackStack() },
-                    onLanguageNavAction = { navController.navigate(Screen.LanguageScreen.withArgs(it)) }
+                    onLanguageNavAction = {
+                        if (isDeviceSDKAndroid13OrAbove()) {
+                            navController.navigate(Screen.LanguageScreen.withArgs(it))
+                        } else {
+                            context.openAppLocaleSettings()
+                        }
+                    }
                 )
             }
             composable(
