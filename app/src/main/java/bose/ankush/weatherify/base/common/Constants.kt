@@ -29,7 +29,8 @@ val PERMISSIONS_TO_REQUEST = arrayOf(
 )
 
 /*Room central db name*/
-const val DATABASE_NAME = "central_weather_table"
+const val RUN_DATABASE_NAME = "central_run_table"
+const val WEATHER_DATABASE_NAME = "central_weather_table"
 
 /*private const val PERMISSION_DENIED = 0
 private const val PERMISSION_GIVEN = 1

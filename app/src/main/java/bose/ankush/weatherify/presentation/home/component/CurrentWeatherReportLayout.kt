@@ -26,7 +26,7 @@ import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
 import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
-import bose.ankush.weatherify.data.room.WeatherEntity
+import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import coil.compose.AsyncImage
 
 @Composable
@@ -82,7 +82,7 @@ fun CurrentWeatherStateBriefing(currentWeather: WeatherEntity.Current) {
     }
 }
 
-@Composable
+/*@Composable
 private fun CurrentDate(dt: Long?) {
     Surface(
         modifier = Modifier.padding(top = 20.dp),
@@ -98,7 +98,7 @@ private fun CurrentDate(dt: Long?) {
             textAlign = TextAlign.Center,
         )
     }
-}
+}*/
 
 @Composable
 private fun CurrentWeatherUI(weatherData: WeatherEntity.Current) {

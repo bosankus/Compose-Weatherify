@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.data.preference.PreferenceManager
-import bose.ankush.weatherify.data.room.WeatherEntity
+import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetWeatherReport
@@ -68,7 +68,7 @@ class WeatherViewModel @Inject constructor(
                     // TODO: check if ('new location' - 'saved location') = X meters away
                     // hold value for UI reference
                     userLocationPreference.value = UIState(data = location)
-                    // refreshWeatherReportInRoom(location)
+                    refreshWeatherReportInRoom(location)
                     fetchAirQualityReport(location)
                 }
         }

@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.data.room
+package bose.ankush.weatherify.data.room.weather
 
 import androidx.room.Database
 import androidx.room.RoomDatabase

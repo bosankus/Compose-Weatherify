@@ -2,7 +2,7 @@ package bose.ankush.weatherify.domain.use_case.get_weather_reports
 
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.base.common.errorResponse
-import bose.ankush.weatherify.data.room.WeatherEntity
+import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import bose.ankush.weatherify.presentation.UIState
 import kotlinx.coroutines.flow.Flow

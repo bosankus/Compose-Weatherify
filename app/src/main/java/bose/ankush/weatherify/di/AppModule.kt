@@ -3,11 +3,14 @@ package bose.ankush.weatherify.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
-import bose.ankush.weatherify.base.common.DATABASE_NAME
-import bose.ankush.weatherify.data.room.Converters
+import bose.ankush.weatherify.base.common.RUN_DATABASE_NAME
+import bose.ankush.weatherify.base.common.WEATHER_DATABASE_NAME
 import bose.ankush.weatherify.data.room.JsonParser
 import bose.ankush.weatherify.data.room.Parser
-import bose.ankush.weatherify.data.room.WeatherDatabase
+import bose.ankush.weatherify.data.room.run.RunDataModelConverters
+import bose.ankush.weatherify.data.room.run.RunDatabase
+import bose.ankush.weatherify.data.room.weather.WeatherDataModelConverters
+import bose.ankush.weatherify.data.room.weather.WeatherDatabase
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -31,20 +34,41 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideTypeConverters(parser: Parser): Converters = Converters(parser)
+    fun provideTypeWeatherDataModelConverters(parser: Parser): WeatherDataModelConverters =
+        WeatherDataModelConverters(parser)
+
+    @Singleton
+    @Provides
+    fun provideTypeRunDataModelConverters(): RunDataModelConverters =
+        RunDataModelConverters()
 
     @Singleton
     @Provides
     fun providesWeatherDatabase(
         @ApplicationContext context: Context,
-        converters: Converters
+        weatherDataModelConverters: WeatherDataModelConverters
     ): WeatherDatabase {
         return Room.databaseBuilder(
             context,
             WeatherDatabase::class.java,
-            DATABASE_NAME
+            WEATHER_DATABASE_NAME
         )
-            .addTypeConverter(converters)
+            .addTypeConverter(weatherDataModelConverters)
+            .build()
+    }
+
+    @Singleton
+    @Provides
+    fun providesRunDatabase(
+        @ApplicationContext context: Context,
+        runDataModelConverters: RunDataModelConverters
+    ): RunDatabase {
+        return Room.databaseBuilder(
+            context,
+            RunDatabase::class.java,
+            RUN_DATABASE_NAME
+        )
+            .addTypeConverter(runDataModelConverters)
             .build()
     }
 }

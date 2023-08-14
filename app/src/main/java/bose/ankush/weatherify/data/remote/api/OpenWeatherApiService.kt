@@ -4,7 +4,7 @@ import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.data.remote.dto.AirQualityDto
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.data.remote.dto.WeatherDto
-import bose.ankush.weatherify.data.room.WeatherEntity
+import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import retrofit2.http.GET
 import retrofit2.http.Query
 

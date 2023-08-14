@@ -1,18 +1,18 @@
-package bose.ankush.weatherify.data.room
+package bose.ankush.weatherify.data.room.weather
 
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import bose.ankush.weatherify.base.common.DATABASE_NAME
+import bose.ankush.weatherify.base.common.WEATHER_DATABASE_NAME
 
-@Entity(tableName = DATABASE_NAME)
+@Entity(tableName = WEATHER_DATABASE_NAME)
 data class WeatherEntity(
     @PrimaryKey(autoGenerate = true) val id: Long,
-    @field:TypeConverters(Converters::class) val alerts: List<Alert?>? = listOf(),
+    @field:TypeConverters(WeatherDataModelConverters::class) val alerts: List<Alert?>? = listOf(),
     @Embedded val current: Current? = null,
-    @field:TypeConverters(Converters::class) val daily: List<Daily?>? = listOf(),
-    @field:TypeConverters(Converters::class) val hourly: List<Hourly?>? = listOf(),
+    @field:TypeConverters(WeatherDataModelConverters::class) val daily: List<Daily?>? = listOf(),
+    @field:TypeConverters(WeatherDataModelConverters::class) val hourly: List<Hourly?>? = listOf(),
 ) {
     data class Alert(
         val description: String?,
@@ -32,7 +32,7 @@ data class WeatherEntity(
         val sunset: Int?,
         val temp: Double?,
         val uvi: Double?,
-        @field:TypeConverters(Converters::class) val weather: List<Weather?>? = listOf(),
+        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
         val wind_gust: Double?,
         val wind_speed: Double?
     )
@@ -49,7 +49,7 @@ data class WeatherEntity(
         val sunset: Int?,
         @Embedded val temp: Temp?,
         val uvi: Double?,
-        @field:TypeConverters(Converters::class) val weather: List<Weather?>? = listOf(),
+        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
         val wind_gust: Double?,
         val wind_speed: Double?
     ) {
@@ -69,7 +69,7 @@ data class WeatherEntity(
         val feels_like: Double?,
         val humidity: Int?,
         val temp: Double?,
-        @field:TypeConverters(Converters::class) val weather: List<Weather?>? = listOf(),
+        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
     )
 }
 

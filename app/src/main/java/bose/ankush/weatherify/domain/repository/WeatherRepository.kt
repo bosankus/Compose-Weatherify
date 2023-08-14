@@ -3,7 +3,7 @@ package bose.ankush.weatherify.domain.repository
 import bose.ankush.weatherify.data.remote.dto.AirQualityDto
 import bose.ankush.weatherify.data.remote.dto.ForecastDto
 import bose.ankush.weatherify.data.remote.dto.WeatherDto
-import bose.ankush.weatherify.data.room.WeatherEntity
+import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import kotlinx.coroutines.flow.Flow
 
 /**Created by

@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.UiText
-import bose.ankush.weatherify.data.room.WeatherEntity
+import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportCardLayout

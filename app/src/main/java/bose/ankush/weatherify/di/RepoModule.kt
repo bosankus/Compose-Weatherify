@@ -4,9 +4,12 @@ import android.content.Context
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.repository.CityRepositoryImpl
+import bose.ankush.weatherify.data.repository.RunRepositoryImpl
 import bose.ankush.weatherify.data.repository.WeatherRepositoryImpl
-import bose.ankush.weatherify.data.room.WeatherDatabase
+import bose.ankush.weatherify.data.room.run.RunDatabase
+import bose.ankush.weatherify.data.room.weather.WeatherDatabase
 import bose.ankush.weatherify.domain.repository.CityRepository
+import bose.ankush.weatherify.domain.repository.RunRepository
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import dagger.Module
 import dagger.Provides
@@ -38,4 +41,9 @@ object RepoModule {
         context: Context
     ): CityRepository =
         CityRepositoryImpl(context)
+
+    @Singleton
+    @Provides
+    fun provideRunRepository(runDatabase: RunDatabase): RunRepository =
+        RunRepositoryImpl(runDatabase)
 }

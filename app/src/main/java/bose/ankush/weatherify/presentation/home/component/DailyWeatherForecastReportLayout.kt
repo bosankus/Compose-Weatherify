@@ -17,7 +17,7 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.dayName
 import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
-import bose.ankush.weatherify.data.room.WeatherEntity
+import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import coil.compose.AsyncImage
 
 @Composable
