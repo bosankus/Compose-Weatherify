@@ -14,7 +14,7 @@ object Versions {
     const val buildGradle = "8.1.0"
     const val navigation = "2.7.0"
     const val secretPlugin = "2.0.1"
-    const val benManes = "0.48.0"
+    const val benManes = "0.49.0"
     const val spotlessVersion = "6.21.0"
     const val ktLintVersion = "11.5.1"
     const val googleServices = "4.3.15"
