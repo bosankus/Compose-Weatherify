@@ -22,7 +22,7 @@ jobs:
       - name: Log dependency update report
         run: cat build/dependencyUpdates/dependency_update_report.txt
       - name: Save report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-update-reports
           path: build/dependencyUpdates
