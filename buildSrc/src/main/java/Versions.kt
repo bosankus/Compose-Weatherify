@@ -8,7 +8,7 @@ object Versions {
 
     // Compose
     const val composeBom = "2023.08.00"
-    const val compilerExtensionVersion = "1.5.6"
+    const val compilerExtensionVersion = "1.5.14"
 
     // Plugins
     const val buildGradle = "8.5.0"
