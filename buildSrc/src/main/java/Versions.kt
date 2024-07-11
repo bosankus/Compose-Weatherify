@@ -15,7 +15,7 @@ object Versions {
     const val navigation = "2.7.0"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.51.0"
-    const val spotlessVersion = "6.22.0"
+    const val spotlessVersion = "6.25.0"
     const val ktLintVersion = "11.6.1"
     const val googleServices = "4.3.15"
 
