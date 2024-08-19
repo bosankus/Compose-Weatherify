@@ -17,6 +17,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version Versions.ktLintVersion apply false
     id("com.diffplug.spotless") version Versions.spotlessVersion apply false
     id("com.github.ben-manes.versions") version Versions.benManes
+    id("org.jetbrains.kotlin.plugin.compose") version Versions.kotlin apply false
 }
 
 tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("dependencyUpdates").configure {
