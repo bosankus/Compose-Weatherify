@@ -59,7 +59,7 @@ object Versions {
     const val coroutines = "1.6.4"
 
     // Dependency Injection
-    const val hilt = "2.51.1"
+    const val hilt = "2.52"
     const val hiltCompose = "1.0.0"
 
     // Miscellaneous
