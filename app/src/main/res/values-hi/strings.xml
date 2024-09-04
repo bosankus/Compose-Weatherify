@@ -6,12 +6,10 @@
     <string name="aq_screen">हवा गुणवत्ता</string>
     <string name="city_screen">शहरों</string>
     <string name="account_screen">प्रोफ़ाइल</string>
-    <string name="run_screen">दौड़</string>
     <string name="settings_screen">सेटिंग</string>
 
     <!--Nested NavGraph group name-->
     <string name="home_nested_nav">home_nested_nav</string>
-    <string name="run_nested_nav">run_nested_nav</string>
     <string name="profile_nested_nav">profile_nested_nav</string>
 
     <!--General Texts-->

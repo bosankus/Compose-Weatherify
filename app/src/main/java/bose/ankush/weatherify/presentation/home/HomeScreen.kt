@@ -21,6 +21,7 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import bose.ankush.weatherify.domain.model.AirQuality
+import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.UIState
 import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportCardLayout
 import bose.ankush.weatherify.presentation.home.component.CurrentWeatherReportLayout
@@ -30,10 +31,11 @@ import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
 import bose.ankush.weatherify.presentation.navigation.Screen
+import timber.log.Timber
 
 @Composable
 fun HomeScreen(
-    viewModel: WeatherViewModel,
+    viewModel: MainViewModel,
     navController: NavController
 ) {
     val context: Context = LocalContext.current
@@ -41,28 +43,28 @@ fun HomeScreen(
     val airQualityReports: UIState<AirQuality> = viewModel.airQualityReport.collectAsState().value
 
     // reacting as per response state change
-    if (weatherReports.isLoading || airQualityReports.isLoading) {
-        // Screen loading handler
-        HandleScreenLoading()
-    }
-    if (weatherReports.error?.asString(context).isNullOrEmpty() ||
-        weatherReports.error?.asString(context).isNullOrEmpty()
-    ) {
-        // Screen error handler
-        HandleScreenError(
-            context,
-            weatherReports.error,
-            airQualityReports.error
-        ) { viewModel.performInitialDataLoading() }
-    }
+    when {
+        weatherReports.isLoading && airQualityReports.isLoading ->
+            // Screen loading handler
+            HandleScreenLoading()
 
-    // Show data on UI
-    ShowUIContainer(
-        weatherReports.data,
-        airQualityReports.data,
-        navController
-    )
+        !weatherReports.error?.asString(context).isNullOrEmpty() ||
+                !weatherReports.error?.asString(context).isNullOrEmpty() ->
+            // Screen error handler
+            HandleScreenError(
+                context,
+                weatherReports.error,
+                airQualityReports.error
+            ) { viewModel.performInitialDataLoading() }
 
+        else ->
+            // Show data on UI
+            ShowUIContainer(
+                weatherReports.data,
+                airQualityReports.data,
+                navController
+            )
+    }
 
     // Handle back button press to exit app
     BackHandler {
@@ -107,6 +109,7 @@ private fun ShowUIContainer(
                 // Show current weather report
                 item {
                     weatherReports?.current?.let { CurrentWeatherReportLayout(it) }
+                        ?: Timber.d("Weather report is empty")
                 }
 
                 // Show brief air quality report

@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
                 ) {
-                    AppNavigation()
+                    AppNavigation(viewModel)
                 }
             }
         }

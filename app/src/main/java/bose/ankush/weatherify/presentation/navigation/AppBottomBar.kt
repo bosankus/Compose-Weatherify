@@ -30,7 +30,6 @@ fun AppBottomBar(
     val selectedItem = remember { mutableIntStateOf(0) }
     val screenItems = listOf(
         Screen.HomeNestedNav,
-        Screen.RunNestedNav,
         Screen.ProfileNestedNav
     )
 
@@ -51,11 +50,6 @@ fun AppBottomBar(
                         when (screen.resourceId) {
                             R.string.home_nested_nav -> Icon(
                                 painter = painterResource(id = R.drawable.ic_home),
-                                contentDescription = stringResource(id = screen.resourceId)
-                            )
-
-                            R.string.run_nested_nav -> Icon(
-                                painter = painterResource(id = R.drawable.ic_run),
                                 contentDescription = stringResource(id = screen.resourceId)
                             )
 

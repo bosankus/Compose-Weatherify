@@ -15,10 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.component.ScreenTopAppBar
+import bose.ankush.weatherify.presentation.MainViewModel
 
 @Composable
 internal fun AirQualityDetailsScreen(
-    viewModel: WeatherViewModel,
+    viewModel: MainViewModel,
     navController: NavController
 ) {
     val userLocation = remember { viewModel.userLocationPreference.value }

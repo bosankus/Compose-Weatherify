@@ -11,10 +11,6 @@ sealed class Screen(val route: String, @StringRes val resourceId: Int) {
     data object CitiesListScreen : Screen("city_list_screen", R.string.city_screen)
     data object AirQualityDetailsScreen : Screen("air_quality_details_screen", R.string.aq_screen)
 
-    /*Running Screens*/
-    data object RunNestedNav : Screen("run_nav", R.string.run_nested_nav)
-    data object RunScreen : Screen("run_screen", R.string.run_screen)
-
     /*Account/Profile Screens*/
     data object ProfileNestedNav : Screen("profile_nav", R.string.profile_nested_nav)
     data object SettingsScreen : Screen("settings_screen", R.string.settings_screen)

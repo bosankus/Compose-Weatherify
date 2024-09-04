@@ -19,11 +19,10 @@ import androidx.navigation.navigation
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
+import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
 import bose.ankush.weatherify.presentation.home.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.home.HomeScreen
-import bose.ankush.weatherify.presentation.home.WeatherViewModel
-import bose.ankush.weatherify.presentation.run.RunScreen
 import bose.ankush.weatherify.presentation.settings.SettingsScreen
 
 const val LANGUAGE_ARGUMENT_KEY = "country_config"
@@ -31,7 +30,7 @@ const val LANGUAGE_ARGUMENT_KEY = "country_config"
 @SuppressLint("NewApi")
 @ExperimentalAnimationApi
 @Composable
-fun AppNavigation() {
+fun AppNavigation(viewModel: MainViewModel) {
     val navController = rememberNavController()
     val context = LocalContext.current
     NavHost(
@@ -46,8 +45,8 @@ fun AppNavigation() {
             composable(
                 route = Screen.HomeScreen.route,
             ) { entry ->
-                val viewModel =
-                    entry.sharedViewModel<WeatherViewModel>(navController = navController)
+                val viewModel = viewModel
+                //entry.sharedViewModel<WeatherViewModel>(navController = navController)
                 HomeScreen(
                     viewModel = viewModel,
                     navController = navController
@@ -109,24 +108,12 @@ fun AppNavigation() {
                     )
                 }
             ) { entry ->
-                val viewModel =
-                    entry.sharedViewModel<WeatherViewModel>(navController = navController)
+                val viewModel = viewModel
+                // entry.sharedViewModel<WeatherViewModel>(navController = navController)
                 AirQualityDetailsScreen(
                     viewModel = viewModel,
                     navController = navController
                 )
-            }
-        }
-
-        /*Running Screens*/
-        navigation(
-            startDestination = Screen.RunScreen.route,
-            route = Screen.RunNestedNav.route
-        ) {
-            composable(
-                route = Screen.RunScreen.route,
-            ) {
-                RunScreen(navController = navController)
             }
         }
 

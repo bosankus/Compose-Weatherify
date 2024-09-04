@@ -3,12 +3,9 @@ package bose.ankush.weatherify.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
-import bose.ankush.weatherify.base.common.RUN_DATABASE_NAME
 import bose.ankush.weatherify.base.common.WEATHER_DATABASE_NAME
 import bose.ankush.weatherify.data.room.JsonParser
 import bose.ankush.weatherify.data.room.Parser
-import bose.ankush.weatherify.data.room.run.RunDataModelConverters
-import bose.ankush.weatherify.data.room.run.RunDatabase
 import bose.ankush.weatherify.data.room.weather.WeatherDataModelConverters
 import bose.ankush.weatherify.data.room.weather.WeatherDatabase
 import com.google.gson.Gson
@@ -39,11 +36,6 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideTypeRunDataModelConverters(): RunDataModelConverters =
-        RunDataModelConverters()
-
-    @Singleton
-    @Provides
     fun providesWeatherDatabase(
         @ApplicationContext context: Context,
         weatherDataModelConverters: WeatherDataModelConverters
@@ -54,21 +46,6 @@ object AppModule {
             WEATHER_DATABASE_NAME
         )
             .addTypeConverter(weatherDataModelConverters)
-            .build()
-    }
-
-    @Singleton
-    @Provides
-    fun providesRunDatabase(
-        @ApplicationContext context: Context,
-        runDataModelConverters: RunDataModelConverters
-    ): RunDatabase {
-        return Room.databaseBuilder(
-            context,
-            RunDatabase::class.java,
-            RUN_DATABASE_NAME
-        )
-            .addTypeConverter(runDataModelConverters)
             .build()
     }
 }
