@@ -64,6 +64,7 @@ object Deps {
     val firebaseBom by lazy { "com.google.firebase:firebase-bom:${Versions.firebaseBom}" }
     val firebaseConfig by lazy { "com.google.firebase:firebase-config-ktx" }
     val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics-ktx" }
+    val firebasePerformanceMonitoring by lazy { "com.google.firebase:firebase-perf" }
 
     // Coroutines
     val coroutinesCore by lazy { "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}" }

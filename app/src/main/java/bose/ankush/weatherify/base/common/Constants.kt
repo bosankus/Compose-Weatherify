@@ -37,3 +37,6 @@ val PERMISSIONS_TO_REQUEST = arrayOf(
 const val WEATHER_DATABASE_NAME = "central_weather_table"
 const val AQ_DATABASE_NAME = "central_aq_table"
 const val PHONE_NUMBER = "tel:+91XXXXXXXXX"
+
+/*Remote keys*/
+const val ENABLE_NOTIFICATION = "enable_notification"

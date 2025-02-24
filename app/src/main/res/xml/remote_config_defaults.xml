@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<defaults>
+  <entry>
+    <key>enable_notification</key>
+    <value>false</value>
+  </entry>
+  <entry>
+    <key>start_user_journey</key>
+    <value>false</value>
+  </entry>
+</defaults>

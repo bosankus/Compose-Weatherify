@@ -137,6 +137,7 @@ dependencies {
     implementation(platform(Deps.firebaseBom))
     implementation(Deps.firebaseConfig)
     implementation(Deps.firebaseAnalytics)
+    implementation(Deps.firebasePerformanceMonitoring)
 
     // Coroutines
     implementation(Deps.retrofitCoroutineAdapter)

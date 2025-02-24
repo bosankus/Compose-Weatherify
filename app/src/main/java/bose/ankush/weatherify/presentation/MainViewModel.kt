@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.weatherify.R
+import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.data.preference.PreferenceManager
@@ -11,6 +13,9 @@ import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetWeatherReport
 import bose.ankush.weatherify.domain.use_case.refresh_weather_reports.RefreshWeatherReport
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +24,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,6 +56,13 @@ class MainViewModel @Inject constructor(
         _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
     } + dispatchers.io
 
+    private val remoteConfig = Firebase.remoteConfig
+    private val tag = "${MainViewModel::class.simpleName} ->"
+
+    init {
+        updateRemoteConfigParameters()
+    }
+
     fun dismissDialog() {
         permissionDialogQueue.removeFirst()
     }
@@ -73,8 +86,19 @@ class MainViewModel @Inject constructor(
         _launchNotificationPermission.update { launchState }
     }
 
+    /**
+     * Updates the state of the notification banner based on the remote configuration.
+     * If notifications are disabled, the banner visibility will be false.
+     */
     fun updateShowNotificationBannerState(launchState: Boolean) {
-        _showNotificationCardItem.update { launchState }
+        viewModelScope.launch(dataFetchExceptionHandler) {
+            if (remoteConfig.getBoolean(ENABLE_NOTIFICATION)) {
+                _showNotificationCardItem.update { launchState }
+            } else {
+                _showNotificationCardItem.update { false }
+                Timber.tag(tag).d("Notification feature is disabled. Flow won't update.")
+            }
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -124,6 +148,28 @@ class MainViewModel @Inject constructor(
                 // in case we don't have coordinates, we don't have any requirement yet other than this :(
                 _uiState.update { UIState(isLoading = false) }
                 throw RuntimeException("No location coordinates")
+            }
+        }
+    }
+
+    // Update remote config parameters
+    private fun updateRemoteConfigParameters() {
+        viewModelScope.launch(dataFetchExceptionHandler) {
+            try {
+                val configSettings = remoteConfigSettings { minimumFetchIntervalInSeconds = 3600 }
+                remoteConfig.apply {
+                    setConfigSettingsAsync(configSettings)
+                    setDefaultsAsync(R.xml.remote_config_defaults)
+                    fetchAndActivate().addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Timber.tag(tag).d("Remote config parameters updated.")
+                        } else {
+                            Timber.tag(tag).d("Failed to update Remote Config parameters.")
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.message
             }
         }
     }
