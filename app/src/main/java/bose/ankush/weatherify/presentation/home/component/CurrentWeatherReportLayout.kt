@@ -7,12 +7,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,24 +79,6 @@ fun CurrentWeatherStateBriefing(currentWeather: WeatherEntity.Current) {
     }
 }
 
-/*@Composable
-private fun CurrentDate(dt: Long?) {
-    Surface(
-        modifier = Modifier.padding(top = 20.dp),
-        color = MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp),
-        shape = RoundedCornerShape(20.dp),
-    ) {
-        Text(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 5.dp),
-            text = DateTimeUtils.getFormattedDateTimeFromEpoch(dt),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-    }
-}*/
-
 @Composable
 private fun CurrentWeatherUI(weatherData: WeatherEntity.Current) {
     Column(
@@ -118,6 +97,7 @@ private fun CurrentWeatherUI(weatherData: WeatherEntity.Current) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Humidity
             Icon(
                 painter = painterResource(id = R.drawable.ic_humidity),
                 tint = MaterialTheme.colorScheme.onBackground,
@@ -130,6 +110,7 @@ private fun CurrentWeatherUI(weatherData: WeatherEntity.Current) {
                 color = MaterialTheme.colorScheme.onBackground
             )
 
+            // Wind speed
             Icon(
                 modifier = Modifier.padding(start = 20.dp),
                 painter = painterResource(id = R.drawable.ic_wind),
@@ -139,6 +120,20 @@ private fun CurrentWeatherUI(weatherData: WeatherEntity.Current) {
             Text(
                 modifier = Modifier.padding(start = 5.dp),
                 text = stringResource(id = R.string.speed, weatherData.wind_speed.toString()),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            // UV radiation
+            Icon(
+                modifier = Modifier.padding(start = 20.dp),
+                painter = painterResource(id = R.drawable.ic_uv),
+                tint = MaterialTheme.colorScheme.onBackground,
+                contentDescription = stringResource(id = R.string.wind_icon_content)
+            )
+            Text(
+                modifier = Modifier.padding(start = 5.dp),
+                text = weatherData.uvi.toString(),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )

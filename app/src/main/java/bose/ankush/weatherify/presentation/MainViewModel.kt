@@ -155,21 +155,17 @@ class MainViewModel @Inject constructor(
     // Update remote config parameters
     private fun updateRemoteConfigParameters() {
         viewModelScope.launch(dataFetchExceptionHandler) {
-            try {
-                val configSettings = remoteConfigSettings { minimumFetchIntervalInSeconds = 3600 }
-                remoteConfig.apply {
-                    setConfigSettingsAsync(configSettings)
-                    setDefaultsAsync(R.xml.remote_config_defaults)
-                    fetchAndActivate().addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            Timber.tag(tag).d("Remote config parameters updated.")
-                        } else {
-                            Timber.tag(tag).d("Failed to update Remote Config parameters.")
-                        }
+            val configSettings = remoteConfigSettings { minimumFetchIntervalInSeconds = 3600 }
+            remoteConfig.apply {
+                setConfigSettingsAsync(configSettings)
+                setDefaultsAsync(R.xml.remote_config_defaults)
+                fetchAndActivate().addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Timber.tag(tag).d("Remote config parameters updated.")
+                    } else {
+                        Timber.tag(tag).d("Failed to update Remote Config parameters.")
                     }
                 }
-            } catch (e: Exception) {
-                e.message
             }
         }
     }
