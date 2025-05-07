@@ -20,6 +20,8 @@ object Extension {
 
     fun Double.toCelsius(): String = (this - 273).roundToInt().toString()
 
+    fun String.getIconUrl(size: String = "@2x.png"): String = "$WEATHER_IMG_URL$this$size"
+
     fun Context.openAppSystemSettings() {
         startActivity(Intent().apply {
             action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
@@ -50,10 +52,6 @@ object Extension {
             this,
             ACCESS_NOTIFICATION
         ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    fun String.getIconUrl(size: String = "@2x.png"): String {
-        return "$WEATHER_IMG_URL$this$size"
     }
 
     fun String.wrapText(): String {
