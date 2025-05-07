@@ -3,7 +3,6 @@ package bose.ankush.weatherify.data.repository
 import androidx.room.withTransaction
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
-import bose.ankush.weatherify.data.remote.dto.toAirQuality
 import bose.ankush.weatherify.data.room.weather.WeatherDatabase
 import bose.ankush.weatherify.data.room.weather.WeatherEntity
 import bose.ankush.weatherify.domain.model.AirQuality
@@ -41,7 +40,7 @@ class WeatherRepositoryImpl @Inject constructor(
             val airQuality = apiService.getCurrentAirQuality(
                 latitude = coordinates.first.toString(),
                 longitude = coordinates.second.toString()
-            ).toAirQuality()
+            )
             // store the data in room db
             weatherDatabase.withTransaction {
                 weatherDatabase.weatherDao().refreshWeather(weatherData, airQuality)

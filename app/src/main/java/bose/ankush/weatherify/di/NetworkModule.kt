@@ -1,8 +1,6 @@
 package bose.ankush.weatherify.di
 
-import bose.ankush.weatherify.base.common.OPEN_WEATHER_BASE_URL
-import bose.ankush.weatherify.base.common.OPEN_WEATHER_CERT_PIN
-import bose.ankush.weatherify.base.common.OPEN_WEATHER_HOSTNAME
+import bose.ankush.weatherify.base.common.WEATHER_BASE_URL
 import bose.ankush.weatherify.data.remote.LoggingInterceptor.logBodyInterceptor
 import bose.ankush.weatherify.data.remote.NetworkInterceptor.onlineInterceptor
 import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
@@ -12,7 +10,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
@@ -44,9 +41,6 @@ object NetworkModule {
             .callTimeout(60, TimeUnit.SECONDS)
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
-            .certificatePinner(CertificatePinner.Builder()
-                .add(OPEN_WEATHER_HOSTNAME, OPEN_WEATHER_CERT_PIN)
-                .build())
             .build()
     }
 
@@ -62,7 +56,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient
     ): OpenWeatherApiService {
         return Retrofit.Builder()
-            .baseUrl(OPEN_WEATHER_BASE_URL)
+            .baseUrl(WEATHER_BASE_URL)
             .addConverterFactory(converterFactory)
             .client(okHttpClient)
             .build()

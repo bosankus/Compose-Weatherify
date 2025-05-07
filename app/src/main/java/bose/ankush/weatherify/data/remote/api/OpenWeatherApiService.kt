@@ -1,8 +1,7 @@
 package bose.ankush.weatherify.data.remote.api
 
-import bose.ankush.weatherify.BuildConfig
-import bose.ankush.weatherify.data.remote.dto.AirQualityDto
 import bose.ankush.weatherify.data.room.weather.WeatherEntity
+import bose.ankush.weatherify.domain.model.AirQuality
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -12,18 +11,15 @@ Date: 05,May,2021
  **/
 interface OpenWeatherApiService {
 
-    @GET("/data/2.5/air_pollution")
+    @GET("get-air-pollution")
     suspend fun getCurrentAirQuality(
         @Query("lat") latitude: String,
-        @Query("lon") longitude: String,
-        @Query("appid") AppId: String = BuildConfig.OPEN_WEATHER_API
-    ): AirQualityDto
+        @Query("lon") longitude: String
+    ): AirQuality
 
-    @GET("/data/3.0/onecall")
+    @GET("get-weather")
     suspend fun getOneCallWeather(
         @Query("lat") latitude: String,
-        @Query("lon") longitude: String,
-        @Query("exclude") exclude: String = "minutely",
-        @Query("appid") AppId: String = BuildConfig.OPEN_WEATHER_API
+        @Query("lon") longitude: String
     ): WeatherEntity
 }

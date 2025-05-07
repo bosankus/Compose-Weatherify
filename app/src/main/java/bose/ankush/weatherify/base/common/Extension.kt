@@ -8,6 +8,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import kotlin.math.roundToInt
 
 /**Created by
@@ -37,7 +38,7 @@ object Extension {
                 ) == PackageManager.PERMISSION_GRANTED
     }
 
-    fun Context.hasPhoneCallPermission(): Boolean {
+    private fun Context.hasPhoneCallPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             this,
             ACCESS_PHONE_CALL
@@ -52,7 +53,7 @@ object Extension {
     }
 
     fun String.getIconUrl(size: String = "@2x.png"): String {
-        return "$OPEN_WEATHER_IMG_URL$this$size"
+        return "$WEATHER_IMG_URL$this$size"
     }
 
     fun String.wrapText(): String {
@@ -70,53 +71,6 @@ object Extension {
         return firstLetter + restOfString
     }
 
-    /*fun List<ForecastDto.ForecastList>.getForecastListForNext4Days():
-            List<AvgForecast> {
-        return filter { list -> (list.dt?.isNotMatchingWithTodayAndWithinNext4Days() == true) }
-            .parseEachDayFromList()
-    }
-
-    private fun List<ForecastDto.ForecastList>.parseEachDayFromList(): List<AvgForecast> {
-        val listOfAvgForecast = ArrayList<AvgForecast>()
-        var avgTemp: Int
-        var dayName: String
-        var feelsLike: String?
-        for (i in 1..4 step 1) {
-            var totalTemp = 0
-            var counter = 0
-            for (j in this.indices step 1) {
-                val date = this[j].dt
-                if (date?.let { DateTimeUtils.getDayWiseDifferenceFromToday(it) } == i) {
-                    val forecastObj = this[j]
-                    feelsLike = forecastObj.main?.feelsLike?.toCelsius()
-                    totalTemp += forecastObj.main?.temp?.toCelsius()?.toInt()!!
-                    counter++
-                    if ((counter % 7) == 0) {
-                        avgTemp = totalTemp / counter
-                        dayName = DateTimeUtils.getDayNameFromEpoch(date)
-                        val avgForecast =
-                            AvgForecast(this.hashCode(), date, dayName, "$avgTemp", feelsLike)
-                        listOfAvgForecast.add(avgForecast)
-                    }
-                }
-            }
-        }
-        return listOfAvgForecast
-    }
-
-    private fun Int.isNotMatchingWithTodayAndWithinNext4Days(): Boolean {
-        val givenDate = Date(this.toLong() * 1000)
-        val givenDateCalender = Calendar.getInstance()
-        givenDateCalender.time = givenDate
-        val givenYear = givenDateCalender.get(Calendar.YEAR)
-        val currentYear = DateTimeUtils.getTodayDateInCalenderFormat().get(Calendar.YEAR)
-        val givenDateNumber = givenDateCalender.get(Calendar.DAY_OF_MONTH + 1)
-        val todayDateNumber =
-            DateTimeUtils.getTodayDateInCalenderFormat().get(Calendar.DAY_OF_MONTH + 1)
-        val differenceOfDate = DateTimeUtils.getDayWiseDifferenceFromToday(this)
-        return (givenDateNumber > todayDateNumber && givenYear == currentYear && (differenceOfDate <= 4))
-    }*/
-
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     fun Context.openAppLocaleSettings() {
         startActivity(Intent().apply {
@@ -126,14 +80,14 @@ object Extension {
     }
 
     fun Context.callNumber(): Boolean {
-        if (this.hasPhoneCallPermission()) {
+        return if (this.hasPhoneCallPermission()) {
             startActivity(Intent().apply {
                 action = Intent.ACTION_CALL
-                data = Uri.parse(PHONE_NUMBER)
+                data = PHONE_NUMBER.toUri()
             })
-            return true
+            true
         } else {
-            return false
+            false
         }
     }
 
