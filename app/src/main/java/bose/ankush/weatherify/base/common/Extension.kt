@@ -18,26 +18,32 @@ Date: 06,May,2021
 
 object Extension {
 
-    fun Double.toCelsius(): String = (this - 273).roundToInt().toString()
+    fun Double.toCelsius() = (this - 273).roundToInt().toString()
 
-    fun String.getIconUrl(size: String = "@2x.png"): String = "$WEATHER_IMG_URL$this$size"
+    fun String.getIconUrl(size: String = "@2x.png") = "$WEATHER_IMG_URL$this$size"
 
-    fun Context.openAppSystemSettings() {
-        startActivity(Intent().apply {
-            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+    fun String.formatTextCapitalization() = replaceFirstChar { it.uppercaseChar() }
+
+    fun isDeviceSDKAndroid13OrAbove() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
+    fun Context.openAppSystemSettings() = startActivity(
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.fromParts("package", packageName, null)
-        })
-    }
+        }
+    )
 
-    fun Context.hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    fun Context.openAppLocaleSettings() = startActivity(
+        Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+        }
+    )
+
+    fun Context.hasLocationPermission(): Boolean = listOf(
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+        android.Manifest.permission.ACCESS_FINE_LOCATION
+    ).all { permission ->
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun Context.hasPhoneCallPermission(): Boolean {
@@ -63,33 +69,11 @@ object Extension {
         }
     }
 
-    fun String.formatTextCapitalization(): String {
-        val firstLetter = this[0].uppercaseChar()
-        val restOfString = this.substring(1)
-        return firstLetter + restOfString
-    }
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    fun Context.openAppLocaleSettings() {
-        startActivity(Intent().apply {
-            action = Settings.ACTION_APP_LOCALE_SETTINGS
-            data = Uri.fromParts("package", packageName, null)
-        })
-    }
-
-    fun Context.callNumber(): Boolean {
-        return if (this.hasPhoneCallPermission()) {
-            startActivity(Intent().apply {
-                action = Intent.ACTION_CALL
+    fun Context.callNumber(): Boolean = hasPhoneCallPermission().also { hasPermission ->
+        if (hasPermission) startActivity(
+            Intent(Intent.ACTION_CALL).apply {
                 data = PHONE_NUMBER.toUri()
-            })
-            true
-        } else {
-            false
-        }
-    }
-
-    fun isDeviceSDKAndroid13OrAbove(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+            }
+        )
     }
 }
