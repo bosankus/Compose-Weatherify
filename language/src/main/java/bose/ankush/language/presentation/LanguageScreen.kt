@@ -21,19 +21,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.EmojiSupportMatch
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import bose.ankush.language.R
 import bose.ankush.language.util.LocaleHelper.changeLanguageTo
 import bose.ankush.language.util.LocaleHelper.getCountryFlag
+import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
 import bose.ankush.language.util.LocaleHelper.getDisplayName
 
 @Composable
@@ -84,28 +87,30 @@ private fun ScreenHeader(navAction: () -> Unit) {
 
 @Composable
 private fun ShowUI(languages: Array<String>) {
+    val changedLanguage = remember { mutableStateOf(getDefaultLanguage()) }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         items(languages.size) { position ->
             Row(
                 modifier = Modifier
-                    .padding(top = 16.dp)
+                    .padding(vertical = 8.dp)
                     .clip(RoundedCornerShape(5.dp))
-                    .padding(all = 5.dp),
+                    .clickable {
+                        changedLanguage.value = changeLanguageTo(languages[position])
+                        Log.d("LanguageScreen", "Language changed to: ${changedLanguage.value}")
+                    }
+                    .padding(5.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    modifier = Modifier
-                        .clickable {
-                            val localeListCompat = changeLanguageTo(languages[position])
-                            Log.d("LanguageScreen", "LanguageChangeSetting: $localeListCompat")
-                        }
-                        .weight(1f),
-                    text = languages[position].let { "${it.getCountryFlag()}  ${it.getDisplayName()}" },
+                    modifier = Modifier.weight(1f),
+                    text = "${languages[position].getCountryFlag()}    ${languages[position].getDisplayName()}",
+                    fontFamily = FontFamily.Default,
                     style = TextStyle(
                         platformStyle = PlatformTextStyle(
                             emojiSupportMatch = EmojiSupportMatch.None
@@ -113,12 +118,13 @@ private fun ShowUI(languages: Array<String>) {
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                 )
-                Icon(
-                    modifier = Modifier.alpha(0f), // TODO: Should be visible if item is selected
-                    imageVector = Icons.Filled.Check,
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    contentDescription = "${languages[position]} ${Icons.Filled.Check.name}"
-                )
+                if (changedLanguage.value == languages[position]) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        tint = MaterialTheme.colorScheme.onBackground,
+                        contentDescription = "${languages[position]} selected"
+                    )
+                }
             }
         }
     }
