@@ -22,10 +22,10 @@ class WeatherRepositoryImpl @Inject constructor(
     private val dispatcher: DispatcherProvider,
 ) : WeatherRepository {
 
-    override suspend fun getAirQualityReport(lat: String, lang: String): Flow<AirQuality> =
+    override fun getAirQualityReport(lat: String, lang: String): Flow<AirQuality> =
         weatherDatabase.weatherDao().getAirQuality()
 
-    override suspend fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherEntity?> =
+    override fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherEntity?> =
         weatherDatabase.weatherDao().getWeather()
 
     /**

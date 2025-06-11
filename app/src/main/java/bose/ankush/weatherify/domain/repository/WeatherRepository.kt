@@ -11,9 +11,9 @@ Date: 05,May,2021
 
 interface WeatherRepository {
 
-    suspend fun getAirQualityReport(lat: String, lang: String): Flow<AirQuality>
+    fun getAirQualityReport(lat: String, lang: String): Flow<AirQuality>
 
-    suspend fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherEntity?>
+    fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherEntity?>
 
     suspend fun refreshWeatherData(coordinates: Pair<Double, Double>)
 }

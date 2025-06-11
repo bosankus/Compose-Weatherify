@@ -2,10 +2,10 @@
   "code": "india",
   "codeA2": "in",
   "languages": [
-    "en",
-    "hi",
-    "iw"
+    "en-IN",
+    "hi-IN",
+    "iw-IL"
   ],
-  "defaultLanguage": "en",
+  "defaultLanguage": "en-IN",
   "localCurrency": ["INR"]
 }
