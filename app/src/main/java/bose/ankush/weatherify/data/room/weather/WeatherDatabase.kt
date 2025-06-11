@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [WeatherEntity::class, AirQualityEntity::class],
     version = 2,
-    autoMigrations = [AutoMigration (from = 1, to = 2)]
+    exportSchema = false
 )
 abstract class WeatherDatabase : RoomDatabase() {
 

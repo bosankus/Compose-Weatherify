@@ -1,20 +1,15 @@
-package bose.ankush.weatherify.data.room.weather
+package bose.ankush.weatherify.domain.model
 
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import androidx.room.TypeConverters
-import bose.ankush.weatherify.base.common.WEATHER_DATABASE_NAME
-
-@Entity(tableName = WEATHER_DATABASE_NAME)
-data class WeatherEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    @field:TypeConverters(WeatherDataModelConverters::class) val alerts: List<Alert?>? = listOf(),
-    @Embedded val current: Current? = null,
-    @field:TypeConverters(WeatherDataModelConverters::class) val daily: List<Daily?>? = listOf(),
-    @field:TypeConverters(WeatherDataModelConverters::class) val hourly: List<Hourly?>? = listOf(),
-    @ColumnInfo(defaultValue = "0") val lastUpdated: Long = System.currentTimeMillis(),
+/**
+ * Domain model for weather forecast data
+ */
+data class WeatherForecast(
+    val id: Long,
+    val alerts: List<Alert?>? = listOf(),
+    val current: Current? = null,
+    val daily: List<Daily?>? = listOf(),
+    val hourly: List<Hourly?>? = listOf(),
+    val lastUpdated: Long = System.currentTimeMillis(),
 ) {
     data class Alert(
         val description: String?,
@@ -34,7 +29,7 @@ data class WeatherEntity(
         val sunset: Int?,
         val temp: Double?,
         val uvi: Double?,
-        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
+        val weather: List<WeatherCondition?>? = listOf(),
         val wind_gust: Double?,
         val wind_speed: Double?
     )
@@ -49,9 +44,9 @@ data class WeatherEntity(
         val summary: String?,
         val sunrise: Int?,
         val sunset: Int?,
-        @Embedded val temp: Temp?,
+        val temp: Temp?,
         val uvi: Double?,
-        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
+        val weather: List<WeatherCondition?>? = listOf(),
         val wind_gust: Double?,
         val wind_speed: Double?
     ) {
@@ -71,11 +66,14 @@ data class WeatherEntity(
         val feels_like: Double?,
         val humidity: Int?,
         val temp: Double?,
-        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
+        val weather: List<WeatherCondition?>? = listOf(),
     )
 }
 
-data class Weather(
+/**
+ * Domain model for weather condition
+ */
+data class WeatherCondition(
     val description: String,
     val icon: String,
     val id: Int,

@@ -10,10 +10,10 @@ This document contains a comprehensive list of actionable improvement tasks for 
    - [x] Implement mappers to convert between data and domain models
    - [x] Ensure domain layer has no dependencies on data layer classes
 
-2. [ ] **Improve Repository Pattern Implementation**
-   - [ ] Update WeatherRepository to return domain models instead of data entities
-   - [ ] Implement caching strategy with proper expiration policies
-   - [ ] Add error handling and retry mechanisms for network requests
+2. [x] **Improve Repository Pattern Implementation**
+   - [x] Update WeatherRepository to return domain models instead of data entities
+   - [x] Implement caching strategy with proper expiration policies
+   - [x] Add error handling and retry mechanisms for network requests
 
 3. [ ] **Enhance Dependency Injection**
    - [ ] Review and optimize Hilt modules

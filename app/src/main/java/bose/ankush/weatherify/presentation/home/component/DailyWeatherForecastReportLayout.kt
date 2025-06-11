@@ -17,11 +17,11 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.dayName
 import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
-import bose.ankush.weatherify.data.room.weather.WeatherEntity
+import bose.ankush.weatherify.domain.model.WeatherForecast
 import coil.compose.AsyncImage
 
 @Composable
-internal fun DailyWeatherForecastReportLayout(list: List<WeatherEntity.Daily?>, item: Int) {
+internal fun DailyWeatherForecastReportLayout(list: List<WeatherForecast.Daily?>, item: Int) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,

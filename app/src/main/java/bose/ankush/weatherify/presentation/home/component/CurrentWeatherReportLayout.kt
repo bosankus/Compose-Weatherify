@@ -23,11 +23,11 @@ import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
 import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
-import bose.ankush.weatherify.data.room.weather.WeatherEntity
+import bose.ankush.weatherify.domain.model.WeatherForecast
 import coil.compose.AsyncImage
 
 @Composable
-internal fun CurrentWeatherReportLayout(currentWeather: WeatherEntity.Current) {
+internal fun CurrentWeatherReportLayout(currentWeather: WeatherForecast.Current) {
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -47,7 +47,7 @@ internal fun CurrentWeatherReportLayout(currentWeather: WeatherEntity.Current) {
 }
 
 @Composable
-fun CurrentWeatherStateBriefing(currentWeather: WeatherEntity.Current) {
+fun CurrentWeatherStateBriefing(currentWeather: WeatherForecast.Current) {
     Row(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -80,7 +80,7 @@ fun CurrentWeatherStateBriefing(currentWeather: WeatherEntity.Current) {
 }
 
 @Composable
-private fun CurrentWeatherUI(weatherData: WeatherEntity.Current) {
+private fun CurrentWeatherUI(weatherData: WeatherForecast.Current) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

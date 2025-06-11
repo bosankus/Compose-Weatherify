@@ -45,6 +45,7 @@ object AppModule {
             WeatherDatabase::class.java,
             WEATHER_DATABASE_NAME
         )
+            .fallbackToDestructiveMigration()
             .addTypeConverter(weatherDataModelConverters)
             .build()
     }

@@ -34,12 +34,12 @@ import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
 import bose.ankush.weatherify.base.common.Extension.getIconUrl
 import bose.ankush.weatherify.base.common.Extension.toCelsius
 import bose.ankush.weatherify.base.common.Extension.wrapText
-import bose.ankush.weatherify.data.room.weather.WeatherEntity
+import bose.ankush.weatherify.domain.model.WeatherForecast
 import coil.compose.AsyncImage
 
 @Composable
 internal fun HourlyWeatherForecastReportLayout(
-    hourlyWeatherForecasts: List<WeatherEntity.Hourly?>
+    hourlyWeatherForecasts: List<WeatherForecast.Hourly?>
 ) {
     if (hourlyWeatherForecasts.isNotEmpty()) {
         Column(
@@ -64,7 +64,7 @@ internal fun HourlyWeatherForecastReportLayout(
 
 @Composable
 private fun FutureForecastListItem(
-    weatherForecast: List<WeatherEntity.Hourly?>,
+    weatherForecast: List<WeatherForecast.Hourly?>,
     onItemClick: (Int) -> Unit
 ) {
     var selectedItem by remember { mutableStateOf(0) }

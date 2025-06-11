@@ -34,7 +34,7 @@ class MainViewModel @Inject constructor(
     private val getAirQuality: GetAirQuality,
     private val locationProviderClient: FusedLocationProviderClient,
     private val preferenceManager: PreferenceManager,
-    dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider
 ) : ViewModel() {
 
     var permissionDialogQueue = mutableStateListOf<String>()
@@ -54,7 +54,7 @@ class MainViewModel @Inject constructor(
 
     private val dataFetchExceptionHandler = CoroutineExceptionHandler { _, e ->
         _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
-    } + dispatchers.io
+    }
 
     private val remoteConfig = Firebase.remoteConfig
     private val tag = "${MainViewModel::class.simpleName} ->"
@@ -91,7 +91,7 @@ class MainViewModel @Inject constructor(
      * If notifications are disabled, the banner visibility will be false.
      */
     fun updateShowNotificationBannerState(launchState: Boolean) {
-        viewModelScope.launch(dataFetchExceptionHandler) {
+        viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
             if (remoteConfig.getBoolean(ENABLE_NOTIFICATION)) {
                 _showNotificationCardItem.update { launchState }
             } else {
@@ -103,24 +103,25 @@ class MainViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun fetchAndSaveLocationCoordinates() {
-        locationProviderClient.lastLocation.addOnSuccessListener { location ->
-            if (location != null) {
-                viewModelScope.launch(dataFetchExceptionHandler) {
-                    val coordinates = Pair(first = location.latitude, second = location.longitude)
-                    // storing location on shared preference
-                    preferenceManager.saveLocationPreferences(coordinates)
-                    // load initial data when coordinates received
-                    performInitialDataLoading()
+        locationProviderClient.lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+                        val coordinates = Pair(first = location.latitude, second = location.longitude)
+                        // storing location on shared preference
+                        preferenceManager.saveLocationPreferences(coordinates)
+                        // load initial data when coordinates received
+                        performInitialDataLoading()
+                    }
                 }
             }
-        }
             .addOnFailureListener { e -> throw RuntimeException(e.message.toString()) }
     }
 
 
     // initial data loading to get things ready for UI
     private fun performInitialDataLoading() {
-        viewModelScope.launch(dataFetchExceptionHandler) {
+        viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
             // Get coordinates from preference
             val preferences = preferenceManager.getLocationPreferenceFlow().first()
             val latitude = preferences[PreferenceManager.USER_LAT_LOCATION]
@@ -154,7 +155,7 @@ class MainViewModel @Inject constructor(
 
     // Update remote config parameters
     private fun updateRemoteConfigParameters() {
-        viewModelScope.launch(dataFetchExceptionHandler) {
+        viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
             val configSettings = remoteConfigSettings { minimumFetchIntervalInSeconds = 3600 }
             remoteConfig.apply {
                 setConfigSettingsAsync(configSettings)
