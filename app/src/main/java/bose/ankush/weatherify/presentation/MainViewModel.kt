@@ -30,6 +30,23 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+/**
+ * Main ViewModel for the Weatherify application.
+ * 
+ * This ViewModel is responsible for:
+ * - Managing the UI state for weather and air quality data
+ * - Handling location permissions and coordinates
+ * - Managing notification settings and permissions
+ * - Coordinating data loading from repositories
+ *
+ * @property refreshWeatherReport Use case for refreshing weather data from remote source
+ * @property getWeatherReport Use case for retrieving weather data from local database
+ * @property getAirQuality Use case for retrieving air quality data
+ * @property locationClient Client for accessing device location
+ * @property preferenceManager Manager for user preferences storage
+ * @property dispatchers Provider for coroutine dispatchers
+ * @property remoteConfigService Service for accessing remote configuration
+ */
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val refreshWeatherReport: RefreshWeatherReport,
@@ -41,21 +58,41 @@ class MainViewModel @Inject constructor(
     private val remoteConfigService: RemoteConfigService
 ) : ViewModel() {
 
+    /**
+     * Queue of permissions that need to be requested from the user.
+     * This is exposed to the UI to show appropriate permission dialogs.
+     */
     var permissionDialogQueue = mutableStateListOf<String>()
         private set
 
     private val _uiState = MutableStateFlow(UIState(isLoading = true))
+    /**
+     * The current UI state containing weather data, air quality, and loading status.
+     */
     val uiState = _uiState.asStateFlow()
 
     private val _launchPhoneCallPermission = MutableStateFlow(false)
+    /**
+     * Flag indicating whether the phone call permission dialog should be shown.
+     */
     val launchPhoneCallPermission = _launchPhoneCallPermission.asStateFlow()
 
     private val _launchNotificationPermission = MutableStateFlow(false)
+    /**
+     * Flag indicating whether the notification permission dialog should be shown.
+     */
     val launchNotificationPermission = _launchNotificationPermission.asStateFlow()
 
     private val _showNotificationCardItem = MutableStateFlow(false)
+    /**
+     * Flag indicating whether the notification card should be shown in the UI.
+     */
     val showNotificationCardItem = _showNotificationCardItem.asStateFlow()
 
+    /**
+     * Exception handler for data fetching operations.
+     * Updates the UI state with an error message when an exception occurs.
+     */
     private val dataFetchExceptionHandler = CoroutineExceptionHandler { _, e ->
         if (e !is CancellationException) {
             _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
@@ -69,10 +106,22 @@ class MainViewModel @Inject constructor(
     private var locationJob: Job? = null
     private var dataLoadingJob: Job? = null
 
+    /**
+     * Dismisses the current permission dialog by removing it from the queue.
+     * This should be called when the user has responded to a permission request.
+     */
     fun dismissDialog() {
         permissionDialogQueue.removeAt(0)
     }
 
+    /**
+     * Handles the result of a permission request.
+     * If permission is denied, adds it to the dialog queue to show a rationale.
+     * If permission is granted, proceeds with fetching location coordinates.
+     *
+     * @param permission The permission that was requested
+     * @param isGranted Whether the permission was granted by the user
+     */
     fun onPermissionResult(
         permission: String,
         isGranted: Boolean,
@@ -84,10 +133,20 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Updates the state of the phone call permission dialog.
+     *
+     * @param launchState True to show the permission dialog, false to hide it
+     */
     fun updatePhoneCallPermission(launchState: Boolean) {
         _launchPhoneCallPermission.update { launchState }
     }
 
+    /**
+     * Updates the state of the notification permission dialog.
+     *
+     * @param launchState True to show the permission dialog, false to hide it
+     */
     fun updateNotificationPermission(launchState: Boolean) {
         _launchNotificationPermission.update { launchState }
     }
@@ -95,6 +154,8 @@ class MainViewModel @Inject constructor(
     /**
      * Updates the state of the notification banner based on the remote configuration.
      * If notifications are disabled, the banner visibility will be false.
+     *
+     * @param launchState True to show the notification banner if enabled in remote config, false to hide it
      */
     fun updateShowNotificationBannerState(launchState: Boolean) {
         // Cancel previous job if it exists
@@ -118,6 +179,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Fetches the user's current location coordinates and saves them to preferences.
+     * Once coordinates are obtained, triggers initial data loading for weather and air quality.
+     * This method handles errors and updates the UI state accordingly.
+     */
     fun fetchAndSaveLocationCoordinates() {
         // Cancel previous job if it exists
         locationJob?.cancel()
@@ -146,7 +212,20 @@ class MainViewModel @Inject constructor(
     }
 
 
-    // initial data loading to get things ready for UI
+    /**
+     * Performs initial data loading to prepare weather and air quality data for the UI.
+     * 
+     * This method:
+     * 1. Retrieves user location coordinates from preferences
+     * 2. Refreshes weather data from remote source and saves to local database
+     * 3. Combines air quality and weather data streams
+     * 4. Updates the UI state with the combined data
+     * 
+     * The method handles various error cases:
+     * - Missing coordinates
+     * - Network errors
+     * - Data processing errors
+     */
     private fun performInitialDataLoading() {
         // Cancel previous job if it exists
         dataLoadingJob?.cancel()
@@ -212,6 +291,10 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Cleans up resources when the ViewModel is cleared.
+     * Cancels all active coroutine jobs to prevent memory leaks and unnecessary work.
+     */
     override fun onCleared() {
         super.onCleared()
         // Cancel all active jobs when ViewModel is cleared
