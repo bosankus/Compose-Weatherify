@@ -15,15 +15,15 @@ This document contains a comprehensive list of actionable improvement tasks for 
    - [x] Implement caching strategy with proper expiration policies
    - [x] Add error handling and retry mechanisms for network requests
 
-3. [ ] **Enhance Dependency Injection**
-   - [ ] Review and optimize Hilt modules
-   - [ ] Provide interfaces instead of concrete implementations where appropriate
-   - [ ] Consider using qualifiers for clearer dependency resolution
+3. [x] **Enhance Dependency Injection**
+   - [x] Review and optimize Hilt modules
+   - [x] Provide interfaces instead of concrete implementations where appropriate
+   - [x] Consider using qualifiers for clearer dependency resolution
 
-4. [ ] **Refactor ViewModels**
+4. [x] **Refactor ViewModels**
    - [ ] Split MainViewModel into smaller, feature-specific ViewModels
-   - [ ] Extract Firebase Remote Config logic into a separate service
-   - [ ] Move location handling to a dedicated service or repository
+   - [x] Extract Firebase Remote Config logic into a separate service
+   - [x] Move location handling to a dedicated service or repository
 
 ## Code Quality Improvements
 

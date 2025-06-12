@@ -7,18 +7,24 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import bose.ankush.weatherify.R
-import com.google.android.gms.location.LocationServices
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LocationService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    private lateinit var locationClient: LocationClient
+
+    @Inject
+    lateinit var locationClient: LocationClient
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -26,10 +32,6 @@ class LocationService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        locationClient = DeviceLocationClient(
-            applicationContext,
-            LocationServices.getFusedLocationProviderClient(applicationContext)
-        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -66,12 +68,12 @@ class LocationService : Service() {
                     updatedNotification.build()
                 )
             }
+            .launchIn(serviceScope)
 
         startForeground(
             NOTIFICATION_ID,
             notification.build()
         )
-        locationClient.getLocationUpdates(interval = 1000)
     }
 
     private fun stop() {

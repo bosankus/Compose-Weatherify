@@ -6,7 +6,6 @@ import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
 import bose.ankush.weatherify.data.repository.CityRepositoryImpl
 import bose.ankush.weatherify.data.repository.WeatherRepositoryImpl
 import bose.ankush.weatherify.data.room.weather.WeatherDatabase
-import bose.ankush.weatherify.di.qualifiers.WeatherApi
 import bose.ankush.weatherify.domain.repository.CityRepository
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import dagger.Module
@@ -23,7 +22,7 @@ object RepoModule {
     @Singleton
     @Provides
     fun provideWeatherRepository(
-        @WeatherApi openWeatherApiService: OpenWeatherApiService,
+        openWeatherApiService: OpenWeatherApiService,
         weatherDatabase: WeatherDatabase,
         dispatcherProvider: DispatcherProvider
     ): WeatherRepository =

@@ -1,22 +1,17 @@
 package bose.ankush.weatherify.presentation
 
-import android.annotation.SuppressLint
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
-import bose.ankush.weatherify.di.qualifiers.DeviceLocation
+import bose.ankush.weatherify.base.location.LocationClient
 import bose.ankush.weatherify.domain.preference.PreferenceManager
+import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetWeatherReport
 import bose.ankush.weatherify.domain.use_case.refresh_weather_reports.RefreshWeatherReport
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,9 +28,10 @@ class MainViewModel @Inject constructor(
     private val refreshWeatherReport: RefreshWeatherReport,
     private val getWeatherReport: GetWeatherReport,
     private val getAirQuality: GetAirQuality,
-    @DeviceLocation private val locationProviderClient: FusedLocationProviderClient,
+    private val locationClient: LocationClient,
     private val preferenceManager: PreferenceManager,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    private val remoteConfigService: RemoteConfigService
 ) : ViewModel() {
 
     var permissionDialogQueue = mutableStateListOf<String>()
@@ -57,15 +53,10 @@ class MainViewModel @Inject constructor(
         _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
     }
 
-    private val remoteConfig = Firebase.remoteConfig
     private val tag = "${MainViewModel::class.simpleName} ->"
 
-    init {
-        updateRemoteConfigParameters()
-    }
-
     fun dismissDialog() {
-        permissionDialogQueue.removeFirst()
+        permissionDialogQueue.removeAt(0)
     }
 
     fun onPermissionResult(
@@ -93,30 +84,31 @@ class MainViewModel @Inject constructor(
      */
     fun updateShowNotificationBannerState(launchState: Boolean) {
         viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            if (remoteConfig.getBoolean(ENABLE_NOTIFICATION)) {
+            if (remoteConfigService.getBoolean(ENABLE_NOTIFICATION)) {
                 _showNotificationCardItem.update { launchState }
+                Timber.tag(tag).d("Notification feature is enabled")
             } else {
                 _showNotificationCardItem.update { false }
-                Timber.tag(tag).d("Notification feature is disabled. Flow won't update.")
+                Timber.tag(tag).d("Notification feature is disabled")
             }
         }
     }
 
-    @SuppressLint("MissingPermission")
     fun fetchAndSaveLocationCoordinates() {
-        locationProviderClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-                        val coordinates = Pair(first = location.latitude, second = location.longitude)
-                        // storing location on shared preference
-                        preferenceManager.saveLocationPreferences(coordinates)
-                        // load initial data when coordinates received
-                        performInitialDataLoading()
-                    }
+        viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+            locationClient.getCurrentLocation().fold(
+                onSuccess = { location ->
+                    val coordinates = Pair(first = location.latitude, second = location.longitude)
+                    // storing location on shared preference
+                    preferenceManager.saveLocationPreferences(coordinates)
+                    // load initial data when coordinates received
+                    performInitialDataLoading()
+                },
+                onFailure = { e ->
+                    _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
                 }
-            }
-            .addOnFailureListener { e -> throw RuntimeException(e.message.toString()) }
+            )
+        }
     }
 
 
@@ -150,24 +142,6 @@ class MainViewModel @Inject constructor(
                 // in case we don't have coordinates, we don't have any requirement yet other than this :(
                 _uiState.update { UIState(isLoading = false) }
                 throw RuntimeException("No location coordinates")
-            }
-        }
-    }
-
-    // Update remote config parameters
-    private fun updateRemoteConfigParameters() {
-        viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            val configSettings = remoteConfigSettings { minimumFetchIntervalInSeconds = 3600 }
-            remoteConfig.apply {
-                setConfigSettingsAsync(configSettings)
-                setDefaultsAsync(R.xml.remote_config_defaults)
-                fetchAndActivate().addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Timber.tag(tag).d("Remote config parameters updated.")
-                    } else {
-                        Timber.tag(tag).d("Failed to update Remote Config parameters.")
-                    }
-                }
             }
         }
     }

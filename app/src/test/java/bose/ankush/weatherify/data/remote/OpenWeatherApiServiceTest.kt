@@ -3,9 +3,8 @@ package bose.ankush.weatherify.data.remote
 import bose.ankush.weatherify.MainCoroutineRule
 import bose.ankush.weatherify.MockWebServerUtil.enqueueResponse
 import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
-import bose.ankush.weatherify.data.remote.dto.toAirQuality
 import bose.ankush.weatherify.domain.model.AirQuality
-import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth
 import kotlinx.coroutines.test.runTest
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockWebServer
@@ -58,7 +57,7 @@ class OpenWeatherApiServiceTest {
                 val actualResponse = openWeatherApiService.getCurrentAirQuality(
                     latitude = "22.48",
                     longitude = "88.40"
-                ).toAirQuality()
+                )
                 val expectedResponse = AirQuality(
                     aqi = 5,
                     co = 1441.96,
@@ -68,7 +67,7 @@ class OpenWeatherApiServiceTest {
                     pm10 = 237.01,
                     pm25 = 165.02
                 )
-                assertThat(actualResponse).isEqualTo(expectedResponse)
+                Truth.assertThat(actualResponse).isEqualTo(expectedResponse)
             } catch (e: Exception) {
                 e.printStackTrace()
             }

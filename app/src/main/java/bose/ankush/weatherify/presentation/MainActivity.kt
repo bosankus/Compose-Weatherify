@@ -23,11 +23,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
 import bose.ankush.weatherify.base.common.ACCESS_PHONE_CALL
 import bose.ankush.weatherify.base.common.Extension.callNumber
-import bose.ankush.weatherify.base.common.Extension.hasLocationPermission
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
+import bose.ankush.weatherify.base.location.LocationClient
 import bose.ankush.weatherify.base.permissions.CoarseLocationPermissionTextProvider
 import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvider
 import bose.ankush.weatherify.base.permissions.PermissionAlertDialog
@@ -35,6 +35,7 @@ import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
@@ -42,6 +43,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
     private val viewModel: MainViewModel by viewModels()
+
+    @Inject
+    lateinit var locationClient: LocationClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -55,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                     viewModel.launchPhoneCallPermission.collectAsState()
                 val launchNotificationPermissionState =
                     viewModel.launchNotificationPermission.collectAsState()
-                if (context.hasLocationPermission()) {
+                if (locationClient.hasLocationPermission()) {
                     // if permission granted already then fetch and save location coordinates
                     viewModel.fetchAndSaveLocationCoordinates()
                 } else {

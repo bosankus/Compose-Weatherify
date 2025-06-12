@@ -7,5 +7,9 @@ interface LocationClient {
 
     fun getLocationUpdates(interval: Long): Flow<Location>
 
+    suspend fun getCurrentLocation(): Result<Location>
+
+    fun hasLocationPermission(): Boolean
+
     class LocationException(message: String): Exception()
 }

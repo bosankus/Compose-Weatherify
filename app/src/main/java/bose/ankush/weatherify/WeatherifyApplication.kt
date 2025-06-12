@@ -5,8 +5,10 @@ import android.app.NotificationManager
 import android.content.Context
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
+import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import javax.inject.Inject
 
 /**Created by
 Author: Ankush Bose
@@ -16,10 +18,18 @@ Date: 05,May,2021
 @HiltAndroidApp
 class WeatherifyApplication : WeatherifyApplicationCore() {
 
+    @Inject
+    lateinit var remoteConfigService: RemoteConfigService
+
     override fun onCreate() {
         super.onCreate()
         enableTimber()
         createNotificationChannel()
+        initializeRemoteConfig()
+    }
+
+    private fun initializeRemoteConfig() {
+        remoteConfigService.initialize()
     }
 
     private fun enableTimber() {
