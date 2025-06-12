@@ -14,11 +14,17 @@ import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetWeatherReport
 import bose.ankush.weatherify.domain.use_case.refresh_weather_reports.RefreshWeatherReport
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -51,10 +57,17 @@ class MainViewModel @Inject constructor(
     val showNotificationCardItem = _showNotificationCardItem.asStateFlow()
 
     private val dataFetchExceptionHandler = CoroutineExceptionHandler { _, e ->
-        _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
+        if (e !is CancellationException) {
+            _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
+        }
     }
 
     private val tag = "${MainViewModel::class.simpleName} ->"
+
+    // Track active jobs for proper cancellation
+    private var notificationBannerJob: Job? = null
+    private var locationJob: Job? = null
+    private var dataLoadingJob: Job? = null
 
     fun dismissDialog() {
         permissionDialogQueue.removeAt(0)
@@ -84,70 +97,126 @@ class MainViewModel @Inject constructor(
      * If notifications are disabled, the banner visibility will be false.
      */
     fun updateShowNotificationBannerState(launchState: Boolean) {
-        viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            if (remoteConfigService.getBoolean(ENABLE_NOTIFICATION)) {
-                _showNotificationCardItem.update { launchState }
-                Timber.tag(tag).d("Notification feature is enabled")
-            } else {
-                _showNotificationCardItem.update { false }
-                Timber.tag(tag).d("Notification feature is disabled")
+        // Cancel previous job if it exists
+        notificationBannerJob?.cancel()
+
+        notificationBannerJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+            try {
+                if (remoteConfigService.getBoolean(ENABLE_NOTIFICATION)) {
+                    _showNotificationCardItem.update { launchState }
+                    Timber.tag(tag).d("Notification feature is enabled")
+                } else {
+                    _showNotificationCardItem.update { false }
+                    Timber.tag(tag).d("Notification feature is disabled")
+                }
+            } catch (e: CancellationException) {
+                throw e // Rethrow cancellation exceptions
+            } catch (e: Exception) {
+                Timber.tag(tag).e(e, "Error updating notification banner state")
+                _uiState.update { it.copy(error = UiText.DynamicText(e.message.toString())) }
             }
         }
     }
 
     fun fetchAndSaveLocationCoordinates() {
-        viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            locationClient.getCurrentLocation().fold(
-                onSuccess = { location ->
-                    val coordinates = Pair(first = location.latitude, second = location.longitude)
-                    // storing location on shared preference
-                    preferenceManager.saveLocationPreferences(coordinates)
-                    // load initial data when coordinates received
-                    performInitialDataLoading()
-                },
-                onFailure = { e ->
-                    _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
-                }
-            )
+        // Cancel previous job if it exists
+        locationJob?.cancel()
+
+        locationJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+            try {
+                locationClient.getCurrentLocation().fold(
+                    onSuccess = { location ->
+                        val coordinates = Pair(first = location.latitude, second = location.longitude)
+                        // storing location on shared preference
+                        preferenceManager.saveLocationPreferences(coordinates)
+                        // load initial data when coordinates received
+                        performInitialDataLoading()
+                    },
+                    onFailure = { e ->
+                        _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
+                    }
+                )
+            } catch (e: CancellationException) {
+                throw e // Rethrow cancellation exceptions
+            } catch (e: Exception) {
+                Timber.tag(tag).e(e, "Error fetching location coordinates")
+                _uiState.update { it.copy(error = UiText.DynamicText(e.message.toString())) }
+            }
         }
     }
 
 
     // initial data loading to get things ready for UI
     private fun performInitialDataLoading() {
-        viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            // Get coordinates from preference
-            val preferences = preferenceManager.getLocationPreferenceFlow().first()
-            val latitude = preferences[PreferenceManager.USER_LAT_LOCATION]
-            val longitude = preferences[PreferenceManager.USER_LON_LOCATION]
+        // Cancel previous job if it exists
+        dataLoadingJob?.cancel()
 
-            if (latitude != null && longitude != null) {
-                val location = Pair(latitude, longitude)
+        dataLoadingJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+            try {
+                // Get coordinates from preference
+                val preferences = preferenceManager.getLocationPreferenceFlow().first()
+                val latitude = preferences[PreferenceManager.USER_LAT_LOCATION]
+                val longitude = preferences[PreferenceManager.USER_LON_LOCATION]
 
-                // fetch and save weather report from remote to ROOM DB
-                refreshWeatherReport(location)
+                if (latitude != null && longitude != null) {
+                    val location = Pair(latitude, longitude)
 
-                // zip both data streams and collect to populate on UI state data class.
-                // Also update UI state about user's location coordinates
-                getAirQuality(location.first, location.second)
-                    .combine(getWeatherReport.invoke(location)) { air, weather ->
+                    // fetch and save weather report from remote to ROOM DB
+                    refreshWeatherReport(location)
+
+                    // zip both data streams and collect to populate on UI state data class.
+                    // Also update UI state about user's location coordinates
+                    getAirQuality(location.first, location.second)
+                        .combine(getWeatherReport.invoke(location)) { air, weather ->
+                            UIState(
+                                isLoading = false,
+                                userLocation = location,
+                                weatherData = weather,
+                                airQualityData = air,
+                                error = null
+                            )
+                        }
+                        .flowOn(dispatchers.io)
+                        .catch { e ->
+                            if (e is CancellationException) throw e
+                            Timber.tag(tag).e(e, "Error loading weather data")
+                            _uiState.update { 
+                                it.copy(
+                                    isLoading = false,
+                                    error = UiText.DynamicText(e.message.toString())
+                                ) 
+                            }
+                        }
+                        .onEach { newState -> _uiState.update { newState } }
+                        .launchIn(this)
+                } else {
+                    // in case we don't have coordinates, update UI state with appropriate error message
+                    _uiState.update { 
                         UIState(
-                            isLoading = false,
-                            userLocation = location,
-                            weatherData = weather,
-                            airQualityData = air,
-                            error = null
-                        )
-                    }.collect { newState -> _uiState.update { newState } }
-            } else {
-                // in case we don't have coordinates, update UI state with appropriate error message
+                            isLoading = false, 
+                            error = UiText.StringResource(R.string.default_coordinates_txt)
+                        ) 
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e // Rethrow cancellation exceptions
+            } catch (e: Exception) {
+                Timber.tag(tag).e(e, "Error in initial data loading")
                 _uiState.update { 
-                    UIState(
-                        isLoading = false, 
-                        error = UiText.StringResource(R.string.default_coordinates_txt)
+                    it.copy(
+                        isLoading = false,
+                        error = UiText.DynamicText(e.message.toString())
                     ) 
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        // Cancel all active jobs when ViewModel is cleared
+        notificationBannerJob?.cancel()
+        locationJob?.cancel()
+        dataLoadingJob?.cancel()
     }
 }
