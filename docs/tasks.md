@@ -32,10 +32,10 @@ This document contains a comprehensive list of actionable improvement tasks for 
    - [x] Implement a consistent error handling strategy across the app
    - [x] Add meaningful error messages and recovery options
 
-6. [ ] **Enhance Null Safety**
-   - [ ] Review and reduce nullable types where possible
-   - [ ] Add proper null checks and fallback values
-   - [ ] Use Kotlin's safe call operators consistently
+6. [x] **Enhance Null Safety**
+   - [x] Review and reduce nullable types where possible
+   - [x] Add proper null checks and fallback values
+   - [x] Use Kotlin's safe call operators consistently
 
 7. [ ] **Optimize Coroutines Usage**
    - [ ] Review and optimize coroutine scopes

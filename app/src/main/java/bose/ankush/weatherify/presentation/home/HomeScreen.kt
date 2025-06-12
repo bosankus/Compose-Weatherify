@@ -50,7 +50,7 @@ fun HomeScreen(
         }
 
         uiState.weatherData?.current?.weather?.isNotEmpty() == true ||
-                uiState.airQualityData?.aqi != null -> {
+                uiState.airQualityData != null -> {
             // Show data on UI
             ShowUIContainer(uiState, navController)
         }

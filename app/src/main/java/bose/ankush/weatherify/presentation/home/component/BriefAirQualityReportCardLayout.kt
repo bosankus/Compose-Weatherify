@@ -58,7 +58,7 @@ private fun ShowUI(
     ) {
         Text(
             modifier = Modifier.alpha(0.6f),
-            text = aq.aqi?.getFormattedAQI() ?: "00",
+            text = aq.aqi.getFormattedAQI(),
             style = MaterialTheme.typography.titleLarge,
             fontSize = 26.sp,
             color = MaterialTheme.colorScheme.onSurface,
@@ -73,7 +73,7 @@ private fun ShowUI(
         )
         Text(
             modifier = Modifier.padding(top = 5.dp),
-            text = aq.aqi?.let { getAQIAnalysedText(it) }?.first ?: "Something went wrong",
+            text = getAQIAnalysedText(aq.aqi).first,
             style = MaterialTheme.typography.bodyLarge,
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onSurface,
