@@ -4,6 +4,7 @@ import bose.ankush.weatherify.base.common.WEATHER_BASE_URL
 import bose.ankush.weatherify.data.remote.LoggingInterceptor.logBodyInterceptor
 import bose.ankush.weatherify.data.remote.NetworkInterceptor.onlineInterceptor
 import bose.ankush.weatherify.data.remote.api.OpenWeatherApiService
+import bose.ankush.weatherify.di.qualifiers.WeatherApi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -50,7 +51,9 @@ object NetworkModule {
         return GsonConverterFactory.create()
     }
 
+    @Singleton
     @Provides
+    @WeatherApi
     fun providesOpenWeatherApiService(
         converterFactory: Converter.Factory,
         okHttpClient: OkHttpClient

@@ -8,7 +8,8 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
-import bose.ankush.weatherify.data.preference.PreferenceManager
+import bose.ankush.weatherify.di.qualifiers.DeviceLocation
+import bose.ankush.weatherify.domain.preference.PreferenceManager
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetWeatherReport
 import bose.ankush.weatherify.domain.use_case.refresh_weather_reports.RefreshWeatherReport
@@ -32,7 +33,7 @@ class MainViewModel @Inject constructor(
     private val refreshWeatherReport: RefreshWeatherReport,
     private val getWeatherReport: GetWeatherReport,
     private val getAirQuality: GetAirQuality,
-    private val locationProviderClient: FusedLocationProviderClient,
+    @DeviceLocation private val locationProviderClient: FusedLocationProviderClient,
     private val preferenceManager: PreferenceManager,
     private val dispatchers: DispatcherProvider
 ) : ViewModel() {
