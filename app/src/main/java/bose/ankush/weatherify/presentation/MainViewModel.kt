@@ -3,6 +3,7 @@ package bose.ankush.weatherify.presentation
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
@@ -139,9 +140,13 @@ class MainViewModel @Inject constructor(
                         )
                     }.collect { newState -> _uiState.update { newState } }
             } else {
-                // in case we don't have coordinates, we don't have any requirement yet other than this :(
-                _uiState.update { UIState(isLoading = false) }
-                throw RuntimeException("No location coordinates")
+                // in case we don't have coordinates, update UI state with appropriate error message
+                _uiState.update { 
+                    UIState(
+                        isLoading = false, 
+                        error = UiText.StringResource(R.string.default_coordinates_txt)
+                    ) 
+                }
             }
         }
     }
