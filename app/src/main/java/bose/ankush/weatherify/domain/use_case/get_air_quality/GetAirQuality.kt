@@ -8,6 +8,6 @@ import javax.inject.Inject
 class GetAirQuality @Inject constructor(
     private val weatherRepository: WeatherRepository
 ) {
-    suspend operator fun invoke(lat: Double, lang: Double): Flow<AirQuality?> =
+    operator fun invoke(lat: Double, lang: Double): Flow<AirQuality?> =
         weatherRepository.getAirQualityReport(lat.toString(), lang.toString())
 }
