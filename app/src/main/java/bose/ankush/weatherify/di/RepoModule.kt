@@ -24,12 +24,14 @@ object RepoModule {
     fun provideWeatherRepository(
         openWeatherApiService: OpenWeatherApiService,
         weatherDatabase: WeatherDatabase,
-        dispatcherProvider: DispatcherProvider
+        dispatcherProvider: DispatcherProvider,
+        context: Context
     ): WeatherRepository =
         WeatherRepositoryImpl(
             openWeatherApiService,
             weatherDatabase,
-            dispatcherProvider
+            dispatcherProvider,
+            context
         )
 
     @Singleton

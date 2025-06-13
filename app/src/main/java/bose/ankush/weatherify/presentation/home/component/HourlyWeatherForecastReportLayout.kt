@@ -10,7 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
@@ -36,6 +40,7 @@ import bose.ankush.weatherify.base.common.Extension.toCelsius
 import bose.ankush.weatherify.base.common.Extension.wrapText
 import bose.ankush.weatherify.domain.model.WeatherForecast
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 @Composable
 internal fun HourlyWeatherForecastReportLayout(
@@ -54,10 +59,27 @@ internal fun HourlyWeatherForecastReportLayout(
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 16.dp)
             )
-            FutureForecastListItem(hourlyWeatherForecasts) { /*TODO: item on click action*/ }
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+                )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    FutureForecastListItem(hourlyWeatherForecasts) { /* Item click action will be implemented in future */ }
+                }
+            }
         }
     } else {
-        /*No Need to show anything if data is empty*/
+        // Return empty content when no data is available
     }
 }
 
@@ -68,24 +90,38 @@ private fun FutureForecastListItem(
     onItemClick: (Int) -> Unit
 ) {
     var selectedItem by remember { mutableStateOf(0) }
+
+    // Limit the number of items to display for better performance
+    val limitedForecast = remember(weatherForecast) { 
+        weatherForecast.take(24) // Show only 24 hours
+    }
+
+    // Pre-calculate background colors to avoid recalculation during composition
+    val selectedBackground = MaterialTheme.colorScheme.primaryContainer
+    val unselectedBackground = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp, top = 16.dp)
+            .padding(start = 8.dp, end = 8.dp, top = 16.dp),
+        state = rememberLazyListState() // Add state to prevent unnecessary recompositions
     ) {
-        items(weatherForecast.size) {
+        items(
+            items = limitedForecast,
+            key = { item -> item?.dt ?: 0 } // Use unique key for each item
+        ) { item ->
+            val index = limitedForecast.indexOf(item)
+            val isSelected = selectedItem == index
+
             Box(
                 modifier = Modifier
                     .padding(start = 8.dp, end = 8.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(16.dp))
                     .clickable {
-                        selectedItem = it
-                        onItemClick(it)
+                        selectedItem = index
+                        onItemClick(index)
                     }
-                    .background(
-                        if (selectedItem == it) MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp)
-                    )
+                    .background(if (isSelected) selectedBackground else unselectedBackground)
                     .padding(horizontal = 10.dp, vertical = 20.dp)
             ) {
                 Column(
@@ -93,34 +129,38 @@ private fun FutureForecastListItem(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Time
                     Text(
-                        text = weatherForecast[it]?.dt?.toFormattedTime()
-                            ?: stringResource(id = R.string.not_available),
+                        text = item?.dt?.toFormattedTime() ?: stringResource(id = R.string.not_available),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.alpha(0.6f),
                     )
+
+                    // Weather icon
                     AsyncImage(
-                        model = weatherForecast[it]?.weather?.get(0)?.icon?.getIconUrl(),
-                        placeholder = painterResource(id = R.drawable.ic_sunny),
+                        model = item?.weather?.get(0)?.icon?.getIconUrl(),
+                        error = painterResource(id = R.drawable.ic_sunny),
                         contentDescription = stringResource(id = R.string.weather_icon_content),
                     )
+
+                    // Temperature
                     Text(
                         text = stringResource(
                             id = R.string.celsius,
-                            weatherForecast[it]?.temp?.toCelsius()
-                                ?: stringResource(id = R.string.not_available)
+                            item?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(top = 16.dp)
                     )
+
+                    // Weather description
                     Text(
-                        text = (weatherForecast[it]?.weather?.get(0)?.description
-                            ?: stringResource(id = R.string.not_available)).wrapText()
-                            .formatTextCapitalization(),
+                        text = (item?.weather?.get(0)?.description ?: stringResource(id = R.string.not_available))
+                            .wrapText().formatTextCapitalization(),
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Ellipsis,
                         color = MaterialTheme.colorScheme.onSurface,
