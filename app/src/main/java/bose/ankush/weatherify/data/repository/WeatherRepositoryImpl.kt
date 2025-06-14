@@ -1,6 +1,8 @@
 package bose.ankush.weatherify.data.repository
 
+import android.content.Context
 import androidx.room.withTransaction
+import bose.ankush.weatherify.base.common.ConnectivityManager
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.data.mapper.AirQualityMapper
 import bose.ankush.weatherify.data.mapper.WeatherMapper
@@ -26,6 +28,7 @@ class WeatherRepositoryImpl @Inject constructor(
     private val apiService: OpenWeatherApiService,
     private val weatherDatabase: WeatherDatabase,
     private val dispatcher: DispatcherProvider,
+    private val context: Context
 ) : WeatherRepository {
 
     companion object {
@@ -78,15 +81,22 @@ class WeatherRepositoryImpl @Inject constructor(
     /**
      * Method used by view-model when UI sends refresh weather event.
      * Checks if the data is stale before fetching new data.
+     * Also checks for network connectivity before making API calls.
      */
     override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>) {
         withContext(dispatcher.io) {
-            // Check if data is stale
+            // Check if data exists in cache
             val currentWeather = weatherDatabase.weatherDao().getWeather().firstOrNull()
             val currentTime = System.currentTimeMillis()
 
-            // If data is null or stale, fetch new data
-            if (currentWeather == null || (currentTime - currentWeather.lastUpdated > CACHE_EXPIRATION_TIME)) {
+            // Check if network is available
+            val isNetworkAvailable = ConnectivityManager.isNetworkAvailable(context)
+
+            // Only fetch new data if:
+            // 1. Network is available AND
+            // 2. Either data is null OR data is stale (older than cache expiration time)
+            if (isNetworkAvailable && 
+                (currentWeather == null || (currentTime - currentWeather.lastUpdated > CACHE_EXPIRATION_TIME))) {
                 try {
                     // Fetch weather data with retry mechanism
                     val weatherData = retryWithExponentialBackoff {
