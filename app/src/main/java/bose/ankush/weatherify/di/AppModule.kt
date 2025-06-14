@@ -9,6 +9,7 @@ import bose.ankush.weatherify.data.room.Parser
 import bose.ankush.weatherify.data.room.weather.WeatherDataModelConverters
 import bose.ankush.weatherify.data.room.weather.WeatherDatabase
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,6 +25,12 @@ object AppModule {
     @Singleton
     fun provideContext(application: Application): Context =
         application.applicationContext
+
+    @Singleton
+    @Provides
+    fun providesGson(): Gson {
+        return GsonBuilder().create()
+    }
 
     @Singleton
     @Provides

@@ -22,5 +22,5 @@ rootProject.name = "Weatherify"
 include(
     ":app",
     ":language",
-    ":payment",
+    ":network",
 )
