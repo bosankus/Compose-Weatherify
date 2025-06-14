@@ -10,18 +10,17 @@ import kotlinx.coroutines.flow.Flow
 interface WeatherRepository {
     /**
      * Get air quality report for a location
-     * @param latitude Latitude of the location
-     * @param longitude Longitude of the location
+     * @param coordinates Pair of latitude and longitude
      * @return Flow of AirQuality
      */
-    fun getAirQualityReport(latitude: String, longitude: String): Flow<AirQuality>
+    fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality>
 
     /**
      * Get weather report for a location
-     * @param location Pair of latitude and longitude
+     * @param coordinates Pair of latitude and longitude
      * @return Flow of WeatherForecast
      */
-    fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherForecast?>
+    fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherForecast?>
 
     /**
      * Refresh weather data for a location

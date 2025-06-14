@@ -25,7 +25,7 @@ class WeatherRepositoryImpl @Inject constructor(
     private val dispatcher: DispatcherProvider
 ) : WeatherRepository {
 
-    override fun getAirQualityReport(lat: String, lang: String): Flow<AirQuality> =
+    override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality> =
         weatherDatabase.weatherDao().getAirQuality().map { entity ->
             AirQualityMapper.mapToDomain(entity)
         }
@@ -48,10 +48,7 @@ class WeatherRepositoryImpl @Inject constructor(
 
                 // Get the latest data from the network repository
                 val weatherData = networkRepository.getWeatherReport(coordinates).firstOrNull()
-                val airQualityData = networkRepository.getAirQualityReport(
-                    coordinates.first.toString(),
-                    coordinates.second.toString()
-                ).firstOrNull()
+                val airQualityData = networkRepository.getAirQualityReport(coordinates).firstOrNull()
 
                 if (weatherData != null && airQualityData != null) {
                     // Convert network models to app models using the NetworkMapper

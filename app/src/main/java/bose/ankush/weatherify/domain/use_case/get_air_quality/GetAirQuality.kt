@@ -9,5 +9,5 @@ class GetAirQuality @Inject constructor(
     private val weatherRepository: WeatherRepository
 ) {
     operator fun invoke(lat: Double, lang: Double): Flow<AirQuality?> =
-        weatherRepository.getAirQualityReport(lat.toString(), lang.toString())
+        weatherRepository.getAirQualityReport(Pair(lat, lang))
 }

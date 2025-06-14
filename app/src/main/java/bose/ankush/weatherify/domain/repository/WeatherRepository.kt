@@ -11,7 +11,7 @@ Date: 05,May,2021
 
 interface WeatherRepository {
 
-    fun getAirQualityReport(lat: String, lang: String): Flow<AirQuality>
+    fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality>
 
     fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherForecast?>
 
