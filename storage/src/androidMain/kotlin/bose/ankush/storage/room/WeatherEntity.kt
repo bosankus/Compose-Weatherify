@@ -14,14 +14,14 @@ data class WeatherEntity(
     @Embedded val current: Current? = null,
     @field:TypeConverters(WeatherDataModelConverters::class) val daily: List<Daily?>? = listOf(),
     @field:TypeConverters(WeatherDataModelConverters::class) val hourly: List<Hourly?>? = listOf(),
-    @ColumnInfo(defaultValue = "0") val lastUpdated: Long = System.currentTimeMillis(),
+    @ColumnInfo(defaultValue = "0") val lastUpdated: Long = System.currentTimeMillis()
 ) {
     data class Alert(
         val description: String?,
         val end: Int?,
         val event: String?,
         val sender_name: String?,
-        val start: Int?,
+        val start: Int?
     )
 
     data class Current(
@@ -71,7 +71,7 @@ data class WeatherEntity(
         val feels_like: Double?,
         val humidity: Int?,
         val temp: Double?,
-        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
+        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf()
     )
 }
 
