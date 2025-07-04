@@ -3,7 +3,14 @@ package bose.ankush.storage.api
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Interface for weather data storage operations
+ * Interface for weather data storage operations.
+ * 
+ * This interface defines the contract for storing and retrieving weather and air quality data.
+ * It abstracts the underlying storage mechanism (e.g., Room database) from the rest of the application.
+ * Implementations of this interface are responsible for:
+ * - Retrieving weather and air quality data
+ * - Refreshing data from the network
+ * - Tracking the last update time
  */
 interface WeatherStorage {
     /**
@@ -23,6 +30,7 @@ interface WeatherStorage {
     /**
      * Refresh weather data from the network and store it
      * @param coordinates Pair of latitude and longitude
+     * @throws Exception if there's an error refreshing the data
      */
     suspend fun refreshWeatherData(coordinates: Pair<Double, Double>)
 
