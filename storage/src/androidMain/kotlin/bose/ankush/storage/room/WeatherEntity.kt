@@ -1,11 +1,11 @@
-package bose.ankush.weatherify.data.room.weather
+package bose.ankush.storage.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
-import bose.ankush.weatherify.base.common.WEATHER_DATABASE_NAME
+import bose.ankush.storage.common.WEATHER_DATABASE_NAME
 
 @Entity(tableName = WEATHER_DATABASE_NAME)
 data class WeatherEntity(

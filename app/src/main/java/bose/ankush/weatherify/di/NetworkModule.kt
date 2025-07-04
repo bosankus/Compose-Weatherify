@@ -13,24 +13,31 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Network module for Dagger Hilt that provides dependencies from the KMM network module
+ * Module for providing network-related dependencies
  */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Singleton
+    /**
+     * Provides NetworkConnectivity implementation
+     */
     @Provides
-    fun providesNetworkConnectivity(@ApplicationContext context: Context): NetworkConnectivity {
+    @Singleton
+    fun provideNetworkConnectivity(
+        @ApplicationContext context: Context
+    ): NetworkConnectivity {
         return AndroidNetworkConnectivity(context)
     }
 
-    @Singleton
+    /**
+     * Provides WeatherRepository implementation from the network module
+     */
     @Provides
-    fun providesWeatherRepository(
+    @Singleton
+    fun provideNetworkWeatherRepository(
         networkConnectivity: NetworkConnectivity
     ): WeatherRepository {
-        // Use the factory method from the network module to create a repository
         return createWeatherRepository(networkConnectivity)
     }
 }

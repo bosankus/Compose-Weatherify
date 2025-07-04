@@ -1,8 +1,8 @@
-package bose.ankush.weatherify.data.room.weather
+package bose.ankush.storage.room
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import bose.ankush.weatherify.base.common.AQ_DATABASE_NAME
+import bose.ankush.storage.common.AQ_DATABASE_NAME
 
 @Entity(tableName = AQ_DATABASE_NAME)
 data class AirQualityEntity(

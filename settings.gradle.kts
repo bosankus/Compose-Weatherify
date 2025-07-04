@@ -23,4 +23,5 @@ include(
     ":app",
     ":language",
     ":network",
+    ":storage",
 )

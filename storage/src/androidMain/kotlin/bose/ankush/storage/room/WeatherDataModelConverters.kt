@@ -1,12 +1,11 @@
-package bose.ankush.weatherify.data.room.weather
+package bose.ankush.storage.room
 
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
-import bose.ankush.weatherify.data.room.Parser
 import com.google.gson.reflect.TypeToken
 
 @ProvidedTypeConverter
-class WeatherDataModelConverters (private val parser: Parser) {
+class WeatherDataModelConverters(private val parser: Parser) {
 
     @TypeConverter
     fun toAlertJson(alerts: List<WeatherEntity.Alert?>?): String = parser.toJson(

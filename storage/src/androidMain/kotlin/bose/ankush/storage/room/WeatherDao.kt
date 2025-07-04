@@ -1,12 +1,12 @@
-package bose.ankush.weatherify.data.room.weather
+package bose.ankush.storage.room
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import bose.ankush.weatherify.base.common.AQ_DATABASE_NAME
-import bose.ankush.weatherify.base.common.WEATHER_DATABASE_NAME
+import bose.ankush.storage.common.AQ_DATABASE_NAME
+import bose.ankush.storage.common.WEATHER_DATABASE_NAME
 import kotlinx.coroutines.flow.Flow
 
 @Dao

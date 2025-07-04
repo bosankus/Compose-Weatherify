@@ -1,6 +1,5 @@
-package bose.ankush.weatherify.data.room.weather
+package bose.ankush.storage.room
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 

@@ -86,6 +86,7 @@ composeCompiler {
 dependencies {
 
     api(project(":language"))
+    api(project(":storage"))
     api(project(":network"))
 
     // Core
@@ -102,10 +103,6 @@ dependencies {
     implementation(Deps.dataStore)
     implementation(Deps.splashScreen)
 
-    // Room
-    implementation(Deps.room)
-    implementation(Deps.roomKtx)
-    kapt(Deps.roomCompiler)
 
     // Compose
     implementation(platform(Deps.composeBom))

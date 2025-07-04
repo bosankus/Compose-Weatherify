@@ -1,9 +1,9 @@
-package bose.ankush.weatherify.data.room
+package bose.ankush.storage.room
 
 import com.google.gson.Gson
 import java.lang.reflect.Type
 
-class JsonParser (private val gson: Gson) : Parser {
+class JsonParser(private val gson: Gson) : Parser {
     override fun <T> fromJson(json: String, type: Type): T? {
         return gson.fromJson(json, type)
     }

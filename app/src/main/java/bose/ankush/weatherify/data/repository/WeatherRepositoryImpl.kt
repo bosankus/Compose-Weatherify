@@ -1,69 +1,65 @@
 package bose.ankush.weatherify.data.repository
 
-import androidx.room.withTransaction
+import bose.ankush.storage.api.WeatherStorage
+import bose.ankush.storage.room.AirQualityEntity
+import bose.ankush.storage.room.WeatherEntity as StorageWeatherEntity
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.data.mapper.AirQualityMapper
-import bose.ankush.weatherify.data.mapper.NetworkMapper
 import bose.ankush.weatherify.data.mapper.WeatherMapper
-import bose.ankush.weatherify.data.room.weather.WeatherDatabase
 import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.domain.model.WeatherForecast
 import bose.ankush.weatherify.domain.repository.WeatherRepository
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * Implementation of WeatherRepository that uses the KMM network module
- * and stores data in the local database
+ * Implementation of WeatherRepository that uses the KMM storage module
+ * for data access and refresh operations
  */
 class WeatherRepositoryImpl @Inject constructor(
-    private val networkRepository: bose.ankush.network.repository.WeatherRepository,
-    private val weatherDatabase: WeatherDatabase,
+    private val weatherStorage: WeatherStorage,
     private val dispatcher: DispatcherProvider
 ) : WeatherRepository {
 
     override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality> =
-        weatherDatabase.weatherDao().getAirQuality().map { entity ->
-            AirQualityMapper.mapToDomain(entity)
+        weatherStorage.getAirQualityReport(coordinates).map { entity ->
+            AirQualityMapper.mapToDomain(entity as AirQualityEntity)
         }
 
     override fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherForecast?> =
-        weatherDatabase.weatherDao().getWeather().map { entity ->
-            WeatherMapper.mapToDomain(entity)
+        weatherStorage.getWeatherReport(location).map { entity ->
+            WeatherMapper.mapToDomain(entity as StorageWeatherEntity)
         }
 
     /**
      * Method used by view-model when UI sends refresh weather event.
-     * Delegates to the network module's repository for fetching data,
-     * then stores it in the local database.
+     * Delegates to the storage module for refreshing data.
+     * 
+     * The app module controls when to refresh based on business rules
+     * (e.g., data staleness, user pull-to-refresh)
      */
     override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>) {
         withContext(dispatcher.io) {
             try {
-                // Delegate to the network module's repository to refresh data
-                networkRepository.refreshWeatherData(coordinates)
+                // Check if data is stale (older than 1 hour)
+                val lastUpdateTime = weatherStorage.getLastWeatherUpdateTime()
+                val currentTime = System.currentTimeMillis()
+                val isDataStale = (currentTime - lastUpdateTime) > ONE_HOUR_IN_MILLIS
 
-                // Get the latest data from the network repository
-                val weatherData = networkRepository.getWeatherReport(coordinates).firstOrNull()
-                val airQualityData = networkRepository.getAirQualityReport(coordinates).firstOrNull()
-
-                if (weatherData != null && airQualityData != null) {
-                    // Convert network models to app models using the NetworkMapper
-                    val weatherEntity = NetworkMapper.mapWeatherForecastToEntity(weatherData)
-                    val airQualityEntity = NetworkMapper.mapAirQualityToEntity(airQualityData)
-
-                    // Store the data in room db
-                    weatherDatabase.withTransaction {
-                        weatherDatabase.weatherDao().refreshWeather(weatherEntity, airQualityEntity)
-                    }
+                // Refresh data if it's stale or if this is a forced refresh
+                if (isDataStale) {
+                    weatherStorage.refreshWeatherData(coordinates)
                 }
             } catch (e: Exception) {
                 // If there's an error, throw a more descriptive exception
                 throw Exception("Failed to refresh weather data: ${e.message}", e)
             }
         }
+    }
+
+    companion object {
+        private const val ONE_HOUR_IN_MILLIS = 60 * 60 * 1000L
     }
 }
