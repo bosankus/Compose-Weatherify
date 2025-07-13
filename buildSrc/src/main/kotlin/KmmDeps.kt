@@ -1,7 +1,7 @@
 import org.gradle.api.artifacts.dsl.DependencyHandler
 
 object KmmVersions {
-    const val ktor = "2.3.5"
+    const val ktor = "2.3.13"
     const val kotlinxSerialization = "1.6.0"
     const val kotlinxCoroutines = "1.7.3"
     const val koin = "3.5.0"
