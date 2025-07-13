@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.data.mapper
 
-import bose.ankush.weatherify.data.room.weather.Weather as WeatherData
-import bose.ankush.weatherify.data.room.weather.WeatherEntity
+import bose.ankush.storage.room.Weather as StorageWeather
+import bose.ankush.storage.room.WeatherEntity as StorageWeatherEntity
 import bose.ankush.weatherify.domain.model.WeatherCondition
 import bose.ankush.weatherify.domain.model.WeatherForecast
 
@@ -11,9 +11,21 @@ import bose.ankush.weatherify.domain.model.WeatherForecast
 object WeatherMapper {
 
     /**
-     * Maps a WeatherEntity to a WeatherForecast domain model
+     * Maps a Storage Weather entity to a WeatherCondition domain model
      */
-    fun mapToDomain(entity: WeatherEntity?): WeatherForecast? {
+    private fun mapStorageWeatherToDomain(weather: StorageWeather): WeatherCondition {
+        return WeatherCondition(
+            description = weather.description,
+            icon = weather.icon,
+            id = weather.id,
+            main = weather.main
+        )
+    }
+
+    /**
+     * Maps a Storage WeatherEntity to a WeatherForecast domain model
+     */
+    fun mapToDomain(entity: StorageWeatherEntity?): WeatherForecast? {
         if (entity == null) return null
 
         return WeatherForecast(
@@ -42,7 +54,7 @@ object WeatherMapper {
                     uvi = current.uvi,
                     weather = current.weather?.map { weather ->
                         weather?.let {
-                            mapWeatherToDomain(it)
+                            mapStorageWeatherToDomain(it)
                         }
                     },
                     wind_gust = current.wind_gust,
@@ -74,7 +86,7 @@ object WeatherMapper {
                         uvi = it.uvi,
                         weather = it.weather?.map { weather ->
                             weather?.let {
-                                mapWeatherToDomain(it)
+                                mapStorageWeatherToDomain(it)
                             }
                         },
                         wind_gust = it.wind_gust,
@@ -92,25 +104,13 @@ object WeatherMapper {
                         temp = it.temp,
                         weather = it.weather?.map { weather ->
                             weather?.let {
-                                mapWeatherToDomain(it)
+                                mapStorageWeatherToDomain(it)
                             }
                         }
                     )
                 }
             },
             lastUpdated = entity.lastUpdated
-        )
-    }
-
-    /**
-     * Maps a Weather entity to a WeatherCondition domain model
-     */
-    private fun mapWeatherToDomain(weather: WeatherData): WeatherCondition {
-        return WeatherCondition(
-            description = weather.description,
-            icon = weather.icon,
-            id = weather.id,
-            main = weather.main
         )
     }
 }

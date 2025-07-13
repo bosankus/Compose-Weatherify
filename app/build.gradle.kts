@@ -24,10 +24,17 @@ android {
         multiDexEnabled = ConfigData.multiDexEnabled
         testInstrumentationRunner = "bose.ankush.weatherify.helper.HiltTestRunner"
         resourceConfigurations.addAll(listOf("en", "hi", "iw"))
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-            }
+    }
+
+    kapt {
+        arguments {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
+    }
+
+    packaging {
+        resources {
+            excludes.add("META-INF/versions/9/previous-compilation-data.bin")
         }
     }
 
@@ -79,6 +86,8 @@ composeCompiler {
 dependencies {
 
     api(project(":language"))
+    api(project(":storage"))
+    api(project(":network"))
 
     // Core
     implementation(Deps.androidCore)
@@ -94,10 +103,6 @@ dependencies {
     implementation(Deps.dataStore)
     implementation(Deps.splashScreen)
 
-    // Room
-    implementation(Deps.room)
-    implementation(Deps.roomKtx)
-    kapt(Deps.roomCompiler)
 
     // Compose
     implementation(platform(Deps.composeBom))
@@ -106,8 +111,6 @@ dependencies {
     implementation(Deps.composeUiToolingPreview)
     implementation(Deps.composeMaterial3)
     // Compose Testing
-    // androidTestImplementation(Deps.composeUiJunit4)
-    // debugImplementation(Deps.composeUiTestManifest)
 
     // Unit Testing
     testImplementation(Deps.junit)
@@ -120,6 +123,10 @@ dependencies {
     testImplementation(Deps.mockWebServer)
     testImplementation(Deps.mockk)
 
+    // Retrofit for testing only
+    testImplementation(Deps.retrofit)
+    testImplementation(Deps.retrofitGson)
+
     // UI Testing
     androidTestImplementation(Deps.extJunit)
     androidTestImplementation(Deps.espressoCore)
@@ -128,10 +135,8 @@ dependencies {
     kaptAndroidTest(Deps.hiltDaggerAndroidCompiler)
 
     // Networking
-    implementation(Deps.okHttp3)
-    implementation(Deps.retrofit)
-    implementation(Deps.retrofitGson)
-    implementation(Deps.okhttpInterceptor)
+    // Network dependencies removed as they are now provided by the network module
+    implementation("com.google.code.gson:gson:2.10.1") // Keep Gson for JSON serialization in the app module
 
     // Firebase
     implementation(platform(Deps.firebaseBom))
@@ -140,7 +145,7 @@ dependencies {
     implementation(Deps.firebasePerformanceMonitoring)
 
     // Coroutines
-    implementation(Deps.retrofitCoroutineAdapter)
+    // Retrofit coroutine adapter removed as it's now provided by the network module
     implementation(Deps.coroutinesCore)
     implementation(Deps.coroutinesAndroid)
 
@@ -157,4 +162,3 @@ dependencies {
     // Memory leak
     debugImplementation(Deps.leakCanary)
 }
-
