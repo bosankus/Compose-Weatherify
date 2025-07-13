@@ -35,7 +35,7 @@ object NetworkModule {
      */
     @Provides
     @Singleton
-    fun provideNetworkWeatherRepository(
+    fun provideWeatherRepository(
         networkConnectivity: NetworkConnectivity
     ): WeatherRepository {
         return createWeatherRepository(networkConnectivity)
