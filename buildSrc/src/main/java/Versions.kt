@@ -46,10 +46,7 @@ object Versions {
     const val room = "2.5.2"
 
     // Networking
-    const val okHttp3 = "4.9.3"
-    const val retrofit = "2.9.0"
-    const val retrofitCoroutineAdapter = "0.9.2"
-    const val okhttpInterceptor = "4.9.3"
+    const val gson = "2.13.1"
 
     // Firebase
     const val firebaseBom = "32.2.0"

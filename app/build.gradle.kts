@@ -131,7 +131,7 @@ dependencies {
     kaptAndroidTest(Deps.hiltDaggerAndroidCompiler)
 
     // Networking
-    implementation("com.google.code.gson:gson:2.13.1") // Keep Gson for JSON serialization in the app module
+    implementation(Deps.gson)
 
     // Firebase
     implementation(platform(Deps.firebaseBom))
