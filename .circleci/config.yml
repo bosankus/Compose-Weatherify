@@ -43,9 +43,11 @@ jobs:
           command: ./gradlew lint testDebug --continue
 
       # Then start the emulator and run the Instrumentation tests!
-      - android/start-emulator-and-run-tests:
-          test-command: ./gradlew connectedDebugAndroidTest
-          system-image: system-images;android-29;google_apis;x86
+      - android/start-emulator:
+          system-image: system-images;android-34;google_apis;x86_64
+      - run:
+          name: Run instrumentation tests
+          command: ./gradlew connectedDebugAndroidTest
 
       # And finally run the release build
       - run:
