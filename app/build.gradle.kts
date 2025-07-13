@@ -88,6 +88,7 @@ dependencies {
     api(project(":language"))
     api(project(":storage"))
     api(project(":network"))
+    api(project(":sunriseui"))
 
     // Core
     implementation(Deps.androidCore)
@@ -110,7 +111,6 @@ dependencies {
     debugImplementation(Deps.composeUiTooling)
     implementation(Deps.composeUiToolingPreview)
     implementation(Deps.composeMaterial3)
-    // Compose Testing
 
     // Unit Testing
     testImplementation(Deps.junit)
@@ -123,10 +123,6 @@ dependencies {
     testImplementation(Deps.mockWebServer)
     testImplementation(Deps.mockk)
 
-    // Retrofit for testing only
-    testImplementation(Deps.retrofit)
-    testImplementation(Deps.retrofitGson)
-
     // UI Testing
     androidTestImplementation(Deps.extJunit)
     androidTestImplementation(Deps.espressoCore)
@@ -135,8 +131,7 @@ dependencies {
     kaptAndroidTest(Deps.hiltDaggerAndroidCompiler)
 
     // Networking
-    // Network dependencies removed as they are now provided by the network module
-    implementation("com.google.code.gson:gson:2.10.1") // Keep Gson for JSON serialization in the app module
+    implementation("com.google.code.gson:gson:2.13.1") // Keep Gson for JSON serialization in the app module
 
     // Firebase
     implementation(platform(Deps.firebaseBom))
@@ -145,7 +140,6 @@ dependencies {
     implementation(Deps.firebasePerformanceMonitoring)
 
     // Coroutines
-    // Retrofit coroutine adapter removed as it's now provided by the network module
     implementation(Deps.coroutinesCore)
     implementation(Deps.coroutinesAndroid)
 
