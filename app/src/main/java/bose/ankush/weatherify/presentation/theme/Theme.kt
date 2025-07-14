@@ -42,7 +42,7 @@ fun WeatherifyTheme(
         with(systemUiController) {
             // Set both status bar and navigation bar in a single batch update
             setStatusBarColor(
-                color = colors.surface,
+                color = androidx.compose.ui.graphics.Color.Transparent,
                 darkIcons = !darkTheme
             )
             setNavigationBarColor(
@@ -50,6 +50,10 @@ fun WeatherifyTheme(
                 darkIcons = !darkTheme
             )
             isNavigationBarVisible = false
+            // Enable drawing behind the status bar
+            setSystemBarsColor(
+                color = androidx.compose.ui.graphics.Color.Transparent
+            )
         }
     }
 
