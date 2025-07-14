@@ -153,9 +153,9 @@ private fun LocationAndDateHeader(
                     )
 
                     if (!addresses.isNullOrEmpty()) {
-                        val address = addresses[0]
-                        val cityName = address.locality ?: address.subAdminArea
-                        val countryName = address.countryName
+                        val address = addresses.firstOrNull()
+                        val cityName = address?.locality ?: address?.subAdminArea
+                        val countryName = address?.countryName
 
                         when {
                             cityName != null -> "$cityName, $countryName"
@@ -203,6 +203,12 @@ private fun LocationAndDateHeader(
 
 @Composable
 private fun CurrentWeatherVisualization(currentWeather: WeatherForecast.Current) {
+    // Cache the first weather condition to avoid multiple get(0) calls and potential crashes
+    val firstWeather = currentWeather.weather?.firstOrNull()
+    val weatherDescription = (firstWeather?.description ?: stringResource(id = R.string.not_available))
+        .formatTextCapitalization()
+    val weatherIconUrl = firstWeather?.icon?.getIconUrl()
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -246,7 +252,7 @@ private fun CurrentWeatherVisualization(currentWeather: WeatherForecast.Current)
                 modifier = Modifier.size(100.dp)
             ) {
                 AsyncImage(
-                    model = currentWeather.weather?.get(0)?.icon?.getIconUrl(),
+                    model = weatherIconUrl,
                     placeholder = painterResource(id = R.drawable.ic_sunny),
                     contentDescription = stringResource(id = R.string.weather_icon_content),
                     modifier = Modifier
@@ -258,8 +264,7 @@ private fun CurrentWeatherVisualization(currentWeather: WeatherForecast.Current)
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = (currentWeather.weather?.get(0)?.description
-                    ?: stringResource(id = R.string.not_available)).formatTextCapitalization(),
+                text = weatherDescription,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground,

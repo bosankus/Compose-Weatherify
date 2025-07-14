@@ -6,7 +6,7 @@
 
 A modern weather application built with Jetpack Compose that provides current weather conditions, forecasts, and air quality information.
 
-[![Download APK](https://img.shields.io/badge/download-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)]( )
++[![Download APK](https://img.shields.io/badge/download-APK-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)](https://github.com/bosankus/Compose-Weatherify/releases/latest)
 
 ## 📱 Features
 

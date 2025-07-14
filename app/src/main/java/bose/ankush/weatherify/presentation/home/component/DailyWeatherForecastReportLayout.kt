@@ -63,7 +63,10 @@ internal fun DailyWeatherForecastItem(list: List<WeatherForecast.Daily?>, item: 
     val dayName = list[item]?.dt?.dayName() ?: stringResource(id = R.string.not_available)
     val minTemperature = "${list[item]?.temp?.min?.toCelsius()}°"
     val maxTemperature = "${list[item]?.temp?.max?.toCelsius()}°"
-    val weatherDescription = list[item]?.weather?.get(0)?.description
+
+    val firstWeather = list[item]?.weather?.firstOrNull()
+    val weatherDescription = firstWeather?.description
+    val weatherIconUrl = firstWeather?.icon?.getIconUrl()
 
     WeatherDayCard(
         dayName = dayName,
@@ -75,7 +78,7 @@ internal fun DailyWeatherForecastItem(list: List<WeatherForecast.Daily?>, item: 
                 modifier = Modifier
                     .padding(4.dp)
                     .size(40.dp),
-                model = list[item]?.weather?.get(0)?.icon?.getIconUrl(),
+                model = weatherIconUrl,
                 placeholder = painterResource(id = R.drawable.ic_sunny),
                 contentDescription = stringResource(id = R.string.weather_icon_content),
             )

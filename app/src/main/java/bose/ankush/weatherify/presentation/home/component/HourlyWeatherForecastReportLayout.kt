@@ -107,8 +107,11 @@ private fun FutureForecastListItem(
                 id = R.string.celsius,
                 item?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
             )
-            val description = (item?.weather?.get(0)?.description ?: stringResource(id = R.string.not_available))
+
+            val firstWeather = item?.weather?.firstOrNull()
+            val description = (firstWeather?.description ?: stringResource(id = R.string.not_available))
                 .wrapText().formatTextCapitalization()
+            val weatherIconUrl = firstWeather?.icon?.getIconUrl()
 
             WeatherHourCard(
                 time = time,
@@ -122,7 +125,7 @@ private fun FutureForecastListItem(
                 iconContent = {
                     AsyncImage(
                         modifier = Modifier.size(40.dp),
-                        model = item?.weather?.get(0)?.icon?.getIconUrl(),
+                        model = weatherIconUrl,
                         error = painterResource(id = R.drawable.ic_sunny),
                         contentDescription = stringResource(id = R.string.weather_icon_content),
                     )
