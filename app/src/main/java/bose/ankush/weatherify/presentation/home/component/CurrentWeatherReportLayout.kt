@@ -374,24 +374,22 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
         )
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .height(120.dp)
         ) {
-            // Combined animation for sunrise and sunset
             SunriseSunsetCombinedAnimation(
                 sunriseTimestamp = weatherData.sunrise?.toLong(),
                 sunsetTimestamp = weatherData.sunset?.toLong(),
-                currentTimestamp = System.currentTimeMillis() / 1000,
+                currentTimestamp = System.currentTimeMillis() / 1000
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Times display
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
