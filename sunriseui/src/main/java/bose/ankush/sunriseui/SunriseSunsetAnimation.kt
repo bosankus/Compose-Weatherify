@@ -1,3 +1,5 @@
+package bose.ankush.sunriseui
+
 /**
  * Dynamic sunrise/sunset landscape animation that responds to real-time data.
  *
@@ -13,8 +15,6 @@
  * @param currentTimestamp Unix timestamp (seconds) for current time
  * @param windDirection Wind direction in degrees (0-360°) for cloud movement. Default 225° (SW)
  */
-
-package bose.ankush.sunriseui
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOutCubic
@@ -78,19 +78,17 @@ fun SunriseSunsetCombinedAnimation(
             return@Box
         }
 
-        val sunrise = sunriseTimestamp
-        val sunset = sunsetTimestamp
         // Calculate the normalized position (0 to 1) based on current time
-        val dayDuration = sunset - sunrise
-        val timeElapsed = currentTimestamp - sunrise
+        val dayDuration = sunsetTimestamp - sunriseTimestamp
+        val timeElapsed = currentTimestamp - sunriseTimestamp
         val normalizedTimePosition = if (dayDuration == 0L) {
             0f // Safe default value if duration is zero
         } else {
             (timeElapsed.toFloat() / dayDuration).coerceIn(0f, 1f)
         }
 
-        val isBeforeSunrise = currentTimestamp < sunrise
-        val isAfterSunset = currentTimestamp > sunset
+        val isBeforeSunrise = currentTimestamp < sunriseTimestamp
+        val isAfterSunset = currentTimestamp > sunsetTimestamp
         val isNight = isBeforeSunrise || isAfterSunset
 
         var initialAnimationPlayed by remember { mutableStateOf(false) }
@@ -109,7 +107,7 @@ fun SunriseSunsetCombinedAnimation(
                 animatedProgress.animateTo(
                     targetValue = targetProgress,
                     animationSpec = tween(
-                        durationMillis = 3000,
+                        durationMillis = SunriseConstants.Durations.INITIAL_ANIMATION,
                         easing = FastOutSlowInEasing
                     )
                 )
@@ -157,16 +155,6 @@ fun SunriseSunsetCombinedAnimation(
         }
 
         val progress = animatedProgress.value
-        val currentWindDirection = windDirection
-        // Replace multiple Box composables with a single Canvas for arc gradient
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(SunriseConstants.Dimensions.ANIMATION_HEIGHT)
-        ) {
-            // Make arc invisible by not drawing it
-            // (No drawPath or drawArc call here)
-        }
 
         val skyGradient = createSoothingSkyGradient(progress, isBeforeSunrise, isAfterSunset)
         Box(
@@ -187,8 +175,6 @@ fun SunriseSunsetCombinedAnimation(
                 .fillMaxWidth()
                 .height(SunriseConstants.Dimensions.ANIMATION_HEIGHT)
         ) {
-            val isMorning =
-                !isBeforeSunrise && !isAfterSunset && progress <= SunriseConstants.TimeThresholds.MORNING_END
             val isDaytime = !isBeforeSunrise && !isAfterSunset
 
             if (isNight) {
@@ -223,7 +209,7 @@ fun SunriseSunsetCombinedAnimation(
                 drawClouds(
                     progress = progress,
                     cloudDriftProgress = cloudDrift.value,
-                    windDirection = currentWindDirection,
+                    windDirection = windDirection,
                     isBeforeSunrise = isBeforeSunrise,
                     isAfterSunset = isAfterSunset
                 )
@@ -285,7 +271,7 @@ private fun createSoothingSkyGradient(
 
         progress >= SunriseConstants.TimeThresholds.DUSK_START -> {
             val transitionFactor =
-                ((progress - SunriseConstants.TimeThresholds.DUSK_START) / SunriseConstants.TimeThresholds.DAWN_END).coerceIn(
+                ((progress - SunriseConstants.TimeThresholds.DUSK_START) / (1f - SunriseConstants.TimeThresholds.DUSK_START)).coerceIn(
                     0f,
                     1f
                 )
@@ -315,7 +301,6 @@ private fun DrawScope.drawStarField(
     twinkleIntensity: Float,
     isBeforeSunrise: Boolean
 ) {
-    val starCount = SunriseConstants.Counts.STAR_COUNT
     val baseOpacity =
         if (isBeforeSunrise) SunriseConstants.Opacity.STAR_BASE_BEFORE_SUNRISE else SunriseConstants.Opacity.STAR_BASE_AFTER_SUNSET
     val starPositions = SunriseConstants.STAR_POSITIONS
@@ -361,21 +346,18 @@ private fun DrawScope.drawMoon(
     val moonY: Float
 
     if (sunriseTimestamp != null && sunsetTimestamp != null) {
-        val sunrise = sunriseTimestamp
-        val sunset = sunsetTimestamp
-
         if (isBeforeSunrise) {
-            val nightDuration = sunrise - (sunset - 24 * 3600)
-            val timeElapsed = currentTimestamp - (sunset - 24 * 3600)
+            val nightDuration = sunriseTimestamp - (sunsetTimestamp - 24 * 3600)
+            val timeElapsed = currentTimestamp - (sunsetTimestamp - 24 * 3600)
             val nightProgress = (timeElapsed.toFloat() / nightDuration).coerceIn(0f, 1f)
             moonX =
                 size.width * (SunriseConstants.Positioning.MOON_START_X - nightProgress * SunriseConstants.Positioning.MOON_TRAVEL_DISTANCE)
             moonY =
                 size.height * (SunriseConstants.Positioning.MOON_Y_VARIATION - (sin(nightProgress * PI).toFloat() * SunriseConstants.Positioning.MOON_Y_AMPLITUDE))
         } else {
-            val nextSunrise = sunrise + 24 * 3600
-            val nightDuration = nextSunrise - sunset
-            val timeElapsed = currentTimestamp - sunset
+            val nextSunrise = sunriseTimestamp + 24 * 3600
+            val nightDuration = nextSunrise - sunsetTimestamp
+            val timeElapsed = currentTimestamp - sunsetTimestamp
             val nightProgress = (timeElapsed.toFloat() / nightDuration).coerceIn(0f, 1f)
             moonX =
                 size.width * (SunriseConstants.Positioning.MOON_END_X + nightProgress * SunriseConstants.Positioning.MOON_TRAVEL_DISTANCE)
@@ -431,10 +413,10 @@ private fun DrawScope.drawSun(
     sunriseTimestamp: Int,
     sunsetTimestamp: Int
 ) {
-    val sunrise = sunriseTimestamp.toLong()
-    val sunset = sunsetTimestamp.toLong()
-    val dayDuration = sunset - sunrise
-    val timeElapsed = currentTimestamp - sunrise
+    val sunriseTimestampLong = sunriseTimestamp.toLong()
+    val sunsetTimestampLong = sunsetTimestamp.toLong()
+    val dayDuration = sunsetTimestampLong - sunriseTimestampLong
+    val timeElapsed = currentTimestamp - sunriseTimestampLong
     val timeProgress = (timeElapsed.toFloat() / dayDuration).coerceIn(0f, 1f)
 
     val sunX =
