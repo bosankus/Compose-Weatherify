@@ -12,13 +12,10 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,10 +23,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import bose.ankush.sunriseui.SunriseSunsetCombinedAnimation
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.presentation.MainViewModel
@@ -55,7 +54,10 @@ fun HomeScreen(
     when {
         !uiState.error?.asString(context).isNullOrEmpty() -> {
             // Screen error handler
-            HandleScreenError(context, uiState.error) { viewModel.fetchAndSaveLocationCoordinates() }
+            HandleScreenError(
+                context,
+                uiState.error
+            ) { viewModel.fetchAndSaveLocationCoordinates() }
         }
 
         uiState.weatherData?.current?.weather?.isNotEmpty() == true ||
@@ -134,90 +136,102 @@ private fun ShowUIContainer(
     }
 
     Box {
-        Scaffold(content = { innerPadding ->
-            LazyColumn(
-                contentPadding = innerPadding, 
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                // Add state key to prevent unnecessary recompositions
-                state = rememberLazyListState()
-            ) {
-                // Show current weather report - prioritize loading this first
-                item(key = "current_weather") {
-                    weatherReports?.current?.let { 
-                        AnimatedVisibility(
-                            visibleState = currentWeatherTransitionState,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                    slideInVertically(
-                                        animationSpec = tween(durationMillis = 500),
-                                        initialOffsetY = { it / 3 }
-                                    ),
-                            exit = fadeOut()
-                        ) {
-                            CurrentWeatherReportLayout(
-                                it, 
-                                uiState.userLocation,
-                                weatherReports.daily?.firstOrNull()?.summary
-                            )
-                        }
-                    }
-                }
-
-                // Show brief air quality report
-                item(key = "air_quality") {
-                    airQualityReports?.let {
-                        AnimatedVisibility(
-                            visibleState = airQualityTransitionState,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                    slideInVertically(
-                                        animationSpec = tween(durationMillis = 500),
-                                        initialOffsetY = { it / 3 }
-                                    ),
-                            exit = fadeOut()
-                        ) {
-                            BriefAirQualityReportCardLayout(airQualityReports, navController)
-                        }
-                    }
-                }
-
-                // Show hourly weather forecast report
-                item(key = "hourly_forecast") {
-                    weatherReports?.hourly?.let { 
-                        AnimatedVisibility(
-                            visibleState = hourlyForecastTransitionState,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                    slideInVertically(
-                                        animationSpec = tween(durationMillis = 500),
-                                        initialOffsetY = { it / 3 }
-                                    ),
-                            exit = fadeOut()
-                        ) {
-                            HourlyWeatherForecastReportLayout(it)
-                        }
-                    }
-                }
-
-                // Show next 8 day's weather forecast report
-                item(key = "daily_forecast") {
-                    weatherReports?.daily?.let { list ->
-                        AnimatedVisibility(
-                            visibleState = dailyForecastTransitionState,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                    slideInVertically(
-                                        animationSpec = tween(durationMillis = 500),
-                                        initialOffsetY = { it / 3 }
-                                    ),
-                            exit = fadeOut()
-                        ) {
-                            DailyWeatherForecastReportLayout(list)
-                        }
-                    }
-                }
-            }
-        }, bottomBar = {
-            AppBottomBar(
-                isVisible = rememberSaveable { mutableStateOf(true) },
-                navController = navController
+        // Add the SunriseSunsetCombinedAnimation as a full-screen background
+        weatherReports?.current?.let { currentWeather ->
+            SunriseSunsetCombinedAnimation(
+                sunriseTimestamp = currentWeather.sunrise?.toLong(),
+                sunsetTimestamp = currentWeather.sunset?.toLong(),
+                currentTimestamp = System.currentTimeMillis() / 1000
             )
-        })
+        }
+
+        Scaffold(
+            containerColor = Color.Transparent, // Make the scaffold background transparent
+            content = { innerPadding ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = innerPadding,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    // Add state key to prevent unnecessary recompositions
+                    state = rememberLazyListState()
+                ) {
+                    // Show current weather report - prioritize loading this first
+                    item(key = "current_weather") {
+                        weatherReports?.current?.let {
+                            AnimatedVisibility(
+                                visibleState = currentWeatherTransitionState,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 500),
+                                            initialOffsetY = { it / 3 }
+                                        ),
+                                exit = fadeOut()
+                            ) {
+                                CurrentWeatherReportLayout(
+                                    it,
+                                    uiState.userLocation,
+                                    weatherReports.daily?.firstOrNull()?.summary
+                                )
+                            }
+                        }
+                    }
+
+                    // Show brief air quality report
+                    item(key = "air_quality") {
+                        airQualityReports?.let {
+                            AnimatedVisibility(
+                                visibleState = airQualityTransitionState,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 500),
+                                            initialOffsetY = { it / 3 }
+                                        ),
+                                exit = fadeOut()
+                            ) {
+                                BriefAirQualityReportCardLayout(airQualityReports, navController)
+                            }
+                        }
+                    }
+
+                    // Show hourly weather forecast report
+                    item(key = "hourly_forecast") {
+                        weatherReports?.hourly?.let {
+                            AnimatedVisibility(
+                                visibleState = hourlyForecastTransitionState,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 500),
+                                            initialOffsetY = { it / 3 }
+                                        ),
+                                exit = fadeOut()
+                            ) {
+                                HourlyWeatherForecastReportLayout(it)
+                            }
+                        }
+                    }
+
+                    // Show next 8 day's weather forecast report
+                    item(key = "daily_forecast") {
+                        weatherReports?.daily?.let { list ->
+                            AnimatedVisibility(
+                                visibleState = dailyForecastTransitionState,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 500),
+                                            initialOffsetY = { it / 3 }
+                                        ),
+                                exit = fadeOut()
+                            ) {
+                                DailyWeatherForecastReportLayout(list)
+                            }
+                        }
+                    }
+                }
+            }, bottomBar = {
+                AppBottomBar(
+                    isVisible = rememberSaveable { mutableStateOf(true) },
+                    navController = navController
+                )
+            })
     }
 }

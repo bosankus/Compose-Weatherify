@@ -24,4 +24,6 @@ include(
     ":language",
     ":network",
     ":storage",
+    ":sunriseui",
+    ":payment",
 )

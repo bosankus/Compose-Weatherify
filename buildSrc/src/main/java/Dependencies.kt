@@ -28,9 +28,6 @@ object Deps {
     val composeUi by lazy { "androidx.compose.ui:ui" }
     val composeUiTooling by lazy { "androidx.compose.ui:ui-tooling" }
     val composeUiToolingPreview by lazy { "androidx.compose.ui:ui-tooling-preview" }
-    // Compose testing
-    val composeUiJunit4 by lazy { "androidx.compose.ui:ui-test-junit4" }
-    val composeUiTestManifest by lazy { "androidx.compose.ui:ui-test-manifest" }
 
     // Unit Testing
     val junit by lazy { "junit:junit:${Versions.junit}" }
@@ -54,11 +51,7 @@ object Deps {
     val espressoContrib by lazy { "androidx.test.espresso:espresso-contrib:${Versions.espresso}" }
 
     // Networking
-    val okHttp3 by lazy { "com.squareup.okhttp3:okhttp:${Versions.okHttp3}" }
-    val retrofit by lazy { "com.squareup.retrofit2:retrofit:${Versions.retrofit}" }
-    val retrofitGson by lazy { "com.squareup.retrofit2:converter-gson:${Versions.retrofit}" }
-    val retrofitCoroutineAdapter by lazy { "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:${Versions.retrofitCoroutineAdapter}" }
-    val okhttpInterceptor by lazy { "com.squareup.okhttp3:logging-interceptor:${Versions.okhttpInterceptor}" }
+    val gson by lazy { "com.google.code.gson:gson:${Versions.gson}" }
 
     // Firebase
     val firebaseBom by lazy { "com.google.firebase:firebase-bom:${Versions.firebaseBom}" }

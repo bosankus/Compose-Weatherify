@@ -10,6 +10,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -41,12 +42,8 @@ fun WeatherifyTheme(
     SideEffect {
         with(systemUiController) {
             // Set both status bar and navigation bar in a single batch update
-            setStatusBarColor(
-                color = colors.surface,
-                darkIcons = !darkTheme
-            )
-            setNavigationBarColor(
-                color = colors.onSurface,
+            setSystemBarsColor(
+                color = Transparent,
                 darkIcons = !darkTheme
             )
             isNavigationBarVisible = false

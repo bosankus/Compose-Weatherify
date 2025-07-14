@@ -42,7 +42,6 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,7 +56,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
@@ -78,7 +76,6 @@ internal fun SettingsScreen(
     onAvatarNavAction: () -> Unit,
 ) {
     val isNotificationBannerVisible = viewModel.showNotificationCardItem.collectAsState().value
-    val tooltipState = remember { RichTooltipState() }
     val scope = rememberCoroutineScope()
     val languageList = LocaleConfigMapper.getAvailableLanguagesFromJson(
         jsonFile = "countryConfig.json",
@@ -95,7 +92,7 @@ internal fun SettingsScreen(
             ScreenHeader(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 30.dp),
+                    .padding(start = 16.dp, end = 16.dp, top = 50.dp),
                 onAvatarNavAction = onAvatarNavAction,
                 scope = scope
             )
@@ -177,12 +174,12 @@ internal fun SettingsScreen(
                                     ),
                                     shape = RoundedCornerShape(8.dp),
                                     onClick = { onNotificationNavAction.invoke() }
-                                ) { 
+                                ) {
                                     Text(
                                         text = "Turn on",
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Medium
-                                    ) 
+                                    )
                                 }
                             }
                         }
@@ -372,7 +369,9 @@ internal fun SettingsScreen(
                                             .width(40.dp)
                                             .height(4.dp)
                                             .background(
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                                color = MaterialTheme.colorScheme.onSurface.copy(
+                                                    alpha = 0.3f
+                                                ),
                                                 shape = RoundedCornerShape(2.dp)
                                             )
                                     )
@@ -563,18 +562,18 @@ fun ScreenHeader(
 
             RichTooltipBox(
                 tooltipState = tooltipState,
-                title = { 
+                title = {
                     Text(
                         text = "Hi Maa,",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
-                    ) 
+                    )
                 },
-                text = { 
+                text = {
                     Text(
                         text = "Baba sends you love, kisses and hug ❤\uFE0F",
                         style = MaterialTheme.typography.bodyMedium
-                    ) 
+                    )
                 },
                 action = {
                     Text(
