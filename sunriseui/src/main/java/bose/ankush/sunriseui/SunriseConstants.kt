@@ -56,43 +56,44 @@ object SunriseConstants {
 
     /** Color schemes for different time periods and visual elements. */
     object Colors {
-        // Night colors
+        // Night colors - Deep blue to dark blue-black
         val NIGHT_GRADIENT = listOf(
-            Color(0xFF0F0F23).copy(alpha = 0.4f),
-            Color(0xFF1A1A2E).copy(alpha = 0.5f),
-            Color(0xFF16213E).copy(alpha = 0.6f),
-            Color(0xFF0F3460).copy(alpha = 0.7f)
+            Color(0xFF000011).copy(alpha = 0.9f),  // Almost black with slight blue tint
+            Color(0xFF0A1035).copy(alpha = 0.8f),  // Very dark blue
+            Color(0xFF0F1A4A).copy(alpha = 0.7f),  // Dark blue
+            Color(0xFF162554).copy(alpha = 0.6f)   // Medium-dark blue
         )
 
-        // Dawn colors
+        // Dawn colors - Dark blue to purple, pink, orange, yellow
         val DAWN_GRADIENT = listOf(
-            Color(0xFF2D1B69).copy(alpha = 0.3f),
-            Color(0xFF5B2C6F).copy(alpha = 0.4f),
-            Color(0xFF8B5A3C).copy(alpha = 0.5f),
-            Color(0xFFD4A574).copy(alpha = 0.6f)
+            Color(0xFF0A1035).copy(alpha = 0.8f),  // Very dark blue
+            Color(0xFF341C5D).copy(alpha = 0.7f),  // Deep purple
+            Color(0xFF9A3A6A).copy(alpha = 0.6f),  // Pink-purple
+            Color(0xFFE67E45).copy(alpha = 0.5f)   // Orange
         )
 
-        // Day colors
+        // Day colors - Deep blue to lighter blue
         val DAY_GRADIENT = listOf(
-            Color(0xFF87CEEB).copy(alpha = 0.3f),
-            Color(0xFFA8D8EA).copy(alpha = 0.4f),
-            Color(0xFFB8E6B8).copy(alpha = 0.5f),
-            Color(0xFFE8F4F8).copy(alpha = 0.6f)
+            Color(0xFF0E4C92).copy(alpha = 0.7f),  // Deep blue
+            Color(0xFF1A75FF).copy(alpha = 0.6f),  // Medium blue
+            Color(0xFF5D9EFF).copy(alpha = 0.5f),  // Light blue
+            Color(0xFF87CEEB).copy(alpha = 0.4f)   // Sky blue
         )
 
-        // Dusk colors
+        // Dusk colors - Dark blue to purple, pink, orange, red
         val DUSK_GRADIENT = listOf(
-            Color(0xFF4A148C).copy(alpha = 0.3f),
-            Color(0xFF7B1FA2).copy(alpha = 0.4f),
-            Color(0xFFAD1457).copy(alpha = 0.5f),
-            Color(0xFFE91E63).copy(alpha = 0.6f)
+            Color(0xFF0A1035).copy(alpha = 0.8f),  // Very dark blue
+            Color(0xFF341C5D).copy(alpha = 0.7f),  // Deep purple
+            Color(0xFF9A3A6A).copy(alpha = 0.6f),  // Pink-purple
+            Color(0xFFE05038).copy(alpha = 0.5f)   // Orange-red
         )
 
-        // Default fallback colors
+        // Default fallback colors - Realistic daytime sky
         val DEFAULT_GRADIENT = listOf(
-            Color(0xFF87CEEB).copy(alpha = 0.3f),
-            Color(0xFFB8E6B8).copy(alpha = 0.4f),
-            Color(0xFFFFE5B4).copy(alpha = 0.5f)
+            Color(0xFF0E4C92).copy(alpha = 0.7f),  // Deep blue
+            Color(0xFF1A75FF).copy(alpha = 0.6f),  // Medium blue
+            Color(0xFF5D9EFF).copy(alpha = 0.5f),  // Light blue
+            Color(0xFF87CEEB).copy(alpha = 0.4f)   // Sky blue
         )
 
         // Celestial body colors
@@ -100,17 +101,17 @@ object SunriseConstants {
         val MOON_PHASE_COLOR = Color(0xFF0F0F23)
         val STAR_COLOR = Color.White
 
-        // Cloud colors
-        val CLOUD_DAY_COLOR = Color(0xFFFFFFFF)
-        val CLOUD_DAWN_COLOR = Color(0xFFFFF8DC)
-        val CLOUD_DUSK_COLOR = Color(0xFFFFB6C1)
+        // Cloud colors - Adjusted to match realistic sky gradients
+        val CLOUD_DAY_COLOR = Color(0xFFFFFFFF)  // Pure white for daytime
+        val CLOUD_DAWN_COLOR = Color(0xFFFAE3C6)  // Warm cream/peach for sunrise
+        val CLOUD_DUSK_COLOR = Color(0xFFFFB8A0)  // Soft orange-pink for sunset
 
-        // Sun colors by time
-        val SUN_EARLY_MORNING = Color(0xFFFF8C42)
-        val SUN_MORNING = Color(0xFFFFB347)
-        val SUN_MIDDAY = Color(0xFFFFC107)
-        val SUN_EVENING = Color(0xFFFFB347)
-        val SUN_LATE_EVENING = Color(0xFFFF8C42)
+        // Sun colors by time - Enhanced for realistic appearance
+        val SUN_EARLY_MORNING = Color(0xFFFF7E45)  // Warm orange-red for early morning
+        val SUN_MORNING = Color(0xFFFFAA33)  // Golden orange for morning
+        val SUN_MIDDAY = Color(0xFFFFD700)  // Bright gold for midday
+        val SUN_EVENING = Color(0xFFFFAA33)  // Golden orange for evening
+        val SUN_LATE_EVENING = Color(0xFFFF7E45)  // Warm orange-red for late evening
     }
 
     /** Spatial positioning and movement parameters (normalized 0.0-1.0). */
@@ -137,7 +138,6 @@ object SunriseConstants {
     object TimeThresholds {
         const val DAWN_END = 0.2f
         const val DUSK_START = 0.8f
-        const val MORNING_END = 0.3f
         const val SUN_MORNING_END = 0.1f
         const val SUN_MIDMORNING_END = 0.2f
         const val SUN_EVENING_START = 0.8f

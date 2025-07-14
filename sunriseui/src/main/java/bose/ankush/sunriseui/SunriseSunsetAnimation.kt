@@ -10,10 +10,6 @@ package bose.ankush.sunriseui
  * - Wind-driven cloud animation during daytime
  * - Atmospheric glow effects around celestial bodies
  *
- * @param sunriseTimestamp Unix timestamp (seconds) for sunrise. Null shows fallback gradient
- * @param sunsetTimestamp Unix timestamp (seconds) for sunset. Null shows fallback gradient
- * @param currentTimestamp Unix timestamp (seconds) for current time
- * @param windDirection Wind direction in degrees (0-360°) for cloud movement. Default 225° (SW)
  */
 
 import androidx.compose.animation.core.Animatable
@@ -179,13 +175,11 @@ fun SunriseSunsetCombinedAnimation(
 
             if (isNight) {
                 drawStarField(
-                    progress = progress,
                     twinkleIntensity = starTwinkle.value,
                     isBeforeSunrise = isBeforeSunrise
                 )
 
                 drawMoon(
-                    progress = progress,
                     isBeforeSunrise = isBeforeSunrise,
                     atmosphericIntensity = atmosphericGlow.value,
                     currentTimestamp = currentTimestamp,
@@ -199,8 +193,8 @@ fun SunriseSunsetCombinedAnimation(
                     progress = progress,
                     atmosphericIntensity = atmosphericGlow.value,
                     currentTimestamp = currentTimestamp,
-                    sunriseTimestamp = sunriseTimestamp.toInt(),
-                    sunsetTimestamp = sunsetTimestamp.toInt()
+                    sunriseTimestamp = sunriseTimestamp,
+                    sunsetTimestamp = sunsetTimestamp
                 )
             }
 
@@ -210,8 +204,6 @@ fun SunriseSunsetCombinedAnimation(
                     progress = progress,
                     cloudDriftProgress = cloudDrift.value,
                     windDirection = windDirection,
-                    isBeforeSunrise = isBeforeSunrise,
-                    isAfterSunset = isAfterSunset
                 )
             }
         }
@@ -292,12 +284,10 @@ private fun createSoothingSkyGradient(
 
 /**
  * Renders twinkling stars across the night sky with varying opacity and size.
- * @param progress Normalized time progress (unused)
  * @param twinkleIntensity Animation value (0.0-1.0) controlling twinkle effect
  * @param isBeforeSunrise True if before sunrise, affects star opacity
  */
 private fun DrawScope.drawStarField(
-    progress: Float,
     twinkleIntensity: Float,
     isBeforeSunrise: Boolean
 ) {
@@ -327,7 +317,6 @@ private fun DrawScope.drawStarField(
 
 /**
  * Renders animated moon that travels across the night sky in an arc pattern.
- * @param progress Normalized time progress (unused)
  * @param isBeforeSunrise True if before sunrise, affects moon trajectory
  * @param atmosphericIntensity Animation value (0.0-1.0) for glow effect
  * @param currentTimestamp Current Unix timestamp in seconds
@@ -335,7 +324,6 @@ private fun DrawScope.drawStarField(
  * @param sunsetTimestamp Sunset timestamp, null for fallback positioning
  */
 private fun DrawScope.drawMoon(
-    progress: Float,
     isBeforeSunrise: Boolean,
     atmosphericIntensity: Float,
     currentTimestamp: Long,
@@ -403,20 +391,18 @@ private fun DrawScope.drawMoon(
  * @param progress Normalized time progress (unused)
  * @param atmosphericIntensity Animation value (0.0-1.0) for glow effect
  * @param currentTimestamp Current Unix timestamp in seconds
- * @param sunriseTimestamp Sunrise timestamp (as Int)
- * @param sunsetTimestamp Sunset timestamp (as Int)
+ * @param sunriseTimestamp Sunrise timestamp (as Long)
+ * @param sunsetTimestamp Sunset timestamp (as Long)
  */
 private fun DrawScope.drawSun(
     progress: Float,
     atmosphericIntensity: Float,
     currentTimestamp: Long,
-    sunriseTimestamp: Int,
-    sunsetTimestamp: Int
+    sunriseTimestamp: Long,
+    sunsetTimestamp: Long
 ) {
-    val sunriseTimestampLong = sunriseTimestamp.toLong()
-    val sunsetTimestampLong = sunsetTimestamp.toLong()
-    val dayDuration = sunsetTimestampLong - sunriseTimestampLong
-    val timeElapsed = currentTimestamp - sunriseTimestampLong
+    val dayDuration = sunsetTimestamp - sunriseTimestamp
+    val timeElapsed = currentTimestamp - sunriseTimestamp
     val timeProgress = (timeElapsed.toFloat() / dayDuration).coerceIn(0f, 1f)
 
     val sunX =
@@ -476,15 +462,11 @@ private fun DrawScope.drawSun(
  * @param progress Normalized time progress for color determination
  * @param cloudDriftProgress Animation value (0.0-1.0) controlling cloud movement
  * @param windDirection Wind direction in degrees (0-360°) affecting movement
- * @param isBeforeSunrise True if before sunrise (unused)
- * @param isAfterSunset True if after sunset (unused)
  */
 private fun DrawScope.drawClouds(
     progress: Float,
     cloudDriftProgress: Float,
     windDirection: Float,
-    isBeforeSunrise: Boolean,
-    isAfterSunset: Boolean
 ) {
     val cloudCount = SunriseConstants.Counts.CLOUD_COUNT
     val cloudColor = when {
