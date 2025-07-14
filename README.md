@@ -22,34 +22,82 @@ A modern weather application built with Jetpack Compose that provides current we
 
 The app follows Clean Architecture principles with MVVM pattern:
 
-```mermaid
-flowchart TD
-    A[Presentation Layer] -->|ViewModel calls Use Cases| B[Domain Layer]
-    B -->|Use Cases call Repository| C[Data Layer]
-    C -->|Repository calls API/Storage| D[External Data Sources]
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style C fill:#bfb,stroke:#333,stroke-width:2px
-    style D fill:#fbb,stroke:#333,stroke-width:2px
+```
+┌─────────────────────────┐
+│                         │
+│    Presentation Layer   │
+│                         │
+└───────────┬─────────────┘
+            │
+            │ ViewModel calls Use Cases
+            ▼
+┌─────────────────────────┐
+│                         │
+│      Domain Layer       │
+│                         │
+└───────────┬─────────────┘
+            │
+            │ Use Cases call Repository
+            ▼
+┌─────────────────────────┐
+│                         │
+│       Data Layer        │
+│                         │
+└───────────┬─────────────┘
+            │
+            │ Repository calls API/Storage
+            ▼
+┌─────────────────────────┐
+│                         │
+│   External Data Sources │
+│                         │
+└─────────────────────────┘
 ```
 
 ### Data Flow
 
-```mermaid
-flowchart LR
-    A[OpenWeather API] -->|Data| B[Repository]
-    E[Local DB] <-->|Cache| B
-    B -->|Domain Models| C[Use Cases]
-    C -->|View States| D[ViewModel]
-    D -->|UI Events| F[Compose UI]
-
-    style A fill:#f9d,stroke:#333,stroke-width:2px
-    style B fill:#adf,stroke:#333,stroke-width:2px
-    style C fill:#bfb,stroke:#333,stroke-width:2px
-    style D fill:#fdb,stroke:#333,stroke-width:2px
-    style E fill:#dcf,stroke:#333,stroke-width:2px
-    style F fill:#fbb,stroke:#333,stroke-width:2px
+```
+┌───────────────┐     API Data     ┌───────────────┐     Network     ┌───────────────┐
+│               │────────────────> │               │────────────────>│               │
+│ Androidplay   │                  │ Network       │                 │ Network       │
+│ API           │                  │ Module        │                 │ Repository    │
+└───────────────┘                  └───────────────┘                 └───────┬───────┘
+                                                                             │
+                                                                             │ Network Models
+                                                                             │
+                                                                             ▼
+┌───────────────┐     Cache      ┌───────────────┐     Entities     ┌───────────────┐
+│               │◄──────────────>│               │<────────────────>│               │
+│ Local DB      │                │ Storage       │                  │ Repository    │
+│               │                │ Module        │                  │               │
+└───────────────┘                └───────────────┘                  └───────┬───────┘
+                                                                            │
+                                                                            │ Domain Models
+                                                                            │
+                                                                            ▼
+                                                                    ┌───────────────┐
+                                                                    │               │
+                                                                    │ Use Cases     │
+                                                                    │               │
+                                                                    └───────┬───────┘
+                                                                            │
+                                                                            │ View States
+                                                                            │
+                                                                            ▼
+                                                                    ┌───────────────┐
+                                                                    │               │
+                                                                    │ ViewModel     │
+                                                                    │               │
+                                                                    └───────┬───────┘
+                                                                            │
+                                                                            │ UI Events
+                                                                            │
+                                                                            ▼
+                                                                    ┌───────────────┐
+                                                                    │               │
+                                                                    │ Compose UI    │
+                                                                    │               │
+                                                                    └───────────────┘
 ```
 
 ## 🚀 Recent Updates
