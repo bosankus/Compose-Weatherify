@@ -432,9 +432,6 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
     }
 }
 
-
-// Create SimpleDateFormat instances to be reused
-private val timeFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())
 private val hourMinuteFormatter = SimpleDateFormat("h:mm", Locale.getDefault())
 
 @Composable
