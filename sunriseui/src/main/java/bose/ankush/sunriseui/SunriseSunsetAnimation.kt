@@ -21,8 +21,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,16 +50,13 @@ fun SunriseSunsetCombinedAnimation(
     windDirection: Float = 225f
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(SunriseConstants.Dimensions.ANIMATION_HEIGHT),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         if (sunriseTimestamp == null || sunsetTimestamp == null) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(SunriseConstants.Dimensions.ANIMATION_HEIGHT)
+                    .fillMaxSize()
                     .background(
                         brush = Brush.verticalGradient(
                             colors = SunriseConstants.Colors.DEFAULT_GRADIENT
@@ -155,8 +151,7 @@ fun SunriseSunsetCombinedAnimation(
         val skyGradient = createSoothingSkyGradient(progress, isBeforeSunrise, isAfterSunset)
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(SunriseConstants.Dimensions.ANIMATION_HEIGHT)
+                .fillMaxSize()
                 .background(
                     brush = if (isNight) Brush.verticalGradient(colors = SunriseConstants.Colors.NIGHT_GRADIENT) else skyGradient,
                     shape = RoundedCornerShape(
@@ -168,8 +163,7 @@ fun SunriseSunsetCombinedAnimation(
 
         Canvas(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(SunriseConstants.Dimensions.ANIMATION_HEIGHT)
+                .fillMaxSize()
         ) {
             val isDaytime = !isBeforeSunrise && !isAfterSunset
 

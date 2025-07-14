@@ -36,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import bose.ankush.sunriseui.SunriseSunsetCombinedAnimation
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils
 import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
@@ -374,73 +373,60 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
             containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
         )
     ) {
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            SunriseSunsetCombinedAnimation(
-                sunriseTimestamp = weatherData.sunrise?.toLong(),
-                sunsetTimestamp = weatherData.sunset?.toLong(),
-                currentTimestamp = System.currentTimeMillis() / 1000
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // Sunrise
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
             ) {
-                // Sunrise
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Sunrise",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-
-                    Text(
-                        text = formatTimeWithAmPm(
-                            weatherData.sunrise,
-                            true
-                        ), // Force AM for sunrise
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-
-                // Divider
-                Box(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .width(1.dp)
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+                Text(
+                    text = "Sunrise",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
 
-                // Sunset
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Sunset",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+                Text(
+                    text = formatTimeWithAmPm(
+                        weatherData.sunrise,
+                        true
+                    ), // Force AM for sunrise
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
 
-                    Text(
-                        text = formatTimeWithAmPm(weatherData.sunset, false), // Force PM for sunset
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+            // Divider
+            Box(
+                modifier = Modifier
+                    .height(40.dp)
+                    .width(1.dp)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            )
+
+            // Sunset
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Sunset",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+
+                Text(
+                    text = formatTimeWithAmPm(weatherData.sunset, false), // Force PM for sunset
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }
@@ -450,17 +436,6 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
 // Create SimpleDateFormat instances to be reused
 private val timeFormatter = SimpleDateFormat("h:mm a", Locale.getDefault())
 private val hourMinuteFormatter = SimpleDateFormat("h:mm", Locale.getDefault())
-
-@Composable
-private fun formatTime(timestamp: Int?): String {
-    if (timestamp == null) return "N/A"
-
-    // Use remember to cache the formatted time based on the timestamp
-    return remember(timestamp) {
-        val date = Date(timestamp.toLong() * 1000)
-        timeFormatter.format(date)
-    }
-}
 
 @Composable
 private fun formatTimeWithAmPm(timestamp: Int?, isSunrise: Boolean): String {
