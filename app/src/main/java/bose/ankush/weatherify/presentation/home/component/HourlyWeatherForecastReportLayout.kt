@@ -1,14 +1,11 @@
 package bose.ankush.weatherify.presentation.home.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,13 +22,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import bose.ankush.sunriseui.WeatherHourCard
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.toFormattedTime
 import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
@@ -40,7 +34,6 @@ import bose.ankush.weatherify.base.common.Extension.toCelsius
 import bose.ankush.weatherify.base.common.Extension.wrapText
 import bose.ankush.weatherify.domain.model.WeatherForecast
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 
 @Composable
 internal fun HourlyWeatherForecastReportLayout(
@@ -96,10 +89,6 @@ private fun FutureForecastListItem(
         weatherForecast.take(24) // Show only 24 hours
     }
 
-    // Pre-calculate background colors to avoid recalculation during composition
-    val selectedBackground = MaterialTheme.colorScheme.primaryContainer
-    val unselectedBackground = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -113,62 +102,32 @@ private fun FutureForecastListItem(
             val index = limitedForecast.indexOf(item)
             val isSelected = selectedItem == index
 
-            Box(
-                modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable {
-                        selectedItem = index
-                        onItemClick(index)
-                    }
-                    .background(if (isSelected) selectedBackground else unselectedBackground)
-                    .padding(horizontal = 10.dp, vertical = 20.dp)
-            ) {
-                Column(
-                    modifier = Modifier.width(IntrinsicSize.Max),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    // Time
-                    Text(
-                        text = item?.dt?.toFormattedTime() ?: stringResource(id = R.string.not_available),
-                        style = MaterialTheme.typography.bodySmall,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.alpha(0.6f),
-                    )
+            val time = item?.dt?.toFormattedTime() ?: stringResource(id = R.string.not_available)
+            val temperature = stringResource(
+                id = R.string.celsius,
+                item?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
+            )
+            val description = (item?.weather?.get(0)?.description ?: stringResource(id = R.string.not_available))
+                .wrapText().formatTextCapitalization()
 
-                    // Weather icon
+            WeatherHourCard(
+                time = time,
+                temperature = temperature,
+                weatherDescription = description,
+                isSelected = isSelected,
+                onClick = {
+                    selectedItem = index
+                    onItemClick(index)
+                },
+                iconContent = {
                     AsyncImage(
+                        modifier = Modifier.size(40.dp),
                         model = item?.weather?.get(0)?.icon?.getIconUrl(),
                         error = painterResource(id = R.drawable.ic_sunny),
                         contentDescription = stringResource(id = R.string.weather_icon_content),
                     )
-
-                    // Temperature
-                    Text(
-                        text = stringResource(
-                            id = R.string.celsius,
-                            item?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )
-
-                    // Weather description
-                    Text(
-                        text = (item?.weather?.get(0)?.description ?: stringResource(id = R.string.not_available))
-                            .wrapText().formatTextCapitalization(),
-                        style = MaterialTheme.typography.bodySmall,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.alpha(0.6f),
-                        textAlign = TextAlign.Center
-                    )
                 }
-            }
+            )
         }
     }
 }
