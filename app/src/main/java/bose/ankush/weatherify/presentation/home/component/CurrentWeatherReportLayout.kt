@@ -382,10 +382,9 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
         ) {
             // Combined animation for sunrise and sunset
             SunriseSunsetCombinedAnimation(
-                sunriseTimestamp = weatherData.sunrise,
-                sunsetTimestamp = weatherData.sunset,
+                sunriseTimestamp = weatherData.sunrise?.toLong(),
+                sunsetTimestamp = weatherData.sunset?.toLong(),
                 currentTimestamp = System.currentTimeMillis() / 1000,
-                sunIcon = painterResource(id = R.drawable.ic_sunny)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
