@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui
+package bose.ankush.sunriseui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

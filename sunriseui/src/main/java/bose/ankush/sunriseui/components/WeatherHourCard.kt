@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui
+package bose.ankush.sunriseui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

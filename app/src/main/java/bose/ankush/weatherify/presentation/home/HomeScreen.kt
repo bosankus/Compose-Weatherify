@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import bose.ankush.sunriseui.SunriseSunsetCombinedAnimation
+import bose.ankush.sunriseui.components.SunriseSunsetCombinedAnimation
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.presentation.MainViewModel

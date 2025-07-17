@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import bose.ankush.sunriseui.WeatherHourCard
+import bose.ankush.sunriseui.components.WeatherHourCard
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.toFormattedTime
 import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
@@ -85,7 +85,7 @@ private fun FutureForecastListItem(
     var selectedItem by remember { mutableStateOf(0) }
 
     // Limit the number of items to display for better performance
-    val limitedForecast = remember(weatherForecast) { 
+    val limitedForecast = remember(weatherForecast) {
         weatherForecast.take(24) // Show only 24 hours
     }
 
@@ -109,8 +109,9 @@ private fun FutureForecastListItem(
             )
 
             val firstWeather = item?.weather?.firstOrNull()
-            val description = (firstWeather?.description ?: stringResource(id = R.string.not_available))
-                .wrapText().formatTextCapitalization()
+            val description =
+                (firstWeather?.description ?: stringResource(id = R.string.not_available))
+                    .wrapText().formatTextCapitalization()
             val weatherIconUrl = firstWeather?.icon?.getIconUrl()
 
             WeatherHourCard(
