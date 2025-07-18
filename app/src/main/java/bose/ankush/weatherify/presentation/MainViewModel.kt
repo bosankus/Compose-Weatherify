@@ -71,12 +71,6 @@ class MainViewModel @Inject constructor(
      */
     val uiState = _uiState.asStateFlow()
 
-    private val _launchPhoneCallPermission = MutableStateFlow(false)
-    /**
-     * Flag indicating whether the phone call permission dialog should be shown.
-     */
-    val launchPhoneCallPermission = _launchPhoneCallPermission.asStateFlow()
-
     private val _launchNotificationPermission = MutableStateFlow(false)
     /**
      * Flag indicating whether the notification permission dialog should be shown.
@@ -131,15 +125,6 @@ class MainViewModel @Inject constructor(
         } else {
             fetchAndSaveLocationCoordinates()
         }
-    }
-
-    /**
-     * Updates the state of the phone call permission dialog.
-     *
-     * @param launchState True to show the permission dialog, false to hide it
-     */
-    fun updatePhoneCallPermission(launchState: Boolean) {
-        _launchPhoneCallPermission.update { launchState }
     }
 
     /**

@@ -6,7 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,8 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.RichTooltipBox
-import androidx.compose.material3.RichTooltipState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,11 +46,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -62,9 +56,7 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,11 +64,10 @@ internal fun SettingsScreen(
     viewModel: MainViewModel,
     navController: NavController,
     onLanguageNavAction: (Array<String>) -> Unit,
-    onNotificationNavAction: () -> Unit,
-    onAvatarNavAction: () -> Unit,
+    onNotificationNavAction: () -> Unit
 ) {
     val isNotificationBannerVisible = viewModel.showNotificationCardItem.collectAsState().value
-    val scope = rememberCoroutineScope()
+    rememberCoroutineScope()
     val languageList = LocaleConfigMapper.getAvailableLanguagesFromJson(
         jsonFile = "countryConfig.json",
         context = LocalContext.current
@@ -92,9 +83,7 @@ internal fun SettingsScreen(
             ScreenHeader(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 50.dp),
-                onAvatarNavAction = onAvatarNavAction,
-                scope = scope
+                    .padding(start = 16.dp, end = 16.dp, top = 50.dp)
             )
         },
         content = { innerPadding ->
@@ -514,12 +503,7 @@ private fun SimplePremiumFeature(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScreenHeader(
-    modifier: Modifier = Modifier,
-    onAvatarNavAction: () -> Unit,
-    scope: CoroutineScope,
-) {
-    val tooltipState = remember { RichTooltipState() }
+fun ScreenHeader(modifier: Modifier = Modifier) {
 
     // Create a transition state for the animation
     val headerTransitionState = remember { MutableTransitionState(false) }
@@ -558,55 +542,6 @@ fun ScreenHeader(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     modifier = Modifier.padding(top = 4.dp)
                 )
-            }
-
-            RichTooltipBox(
-                tooltipState = tooltipState,
-                title = {
-                    Text(
-                        text = "Hi Maa,",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                text = {
-                    Text(
-                        text = "Baba sends you love, kisses and hug ❤\uFE0F",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                action = {
-                    Text(
-                        text = "Call him",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .padding(top = 8.dp, bottom = 8.dp, end = 16.dp)
-                            .clickable {
-                                scope.launch {
-                                    tooltipState.dismiss()
-                                    onAvatarNavAction.invoke()
-                                }
-                            }
-                    )
-                }
-            ) {
-                Surface(
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .shadow(elevation = 4.dp, shape = CircleShape)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.zobo),
-                        contentDescription = "Profile avatar",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(CircleShape)
-                            .clickable { scope.launch { tooltipState.show() } }
-                    )
-                }
             }
         }
     }

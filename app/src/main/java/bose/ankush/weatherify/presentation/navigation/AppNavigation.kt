@@ -12,13 +12,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import bose.ankush.language.presentation.LanguageScreen
-import bose.ankush.weatherify.base.common.Extension.callNumber
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
 import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
-import bose.ankush.weatherify.presentation.home.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.home.HomeScreen
 import bose.ankush.weatherify.presentation.settings.SettingsScreen
 
@@ -76,38 +74,6 @@ fun AppNavigation(viewModel: MainViewModel) {
             ) {
                 CitiesListScreen(navController = navController)
             }
-            composable(
-                route = Screen.AirQualityDetailsScreen.route,
-                enterTransition = {
-                    slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(500)
-                    )
-                },
-                popEnterTransition = {
-                    slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(500)
-                    )
-                },
-                exitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(500)
-                    )
-                },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(500)
-                    )
-                }
-            ) {
-                AirQualityDetailsScreen(
-                    viewModel = viewModel,
-                    navController = navController
-                )
-            }
         }
 
         /*Account/Profile Screens*/
@@ -131,11 +97,6 @@ fun AppNavigation(viewModel: MainViewModel) {
                     onNotificationNavAction = {
                         if (!context.hasNotificationPermission()) {
                             viewModel.updateNotificationPermission(launchState = true)
-                        }
-                    },
-                    onAvatarNavAction = {
-                        if (!context.callNumber()) {
-                            viewModel.updatePhoneCallPermission(launchState = true)
                         }
                     }
                 )

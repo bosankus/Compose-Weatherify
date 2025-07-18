@@ -8,7 +8,6 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import kotlin.math.roundToInt
 
 /**Created by
@@ -46,13 +45,6 @@ object Extension {
         ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun Context.hasPhoneCallPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this,
-            ACCESS_PHONE_CALL
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
     fun Context.hasNotificationPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             this,
@@ -67,13 +59,5 @@ object Extension {
         } else {
             this
         }
-    }
-
-    fun Context.callNumber(): Boolean = hasPhoneCallPermission().also { hasPermission ->
-        if (hasPermission) startActivity(
-            Intent(Intent.ACTION_CALL).apply {
-                data = PHONE_NUMBER.toUri()
-            }
-        )
     }
 }

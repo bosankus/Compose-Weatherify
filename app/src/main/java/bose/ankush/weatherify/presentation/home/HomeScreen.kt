@@ -188,7 +188,7 @@ private fun ShowUIContainer(
                                         ),
                                 exit = fadeOut()
                             ) {
-                                BriefAirQualityReportCardLayout(airQualityReports, navController)
+                                BriefAirQualityReportCardLayout(airQualityReports)
                             }
                         }
                     }

@@ -9,7 +9,6 @@ sealed class Screen(val route: String, @StringRes val resourceId: Int) {
     data object HomeNestedNav : Screen("home_nav", R.string.home_nested_nav)
     data object HomeScreen : Screen("home_screen", R.string.home_screen)
     data object CitiesListScreen : Screen("city_list_screen", R.string.city_screen)
-    data object AirQualityDetailsScreen : Screen("air_quality_details_screen", R.string.aq_screen)
 
     /*Account/Profile Screens*/
     data object ProfileNestedNav : Screen("profile_nav", R.string.profile_nested_nav)

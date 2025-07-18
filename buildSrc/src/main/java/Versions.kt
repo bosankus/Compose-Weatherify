@@ -2,11 +2,10 @@
 object Versions {
 
     // Kotlin
-    const val kotlin = "2.0.20"
-    const val kotlinCompiler = "1.9"
+    const val kotlin = "2.1.21"
 
     // Compose
-    const val composeBom = "2023.08.00"
+    const val composeBom = "2025.05.01"
 
     // Plugins
     const val buildGradle = "8.11.1"
@@ -54,8 +53,8 @@ object Versions {
     const val coroutines = "1.6.4"
 
     // Dependency Injection
-    const val hilt = "2.52"
-    const val hiltCompose = "1.0.0"
+    const val hilt = "2.56.2"
+    const val hiltCompose = "1.2.0"
 
     // Miscellaneous
     const val timber = "5.0.1"

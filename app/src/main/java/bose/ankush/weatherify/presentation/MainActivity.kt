@@ -9,7 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -21,9 +20,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
-import bose.ankush.weatherify.base.common.ACCESS_PHONE_CALL
-import bose.ankush.weatherify.base.common.Extension.callNumber
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
@@ -58,8 +56,6 @@ class MainActivity : AppCompatActivity() {
         setContent {
             WeatherifyTheme {
                 val context: Context = LocalContext.current
-                val launchPhoneCallPermissionState =
-                    viewModel.launchPhoneCallPermission.collectAsState()
                 val launchNotificationPermissionState =
                     viewModel.launchNotificationPermission.collectAsState()
                 if (locationClient.hasLocationPermission()) {
@@ -68,10 +64,6 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     // request location permission
                     RequestLocationPermission(context)
-                }
-                if (launchPhoneCallPermissionState.value) {
-                    // request phone call permission
-                    RequestPhoneCallPermission(context)
                 }
                 if (launchNotificationPermissionState.value) {
                     // request notification permission
@@ -107,7 +99,8 @@ class MainActivity : AppCompatActivity() {
         val permissionQueue = viewModel.permissionDialogQueue
 
         val locationPermissionsResultLauncher =
-            rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestMultiplePermissions(),
+            rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestMultiplePermissions(),
                 onResult = { permissionMap ->
                     PERMISSIONS_TO_REQUEST.forEach { permission ->
                         viewModel.onPermissionResult(
@@ -118,11 +111,12 @@ class MainActivity : AppCompatActivity() {
                 })
 
         permissionQueue.reversed().forEach { permission ->
-            PermissionAlertDialog(permissionTextProvider = when (permission) {
-                Manifest.permission.ACCESS_FINE_LOCATION -> FineLocationPermissionTextProvider()
-                Manifest.permission.ACCESS_COARSE_LOCATION -> CoarseLocationPermissionTextProvider()
-                else -> return@forEach
-            },
+            PermissionAlertDialog(
+                permissionTextProvider = when (permission) {
+                    Manifest.permission.ACCESS_FINE_LOCATION -> FineLocationPermissionTextProvider()
+                    Manifest.permission.ACCESS_COARSE_LOCATION -> CoarseLocationPermissionTextProvider()
+                    else -> return@forEach
+                },
                 isPermanentlyDeclined = shouldShowRequestPermissionRationale(permission),
                 onDismissClick = viewModel::dismissDialog,
                 onOkClick = {
@@ -138,24 +132,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun RequestPhoneCallPermission(context: Context) {
-        val phoneCallPermissionResultLauncher =
-            rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission(),
-                onResult = { isGranted ->
-                    // TODO: Hardcoded task to call phone number as it is triggered from 1 place [AppNavigation]
-                    if (isGranted) context.callNumber()
-                }
-            )
-
-        LaunchedEffect(key1 = Unit) {
-            phoneCallPermissionResultLauncher.launch(ACCESS_PHONE_CALL)
-        }
-    }
-
-    @Composable
     fun RequestNotificationPermission(context: Context) {
         val notificationPermissionResultLauncher =
-            rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission(),
+            rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission(),
                 onResult = { isGranted ->
                     if (isGranted) {
                         Toast.makeText(
