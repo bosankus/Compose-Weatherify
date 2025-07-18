@@ -1,8 +1,5 @@
 package bose.ankush.storage.impl
 
-import bose.ankush.network.model.AirQuality as NetworkAirQuality
-import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
-import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.room.AirQualityEntity
 import bose.ankush.storage.room.Weather
@@ -13,6 +10,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import bose.ankush.network.model.AirQuality as NetworkAirQuality
+import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
+import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 
 /**
  * Implementation of WeatherStorage that uses Room database for storage
@@ -169,7 +169,7 @@ class WeatherStorageImpl @Inject constructor(
                 }
             },
             hourly = weatherData.hourly?.map { hourly ->
-                hourly?.let {
+                hourly?.let { it ->
                     WeatherEntity.Hourly(
                         clouds = it.clouds,
                         dt = it.dt,

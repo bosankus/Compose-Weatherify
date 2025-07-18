@@ -76,8 +76,8 @@ data class WeatherEntity(
 }
 
 data class Weather(
-    val description: String,
-    val icon: String,
+    val description: String? = null,
+    val icon: String? = null,
     val id: Int,
-    val main: String
+    val main: String? = null
 )

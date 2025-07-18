@@ -1,9 +1,9 @@
 package bose.ankush.weatherify.data.mapper
 
-import bose.ankush.storage.room.Weather as StorageWeather
-import bose.ankush.storage.room.WeatherEntity as StorageWeatherEntity
 import bose.ankush.weatherify.domain.model.WeatherCondition
 import bose.ankush.weatherify.domain.model.WeatherForecast
+import bose.ankush.storage.room.Weather as StorageWeather
+import bose.ankush.storage.room.WeatherEntity as StorageWeatherEntity
 
 /**
  * Mapper class to convert between WeatherEntity (data layer) and WeatherForecast (domain layer)
@@ -15,10 +15,10 @@ object WeatherMapper {
      */
     private fun mapStorageWeatherToDomain(weather: StorageWeather): WeatherCondition {
         return WeatherCondition(
-            description = weather.description,
-            icon = weather.icon,
+            description = weather.description ?: "",
+            icon = weather.icon ?: "",
             id = weather.id,
-            main = weather.main
+            main = weather.main ?: ""
         )
     }
 

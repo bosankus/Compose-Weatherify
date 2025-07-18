@@ -74,8 +74,8 @@ data class WeatherForecast(
  * Domain model for weather condition
  */
 data class WeatherCondition(
-    val description: String,
-    val icon: String,
+    val description: String = "",
+    val icon: String = "",
     val id: Int,
-    val main: String
+    val main: String = ""
 )
