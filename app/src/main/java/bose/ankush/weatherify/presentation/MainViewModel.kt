@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.base.common.UiText
+import bose.ankush.weatherify.base.common.errorResponseFromException
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.base.location.LocationClient
 import bose.ankush.weatherify.domain.preference.PreferenceManager
@@ -89,7 +90,13 @@ class MainViewModel @Inject constructor(
      */
     private val dataFetchExceptionHandler = CoroutineExceptionHandler { _, e ->
         if (e !is CancellationException) {
-            _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
+            // Cast Throwable to Exception if possible, otherwise use a generic error message
+            val error = if (e is Exception) {
+                errorResponseFromException(e)
+            } else {
+                UiText.StringResource(resId = R.string.general_error_txt)
+            }
+            _uiState.update { UIState(error = error) }
         }
     }
 
@@ -159,7 +166,7 @@ class MainViewModel @Inject constructor(
                 throw e // Rethrow cancellation exceptions
             } catch (e: Exception) {
                 Timber.tag(tag).e(e, "Error updating notification banner state")
-                _uiState.update { it.copy(error = UiText.DynamicText(e.message.toString())) }
+                _uiState.update { it.copy(error = errorResponseFromException(e)) }
             }
         }
     }
@@ -184,14 +191,19 @@ class MainViewModel @Inject constructor(
                         performInitialDataLoading()
                     },
                     onFailure = { e ->
-                        _uiState.update { UIState(error = UiText.DynamicText(e.message.toString())) }
+                        val error = if (e is Exception) {
+                            errorResponseFromException(e)
+                        } else {
+                            UiText.StringResource(resId = R.string.general_error_txt)
+                        }
+                        _uiState.update { UIState(error = error) }
                     }
                 )
             } catch (e: CancellationException) {
                 throw e // Rethrow cancellation exceptions
             } catch (e: Exception) {
                 Timber.tag(tag).e(e, "Error fetching location coordinates")
-                _uiState.update { it.copy(error = UiText.DynamicText(e.message.toString())) }
+                _uiState.update { it.copy(error = errorResponseFromException(e)) }
             }
         }
     }
@@ -244,10 +256,15 @@ class MainViewModel @Inject constructor(
                         .catch { e ->
                             if (e is CancellationException) throw e
                             Timber.tag(tag).e(e, "Error loading weather data")
+                            val error = if (e is Exception) {
+                                errorResponseFromException(e)
+                            } else {
+                                UiText.StringResource(resId = R.string.general_error_txt)
+                            }
                             _uiState.update { 
                                 it.copy(
                                     isLoading = false,
-                                    error = UiText.DynamicText(e.message.toString())
+                                    error = error
                                 ) 
                             }
                         }
@@ -269,7 +286,7 @@ class MainViewModel @Inject constructor(
                 _uiState.update { 
                     it.copy(
                         isLoading = false,
-                        error = UiText.DynamicText(e.message.toString())
+                        error = errorResponseFromException(e)
                     ) 
                 }
             }

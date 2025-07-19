@@ -1,5 +1,6 @@
 package bose.ankush.network.utils
 
+import bose.ankush.network.common.NetworkException
 import kotlinx.coroutines.delay
 
 /**
@@ -13,7 +14,7 @@ object NetworkUtils {
      * @param maxDelayMillis Maximum delay in milliseconds
      * @param block The suspend function to retry
      * @return The result of the suspend function
-     * @throws Exception if all retries fail
+     * @throws NetworkException if all retries fail
      */
     suspend fun <T> retryWithExponentialBackoff(
         maxRetries: Int = NetworkConstants.MAX_RETRIES,
@@ -22,12 +23,22 @@ object NetworkUtils {
         block: suspend () -> T
     ): T {
         var currentDelay = initialDelayMillis
+        var lastException: Exception? = null
+
         repeat(maxRetries) { attempt ->
             try {
                 return block()
             } catch (e: Exception) {
-                // If this is the last attempt, throw the exception
-                if (attempt == maxRetries - 1) throw e
+                lastException = e
+
+                // If this is the last attempt, convert to NetworkException and throw
+                if (attempt == maxRetries - 1) {
+                    if (e is NetworkException) {
+                        throw e
+                    } else {
+                        throw NetworkException.fromException(e)
+                    }
+                }
 
                 // Otherwise, delay and retry
                 delay(currentDelay)
@@ -36,6 +47,10 @@ object NetworkUtils {
             }
         }
         // This should never be reached, but is needed for compilation
-        throw IllegalStateException("Retry failed after $maxRetries attempts")
+        throw NetworkException(
+            NetworkException.UNKNOWN_ERROR,
+            "Retry failed after $maxRetries attempts",
+            lastException
+        )
     }
 }

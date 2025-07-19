@@ -89,13 +89,32 @@ fun HandleScreenError(
     errorText: UiText?,
     onErrorAction: () -> Unit
 ) {
+    // State to track if retry operation is in progress
+    val (isRetrying, setRetrying) = remember { mutableStateOf(false) }
+
+    // Reset loading state after a delay to give visual feedback
+    // In a real app, this would be reset when the operation completes
+    LaunchedEffect(isRetrying) {
+        if (isRetrying) {
+            delay(2000) // Show loading for at least 2 seconds for better UX
+            setRetrying(false)
+        }
+    }
+
     ShowError(
         modifier = Modifier
             .fillMaxSize()
             .padding(all = 16.dp),
         msg = errorText?.asString(context),
         buttonText = stringResource(id = R.string.retry_btn_txt),
-        buttonAction = onErrorAction
+        isLoading = isRetrying,
+        buttonAction = {
+            // Set loading state to true when retry is clicked
+            setRetrying(true)
+
+            // Call the original action
+            onErrorAction()
+        }
     )
 }
 

@@ -34,6 +34,8 @@
     <string name="city_error_txt">העיר לא נמצאה!</string>
     <string name="server_error_txt">מתמודד עם בעיה בשרת</string>
     <string name="no_internet_txt">האם תוכל לבדוק מחדש את חיבור האינטרנט!</string>
+    <string name="network_unavailable_txt">האם תוכל לבדוק מחדש את חיבור האינטרנט!</string>
+    <string name="network_timeout_txt">פג הזמן הקצוב לבקשה. אנא נסה שוב מאוחר יותר.</string>
     <string name="general_error_txt">אופס!..משהו השתבש.</string>
     <string name="default_coordinates_txt">קואורדינטות המיקום עדיין לא עודכנו.</string>
     <string name="empty_city_list_error_txt">גישה לא מורשית!</string>
