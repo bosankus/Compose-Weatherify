@@ -91,25 +91,18 @@ class WeatherStorageImpl @Inject constructor(
      * @return A WeatherEntity with all fields mapped from the network model
      */
     private fun mapNetworkWeatherToEntity(weatherData: NetworkWeatherForecast): WeatherEntity {
+        // Access the data field which contains all the weather information
+        val data = weatherData.data
+
         return WeatherEntity(
             id = 0, // Room will auto-generate this
             lastUpdated = System.currentTimeMillis(),
-            alerts = weatherData.alerts?.map { alert ->
-                alert?.let {
-                    WeatherEntity.Alert(
-                        description = it.description,
-                        end = it.end,
-                        event = it.event,
-                        sender_name = it.sender_name,
-                        start = it.start
-                    )
-                }
-            },
-            current = weatherData.current?.let { current ->
+            // Since data might be null, we need to handle that case
+            current = data?.current?.let { current ->
                 WeatherEntity.Current(
                     clouds = current.clouds,
-                    dt = current.dt,
-                    feels_like = current.feels_like,
+                    dt = current.dt?.toLong(),
+                    feels_like = current.feelsLike,
                     humidity = current.humidity,
                     pressure = current.pressure,
                     sunrise = current.sunrise,
@@ -121,21 +114,21 @@ class WeatherStorageImpl @Inject constructor(
                             Weather(
                                 description = it.description,
                                 icon = it.icon,
-                                id = it.id,
+                                id = it.id ?: 0,
                                 main = it.main
                             )
                         }
                     },
-                    wind_gust = current.wind_gust,
-                    wind_speed = current.wind_speed
+                    wind_gust = current.windGust,
+                    wind_speed = current.windSpeed
                 )
             },
-            daily = weatherData.daily?.map { daily ->
+            daily = data?.daily?.map { daily ->
                 daily?.let {
                     WeatherEntity.Daily(
                         clouds = it.clouds,
-                        dew_point = it.dew_point,
-                        dt = it.dt,
+                        dew_point = it.dewPoint,
+                        dt = it.dt?.toLong(),
                         humidity = it.humidity,
                         pressure = it.pressure,
                         rain = it.rain,
@@ -158,22 +151,22 @@ class WeatherStorageImpl @Inject constructor(
                                 Weather(
                                     description = it.description,
                                     icon = it.icon,
-                                    id = it.id,
+                                    id = it.id ?: 0,
                                     main = it.main
                                 )
                             }
                         },
-                        wind_gust = it.wind_gust,
-                        wind_speed = it.wind_speed
+                        wind_gust = it.windGust,
+                        wind_speed = it.windSpeed
                     )
                 }
             },
-            hourly = weatherData.hourly?.map { hourly ->
+            hourly = data?.hourly?.map { hourly ->
                 hourly?.let { it ->
                     WeatherEntity.Hourly(
                         clouds = it.clouds,
-                        dt = it.dt,
-                        feels_like = it.feels_like,
+                        dt = it.dt?.toLong(),
+                        feels_like = it.feelsLike,
                         humidity = it.humidity,
                         temp = it.temp,
                         weather = it.weather?.map { weatherCondition ->
@@ -181,14 +174,16 @@ class WeatherStorageImpl @Inject constructor(
                                 Weather(
                                     description = it.description,
                                     icon = it.icon,
-                                    id = it.id,
+                                    id = it.id ?: 0,
                                     main = it.main
                                 )
                             }
                         }
                     )
                 }
-            }
+            },
+            // We don't have alerts in the new model structure, so set it to null
+            alerts = null
         )
     }
 

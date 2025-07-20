@@ -1,11 +1,11 @@
 package bose.ankush.network.repository
 
 import bose.ankush.network.api.WeatherApiService
-import bose.ankush.network.utils.NetworkConstants
 import bose.ankush.network.common.NetworkConnectivity
-import bose.ankush.network.utils.NetworkUtils
 import bose.ankush.network.model.AirQuality
 import bose.ankush.network.model.WeatherForecast
+import bose.ankush.network.utils.NetworkConstants
+import bose.ankush.network.utils.NetworkUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -62,11 +62,11 @@ class WeatherRepositoryImpl(
 
         // Initialize with a default AirQuality if null
         if (_airQualityData.value == null) {
-            _airQualityData.value = AirQuality()
+            _airQualityData.value = AirQuality(data = null, message = null, status = null)
         }
 
         // Map the nullable flow to a non-nullable flow
-        return _airQualityData.map { it ?: AirQuality() }
+        return _airQualityData.map { it ?: AirQuality(data = null, message = null, status = null) }
     }
 
     override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherForecast?> {
@@ -124,7 +124,7 @@ class WeatherRepositoryImpl(
                     val airQualityData = airQualityDeferred.await()
 
                     // Update the weather data flow
-                    _weatherData.value = weatherData.copy(lastUpdated = currentTime)
+                    _weatherData.value = weatherData
                     lastWeatherUpdateTime = currentTime
 
                     // Update the air quality data flow

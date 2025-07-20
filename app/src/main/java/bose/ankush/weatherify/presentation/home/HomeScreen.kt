@@ -37,6 +37,7 @@ import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportC
 import bose.ankush.weatherify.presentation.home.component.CurrentWeatherReportLayout
 import bose.ankush.weatherify.presentation.home.component.DailyWeatherForecastReportLayout
 import bose.ankush.weatherify.presentation.home.component.HourlyWeatherForecastReportLayout
+import bose.ankush.weatherify.presentation.home.state.ErrorBackgroundAnimation
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
@@ -101,21 +102,27 @@ fun HandleScreenError(
         }
     }
 
-    ShowError(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(all = 16.dp),
-        msg = errorText?.asString(context),
-        buttonText = stringResource(id = R.string.retry_btn_txt),
-        isLoading = isRetrying,
-        buttonAction = {
-            // Set loading state to true when retry is clicked
-            setRetrying(true)
+    // Add a background animation that's appropriate for error state
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Create a subtle animated background
+        ErrorBackgroundAnimation()
 
-            // Call the original action
-            onErrorAction()
-        }
-    )
+        ShowError(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(all = 16.dp),
+            msg = errorText?.asString(context),
+            buttonText = stringResource(id = R.string.retry_btn_txt),
+            isLoading = isRetrying,
+            buttonAction = {
+                // Set loading state to true when retry is clicked
+                setRetrying(true)
+
+                // Call the original action
+                onErrorAction()
+            }
+        )
+    }
 }
 
 @Composable

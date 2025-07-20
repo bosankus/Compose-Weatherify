@@ -19,7 +19,7 @@ class KtorWeatherApiService(
         latitude: String,
         longitude: String
     ): AirQuality {
-        return httpClient.get("$baseUrl/get-air-pollution") {
+        return httpClient.get("$baseUrl/air-pollution") {
             parameter("lat", latitude)
             parameter("lon", longitude)
         }.body()
@@ -29,7 +29,7 @@ class KtorWeatherApiService(
         latitude: String,
         longitude: String
     ): WeatherForecast {
-        return httpClient.get("$baseUrl/get-weather") {
+        return httpClient.get("$baseUrl/weather") {
             parameter("lat", latitude)
             parameter("lon", longitude)
         }.body()

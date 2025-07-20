@@ -1,10 +1,12 @@
 package bose.ankush.weatherify.presentation.home.state
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,6 +25,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
+
+/**
+ * Creates a simple background for the error screen
+ */
+@Composable
+fun ErrorBackgroundAnimation() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    )
+}
 
 /**
  * Displays an error message with a retry button
@@ -48,30 +62,37 @@ fun ShowError(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(horizontal = 24.dp)
         ) {
+            // Error icon
             Icon(
                 painter = painterResource(id = R.drawable.ic_error),
                 contentDescription = stringResource(id = R.string.error_icon_content),
-                modifier = Modifier.size(36.dp),
+                modifier = Modifier.size(32.dp),
                 tint = MaterialTheme.colorScheme.error
             )
+
+            Spacer(modifier = Modifier.padding(top = 16.dp))
+
+            // Main error message
             Text(
                 text = msg ?: stringResource(id = R.string.general_error_txt),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 16.dp)
+                overflow = TextOverflow.Ellipsis
             )
+
+            Spacer(modifier = Modifier.padding(top = 8.dp))
+
+            // Retry button
             Button(
                 onClick = buttonAction,
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
-                modifier = Modifier.padding(top = 16.dp),
-                elevation = ButtonDefaults.buttonElevation(
-                    disabledElevation = 0.dp,
-                    defaultElevation = 30.dp,
-                    pressedElevation = 10.dp
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
                 ),
+                modifier = Modifier.padding(top = 16.dp),
                 enabled = !isLoading
             ) {
                 if (isLoading) {
@@ -84,10 +105,10 @@ fun ShowError(
                             strokeWidth = 2.dp
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = buttonText, color = MaterialTheme.colorScheme.onError)
+                        Text(text = buttonText)
                     }
                 } else {
-                    Text(text = buttonText, color = MaterialTheme.colorScheme.onError)
+                    Text(text = buttonText)
                 }
             }
         }
