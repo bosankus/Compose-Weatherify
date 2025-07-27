@@ -15,6 +15,8 @@ data class WeatherForecast(
 ) {
     @Serializable
     data class Data(
+        @SerialName("alerts")
+        val alerts: List<Alert?>?,
         @SerialName("current")
         val current: Current?,
         @SerialName("daily")
@@ -22,6 +24,27 @@ data class WeatherForecast(
         @SerialName("hourly")
         val hourly: List<Hourly?>?
     ) {
+        @Serializable
+        data class WeatherInfo(
+            @SerialName("description")
+            val description: String = "",
+            @SerialName("icon")
+            val icon: String = "",
+            @SerialName("id")
+            val id: Int = 0,
+            @SerialName("main")
+            val main: String = ""
+        )
+
+        @Serializable
+        data class Alert(
+            val description: String?,
+            val end: Int?,
+            val event: String?,
+            @SerialName("sender_name") val senderName: String?,
+            val start: Int?,
+        )
+
         @Serializable
         data class Current(
             @SerialName("clouds")
@@ -43,24 +66,12 @@ data class WeatherForecast(
             @SerialName("uvi")
             val uvi: Double?,
             @SerialName("weather")
-            val weather: List<Weather?>?,
+            val weather: List<WeatherInfo?>?,
             @SerialName("wind_gust")
             val windGust: Double?,
             @SerialName("wind_speed")
             val windSpeed: Double?
-        ) {
-            @Serializable
-            data class Weather(
-                @SerialName("description")
-                val description: String?,
-                @SerialName("icon")
-                val icon: String?,
-                @SerialName("id")
-                val id: Int?,
-                @SerialName("main")
-                val main: String?
-            )
-        }
+        )
 
         @Serializable
         data class Daily(
@@ -87,7 +98,7 @@ data class WeatherForecast(
             @SerialName("uvi")
             val uvi: Double?,
             @SerialName("weather")
-            val weather: List<Weather?>?,
+            val weather: List<WeatherInfo?>?,
             @SerialName("wind_gust")
             val windGust: Double?,
             @SerialName("wind_speed")
@@ -108,18 +119,6 @@ data class WeatherForecast(
                 @SerialName("night")
                 val night: Double?
             )
-
-            @Serializable
-            data class Weather(
-                @SerialName("description")
-                val description: String?,
-                @SerialName("icon")
-                val icon: String?,
-                @SerialName("id")
-                val id: Int?,
-                @SerialName("main")
-                val main: String?
-            )
         }
 
         @Serializable
@@ -135,19 +134,7 @@ data class WeatherForecast(
             @SerialName("temp")
             val temp: Double?,
             @SerialName("weather")
-            val weather: List<Weather?>?
-        ) {
-            @Serializable
-            data class Weather(
-                @SerialName("description")
-                val description: String?,
-                @SerialName("icon")
-                val icon: String?,
-                @SerialName("id")
-                val id: Int?,
-                @SerialName("main")
-                val main: String?
-            )
-        }
+            val weather: List<WeatherInfo?>?
+        )
     }
 }

@@ -37,6 +37,7 @@ import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportC
 import bose.ankush.weatherify.presentation.home.component.CurrentWeatherReportLayout
 import bose.ankush.weatherify.presentation.home.component.DailyWeatherForecastReportLayout
 import bose.ankush.weatherify.presentation.home.component.HourlyWeatherForecastReportLayout
+import bose.ankush.weatherify.presentation.home.component.WeatherAlertLayout
 import bose.ankush.weatherify.presentation.home.state.ErrorBackgroundAnimation
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
@@ -135,6 +136,7 @@ private fun ShowUIContainer(
 
     // Create transition states for animations
     val currentWeatherTransitionState = remember { MutableTransitionState(false) }
+    val alertsTransitionState = remember { MutableTransitionState(false) }
     val airQualityTransitionState = remember { MutableTransitionState(false) }
     val hourlyForecastTransitionState = remember { MutableTransitionState(false) }
     val dailyForecastTransitionState = remember { MutableTransitionState(false) }
@@ -143,6 +145,7 @@ private fun ShowUIContainer(
     LaunchedEffect(weatherReports, airQualityReports) {
         // Reset states first
         currentWeatherTransitionState.targetState = false
+        alertsTransitionState.targetState = false
         airQualityTransitionState.targetState = false
         hourlyForecastTransitionState.targetState = false
         dailyForecastTransitionState.targetState = false
@@ -151,13 +154,16 @@ private fun ShowUIContainer(
         delay(100) // Small initial delay
         currentWeatherTransitionState.targetState = true
 
-        delay(200) // Delay for air quality
+        delay(150) // Delay for alerts (prioritize showing alerts early)
+        alertsTransitionState.targetState = true
+
+        delay(150) // Delay for air quality
         airQualityTransitionState.targetState = true
 
-        delay(300) // Delay for hourly forecast
+        delay(150) // Delay for hourly forecast
         hourlyForecastTransitionState.targetState = true
 
-        delay(400) // Delay for daily forecast
+        delay(150) // Delay for daily forecast
         dailyForecastTransitionState.targetState = true
     }
 
@@ -197,6 +203,28 @@ private fun ShowUIContainer(
                                     it,
                                     uiState.userLocation,
                                     weatherReports.daily?.firstOrNull()?.summary
+                                )
+                            }
+                        }
+                    }
+
+                    // Show weather alerts if available
+                    item(key = "weather_alerts") {
+                        weatherReports?.alerts?.let { alerts ->
+                            AnimatedVisibility(
+                                visibleState = alertsTransitionState,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 500),
+                                            initialOffsetY = { it / 3 }
+                                        ),
+                                exit = fadeOut()
+                            ) {
+                                WeatherAlertLayout(
+                                    alerts = alerts,
+                                    onReadMoreClick = {
+                                        // Optional: Add analytics logging or navigation here
+                                    }
                                 )
                             }
                         }
