@@ -11,6 +11,7 @@ dependencies {
     implementation(Deps.composeUiToolingPreview)
     debugImplementation(Deps.composeUiTooling)
     implementation(Deps.coroutinesCore)
+    // Removed Lottie dependency as per requirements
 
     testImplementation(Deps.junit)
     androidTestImplementation(Deps.extJunit)

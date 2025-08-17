@@ -16,7 +16,7 @@ data class WeatherForecast(
     @Serializable
     data class Data(
         @SerialName("alerts")
-        val alerts: List<Alert?>?,
+        val alerts: List<Alert?>? = null,
         @SerialName("current")
         val current: Current?,
         @SerialName("daily")

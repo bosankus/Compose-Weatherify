@@ -1,8 +1,11 @@
 package bose.ankush.weatherify.di
 
 import android.content.Context
+import bose.ankush.network.auth.repository.AuthRepository
+import bose.ankush.network.auth.storage.TokenStorage
 import bose.ankush.network.common.AndroidNetworkConnectivity
 import bose.ankush.network.common.NetworkConnectivity
+import bose.ankush.network.di.createAuthRepository
 import bose.ankush.network.di.createWeatherRepository
 import bose.ankush.network.repository.WeatherRepository
 import dagger.Module
@@ -32,12 +35,25 @@ object NetworkModule {
 
     /**
      * Provides WeatherRepository implementation from the network module
+     * Uses TokenStorage for JWT authentication in API requests
      */
     @Provides
     @Singleton
     fun provideWeatherRepository(
-        networkConnectivity: NetworkConnectivity
+        networkConnectivity: NetworkConnectivity,
+        tokenStorage: TokenStorage
     ): WeatherRepository {
-        return createWeatherRepository(networkConnectivity)
+        return createWeatherRepository(networkConnectivity, tokenStorage)
+    }
+
+    /**
+     * Provides AuthRepository implementation from the network module
+     */
+    @Provides
+    @Singleton
+    fun provideAuthRepository(
+        tokenStorage: TokenStorage
+    ): AuthRepository {
+        return createAuthRepository(tokenStorage)
     }
 }

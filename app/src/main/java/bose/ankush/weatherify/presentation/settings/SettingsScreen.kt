@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,6 +35,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -54,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.LocaleConfigMapper
+import bose.ankush.weatherify.presentation.AuthState
 import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
 import kotlinx.coroutines.delay
@@ -76,6 +79,22 @@ internal fun SettingsScreen(
     // State for Premium bottom sheet
     val showPremiumBottomSheet = remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
+
+    // Logout dialog state
+    val showLogoutDialog = remember { mutableStateOf(false) }
+
+    // Observe auth state to reflect logout loading/success
+    val authState = viewModel.authState.collectAsState().value
+    val isLoggingOut = authState is AuthState.LogoutLoading
+
+    // Close dialog on successful logout (token cleared -> MainActivity shows Login)
+    LaunchedEffect(authState) {
+        if (authState is AuthState.LoggedOut) {
+            showLogoutDialog.value = false
+            // Reset to avoid lingering LoggedOut state
+            viewModel.resetAuthState()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -372,6 +391,108 @@ internal fun SettingsScreen(
                             )
                         }
                     }
+                }
+
+                // Logout block
+                // Create a transition state for the animation
+                val logoutTransitionState = remember { MutableTransitionState(false) }
+                LaunchedEffect(Unit) {
+                    delay(400)
+                    logoutTransitionState.targetState = true
+                }
+
+                AnimatedVisibility(
+                    visibleState = logoutTransitionState,
+                    enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                            slideInVertically(
+                                animationSpec = tween(durationMillis = 500),
+                                initialOffsetY = { it / 2 }
+                            ),
+                    exit = fadeOut()
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                            .clickable { showLogoutDialog.value = true },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(all = 20.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(16.dp)
+                                            .clip(CircleShape)
+                                            .background(MaterialTheme.colorScheme.error)
+                                    )
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Text(
+                                        text = "Logout",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Text(
+                                    modifier = Modifier.padding(start = 24.dp),
+                                    text = "Sign out from this device.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                )
+                            }
+
+                            Surface(
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.error.copy(alpha = 0.15f),
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.KeyboardArrowRight,
+                                    contentDescription = "Logout",
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (showLogoutDialog.value) {
+                    AlertDialog(
+                        onDismissRequest = { if (!isLoggingOut) showLogoutDialog.value = false },
+                        title = { Text(text = "Logout") },
+                        text = { Text(text = "Are you sure you want to logout?") },
+                        confirmButton = {
+                            TextButton(onClick = { viewModel.logout() }, enabled = !isLoggingOut) {
+                                Text("Confirm")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showLogoutDialog.value = false },
+                                enabled = !isLoggingOut
+                            ) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
                 }
             }
         },

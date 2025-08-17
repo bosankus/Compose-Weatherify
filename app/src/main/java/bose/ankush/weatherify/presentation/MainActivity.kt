@@ -13,17 +13,23 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import bose.ankush.sunriseui.auth.LoginScreen
+import bose.ankush.sunriseui.components.rememberGlassmorphicSnackbarState
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
+import bose.ankush.weatherify.base.common.Extension.openUrlInBrowser
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
 import bose.ankush.weatherify.base.location.LocationClient
@@ -56,39 +62,118 @@ class MainActivity : AppCompatActivity() {
         setContent {
             WeatherifyTheme {
                 val context: Context = LocalContext.current
-                val launchNotificationPermissionState =
-                    viewModel.launchNotificationPermission.collectAsState()
-                if (locationClient.hasLocationPermission()) {
-                    // if permission granted already then fetch and save location coordinates
-                    viewModel.fetchAndSaveLocationCoordinates()
-                } else {
-                    // request location permission
-                    RequestLocationPermission(context)
-                }
-                if (launchNotificationPermissionState.value) {
-                    // request notification permission
-                    RequestNotificationPermission(context)
-                }
+                val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+                val authState by viewModel.authState.collectAsState()
+                val isAuthInitialized by viewModel.isAuthInitialized.collectAsState()
 
-                /**
-                 * For Settings screen:
-                 * notification item should be invisible if notification permission is already granted.
-                 */
-                LaunchedEffect(key1 = launchNotificationPermissionState) {
-                    if (!context.hasNotificationPermission()) {
-                        viewModel.updateShowNotificationBannerState(true)
-                    } else {
-                        viewModel.updateShowNotificationBannerState(false)
+                // Create a state for the glassmorphic snackbar
+                val (showSnackbar, snackbarContent) = rememberGlassmorphicSnackbarState()
+
+                // Handle authentication state changes
+                LaunchedEffect(authState) {
+                    when (authState) {
+                        is AuthState.Error -> {
+                            // Show error message in glassmorphic snackbar
+                            val errorMessage =
+                                (authState as AuthState.Error).message.asString(this@MainActivity)
+                            showSnackbar(errorMessage)
+
+                            // Reset auth state after showing error
+                            viewModel.resetAuthState()
+                        }
+
+                        is AuthState.Success -> {
+                            // Show success message in glassmorphic snackbar
+                            showSnackbar("Authentication successful")
+
+                            // Reset auth state after successful authentication
+                            // The isLoggedIn state will be updated automatically by the authRepository
+                            viewModel.resetAuthState()
+                        }
+
+                        else -> {
+                            // Do nothing for other states
+                        }
                     }
                 }
 
-                // main container holding all app composable screens
+                // Main content box that contains everything
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
                 ) {
-                    AppNavigation(viewModel)
+                    when {
+                        !isAuthInitialized -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        isLoggedIn -> {
+                            // User is logged in, show main app content
+                            val launchNotificationPermissionState =
+                                viewModel.launchNotificationPermission.collectAsState()
+                            if (locationClient.hasLocationPermission()) {
+                                // if permission granted already then fetch and save location coordinates
+                                viewModel.fetchAndSaveLocationCoordinates()
+                            } else {
+                                // request location permission
+                                RequestLocationPermission(context)
+                            }
+                            if (launchNotificationPermissionState.value) {
+                                // request notification permission
+                                RequestNotificationPermission(context)
+                            }
+
+                            /**
+                             * For Settings screen:
+                             * notification item should be invisible if notification permission is already granted.
+                             */
+                            LaunchedEffect(key1 = launchNotificationPermissionState) {
+                                if (!context.hasNotificationPermission()) {
+                                    viewModel.updateShowNotificationBannerState(true)
+                                } else {
+                                    viewModel.updateShowNotificationBannerState(false)
+                                }
+                            }
+
+                            // main container holding all app composable screens
+                            AppNavigation(viewModel)
+                        }
+
+                        else -> {
+                            // User is not logged in, show login screen
+                            LoginScreen(
+                                onLoginClick = { email, password ->
+                                    viewModel.login(email, password)
+                                },
+                                onRegisterClick = { email, password ->
+                                    viewModel.register(email, password)
+                                },
+                                onTermsClick = {
+                                    // Open terms and conditions in the default browser
+                                    context.openUrlInBrowser("https://data.androidplay.in/wfy/terms-and-conditions")
+                                },
+                                onPrivacyPolicyClick = {
+                                    // Open privacy policy in the default browser
+                                    context.openUrlInBrowser("https://data.androidplay.in/wfy/privacy-policy")
+                                },
+                                isLoading = authState is AuthState.Loading
+                            )
+                        }
+                    }
+
+                    // Overlay the glassmorphic snackbar on top of all content
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        snackbarContent()
+                    }
                 }
             }
         }

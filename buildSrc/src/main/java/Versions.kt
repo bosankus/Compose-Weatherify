@@ -13,7 +13,11 @@ object Versions {
     const val secretPlugin = "2.0.1"
     const val benManes = "0.52.0"
     const val spotlessVersion = "6.25.0"
-    const val ktLintVersion = "13.0.0"
+
+    // KtLint versions: separate plugin and CLI to avoid resolution confusion
+    const val ktLintGradlePlugin = "12.1.1"
+    const val ktLintCli = "1.3.1"
+    const val detekt = "1.23.6"
     const val googleServices = "4.3.15"
 
     // Testing

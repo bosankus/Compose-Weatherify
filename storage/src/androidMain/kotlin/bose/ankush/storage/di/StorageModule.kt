@@ -2,13 +2,14 @@ package bose.ankush.storage.di
 
 import android.content.Context
 import androidx.room.Room
-import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
+import bose.ankush.network.auth.storage.TokenStorage
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.common.WEATHER_DATABASE_NAME
+import bose.ankush.storage.impl.TokenStorageImpl
 import bose.ankush.storage.impl.WeatherStorageImpl
 import bose.ankush.storage.room.JsonParser
-import bose.ankush.storage.room.WeatherDatabase
 import bose.ankush.storage.room.WeatherDataModelConverters
+import bose.ankush.storage.room.WeatherDatabase
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -16,6 +17,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -58,5 +60,13 @@ object StorageModule {
         weatherDatabase: WeatherDatabase
     ): WeatherStorage {
         return WeatherStorageImpl(networkRepository, weatherDatabase)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTokenStorage(
+        weatherDatabase: WeatherDatabase
+    ): TokenStorage {
+        return TokenStorageImpl(weatherDatabase)
     }
 }

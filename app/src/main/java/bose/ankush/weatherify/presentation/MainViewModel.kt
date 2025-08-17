@@ -3,8 +3,11 @@ package bose.ankush.weatherify.presentation
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.network.auth.model.AuthResponse
+import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
+import bose.ankush.weatherify.base.common.Extension
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.base.common.errorResponseFromException
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
@@ -19,8 +22,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
@@ -56,7 +61,8 @@ class MainViewModel @Inject constructor(
     private val locationClient: LocationClient,
     private val preferenceManager: PreferenceManager,
     private val dispatchers: DispatcherProvider,
-    private val remoteConfigService: RemoteConfigService
+    private val remoteConfigService: RemoteConfigService,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     /**
@@ -83,6 +89,44 @@ class MainViewModel @Inject constructor(
      * Flag indicating whether the notification card should be shown in the UI.
      */
     val showNotificationCardItem = _showNotificationCardItem.asStateFlow()
+
+    // Authentication state
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
+
+    /**
+     * The current authentication state.
+     */
+    val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    // Login status
+    private val _isLoggedIn = MutableStateFlow(false)
+
+    /**
+     * Flag indicating whether the user is logged in.
+     */
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
+
+    // Authentication initialization flag to avoid UI flicker on app start
+    private val _isAuthInitialized = MutableStateFlow(false)
+
+    /**
+     * True when the initial authentication check has completed.
+     */
+    val isAuthInitialized: StateFlow<Boolean> = _isAuthInitialized.asStateFlow()
+
+    init {
+        // Check if user is already logged in and mark auth initialization after first emission
+        viewModelScope.launch {
+            var hasInitialized = false
+            authRepository.isLoggedIn().collectLatest { isLoggedIn ->
+                _isLoggedIn.value = isLoggedIn
+                if (!hasInitialized) {
+                    _isAuthInitialized.value = true
+                    hasInitialized = true
+                }
+            }
+        }
+    }
 
     /**
      * Exception handler for data fetching operations.
@@ -294,6 +338,106 @@ class MainViewModel @Inject constructor(
     }
 
     /**
+     * Login with email and password
+     * @param email User's email
+     * @param password User's password
+     */
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val response = authRepository.login(email, password)
+                handleAuthResponse(response)
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "Login failed"))
+            }
+        }
+    }
+
+    /**
+     * Register with email and password
+     * @param email User's email
+     * @param password User's password
+     */
+    fun register(email: String, password: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                // Collect device information
+                val timestamp = Extension.getCurrentUtcTimestamp()
+                val deviceModel = Extension.getDeviceModel()
+                val operatingSystem = Extension.getOperatingSystem()
+                val osVersion = Extension.getOsVersion()
+                val appVersion = Extension.getAppVersion()
+                val ipAddress = Extension.getIpAddress()
+                val registrationSource = Extension.getRegistrationSource()
+
+                // Call repository with enhanced data
+                val response = authRepository.register(
+                    email = email,
+                    password = password,
+                    timestampOfRegistration = timestamp,
+                    deviceModel = deviceModel,
+                    operatingSystem = operatingSystem,
+                    osVersion = osVersion,
+                    appVersion = appVersion,
+                    ipAddress = ipAddress,
+                    registrationSource = registrationSource
+                )
+                handleAuthResponse(response)
+            } catch (e: Exception) {
+                _authState.value =
+                    AuthState.Error(UiText.DynamicText(e.message ?: "Registration failed"))
+            }
+        }
+    }
+
+    /**
+     * Logout the user
+     */
+    fun logout() {
+        viewModelScope.launch {
+            _authState.value = AuthState.LogoutLoading
+            try {
+                val result = authRepository.logout()
+                if (result.isSuccess) {
+                    _authState.value = AuthState.LoggedOut
+                } else {
+                    _authState.value = AuthState.Error(
+                        UiText.DynamicText(
+                            result.exceptionOrNull()?.message ?: "Logout failed"
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "Logout failed"))
+            }
+        }
+    }
+
+    /**
+     * Handle authentication response
+     * @param response The authentication response
+     */
+    private fun handleAuthResponse(response: AuthResponse) {
+        val token = response.data?.token
+        if (response.status && token != null && token.isNotBlank()) {
+            _authState.value = AuthState.Success
+        } else {
+            _authState.value = AuthState.Error(
+                UiText.DynamicText(response.message ?: "Authentication failed")
+            )
+        }
+    }
+
+    /**
+     * Reset authentication state to initial
+     */
+    fun resetAuthState() {
+        _authState.value = AuthState.Initial
+    }
+
+    /**
      * Cleans up resources when the ViewModel is cleared.
      * Cancels all active coroutine jobs to prevent memory leaks and unnecessary work.
      */
@@ -304,4 +448,16 @@ class MainViewModel @Inject constructor(
         locationJob?.cancel()
         dataLoadingJob?.cancel()
     }
+}
+
+/**
+ * Authentication state
+ */
+sealed class AuthState {
+    object Initial : AuthState()
+    object Loading : AuthState()
+    object LogoutLoading : AuthState()
+    object Success : AuthState()
+    object LoggedOut : AuthState()
+    data class Error(val message: UiText) : AuthState()
 }

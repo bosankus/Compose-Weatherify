@@ -60,6 +60,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
+        freeCompilerArgs = freeCompilerArgs + listOf(
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi"
+        )
     }
 
     lint {
@@ -142,7 +146,7 @@ dependencies {
 
     // Miscellaneous
     implementation(Deps.timber)
-    implementation(Deps.lottieCompose)
+    // Removed Lottie dependency as per requirements
     implementation(Deps.coilCompose)
 
     // Memory leak

@@ -22,7 +22,10 @@ actual fun createPlatformHttpClient(json: Json): HttpClient {
         install(ContentNegotiation) {
             json(json)
             // Register for mixed content type (application/json, text/html)
-            json(json, contentType = ContentType.parse("application/json, text/html; charset=UTF-8"))
+            json(
+                json,
+                contentType = ContentType.parse("application/json, text/html; charset=UTF-8")
+            )
         }
         install(Logging) {
             logger = object : Logger {
