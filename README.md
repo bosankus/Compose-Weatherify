@@ -6,12 +6,12 @@
 
 A modern weather application built with Jetpack Compose that provides current weather conditions, forecasts, and air quality information.
 
-+[![Download APK](https://img.shields.io/badge/download-APK-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)](https://github.com/bosankus/Compose-Weatherify/releases/latest)
+[![Download APK](https://img.shields.io/badge/download-APK-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)](https://github.com/bosankus/Compose-Weatherify/releases/latest)
 
 ## 📱 Features
 
 - **Current Weather**: View today's temperature and weather conditions
-- **5-Day Forecast**: See weather predictions for the next 4 days
+- **5-Day Forecast**: See weather predictions for the next 5 days
 - **Air Quality Index**: Monitor air pollution levels
 - **Multiple Cities**: Search and save your favorite locations
 - **Multi-language Support**: Available in English, Hindi, and Hebrew
