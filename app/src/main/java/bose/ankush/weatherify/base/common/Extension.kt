@@ -1,12 +1,12 @@
 package bose.ankush.weatherify.base.common
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import bose.ankush.weatherify.BuildConfig
@@ -47,12 +47,61 @@ object Extension {
         }
     )
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    fun Context.openAppLocaleSettings() = startActivity(
-        Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
-            data = Uri.fromParts("package", packageName, null)
+    @SuppressLint("QueryPermissionsNeeded")
+    fun Context.openAppLocaleSettings() {
+        // Try opening the per-app language settings if available, otherwise fall back safely
+        val pm = packageManager
+        // Primary: Per-app language settings (Android 13+)
+        val appLocaleIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+        } else {
+            Intent(Settings.ACTION_LOCALE_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         }
-    )
+
+        try {
+            val canHandleAppLocale = appLocaleIntent.resolveActivity(pm) != null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && canHandleAppLocale) {
+                startActivity(appLocaleIntent)
+                return
+            }
+        } catch (_: Exception) {
+            // Ignore and try fallbacks
+        }
+
+        // Fallback 1: App details/settings screen
+        val appDetailsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        try {
+            val canHandleAppDetails = appDetailsIntent.resolveActivity(pm) != null
+            if (canHandleAppDetails) {
+                startActivity(appDetailsIntent)
+                return
+            }
+        } catch (_: Exception) {
+            // Ignore and try next fallback
+        }
+
+        // Fallback 2: System language settings
+        val localeSettingsIntent = Intent(Settings.ACTION_LOCALE_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        try {
+            val canHandleLocaleSettings = localeSettingsIntent.resolveActivity(pm) != null
+            if (canHandleLocaleSettings) {
+                startActivity(localeSettingsIntent)
+                return
+            }
+        } catch (_: Exception) {
+            // Final fallback: do nothing; avoid crash
+        }
+    }
 
     fun Context.hasLocationPermission(): Boolean = listOf(
         android.Manifest.permission.ACCESS_COARSE_LOCATION,
