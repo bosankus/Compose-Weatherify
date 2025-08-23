@@ -64,4 +64,16 @@ class TokenManager(
         lastRefreshTime = 0
         return refreshToken() != null
     }
+
+    /**
+     * Forces logout by clearing any stored token.
+     */
+    suspend fun forceLogout() {
+        try {
+            tokenStorage.clearToken()
+            if (debugLogging) println("[DEBUG_LOG] Forced logout: token cleared")
+        } catch (e: Exception) {
+            if (debugLogging) println("[DEBUG_LOG] Error during forceLogout: ${e.message}")
+        }
+    }
 }

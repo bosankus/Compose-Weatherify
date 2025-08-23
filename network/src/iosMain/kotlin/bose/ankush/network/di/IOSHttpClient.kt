@@ -6,7 +6,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
@@ -22,8 +21,8 @@ actual fun createPlatformHttpClient(json: Json): HttpClient {
             }
         }
         install(ContentNegotiation) {
-            // Register for mixed content type (application/json, text/html)
-            json(json, contentType = ContentType.parse("application/json, text/html; charset=UTF-8"))
+            // Register standard JSON handling; handle other content types per request if required.
+            json(json)
         }
         install(Logging) {
             logger = object : Logger {

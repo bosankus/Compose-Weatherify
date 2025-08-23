@@ -68,5 +68,5 @@ object Versions {
     const val leakCanary = "2.12"
 
     /*For Payment module*/
-    const val razorPay = "1.6.30"
+    const val razorPay = "1.6.40"
 }

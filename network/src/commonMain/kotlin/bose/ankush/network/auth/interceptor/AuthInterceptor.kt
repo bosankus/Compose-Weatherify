@@ -49,7 +49,22 @@ fun HttpClientConfig<*>.configureAuth(tokenManager: TokenManager) {
                     if (refreshed) {
                         println("[DEBUG_LOG] Token refreshed successfully after 401 response")
                     } else {
-                        println("[DEBUG_LOG] Failed to refresh token after 401 response")
+                        println("[DEBUG_LOG] Failed to refresh token after 401 response; forcing logout and notifying UI")
+                        try {
+                            // Clear token so that app considers user logged out
+                            tokenManager.forceLogout()
+                        } catch (_: Exception) {
+                        }
+                        // Emit a global unauthorized event for the UI to react (navigate to login + snackbar)
+                        try {
+                            bose.ankush.network.auth.events.AuthEventBus.emit(
+                                bose.ankush.network.auth.events.AuthEvent.Unauthorized(
+                                    message = "For security, please log in again to continue using the app."
+                                )
+                            )
+                        } catch (e: Exception) {
+                            println("[DEBUG_LOG] Failed to emit Unauthorized event: ${e.message}")
+                        }
                     }
                 }
             }

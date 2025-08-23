@@ -39,11 +39,9 @@ class AuthRepositoryImpl(
     private suspend fun verifyTokenSaved(originalToken: String) {
         val savedToken = tokenStorage.getToken()
         if (savedToken != originalToken) {
-            println("[DEBUG_LOG] Token verification failed: Original token does not match saved token")
-            println("[DEBUG_LOG] Original: $originalToken")
-            println("[DEBUG_LOG] Saved: $savedToken")
+            println("[DEBUG_LOG] Token verification failed: token mismatch")
         } else {
-            println("[DEBUG_LOG] Token verification successful: Token was correctly saved to the database")
+            println("[DEBUG_LOG] Token verification successful")
         }
     }
 

@@ -45,6 +45,7 @@ import bose.ankush.weatherify.domain.model.WeatherForecast
 import coil.compose.AsyncImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -169,7 +170,7 @@ private fun LocationAndDateHeader(
                 locationName = result
             } catch (e: Exception) {
                 // If geocoding fails, keep the default "Current Location"
-                e.printStackTrace()
+                Timber.e(e, "Geocoding failed; using default location label")
             }
         }
     }

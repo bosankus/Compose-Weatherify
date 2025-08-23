@@ -117,6 +117,22 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
+                // Observe global Unauthorized events from network layer (401 handling)
+                LaunchedEffect(Unit) {
+                    bose.ankush.network.auth.events.AuthEventBus.events.collect { event ->
+                        when (event) {
+                            is bose.ankush.network.auth.events.AuthEvent.Unauthorized -> {
+                                // Show security message; navigation will switch automatically when token is cleared
+                                showSnackbar(
+                                    event.message.ifBlank {
+                                        "You need to log in again to continue using the app for security purposes."
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Main content box that contains everything
                 Box(
                     modifier = Modifier
