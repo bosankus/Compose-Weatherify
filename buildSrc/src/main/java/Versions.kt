@@ -62,7 +62,6 @@ object Versions {
 
     // Miscellaneous
     const val timber = "5.0.1"
-    const val lottie = "6.0.0"
     const val coilCompose = "2.4.0"
 
     // Memory leak
