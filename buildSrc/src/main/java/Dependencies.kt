@@ -58,6 +58,7 @@ object Deps {
     val firebaseConfig by lazy { "com.google.firebase:firebase-config-ktx" }
     val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics-ktx" }
     val firebasePerformanceMonitoring by lazy { "com.google.firebase:firebase-perf" }
+    val firebaseMessaging by lazy { "com.google.firebase:firebase-messaging-ktx" }
 
     // Coroutines
     val coroutinesCore by lazy { "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}" }
@@ -71,7 +72,6 @@ object Deps {
 
     // Miscellaneous
     val timber by lazy { "com.jakewharton.timber:timber:${Versions.timber}" }
-    val lottieCompose by lazy { "com.airbnb.android:lottie-compose:${Versions.lottie}" }
     val coilCompose by lazy { "io.coil-kt:coil-compose:${Versions.coilCompose}" }
 
     // Memory Leak

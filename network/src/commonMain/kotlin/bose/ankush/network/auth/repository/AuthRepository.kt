@@ -37,7 +37,8 @@ interface AuthRepository {
         osVersion: String? = null,
         appVersion: String? = null,
         ipAddress: String? = null,
-        registrationSource: String? = null
+        registrationSource: String? = null,
+        firebaseToken: String? = null
     ): AuthResponse
 
     /**

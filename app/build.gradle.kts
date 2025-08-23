@@ -23,7 +23,9 @@ android {
         versionName = ConfigData.versionName
         multiDexEnabled = ConfigData.multiDexEnabled
         testInstrumentationRunner = "bose.ankush.weatherify.helper.HiltTestRunner"
-        resourceConfigurations.addAll(listOf("en", "hi", "iw"))
+        androidResources {
+            localeFilters.addAll(listOf("en", "hi", "iw"))
+        }
     }
 
     kapt {
@@ -134,6 +136,7 @@ dependencies {
     implementation(Deps.firebaseConfig)
     implementation(Deps.firebaseAnalytics)
     implementation(Deps.firebasePerformanceMonitoring)
+    implementation(Deps.firebaseMessaging)
 
     // Coroutines
     implementation(Deps.coroutinesCore)

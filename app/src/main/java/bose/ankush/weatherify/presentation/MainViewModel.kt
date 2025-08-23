@@ -371,6 +371,7 @@ class MainViewModel @Inject constructor(
                 val appVersion = Extension.getAppVersion()
                 val ipAddress = Extension.getIpAddress()
                 val registrationSource = Extension.getRegistrationSource()
+                val firebaseToken = Extension.getFirebaseToken()
 
                 // Call repository with enhanced data
                 val response = authRepository.register(
@@ -382,7 +383,8 @@ class MainViewModel @Inject constructor(
                     osVersion = osVersion,
                     appVersion = appVersion,
                     ipAddress = ipAddress,
-                    registrationSource = registrationSource
+                    registrationSource = registrationSource,
+                    firebaseToken = firebaseToken
                 )
                 handleAuthResponse(response)
             } catch (e: Exception) {
@@ -421,7 +423,7 @@ class MainViewModel @Inject constructor(
      */
     private fun handleAuthResponse(response: AuthResponse) {
         val token = response.data?.token
-        if (response.status && token != null && token.isNotBlank()) {
+        if (response.isSuccess() && token != null && token.isNotBlank()) {
             _authState.value = AuthState.Success
         } else {
             _authState.value = AuthState.Error(

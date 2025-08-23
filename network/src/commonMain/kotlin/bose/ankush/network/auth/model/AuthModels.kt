@@ -24,7 +24,8 @@ data class RegisterRequest(
     val osVersion: String? = null,
     val appVersion: String? = null,
     val ipAddress: String? = null,
-    val registrationSource: String? = null
+    val registrationSource: String? = null,
+    val firebaseToken: String? = null
 )
 
 /**
@@ -41,7 +42,10 @@ data class RefreshTokenRequest(
 @Serializable
 data class AuthData(
     val token: String? = null,
-    val email: String? = null
+    val email: String? = null,
+    val role: String? = null,
+    val isActive: Boolean? = null,
+    val isPremium: Boolean? = null
 )
 
 /**
@@ -49,10 +53,13 @@ data class AuthData(
  */
 @Serializable
 data class AuthResponse(
+    val success: Boolean? = null,
     val status: Boolean = true,
     val message: String? = null,
     val data: AuthData? = null
-)
+) {
+    fun isSuccess(): Boolean = success ?: status
+}
 
 @Serializable
 data class LogoutErrorData(

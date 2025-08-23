@@ -12,15 +12,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -38,6 +46,7 @@ import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvide
 import bose.ankush.weatherify.base.permissions.PermissionAlertDialog
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
@@ -65,6 +74,17 @@ class MainActivity : AppCompatActivity() {
                 val isLoggedIn by viewModel.isLoggedIn.collectAsState()
                 val authState by viewModel.authState.collectAsState()
                 val isAuthInitialized by viewModel.isAuthInitialized.collectAsState()
+
+                // Configure status bar to be transparent and adjust icon colors based on background luminance
+                val systemUiController = rememberSystemUiController()
+                val bgColor = MaterialTheme.colorScheme.background
+                val useDarkIcons = bgColor.luminance() > 0.5f
+                SideEffect {
+                    systemUiController.setStatusBarColor(
+                        color = Color.Transparent,
+                        darkIcons = useDarkIcons
+                    )
+                }
 
                 // Create a state for the glassmorphic snackbar
                 val (showSnackbar, snackbarContent) = rememberGlassmorphicSnackbarState()
@@ -102,6 +122,7 @@ class MainActivity : AppCompatActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.background)
+                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
                 ) {
                     when {
                         !isAuthInitialized -> {

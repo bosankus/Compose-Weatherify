@@ -22,7 +22,7 @@ class AuthRepositoryImpl(
 
         // Save token on successful login
         val token = response.data?.token
-        if (response.status && token != null && token.isNotBlank()) {
+        if (response.isSuccess() && token != null && token.isNotBlank()) {
             tokenStorage.saveToken(token)
 
             // Verify token was saved correctly
@@ -56,7 +56,8 @@ class AuthRepositoryImpl(
         osVersion: String?,
         appVersion: String?,
         ipAddress: String?,
-        registrationSource: String?
+        registrationSource: String?,
+        firebaseToken: String?
     ): AuthResponse {
         val request = RegisterRequest(
             email = email,
@@ -67,13 +68,14 @@ class AuthRepositoryImpl(
             osVersion = osVersion,
             appVersion = appVersion,
             ipAddress = ipAddress,
-            registrationSource = registrationSource
+            registrationSource = registrationSource,
+            firebaseToken = firebaseToken
         )
         val response = apiService.register(request)
 
         // Save token on successful registration
         val token = response.data?.token
-        if (response.status && token != null && token.isNotBlank()) {
+        if (response.isSuccess() && token != null && token.isNotBlank()) {
             tokenStorage.saveToken(token)
 
             // Verify token was saved correctly
@@ -99,7 +101,7 @@ class AuthRepositoryImpl(
 
         // Save new token on successful refresh
         val token = response.data?.token
-        if (response.status && token != null && token.isNotBlank()) {
+        if (response.isSuccess() && token != null && token.isNotBlank()) {
             tokenStorage.saveToken(token)
 
             // Verify token was saved correctly

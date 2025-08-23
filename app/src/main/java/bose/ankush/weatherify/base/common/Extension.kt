@@ -10,11 +10,14 @@ import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import bose.ankush.weatherify.BuildConfig
+import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.net.NetworkInterface
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import kotlin.coroutines.resume
 import kotlin.math.roundToInt
 
 /**Created by
@@ -198,5 +201,24 @@ object Extension {
             // Ignore exceptions and return null
         }
         return null
+    }
+
+    /**
+     * Best-effort fetch of Firebase Cloud Messaging registration token
+     * Kept here to follow the same Extension helper pattern as other device/app info getters
+     */
+    suspend fun getFirebaseToken(): String? = try {
+        suspendCancellableCoroutine<String?> { cont ->
+            try {
+                FirebaseMessaging.getInstance().token
+                    .addOnCompleteListener { task: com.google.android.gms.tasks.Task<String> ->
+                        if (cont.isActive) cont.resume(if (task.isSuccessful) task.result else null)
+                    }
+            } catch (_: Exception) {
+                if (cont.isActive) cont.resume(null)
+            }
+        }
+    } catch (_: Exception) {
+        null
     }
 }

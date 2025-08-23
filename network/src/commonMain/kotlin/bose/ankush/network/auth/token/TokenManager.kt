@@ -44,7 +44,7 @@ class TokenManager(
             try {
                 val response = authRepository.refreshToken() ?: return null
                 val newToken = response.data?.token
-                if (response.status && !newToken.isNullOrBlank()) {
+                if (response.isSuccess() && !newToken.isNullOrBlank()) {
                     tokenStorage.saveToken(newToken)
                     if (debugLogging) println("[DEBUG_LOG] Token refreshed successfully")
                     return newToken
