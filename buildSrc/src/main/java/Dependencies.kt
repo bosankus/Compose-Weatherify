@@ -69,6 +69,7 @@ object Deps {
     val hiltTesting by lazy { "com.google.dagger:hilt-android-testing:${Versions.hilt}" }
     val hiltDaggerAndroidCompiler by lazy { "com.google.dagger:hilt-android-compiler:${Versions.hilt}" }
     val hiltNavigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.hiltCompose}" }
+    val hiltAndroidXCompiler by lazy { "androidx.hilt:hilt-compiler:${Versions.hiltCompose}" }
 
     // Miscellaneous
     val timber by lazy { "com.jakewharton.timber:timber:${Versions.timber}" }
@@ -77,6 +78,6 @@ object Deps {
     // Memory Leak
     val leakCanary by lazy { "com.squareup.leakcanary:leakcanary-android:${Versions.leakCanary}" }
 
-    /*For Payment module*/
+    // For Payment module
     val razorPay by lazy { "com.razorpay:checkout:${Versions.razorPay}" }
 }

@@ -16,7 +16,8 @@ import javax.inject.Singleton
  * Implementation of PreferenceManager that uses DataStore
  */
 @Singleton
-class PreferenceManagerImpl @Inject constructor(@ApplicationContext private val context: Context) : PreferenceManager {
+class PreferenceManagerImpl @Inject constructor(@get:ApplicationContext private val context: Context) :
+    PreferenceManager {
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = APP_PREFERENCE_KEY)
 
@@ -26,6 +27,13 @@ class PreferenceManagerImpl @Inject constructor(@ApplicationContext private val 
         context.dataStore.edit { preferences ->
             preferences[PreferenceManager.USER_LAT_LOCATION] = coordinates.first
             preferences[PreferenceManager.USER_LON_LOCATION] = coordinates.second
+        }
+    }
+
+    override suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceManager.IS_PREMIUM] = isPremium
+            preferences[PreferenceManager.PREMIUM_EXPIRY] = expiryMillis
         }
     }
 }

@@ -6,14 +6,11 @@ import bose.ankush.storage.room.WeatherDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Android implementation of TokenStorage using Room database
  */
-@Singleton
-class TokenStorageImpl @Inject constructor(
+class TokenStorageImpl(
     private val database: WeatherDatabase
 ) : TokenStorage {
 

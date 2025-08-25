@@ -43,7 +43,7 @@ tasks.register("deepClean") {
 
     doLast {
         val dirsToDelete = mutableSetOf<File>().apply {
-            allprojects.forEach { add(it.buildDir) }
+            allprojects.forEach { add(it.layout.buildDirectory.get().asFile) }
             add(rootProject.layout.projectDirectory.dir(".gradle").asFile)
         }
         delete(dirsToDelete)

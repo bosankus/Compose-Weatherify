@@ -2,10 +2,10 @@ import org.gradle.api.artifacts.dsl.DependencyHandler
 
 object KmmVersions {
     const val ktor = "2.3.13"
-    const val kotlinxSerialization = "1.6.0"
-    const val kotlinxCoroutines = "1.7.3"
+    const val kotlinxSerialization = "1.7.3"
+    const val kotlinxCoroutines = "1.9.0"
     const val koin = "3.5.6"
-    const val kotlinxDateTime = "0.4.1"
+    const val kotlinxDateTime = "0.6.1"
 }
 
 object KmmDeps {
@@ -33,6 +33,7 @@ object KmmDeps {
     const val kotlinxDateTime = "org.jetbrains.kotlinx:kotlinx-datetime:${KmmVersions.kotlinxDateTime}"
 }
 
+@Suppress("unused")
 fun DependencyHandler.addKmmCommonDependencies() {
     implementation(KmmDeps.ktorCore)
     implementation(KmmDeps.ktorSerialization)
@@ -45,10 +46,12 @@ fun DependencyHandler.addKmmCommonDependencies() {
     implementation(KmmDeps.kotlinxDateTime)
 }
 
+@Suppress("unused")
 fun DependencyHandler.addKmmAndroidDependencies() {
     implementation(KmmDeps.ktorAndroid)
 }
 
+@Suppress("unused")
 fun DependencyHandler.addKmmIOSDependencies() {
     implementation(KmmDeps.ktorIOS)
 }

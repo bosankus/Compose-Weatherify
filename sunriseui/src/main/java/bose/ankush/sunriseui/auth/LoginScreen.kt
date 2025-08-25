@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -29,13 +30,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -343,38 +347,34 @@ fun LoginScreen(
                         )
                     }
 
-                    // Terms & Conditions - using TextButton instead of ClickableText
+                    // Terms & Conditions - using BasicText with pointerInput for links
                     val termsText = buildAnnotatedString {
                         append("By continuing, you agree to our ")
-
-                        // Terms & Conditions link
                         pushStringAnnotation(tag = "terms", annotation = "terms")
                         withStyle(
                             style = SpanStyle(
                                 color = MaterialTheme.colorScheme.primary,
                                 textDecoration = TextDecoration.Underline
                             )
-                        ) {
-                            append("Terms & Conditions")
-                        }
+                        ) { append("Terms & Conditions") }
                         pop()
-
                         append(" & ")
-
-                        // Privacy Policy link
                         pushStringAnnotation(tag = "privacy", annotation = "privacy")
                         withStyle(
                             style = SpanStyle(
                                 color = MaterialTheme.colorScheme.primary,
                                 textDecoration = TextDecoration.Underline
                             )
-                        ) {
-                            append("Privacy Policy")
-                        }
+                        ) { append("Privacy Policy") }
                         pop()
                     }
 
-                    ClickableText(
+                    // Store the latest layout result for tap detection
+                    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+                    val currentOnTermsClick by rememberUpdatedState(onTermsClick)
+                    val currentOnPrivacyPolicyClick by rememberUpdatedState(onPrivacyPolicyClick)
+
+                    BasicText(
                         text = termsText,
                         style = MaterialTheme.typography.bodySmall.copy(
                             textAlign = TextAlign.Center,
@@ -382,30 +382,28 @@ fun LoginScreen(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        onClick = { offset ->
-                            if (!isLoading) {
-                                // Check if Terms & Conditions was clicked
-                                termsText.getStringAnnotations(
-                                    tag = "terms",
-                                    start = offset,
-                                    end = offset
-                                ).firstOrNull()?.let {
-                                    onTermsClick()
-                                    return@ClickableText
+                            .padding(vertical = 8.dp)
+                            .pointerInput(isLoading) {
+                                if (!isLoading) {
+                                    detectTapGestures { offsetPosition ->
+                                        textLayoutResult?.let { layoutResult ->
+                                            val offset =
+                                                layoutResult.getOffsetForPosition(offsetPosition)
+                                            termsText.getStringAnnotations(
+                                                start = offset,
+                                                end = offset
+                                            )
+                                                .firstOrNull()?.let { annotation ->
+                                                    when (annotation.tag) {
+                                                        "terms" -> currentOnTermsClick()
+                                                        "privacy" -> currentOnPrivacyPolicyClick()
+                                                    }
+                                                }
+                                        }
+                                    }
                                 }
-
-                                // Check if Privacy Policy was clicked
-                                termsText.getStringAnnotations(
-                                    tag = "privacy",
-                                    start = offset,
-                                    end = offset
-                                ).firstOrNull()?.let {
-                                    onPrivacyPolicyClick()
-                                    return@ClickableText
-                                }
-                            }
-                        }
+                            },
+                        onTextLayout = { textLayoutResult = it }
                     )
                 }
             }

@@ -6,7 +6,9 @@ import bose.ankush.network.auth.storage.TokenStorage
 import bose.ankush.network.common.AndroidNetworkConnectivity
 import bose.ankush.network.common.NetworkConnectivity
 import bose.ankush.network.di.createAuthRepository
+import bose.ankush.network.di.createPaymentRepository
 import bose.ankush.network.di.createWeatherRepository
+import bose.ankush.network.repository.PaymentRepository
 import bose.ankush.network.repository.WeatherRepository
 import dagger.Module
 import dagger.Provides
@@ -44,6 +46,18 @@ object NetworkModule {
         tokenStorage: TokenStorage
     ): WeatherRepository {
         return createWeatherRepository(networkConnectivity, tokenStorage)
+    }
+
+    /**
+     * Provides PaymentRepository implementation from the network module
+     */
+    @Provides
+    @Singleton
+    fun providePaymentRepository(
+        networkConnectivity: NetworkConnectivity,
+        tokenStorage: TokenStorage
+    ): PaymentRepository {
+        return createPaymentRepository(networkConnectivity, tokenStorage)
     }
 
     /**

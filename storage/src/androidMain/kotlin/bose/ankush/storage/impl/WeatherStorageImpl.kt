@@ -8,8 +8,6 @@ import bose.ankush.storage.room.WeatherEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import java.io.IOException
-import javax.inject.Inject
-import javax.inject.Singleton
 import bose.ankush.network.model.AirQuality as NetworkAirQuality
 import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
 import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
@@ -24,8 +22,7 @@ import bose.ankush.network.repository.WeatherRepository as NetworkWeatherReposit
  * - Mapping between network models and database entities
  * - Tracking the last update time for weather data
  */
-@Singleton
-class WeatherStorageImpl @Inject constructor(
+class WeatherStorageImpl(
     private val networkRepository: NetworkWeatherRepository,
     private val weatherDatabase: WeatherDatabase
 ) : WeatherStorage {
@@ -109,12 +106,12 @@ class WeatherStorageImpl @Inject constructor(
                     sunset = current.sunset,
                     temp = current.temp,
                     uvi = current.uvi,
-                    weather = current.weather?.map { weatherCondition ->
-                        weatherCondition?.let {
+                    weather = current.weather?.mapNotNull { info ->
+                        info?.let {
                             Weather(
                                 description = it.description,
                                 icon = it.icon,
-                                id = it.id ?: 0,
+                                id = it.id,
                                 main = it.main
                             )
                         }
@@ -146,12 +143,12 @@ class WeatherStorageImpl @Inject constructor(
                             )
                         },
                         uvi = it.uvi,
-                        weather = it.weather?.map { weatherCondition ->
-                            weatherCondition?.let {
+                        weather = it.weather?.mapNotNull { info ->
+                            info?.let {
                                 Weather(
                                     description = it.description,
                                     icon = it.icon,
-                                    id = it.id ?: 0,
+                                    id = it.id,
                                     main = it.main
                                 )
                             }
@@ -169,12 +166,12 @@ class WeatherStorageImpl @Inject constructor(
                         feels_like = it.feelsLike,
                         humidity = it.humidity,
                         temp = it.temp,
-                        weather = it.weather?.map { weatherCondition ->
-                            weatherCondition?.let {
+                        weather = it.weather?.mapNotNull { info ->
+                            info?.let {
                                 Weather(
                                     description = it.description,
                                     icon = it.icon,
-                                    id = it.id ?: 0,
+                                    id = it.id,
                                     main = it.main
                                 )
                             }

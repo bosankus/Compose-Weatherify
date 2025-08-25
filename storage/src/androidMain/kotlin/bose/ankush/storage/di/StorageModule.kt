@@ -1,4 +1,6 @@
-package bose.ankush.storage.di
+/*
+Moved to app module: bose.ankush.storage.di.StorageModule
+This file is kept as a comment-only placeholder to avoid Hilt in storage module.
 
 import android.content.Context
 import androidx.room.Room
@@ -70,3 +72,7 @@ object StorageModule {
         return TokenStorageImpl(weatherDatabase)
     }
 }
+
+// Moved to app module: bose.ankush.storage.di.StorageModule
+// This placeholder file intentionally left empty to avoid Hilt in storage module.
+*/

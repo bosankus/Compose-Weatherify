@@ -1,5 +1,6 @@
 package bose.ankush.network.di
 
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -25,7 +26,7 @@ actual fun createPlatformHttpClient(json: Json): HttpClient {
         install(Logging) {
             logger = object : Logger {
                 override fun log(message: String) {
-                    println("Ktor Android: $message")
+                    Log.d("Ktor Android:", message)
                 }
             }
             level = LogLevel.INFO

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -6,10 +8,8 @@ plugins {
 
 kotlin {
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = JavaVersion.VERSION_17.toString()
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -42,15 +42,21 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+
+        @Suppress("UNUSED_VARIABLE")
         val androidMain by getting {
             dependencies {
                 implementation(KmmDeps.ktorAndroid)
             }
         }
+
+        @Suppress("UNUSED_VARIABLE")
         val androidUnitTest by getting
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
+
+        @Suppress("UNUSED_VARIABLE")
         val iosMain by creating {
             dependsOn(commonMain)
             iosX64Main.dependsOn(this)
@@ -63,6 +69,8 @@ kotlin {
         val iosX64Test by getting
         val iosArm64Test by getting
         val iosSimulatorArm64Test by getting
+
+        @Suppress("UNUSED_VARIABLE")
         val iosTest by creating {
             dependsOn(commonTest)
             iosX64Test.dependsOn(this)
@@ -86,3 +94,4 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 }
+

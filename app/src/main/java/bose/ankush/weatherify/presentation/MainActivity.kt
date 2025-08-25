@@ -47,19 +47,26 @@ import bose.ankush.weatherify.base.permissions.PermissionAlertDialog
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.razorpay.Checkout
+import com.razorpay.PaymentData
+import com.razorpay.PaymentResultWithDataListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.json.JSONObject
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
 
     private val viewModel: MainViewModel by viewModels()
 
     @Inject
     lateinit var locationClient: LocationClient
+
+    // Hold a reference to the Checkout instance only during payment
+    private var razorpayCheckout: Checkout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -70,12 +77,13 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             WeatherifyTheme {
-                val context: Context = LocalContext.current
+                val context = LocalContext.current
                 val isLoggedIn by viewModel.isLoggedIn.collectAsState()
                 val authState by viewModel.authState.collectAsState()
                 val isAuthInitialized by viewModel.isAuthInitialized.collectAsState()
 
-                // Configure status bar to be transparent and adjust icon colors based on background luminance
+                // Set status bar color and icon color based on background
+                @Suppress("DEPRECATION")
                 val systemUiController = rememberSystemUiController()
                 val bgColor = MaterialTheme.colorScheme.background
                 val useDarkIcons = bgColor.luminance() > 0.5f
@@ -86,54 +94,71 @@ class MainActivity : AppCompatActivity() {
                     )
                 }
 
-                // Create a state for the glassmorphic snackbar
+                // Glassmorphic snackbar state
                 val (showSnackbar, snackbarContent) = rememberGlassmorphicSnackbarState()
 
                 // Handle authentication state changes
                 LaunchedEffect(authState) {
                     when (authState) {
                         is AuthState.Error -> {
-                            // Show error message in glassmorphic snackbar
-                            val errorMessage =
-                                (authState as AuthState.Error).message.asString(this@MainActivity)
-                            showSnackbar(errorMessage)
-
-                            // Reset auth state after showing error
+                            showSnackbar((authState as AuthState.Error).message.asString(this@MainActivity))
                             viewModel.resetAuthState()
                         }
-
                         is AuthState.Success -> {
-                            // Show success message in glassmorphic snackbar
                             showSnackbar("Authentication successful")
-
-                            // Reset auth state after successful authentication
-                            // The isLoggedIn state will be updated automatically by the authRepository
                             viewModel.resetAuthState()
                         }
+                        else -> Unit
+                    }
+                }
 
-                        else -> {
-                            // Do nothing for other states
+                // Listen for Unauthorized events
+                LaunchedEffect(Unit) {
+                    bose.ankush.network.auth.events.AuthEventBus.events.collect { event ->
+                        if (event is bose.ankush.network.auth.events.AuthEvent.Unauthorized) {
+                            showSnackbar(
+                                event.message.ifBlank {
+                                    "You need to log in again to continue using the app for security purposes."
+                                }
+                            )
                         }
                     }
                 }
 
-                // Observe global Unauthorized events from network layer (401 handling)
+                // Collect payment events and launch Razorpay Checkout
                 LaunchedEffect(Unit) {
-                    bose.ankush.network.auth.events.AuthEventBus.events.collect { event ->
-                        when (event) {
-                            is bose.ankush.network.auth.events.AuthEvent.Unauthorized -> {
-                                // Show security message; navigation will switch automatically when token is cleared
-                                showSnackbar(
-                                    event.message.ifBlank {
-                                        "You need to log in again to continue using the app for security purposes."
+                    viewModel.paymentEvents.collect { evt ->
+                        if (evt is bose.ankush.weatherify.presentation.payment.PaymentEvent.LaunchCheckout) {
+                            try {
+                                Checkout.preload(applicationContext)
+                                razorpayCheckout = Checkout()
+                                razorpayCheckout?.setKeyID(evt.keyId)
+                                val options = JSONObject().apply {
+                                    put("name", evt.name)
+                                    put("description", evt.description)
+                                    put("order_id", evt.orderId)
+                                    put("currency", evt.currency)
+                                    put("amount", evt.amount)
+                                    val prefill = JSONObject().apply {
+                                        evt.email?.let { put("email", it) }
+                                        evt.contact?.let { put("contact", it) }
                                     }
+                                    put("prefill", prefill)
+                                }
+                                razorpayCheckout?.open(this@MainActivity, options)
+                            } catch (e: Exception) {
+                                viewModel.onPaymentFailed(
+                                    e.message ?: "Unable to open payment checkout"
                                 )
+                                // Clean up in case of error
+                                Checkout.clearUserData(context)
+                                razorpayCheckout = null
                             }
                         }
                     }
                 }
 
-                // Main content box that contains everything
+                // Main content
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -145,81 +170,66 @@ class MainActivity : AppCompatActivity() {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
+                            ) { CircularProgressIndicator() }
                         }
-
                         isLoggedIn -> {
-                            // User is logged in, show main app content
+                            // Only fetch location once after login, not on every recomposition
                             val launchNotificationPermissionState =
                                 viewModel.launchNotificationPermission.collectAsState()
-                            if (locationClient.hasLocationPermission()) {
-                                // if permission granted already then fetch and save location coordinates
-                                viewModel.fetchAndSaveLocationCoordinates()
-                            } else {
-                                // request location permission
+                            LaunchedEffect(isLoggedIn) {
+                                if (locationClient.hasLocationPermission()) {
+                                    viewModel.fetchAndSaveLocationCoordinates()
+                                }
+                            }
+                            // If location permission is missing, request it on first launch
+                            if (!locationClient.hasLocationPermission()) {
                                 RequestLocationPermission(context)
                             }
                             if (launchNotificationPermissionState.value) {
-                                // request notification permission
                                 RequestNotificationPermission(context)
                             }
-
-                            /**
-                             * For Settings screen:
-                             * notification item should be invisible if notification permission is already granted.
-                             */
-                            LaunchedEffect(key1 = launchNotificationPermissionState) {
-                                if (!context.hasNotificationPermission()) {
-                                    viewModel.updateShowNotificationBannerState(true)
-                                } else {
-                                    viewModel.updateShowNotificationBannerState(false)
-                                }
+                            LaunchedEffect(launchNotificationPermissionState.value) {
+                                viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
                             }
-
-                            // main container holding all app composable screens
                             AppNavigation(viewModel)
                         }
-
                         else -> {
-                            // User is not logged in, show login screen
+                            // Only show login screen if not logged in and auth is initialized
                             LoginScreen(
                                 onLoginClick = { email, password ->
-                                    viewModel.login(email, password)
+                                    viewModel.login(
+                                        email,
+                                        password
+                                    )
                                 },
                                 onRegisterClick = { email, password ->
-                                    viewModel.register(email, password)
+                                    viewModel.register(
+                                        email,
+                                        password
+                                    )
                                 },
-                                onTermsClick = {
-                                    // Open terms and conditions in the default browser
-                                    context.openUrlInBrowser("https://data.androidplay.in/wfy/terms-and-conditions")
-                                },
-                                onPrivacyPolicyClick = {
-                                    // Open privacy policy in the default browser
-                                    context.openUrlInBrowser("https://data.androidplay.in/wfy/privacy-policy")
-                                },
+                                onTermsClick = { context.openUrlInBrowser("https://data.androidplay.in/wfy/terms-and-conditions") },
+                                onPrivacyPolicyClick = { context.openUrlInBrowser("https://data.androidplay.in/wfy/privacy-policy") },
                                 isLoading = authState is AuthState.Loading
                             )
                         }
                     }
-
-                    // Overlay the glassmorphic snackbar on top of all content
+                    // Overlay glassmorphic snackbar
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.BottomCenter
-                    ) {
-                        snackbarContent()
-                    }
+                    ) { snackbarContent() }
                 }
             }
         }
     }
 
+    /**
+     * Request location permissions using Compose dialog and launcher.
+     */
     @Composable
     fun RequestLocationPermission(context: Context) {
         val permissionQueue = viewModel.permissionDialogQueue
-
         val locationPermissionsResultLauncher =
             rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -239,7 +249,7 @@ class MainActivity : AppCompatActivity() {
                     Manifest.permission.ACCESS_COARSE_LOCATION -> CoarseLocationPermissionTextProvider()
                     else -> return@forEach
                 },
-                isPermanentlyDeclined = shouldShowRequestPermissionRationale(permission),
+                isPermanentlyDeclined = !shouldShowRequestPermissionRationale(permission),
                 onDismissClick = viewModel::dismissDialog,
                 onOkClick = {
                     viewModel.dismissDialog()
@@ -248,11 +258,24 @@ class MainActivity : AppCompatActivity() {
                 onGoToAppSettingClick = { context.openAppSystemSettings() })
         }
 
-        LaunchedEffect(key1 = Unit) {
-            locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
+        // Launch initial permission request if missing and queue is empty (first-launch scenario)
+        LaunchedEffect(Unit) {
+            if (permissionQueue.isEmpty() && !locationClient.hasLocationPermission()) {
+                locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
+            }
+        }
+
+        // Also launch when there are items in the queue (e.g., after denial to show rationale)
+        LaunchedEffect(permissionQueue.size) {
+            if (permissionQueue.isNotEmpty()) {
+                locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
+            }
         }
     }
 
+    /**
+     * Request notification permission using Compose launcher.
+     */
     @Composable
     fun RequestNotificationPermission(context: Context) {
         val notificationPermissionResultLauncher =
@@ -265,13 +288,11 @@ class MainActivity : AppCompatActivity() {
                             "Notification permission granted",
                             Toast.LENGTH_SHORT
                         ).show()
-                        // hide notification banner on settings screen
                         viewModel.updateShowNotificationBannerState(false)
                     }
                 }
             )
-
-        LaunchedEffect(key1 = Unit) {
+        LaunchedEffect(Unit) {
             notificationPermissionResultLauncher.launch(ACCESS_NOTIFICATION)
         }
     }
@@ -279,5 +300,34 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         startInAppUpdate(this)
+    }
+
+    /**
+     * Razorpay payment success callback.
+     */
+    override fun onPaymentSuccess(razorpayPaymentID: String?, paymentData: PaymentData?) {
+        val orderId = paymentData?.orderId.orEmpty()
+        val paymentId = paymentData?.paymentId ?: razorpayPaymentID.orEmpty()
+        val signature = paymentData?.signature.orEmpty()
+        if (orderId.isNotBlank() && paymentId.isNotBlank() && signature.isNotBlank()) {
+            viewModel.verifyPayment(orderId, paymentId, signature)
+        } else {
+            viewModel.onPaymentFailed("Payment succeeded but missing data")
+        }
+        razorpayCheckout = null
+    }
+
+    /**
+     * Razorpay payment error callback.
+     */
+    override fun onPaymentError(code: Int, response: String?, paymentData: PaymentData?) {
+        val message = response ?: "Payment failed with code $code"
+        viewModel.onPaymentFailed(message)
+        razorpayCheckout = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        razorpayCheckout = null
     }
 }

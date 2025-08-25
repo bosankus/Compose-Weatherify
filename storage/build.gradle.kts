@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
@@ -7,10 +9,8 @@ plugins {
 
 kotlin {
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = JavaVersion.VERSION_17.toString()
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -38,6 +38,8 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+
+        @Suppress("UNUSED_VARIABLE")
         val androidMain by getting {
             dependencies {
                 // Room dependencies
@@ -47,15 +49,17 @@ kotlin {
                 implementation("com.google.code.gson:gson:2.10.1")
                 // Network module dependency
                 implementation(project(":network"))
-                // Dagger/Hilt dependencies
-                implementation(Deps.hilt)
-                // We can't use kapt here directly, it will be applied in the android block
+                // Note: Hilt is provided from app module; storage has no DI annotations now
             }
         }
+
+        @Suppress("UNUSED_VARIABLE")
         val androidUnitTest by getting
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
+
+        @Suppress("UNUSED_VARIABLE")
         val iosMain by creating {
             dependsOn(commonMain)
             iosX64Main.dependsOn(this)
@@ -65,6 +69,8 @@ kotlin {
         val iosX64Test by getting
         val iosArm64Test by getting
         val iosSimulatorArm64Test by getting
+
+        @Suppress("UNUSED_VARIABLE")
         val iosTest by creating {
             dependsOn(commonTest)
             iosX64Test.dependsOn(this)
@@ -96,10 +102,8 @@ android {
     }
 }
 
-// Apply kapt plugin for Room and Hilt annotation processing
+// Apply kapt plugin for Room annotation processing only (Hilt moved to app module)
 dependencies {
     // Room annotation processor
     "kapt"(Deps.roomCompiler)
-    // Hilt annotation processor
-    "kapt"(Deps.hiltDaggerAndroidCompiler)
 }

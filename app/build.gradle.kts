@@ -1,4 +1,4 @@
-import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -23,6 +23,7 @@ android {
         versionName = ConfigData.versionName
         multiDexEnabled = ConfigData.multiDexEnabled
         testInstrumentationRunner = "bose.ankush.weatherify.helper.HiltTestRunner"
+        @Suppress("UnstableApiUsage")
         androidResources {
             localeFilters.addAll(listOf("en", "hi", "iw"))
         }
@@ -60,13 +61,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-        freeCompilerArgs = freeCompilerArgs + listOf(
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi"
-        )
-    }
 
     lint {
         abortOnError = false
@@ -75,10 +69,9 @@ android {
     namespace = "bose.ankush.weatherify"
 }
 
-composeCompiler {
-    featureFlags = setOf(
-        ComposeFeatureFlag.StrongSkipping.disabled()
-    )
+
+kapt {
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -131,6 +124,10 @@ dependencies {
     // Networking
     implementation(Deps.gson)
 
+    // Room runtime for providing WeatherDatabase from app DI
+    implementation(Deps.room)
+    implementation(Deps.roomKtx)
+
     // Firebase
     implementation(platform(Deps.firebaseBom))
     implementation(Deps.firebaseConfig)
@@ -146,6 +143,7 @@ dependencies {
     implementation(Deps.hilt)
     implementation(Deps.hiltNavigationCompose)
     kapt(Deps.hiltDaggerAndroidCompiler)
+    kapt(Deps.hiltAndroidXCompiler)
 
     // Miscellaneous
     implementation(Deps.timber)
@@ -154,4 +152,18 @@ dependencies {
 
     // Memory leak
     debugImplementation(Deps.leakCanary)
+
+    // Payment SDK moved to app module
+    implementation(Deps.razorPay)
+}
+
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.addAll(
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi"
+        )
+    }
 }
