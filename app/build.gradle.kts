@@ -102,6 +102,7 @@ dependencies {
     debugImplementation(Deps.composeUiTooling)
     implementation(Deps.composeUiToolingPreview)
     implementation(Deps.composeMaterial3)
+    implementation(Deps.composeIconsExtended)
 
     // Unit Testing
     testImplementation(Deps.junit)

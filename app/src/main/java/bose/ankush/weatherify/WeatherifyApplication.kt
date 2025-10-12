@@ -2,7 +2,6 @@ package bose.ankush.weatherify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
@@ -33,7 +32,17 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
     }
 
     private fun enableTimber() {
-        Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        } else {
+            Timber.plant(object : Timber.Tree() {
+                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+                    // Only log WARN, ERROR, and WTF in release; avoid verbose/debug/info
+                    if (priority == android.util.Log.VERBOSE || priority == android.util.Log.DEBUG || priority == android.util.Log.INFO) return
+                    android.util.Log.println(priority, tag, message)
+                }
+            })
+        }
     }
 
     private fun createNotificationChannel() {
@@ -43,7 +52,7 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
             NotificationManager.IMPORTANCE_HIGH
         )
         val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }
 }

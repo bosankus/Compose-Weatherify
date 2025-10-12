@@ -17,9 +17,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
 
 @Singleton
 class DeviceLocationClient @Inject constructor(
@@ -90,7 +90,7 @@ class DeviceLocationClient @Inject constructor(
             return@suspendCancellableCoroutine
         }
 
-        client.lastLocation
+        client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
             .addOnSuccessListener { location ->
                 if (location != null) {
                     continuation.resume(Result.success(location))

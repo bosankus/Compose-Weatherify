@@ -28,6 +28,7 @@ object Deps {
     val composeUi by lazy { "androidx.compose.ui:ui" }
     val composeUiTooling by lazy { "androidx.compose.ui:ui-tooling" }
     val composeUiToolingPreview by lazy { "androidx.compose.ui:ui-tooling-preview" }
+    val composeIconsExtended by lazy { "androidx.compose.material:material-icons-extended" }
 
     // Unit Testing
     val junit by lazy { "junit:junit:${Versions.junit}" }

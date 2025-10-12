@@ -1,5 +1,7 @@
 package bose.ankush.network.di
 
+import bose.ankush.network.api.FeedbackApiService
+import bose.ankush.network.api.KtorFeedbackApiService
 import bose.ankush.network.api.KtorPaymentApiService
 import bose.ankush.network.api.KtorWeatherApiService
 import bose.ankush.network.api.PaymentApiService
@@ -10,6 +12,8 @@ import bose.ankush.network.auth.repository.AuthRepositoryImpl
 import bose.ankush.network.auth.storage.TokenStorage
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.common.NetworkConnectivity
+import bose.ankush.network.repository.FeedbackRepository
+import bose.ankush.network.repository.FeedbackRepositoryImpl
 import bose.ankush.network.repository.PaymentRepository
 import bose.ankush.network.repository.PaymentRepositoryImpl
 import bose.ankush.network.repository.WeatherRepository
@@ -178,4 +182,20 @@ fun createAuthRepository(
     val httpClient = createAuthenticatedHttpClient(tokenStorage)
     val apiService = KtorAuthApiService(httpClient, baseUrl, tokenStorage)
     return AuthRepositoryImpl(apiService, tokenStorage)
+}
+
+
+/**
+ * Factory function to create a FeedbackRepository instance
+ */
+fun createFeedbackRepository(
+    networkConnectivity: NetworkConnectivity,
+    tokenStorage: TokenStorage,
+    baseUrl: String = NetworkConstants.WEATHER_BASE_URL
+): FeedbackRepository {
+    val authRepository = createAuthRepository(tokenStorage, baseUrl)
+    val tokenManager = createTokenManager(tokenStorage, authRepository)
+    val httpClient = createAuthenticatedHttpClient(tokenManager)
+    val apiService: FeedbackApiService = KtorFeedbackApiService(httpClient, baseUrl)
+    return FeedbackRepositoryImpl(apiService, networkConnectivity)
 }

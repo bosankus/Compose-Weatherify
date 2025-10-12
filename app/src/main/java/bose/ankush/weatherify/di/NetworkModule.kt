@@ -6,8 +6,10 @@ import bose.ankush.network.auth.storage.TokenStorage
 import bose.ankush.network.common.AndroidNetworkConnectivity
 import bose.ankush.network.common.NetworkConnectivity
 import bose.ankush.network.di.createAuthRepository
+import bose.ankush.network.di.createFeedbackRepository
 import bose.ankush.network.di.createPaymentRepository
 import bose.ankush.network.di.createWeatherRepository
+import bose.ankush.network.repository.FeedbackRepository
 import bose.ankush.network.repository.PaymentRepository
 import bose.ankush.network.repository.WeatherRepository
 import dagger.Module
@@ -69,5 +71,17 @@ object NetworkModule {
         tokenStorage: TokenStorage
     ): AuthRepository {
         return createAuthRepository(tokenStorage)
+    }
+
+    /**
+     * Provides FeedbackRepository implementation from the network module
+     */
+    @Provides
+    @Singleton
+    fun provideFeedbackRepository(
+        networkConnectivity: NetworkConnectivity,
+        tokenStorage: TokenStorage
+    ): FeedbackRepository {
+        return createFeedbackRepository(networkConnectivity, tokenStorage)
     }
 }

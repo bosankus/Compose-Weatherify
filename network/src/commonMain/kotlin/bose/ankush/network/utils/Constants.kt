@@ -7,7 +7,7 @@ object NetworkConstants {
     /**
      * Base URL for the weather API
      */
-    const val WEATHER_BASE_URL = "https://data.androidplay.in/"
+    const val WEATHER_BASE_URL = "https://data.androidplay.in"
 
     /**
      * Cache expiration time in milliseconds (30 minutes)

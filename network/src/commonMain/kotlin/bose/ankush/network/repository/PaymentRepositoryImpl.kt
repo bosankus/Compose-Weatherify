@@ -15,17 +15,17 @@ class PaymentRepositoryImpl(
     private val networkConnectivity: NetworkConnectivity
 ) : PaymentRepository {
 
-    override suspend fun createOrder(request: CreateOrderRequest): CreateOrderResponse {
+    override suspend fun createOrder(request: CreateOrderRequest): Result<CreateOrderResponse> {
         if (!networkConnectivity.isNetworkAvailable()) {
-            throw IllegalStateException("No internet connection")
+            return Result.failure(IllegalStateException("No internet connection"))
         }
-        return apiService.createOrder(request)
+        return runCatching { apiService.createOrder(request) }
     }
 
-    override suspend fun verifyPayment(request: VerifyPaymentRequest): VerifyPaymentResponse {
+    override suspend fun verifyPayment(request: VerifyPaymentRequest): Result<VerifyPaymentResponse> {
         if (!networkConnectivity.isNetworkAvailable()) {
-            throw IllegalStateException("No internet connection")
+            return Result.failure(IllegalStateException("No internet connection"))
         }
-        return apiService.verifyPayment(request)
+        return runCatching { apiService.verifyPayment(request) }
     }
 }

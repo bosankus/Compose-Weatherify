@@ -11,11 +11,13 @@ import bose.ankush.network.model.VerifyPaymentResponse
 interface PaymentRepository {
     /**
      * Create an order on backend which in turn calls Razorpay Orders API
+     * Returns a Result wrapping either the response or an error
      */
-    suspend fun createOrder(request: CreateOrderRequest): CreateOrderResponse
+    suspend fun createOrder(request: CreateOrderRequest): Result<CreateOrderResponse>
 
     /**
      * Verify payment signature on backend
+     * Returns a Result wrapping either the response or an error
      */
-    suspend fun verifyPayment(request: VerifyPaymentRequest): VerifyPaymentResponse
+    suspend fun verifyPayment(request: VerifyPaymentRequest): Result<VerifyPaymentResponse>
 }

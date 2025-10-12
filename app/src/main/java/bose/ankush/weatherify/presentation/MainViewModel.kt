@@ -68,9 +68,9 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     private fun friendlyMessageFromThrowable(t: Throwable?): String {
-        return when {
-            t == null -> "Something went wrong. Please try again."
-            t is CancellationException -> "Request was cancelled. Please try again."
+        return when (t) {
+            null -> "Something went wrong. Please try again."
+            is CancellationException -> "Request was cancelled. Please try again."
             else -> "Something went wrong. Please try again."
         }
     }
@@ -352,7 +352,7 @@ class MainViewModel @Inject constructor(
                     stage = PaymentStage.CreatingOrder
                 )
             try {
-                val response = createOrder(
+                val result = createOrder(
                     CreateOrderRequest(
                         amount = amountPaise,
                         currency = currency,
@@ -362,43 +362,54 @@ class MainViewModel @Inject constructor(
                         notes = mapOf("note1" to "This is a note", "note2" to "Another note")
                     )
                 )
-                val data = response.extractData()
-                val key = BuildConfig.RAZORPAY_KEY
-                if (data == null)
-                    _paymentUiState.value = _paymentUiState.value.copy(
-                        loading = false,
-                        message = friendlyMessageFromServer(response.message),
-                        stage = PaymentStage.Failure
-                    )
-                else if (key.isBlank())
-                    _paymentUiState.value = _paymentUiState.value.copy(
-                        loading = false,
-                        message = "Payment is temporarily unavailable. Please try again later.",
-                        stage = PaymentStage.Failure
-                    )
-                else if (data.orderId.isBlank() || data.amount <= 0L || data.currency.isBlank())
-                    _paymentUiState.value = _paymentUiState.value.copy(
-                        loading = false,
-                        message = "We couldn't start the payment. Please try again.",
-                        stage = PaymentStage.Failure
-                    )
-                else {
-                    _paymentEvents.trySend(
-                        PaymentEvent.LaunchCheckout(
-                            keyId = key,
-                            orderId = data.orderId,
-                            amount = data.amount,
-                            currency = data.currency,
-                            name = "Weatherify Subscription",
-                            description = "Premium Plan"
+                result.fold(
+                    onSuccess = { response ->
+                        val data = response.extractData()
+                        val key = BuildConfig.RAZORPAY_KEY
+                        if (data == null) {
+                            _paymentUiState.value = _paymentUiState.value.copy(
+                                loading = false,
+                                message = friendlyMessageFromServer(response.message),
+                                stage = PaymentStage.Failure
+                            )
+                        } else if (key.isBlank()) {
+                            _paymentUiState.value = _paymentUiState.value.copy(
+                                loading = false,
+                                message = "Payment is temporarily unavailable. Please try again later.",
+                                stage = PaymentStage.Failure
+                            )
+                        } else if (data.orderId.isBlank() || data.amount <= 0L || data.currency.isBlank()) {
+                            _paymentUiState.value = _paymentUiState.value.copy(
+                                loading = false,
+                                message = "We couldn't start the payment. Please try again.",
+                                stage = PaymentStage.Failure
+                            )
+                        } else {
+                            _paymentEvents.trySend(
+                                PaymentEvent.LaunchCheckout(
+                                    keyId = key,
+                                    orderId = data.orderId,
+                                    amount = data.amount,
+                                    currency = data.currency,
+                                    name = "Weatherify Subscription",
+                                    description = "Premium Plan"
+                                )
+                            )
+                            _paymentUiState.value = _paymentUiState.value.copy(
+                                loading = false,
+                                message = response.message ?: "Order created",
+                                stage = PaymentStage.AwaitingPayment
+                            )
+                        }
+                    },
+                    onFailure = { e ->
+                        _paymentUiState.value = _paymentUiState.value.copy(
+                            loading = false,
+                            message = friendlyMessageFromThrowable(e),
+                            stage = PaymentStage.Failure
                         )
-                    )
-                    _paymentUiState.value = _paymentUiState.value.copy(
-                        loading = false,
-                        message = response.message ?: "Order created",
-                        stage = PaymentStage.AwaitingPayment
-                    )
-                }
+                    }
+                )
             } catch (e: Exception) {
                 _paymentUiState.value = _paymentUiState.value.copy(
                     loading = false,
@@ -418,35 +429,46 @@ class MainViewModel @Inject constructor(
                     stage = PaymentStage.Verifying
                 )
             try {
-                val resp = verifyPayment(
+                val result = verifyPayment(
                     VerifyPaymentRequest(
                         razorpayOrderId = orderId,
                         razorpayPaymentId = paymentId,
                         razorpaySignature = signature
                     )
                 )
-                if (resp.success) {
-                    val cal = Calendar.getInstance(TimeZone.getDefault())
-                    cal.timeInMillis = System.currentTimeMillis()
-                    cal.add(Calendar.MONTH, 1)
-                    val expiry = cal.timeInMillis
-                    withContext(dispatchers.io) {
-                        preferenceManager.savePremiumStatus(true, expiry)
+                result.fold(
+                    onSuccess = { resp ->
+                        if (resp.success) {
+                            val cal = Calendar.getInstance(TimeZone.getDefault())
+                            cal.timeInMillis = System.currentTimeMillis()
+                            cal.add(Calendar.MONTH, 1)
+                            val expiry = cal.timeInMillis
+                            withContext(dispatchers.io) {
+                                preferenceManager.savePremiumStatus(true, expiry)
+                            }
+                            _paymentUiState.value = _paymentUiState.value.copy(
+                                loading = false,
+                                message = "Payment verified",
+                                stage = PaymentStage.Success,
+                                isPremiumActivated = true,
+                                expiryMillis = expiry
+                            )
+                        } else {
+                            _paymentUiState.value = _paymentUiState.value.copy(
+                                loading = false,
+                                message = friendlyMessageFromServer(resp.message),
+                                stage = PaymentStage.Failure
+                            )
+                        }
+                    },
+                    onFailure = { e ->
+                        _paymentUiState.value = _paymentUiState.value.copy(
+                            loading = false,
+                            message = friendlyMessageFromThrowable(e),
+                            stage = PaymentStage.Failure
+                        )
                     }
-                    _paymentUiState.value = _paymentUiState.value.copy(
-                        loading = false,
-                        message = "Payment verified",
-                        stage = PaymentStage.Success,
-                        isPremiumActivated = true,
-                        expiryMillis = expiry
-                    )
-                } else {
-                    _paymentUiState.value = _paymentUiState.value.copy(
-                        loading = false,
-                        message = friendlyMessageFromServer(resp.message),
-                        stage = PaymentStage.Failure
-                    )
-                }
+                )
             } catch (e: Exception) {
                 _paymentUiState.value = _paymentUiState.value.copy(
                     loading = false,

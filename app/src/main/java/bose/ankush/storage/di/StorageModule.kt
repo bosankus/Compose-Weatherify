@@ -1,6 +1,4 @@
-/*
-Moved to app module: bose.ankush.storage.di.StorageModule
-This file is kept as a comment-only placeholder to avoid Hilt in storage module.
+package bose.ankush.storage.di
 
 import android.content.Context
 import androidx.room.Room
@@ -28,7 +26,6 @@ object StorageModule {
     @Provides
     @Singleton
     fun provideGson(): Gson = Gson()
-
     @Provides
     @Singleton
     fun provideJsonParser(gson: Gson): JsonParser = JsonParser(gson)
@@ -51,7 +48,7 @@ object StorageModule {
             WEATHER_DATABASE_NAME
         )
             .addTypeConverter(converters)
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(false)
             .build()
     }
 
@@ -72,7 +69,3 @@ object StorageModule {
         return TokenStorageImpl(weatherDatabase)
     }
 }
-
-// Moved to app module: bose.ankush.storage.di.StorageModule
-// This placeholder file intentionally left empty to avoid Hilt in storage module.
-*/
