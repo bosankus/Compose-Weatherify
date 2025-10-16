@@ -1,6 +1,7 @@
 package bose.ankush.weatherify.presentation.home.component
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,18 +14,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,23 +65,22 @@ private fun rememberAqiUiState(aqi: Int): AqiUiState {
 @Composable
 internal fun BriefAirQualityReportCardLayout(airQuality: AirQuality) {
     val aqiUiState = rememberAqiUiState(airQuality.aqi)
+    var isExpanded by remember { mutableStateOf(false) }
 
     Card(
+        onClick = { isExpanded = !isExpanded },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(24.dp), // Increased corner radius for a softer look
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp) // Lower elevation
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .animateContentSize(),
+        shape = RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
         ) {
-            AqiSummary(aqiUiState = aqiUiState)
+            AqiSummary(aqiUiState = aqiUiState, isExpanded = isExpanded)
             Spacer(modifier = Modifier.height(16.dp))
             HorizontalDivider(
                 Modifier,
@@ -83,13 +88,17 @@ internal fun BriefAirQualityReportCardLayout(airQuality: AirQuality) {
                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            PollutantsDetails(airQuality = airQuality)
+            if (isExpanded) {
+                ExpandedPollutantsDetails(airQuality = airQuality)
+            } else {
+                KeyPollutants(airQuality = airQuality)
+            }
         }
     }
 }
 
 @Composable
-private fun AqiSummary(aqiUiState: AqiUiState) {
+private fun AqiSummary(aqiUiState: AqiUiState, isExpanded: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -97,19 +106,20 @@ private fun AqiSummary(aqiUiState: AqiUiState) {
     ) {
         Box(
             modifier = Modifier
-                .size(72.dp) // Slightly smaller
+                .size(72.dp)
                 .background(aqiUiState.qualityColor, shape = CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = aqiUiState.formattedAqi,
-                style = MaterialTheme.typography.headlineMedium, // Adjusted style for size
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = contentColorFor(backgroundColor = aqiUiState.qualityColor)
             )
         }
 
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
             Text(
@@ -120,15 +130,20 @@ private fun AqiSummary(aqiUiState: AqiUiState) {
             Text(
                 text = aqiUiState.statusText,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold, // Slightly less bold
+                fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowDown,
+            contentDescription = if (isExpanded) "Collapse" else "Expand",
+            modifier = Modifier.rotate(if (isExpanded) 180f else 0f)
+        )
     }
 }
 
 @Composable
-private fun PollutantsDetails(airQuality: AirQuality) {
+private fun KeyPollutants(airQuality: AirQuality) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -138,16 +153,59 @@ private fun PollutantsDetails(airQuality: AirQuality) {
             PollutantItem(name = "CO", value = airQuality.co.toInt().toString())
             PollutantItem(name = "O₃", value = airQuality.o3.toInt().toString())
         }
-        Spacer(modifier = Modifier.height(12.dp))
+    }
+}
+
+@Composable
+fun ExpandedPollutantsDetails(airQuality: AirQuality) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            PollutantItem(
+                modifier = Modifier.weight(1f),
+                name = "CO",
+                value = airQuality.co.toInt().toString()
+            )
+            PollutantItem(
+                modifier = Modifier.weight(1f),
+                name = "NO₂",
+                value = airQuality.no2.toInt().toString()
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            PollutantItem(
+                modifier = Modifier.weight(1f),
+                name = "O₃",
+                value = airQuality.o3.toInt().toString()
+            )
+            PollutantItem(
+                modifier = Modifier.weight(1f),
+                name = "SO₂",
+                value = airQuality.so2.toInt().toString()
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            PollutantItem(
+                modifier = Modifier.weight(1f),
+                name = "PM10",
+                value = airQuality.pm10.toInt().toString()
+            )
+            PollutantItem(
+                modifier = Modifier.weight(1f),
+                name = "PM2.5",
+                value = airQuality.pm25.toInt().toString()
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = "Concentration in μg/m³",
-            style = MaterialTheme.typography.bodySmall, // Match PollutantItem name style
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
     }
 }
+
 
 /**
  * Returns a color based on the air quality index value
@@ -168,8 +226,9 @@ private fun getAirQualityColor(aqi: Int): Color {
  * Displays a single pollutant item with name and value
  */
 @Composable
-private fun PollutantItem(name: String, value: String) {
+private fun PollutantItem(name: String, value: String, modifier: Modifier = Modifier) {
     Column(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
