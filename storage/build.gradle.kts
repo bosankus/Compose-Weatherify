@@ -4,7 +4,7 @@ plugins {
     kotlin("multiplatform")
     id("com.android.library")
     kotlin("plugin.serialization")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 
 kotlin {
@@ -93,17 +93,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    // Room schema location
-    kapt {
-        arguments {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
-    }
 }
 
-// Apply kapt plugin for Room annotation processing only (Hilt moved to app module)
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+// KSP configuration for Room annotation processing (Hilt moved to app module)
 dependencies {
     // Room annotation processor
-    "kapt"(Deps.roomCompiler)
+    add("kspAndroid", Deps.roomCompiler)
 }

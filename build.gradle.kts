@@ -15,6 +15,7 @@ plugins {
     id("org.jetbrains.kotlin.multiplatform") version Versions.kotlin apply false
     id("org.jetbrains.kotlin.plugin.serialization") version Versions.kotlin apply false
     id("com.google.dagger.hilt.android") version Versions.hilt apply false
+    id("com.google.devtools.ksp") version Versions.ksp apply false
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version Versions.secretPlugin apply false
     id("org.jlleitschuh.gradle.ktlint") version Versions.ktLintGradlePlugin apply false
     id("com.diffplug.spotless") version Versions.spotlessVersion apply false

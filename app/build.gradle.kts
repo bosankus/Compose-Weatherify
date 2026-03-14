@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     id("com.google.gms.google-services")
     id("dagger.hilt.android.plugin")
     id("kotlin-parcelize")
@@ -26,12 +26,6 @@ android {
         @Suppress("UnstableApiUsage")
         androidResources {
             localeFilters.addAll(listOf("en", "hi", "iw"))
-        }
-    }
-
-    kapt {
-        arguments {
-            arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
 
@@ -70,8 +64,8 @@ android {
 }
 
 
-kapt {
-    correctErrorTypes = true
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -120,7 +114,7 @@ dependencies {
     androidTestImplementation(Deps.espressoCore)
     androidTestImplementation(Deps.espressoContrib)
     androidTestImplementation(Deps.hiltTesting)
-    kaptAndroidTest(Deps.hiltDaggerAndroidCompiler)
+    kspAndroidTest(Deps.hiltDaggerAndroidCompiler)
 
     // Networking
     implementation(Deps.gson)
@@ -143,8 +137,8 @@ dependencies {
     // Dependency Injection
     implementation(Deps.hilt)
     implementation(Deps.hiltNavigationCompose)
-    kapt(Deps.hiltDaggerAndroidCompiler)
-    kapt(Deps.hiltAndroidXCompiler)
+    ksp(Deps.hiltDaggerAndroidCompiler)
+    ksp(Deps.hiltAndroidXCompiler)
 
     // Miscellaneous
     implementation(Deps.timber)
