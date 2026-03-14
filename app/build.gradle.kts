@@ -23,10 +23,11 @@ android {
         versionName = ConfigData.versionName
         multiDexEnabled = ConfigData.multiDexEnabled
         testInstrumentationRunner = "bose.ankush.weatherify.helper.HiltTestRunner"
-        @Suppress("UnstableApiUsage")
-        androidResources {
-            localeFilters.addAll(listOf("en", "hi", "iw"))
-        }
+    }
+
+    @Suppress("UnstableApiUsage")
+    androidResources {
+        localeFilters.addAll(listOf("en", "hi", "he"))
     }
 
     packaging {

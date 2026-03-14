@@ -37,6 +37,7 @@ import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportC
 import bose.ankush.weatherify.presentation.home.component.CurrentWeatherReportLayout
 import bose.ankush.weatherify.presentation.home.component.DailyWeatherForecastReportLayout
 import bose.ankush.weatherify.presentation.home.component.HourlyWeatherForecastReportLayout
+import bose.ankush.weatherify.presentation.home.component.NotificationPermissionCard
 import bose.ankush.weatherify.presentation.home.component.WeatherAlertLayout
 import bose.ankush.weatherify.presentation.home.state.ErrorBackgroundAnimation
 import bose.ankush.weatherify.presentation.home.state.ShowError
@@ -65,7 +66,7 @@ fun HomeScreen(
         uiState.weatherData?.current?.weather?.isNotEmpty() == true ||
                 uiState.airQualityData != null -> {
             // Show data on UI
-            ShowUIContainer(uiState, navController)
+            ShowUIContainer(uiState, navController, viewModel)
         }
 
         else -> {
@@ -129,10 +130,12 @@ fun HandleScreenError(
 @Composable
 private fun ShowUIContainer(
     uiState: UIState,
-    navController: NavController
+    navController: NavController,
+    viewModel: MainViewModel? = null
 ) {
     val weatherReports = uiState.weatherData
     val airQualityReports = uiState.airQualityData
+    val showNotificationCard = viewModel?.showNotificationCardItem?.collectAsState()?.value ?: false
 
     // Create transition states for animations
     val currentWeatherTransitionState = remember { MutableTransitionState(false) }
@@ -187,6 +190,19 @@ private fun ShowUIContainer(
                     // Add state key to prevent unnecessary recompositions
                     state = rememberLazyListState()
                 ) {
+                    // Show notification permission card
+                    item(key = "notification_card") {
+                        NotificationPermissionCard(
+                            isVisible = showNotificationCard,
+                            onEnableClick = {
+                                viewModel?.updateNotificationPermission(launchState = true)
+                            },
+                            onDismiss = {
+                                viewModel?.updateShowNotificationBannerState(false)
+                            }
+                        )
+                    }
+
                     // Show current weather report - prioritize loading this first
                     item(key = "current_weather") {
                         weatherReports?.current?.let {

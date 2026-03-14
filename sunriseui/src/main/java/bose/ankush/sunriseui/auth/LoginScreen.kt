@@ -6,14 +6,16 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
@@ -140,16 +142,16 @@ fun LoginScreen(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp)
+                .imePadding()
         ) {
-            // Header Section with creative typography - aligned to the left with increased top margin
+            // Header Section with creative typography
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.TopStart)
                     .padding(top = 80.dp)
             ) {
                 // Animate the scale of the title when clicked
@@ -218,11 +220,15 @@ fun LoginScreen(
                 )
             }
 
-            // Form Section - positioned at the bottom of the screen
+            // Spacer to push form to bottom
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Form Section - scrollable when keyboard appears
+            val formScrollState = rememberScrollState()
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.BottomCenter),
+                    .verticalScroll(formScrollState),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(

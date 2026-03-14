@@ -41,6 +41,30 @@
     <string name="empty_city_list_error_txt">ओह तेरी! इस समय कोई शहर नहीं मिला। बाद में जांचें</string>
     <string name="empty_list">कोई विवरण नहीं मिला। कुछ देर बाद कोशिश करें।</string>
 
+    <!--Settings Screen-->
+    <string name="profile_title">प्रोफ़ाइल</string>
+    <string name="logout_btn_txt">लॉगआउट</string>
+    <string name="logout_confirmation_txt">क्या आप लॉगआउट करना चाहते हैं?</string>
+    <string name="logout_warning_txt">आपको अपने खाते को एक्सेस करने के लिए फिर से लॉगिन करना होगा।</string>
+    <string name="confirm_btn_txt">पुष्टि करें</string>
+    <string name="cancel_btn_txt">रद्द करें</string>
+    <string name="premium_get_txt">प्रीमियम प्राप्त करें</string>
+    <string name="premium_processing_txt">प्रक्रिया में…</string>
+    <string name="premium_processing_desc_txt">कृपया प्रतीक्षा करें जबकि हम आपकी प्रीमियम सदस्यता सक्रिय करते हैं।</string>
+    <string name="premium_unlock_desc_txt">सभी सुविधाओं को अनलॉक करें और विज्ञापन-मुक्त अनुभव का आनंद लें।</string>
+    <string name="premium_upgrade_btn_txt">अभी अपग्रेड करें</string>
+    <string name="premium_active_txt">आप प्रीमियम उपयोगकर्ता हैं</string>
+    <string name="premium_expires_txt">%1$s को समाप्त होता है</string>
+    <string name="premium_active_status_txt">सक्रिय</string>
+    <string name="premium_activated_txt">प्रीमियम सफलतापूर्वक सक्रिय किया गया!</string>
+    <string name="settings_notifications_txt">सूचनाएं</string>
+    <string name="settings_language_txt">भाषा</string>
+    <string name="legal_privacy_policy_txt">गोपनीयता नीति</string>
+    <string name="legal_terms_of_use_txt">उपयोग की शर्तें</string>
+    <string name="legal_app_version_txt">ऐप संस्करण</string>
+    <string name="settings_section_title">सेटिंग्स</string>
+    <string name="legal_section_title">कानूनी</string>
+
     <!--Content Descriptions-->
     <string name="weather_icon_content">मौसम की स्थिति आइकन</string>
     <string name="language_icon_content">भाषा परिवर्तन चिह्न</string>
@@ -50,4 +74,17 @@
     <string name="error_icon_content">त्रुटि चिह्</string>
     <string name="close_icon_content">बंद करें चिह्</string>
     <string name="daily_forecast_heading_txt">दैनिक पूर्वानुमान</string>
+    <string name="back_button_content">वापस बटन</string>
+    <string name="premium_icon_content">प्रीमियम सदस्यता आइकन</string>
+    <string name="notification_icon_content">सूचना सेटिंग्स आइकन</string>
+    <string name="privacy_icon_content">गोपनीयता नीति आइकन</string>
+    <string name="terms_icon_content">उपयोग की शर्तें आइकन</string>
+    <string name="info_icon_content">जानकारी आइकन</string>
+    <string name="arrow_right_icon_content">अगली स्क्रीन पर नेविगेट करें</string>
+    <string name="locale_config_error_txt">भाषा कॉन्फ़िगरेशन लोड करने में विफल। डिफ़ॉल्ट भाषा का उपयोग कर रहे हैं।</string>
+
+    <!--Notification Permission Card-->
+    <string name="notification_permission_title">अपडेट रहें</string>
+    <string name="notification_permission_message">मौसम सतर्कता के लिए सूचनाएं सक्षम करें</string>
+    <string name="enable_notification_btn">सक्षम करें</string>
 </resources>

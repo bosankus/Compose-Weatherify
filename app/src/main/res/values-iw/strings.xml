@@ -41,6 +41,30 @@
     <string name="empty_city_list_error_txt">גישה לא מורשית!</string>
     <string name="empty_list">לא נמצאו פרטים. נסה שוב מאוחר יותר</string>
 
+    <!--Settings Screen-->
+    <string name="profile_title">פרופיל</string>
+    <string name="logout_btn_txt">התנתקות</string>
+    <string name="logout_confirmation_txt">האם אתה בטוח שברצונך להתנתק?</string>
+    <string name="logout_warning_txt">יהיה עليך להתחבר שוב כדי לגשת לחשבונך.</string>
+    <string name="confirm_btn_txt">אישור</string>
+    <string name="cancel_btn_txt">ביטול</string>
+    <string name="premium_get_txt">קבל Premium</string>
+    <string name="premium_processing_txt">מעבד…</string>
+    <string name="premium_processing_desc_txt">אנא המתן בזמן שאנו מפעילים את מנוי Premium שלך.</string>
+    <string name="premium_unlock_desc_txt">בטל את כל התכונות והנהן מחוויה ללא פרסומות.</string>
+    <string name="premium_upgrade_btn_txt">שדרג עכשיו</string>
+    <string name="premium_active_txt">אתה משתמש Premium</string>
+    <string name="premium_expires_txt">פוקסה ב- %1$s</string>
+    <string name="premium_active_status_txt">פעיל</string>
+    <string name="premium_activated_txt">Premium הופעל בהצלחה!</string>
+    <string name="settings_notifications_txt">הודעות</string>
+    <string name="settings_language_txt">שפה</string>
+    <string name="legal_privacy_policy_txt">מדיניות פרטיות</string>
+    <string name="legal_terms_of_use_txt">תנאי שימוש</string>
+    <string name="legal_app_version_txt">גרסה אפליקציה</string>
+    <string name="settings_section_title">הגדרות</string>
+    <string name="legal_section_title">משפטי</string>
+
     <!--Content Descriptions-->
     <string name="weather_icon_content">סמל מצב מזג האוויר</string>
     <string name="language_icon_content">סמל שפה</string>
@@ -50,4 +74,17 @@
     <string name="error_icon_content">סמל שגיאה</string>
     <string name="close_icon_content">סמל סגירה</string>
     <string name="daily_forecast_heading_txt">תחזית יומית</string>
+    <string name="back_button_content">כפתור חזרה</string>
+    <string name="premium_icon_content">סמל מנוי Premium</string>
+    <string name="notification_icon_content">סמל הגדרות התראה</string>
+    <string name="privacy_icon_content">סמל מדיניות פרטיות</string>
+    <string name="terms_icon_content">סמל תנאי השימוש</string>
+    <string name="info_icon_content">סמל מידע</string>
+    <string name="arrow_right_icon_content">נווט למסך הבא</string>
+    <string name="locale_config_error_txt">כישלון בטעינת תצורת שפה. שימוש בשפה ברירת מחדל.</string>
+
+    <!--Notification Permission Card-->
+    <string name="notification_permission_title">להישאר מעודכן</string>
+    <string name="notification_permission_message">הפוך התראות חדשות מזג אוויר</string>
+    <string name="enable_notification_btn">הפוך</string>
 </resources>
