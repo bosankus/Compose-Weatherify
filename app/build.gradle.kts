@@ -125,10 +125,10 @@ dependencies {
 
     // Firebase
     implementation(platform(Deps.firebaseBom))
-    implementation(Deps.firebaseConfig)
-    implementation(Deps.firebaseAnalytics)
+    implementation("com.google.firebase:firebase-config")
+    implementation("com.google.firebase:firebase-analytics")
     implementation(Deps.firebasePerformanceMonitoring)
-    implementation(Deps.firebaseMessaging)
+    implementation("com.google.firebase:firebase-messaging")
 
     // Coroutines
     implementation(Deps.coroutinesCore)

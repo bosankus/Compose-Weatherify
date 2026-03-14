@@ -2,10 +2,10 @@ package bose.ankush.weatherify.data.remote_config
 
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
+import com.google.firebase.remoteconfig.remoteConfig
+import com.google.firebase.remoteconfig.remoteConfigSettings
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
