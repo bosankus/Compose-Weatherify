@@ -25,12 +25,12 @@ class WeatherRepositoryImpl @Inject constructor(
 
     override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality> =
         weatherStorage.getAirQualityReport(coordinates).map { entity ->
-            AirQualityMapper.mapToDomain(entity as AirQualityEntity)
+            (entity as? AirQualityEntity)?.let { AirQualityMapper.mapToDomain(it) } ?: AirQuality()
         }
 
     override fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherForecast?> =
         weatherStorage.getWeatherReport(location).map { entity ->
-            WeatherMapper.mapToDomain(entity as StorageWeatherEntity)
+            (entity as? StorageWeatherEntity)?.let { WeatherMapper.mapToDomain(it) }
         }
 
     /**

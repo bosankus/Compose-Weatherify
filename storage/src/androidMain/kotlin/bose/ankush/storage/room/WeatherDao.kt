@@ -27,10 +27,10 @@ interface WeatherDao {
     fun insertAirQuality(airQuality: AirQualityEntity)
 
     @Query("SELECT * from $WEATHER_DATABASE_NAME")
-    fun getWeather(): Flow<WeatherEntity>
+    fun getWeather(): Flow<WeatherEntity?>
 
     @Query("SELECT * from $AQ_DATABASE_NAME")
-    fun getAirQuality(): Flow<AirQualityEntity>
+    fun getAirQuality(): Flow<AirQualityEntity?>
 
     @Query("DELETE from $WEATHER_DATABASE_NAME")
     fun deleteAllWeatherDetails()
