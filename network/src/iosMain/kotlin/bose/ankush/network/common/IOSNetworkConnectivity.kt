@@ -1,28 +1,34 @@
 package bose.ankush.network.common
 
-import platform.Foundation.NSFileManager
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.value
 import platform.SystemConfiguration.SCNetworkReachabilityCreateWithName
-import platform.SystemConfiguration.SCNetworkReachabilityFlags
+import platform.SystemConfiguration.SCNetworkReachabilityFlagsVar
 import platform.SystemConfiguration.SCNetworkReachabilityGetFlags
 import platform.SystemConfiguration.kSCNetworkReachabilityFlagsReachable
-import platform.darwin.NULL
 
 /**
  * iOS implementation of NetworkConnectivity
  */
 class IOSNetworkConnectivity : NetworkConnectivity {
-    
+
+    @OptIn(ExperimentalForeignApi::class)
     override fun isNetworkAvailable(): Boolean {
         val reachability = SCNetworkReachabilityCreateWithName(
-            NULL,
+            null,
             "www.apple.com"
         ) ?: return false
-        
-        val flags = ULongArray(1)
-        if (SCNetworkReachabilityGetFlags(reachability, flags)) {
-            return (flags[0].toInt() and kSCNetworkReachabilityFlagsReachable.toInt()) != 0
+
+        return memScoped {
+            val flags = alloc<SCNetworkReachabilityFlagsVar>()
+            if (SCNetworkReachabilityGetFlags(reachability, flags.ptr)) {
+                (flags.value and kSCNetworkReachabilityFlagsReachable) != 0u
+            } else {
+                false
+            }
         }
-        
-        return false
     }
 }

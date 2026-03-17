@@ -25,6 +25,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,11 +36,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import bose.ankush.sunriseui.auth.LoginScreen
-import bose.ankush.sunriseui.components.rememberGlassmorphicSnackbarState
+import bose.ankush.sunriseui.components.NotificationToast
+import bose.ankush.sunriseui.components.ToastType
+import bose.ankush.sunriseui.components.rememberToastAnchorState
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
-import bose.ankush.weatherify.base.common.Extension.openUrlInBrowser
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
 import bose.ankush.weatherify.base.location.LocationClient
@@ -46,6 +50,7 @@ import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvide
 import bose.ankush.weatherify.base.permissions.PermissionAlertDialog
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
+import bose.ankush.weatherify.presentation.web.InAppWebView
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
@@ -94,18 +99,35 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                     )
                 }
 
-                // Glassmorphic snackbar state
-                val (showSnackbar, snackbarContent) = rememberGlassmorphicSnackbarState()
+                // Toast anchor state — auto-measures bottom bar height
+                val toastAnchorState = rememberToastAnchorState()
+
+                // NotificationToast state
+                var toastVisible by remember { mutableStateOf(false) }
+                var toastMessage by remember { mutableStateOf("") }
+                var toastTitle by remember { mutableStateOf("") }
+                var toastType by remember { mutableStateOf(ToastType.ERROR) }
+
+                fun showToast(
+                    message: String,
+                    title: String = "Error",
+                    type: ToastType = ToastType.ERROR
+                ) {
+                    toastMessage = message
+                    toastTitle = title
+                    toastType = type
+                    toastVisible = true
+                }
 
                 // Handle authentication state changes
                 LaunchedEffect(authState) {
                     when (authState) {
                         is AuthState.Error -> {
-                            showSnackbar((authState as AuthState.Error).message.asString(this@MainActivity))
+                            showToast((authState as AuthState.Error).message.asString(this@MainActivity))
                             viewModel.resetAuthState()
                         }
                         is AuthState.Success -> {
-                            showSnackbar("Authentication successful")
+                            showToast("Authentication successful", "Success", ToastType.SUCCESS)
                             viewModel.resetAuthState()
                         }
                         else -> Unit
@@ -116,10 +138,12 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                 LaunchedEffect(Unit) {
                     bose.ankush.network.auth.events.AuthEventBus.events.collect { event ->
                         if (event is bose.ankush.network.auth.events.AuthEvent.Unauthorized) {
-                            showSnackbar(
-                                event.message.ifBlank {
+                            showToast(
+                                message = event.message.ifBlank {
                                     "You need to log in again to continue using the app for security purposes."
-                                }
+                                },
+                                title = "Session Expired",
+                                type = ToastType.WARNING
                             )
                         }
                     }
@@ -191,34 +215,48 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                             LaunchedEffect(launchNotificationPermissionState.value) {
                                 viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
                             }
-                            AppNavigation(viewModel)
+                            AppNavigation(viewModel, toastAnchorState)
                         }
                         else -> {
-                            // Only show login screen if not logged in and auth is initialized
-                            LoginScreen(
-                                onLoginClick = { email, password ->
-                                    viewModel.login(
-                                        email,
-                                        password
-                                    )
-                                },
-                                onRegisterClick = { email, password ->
-                                    viewModel.register(
-                                        email,
-                                        password
-                                    )
-                                },
-                                onTermsClick = { context.openUrlInBrowser("https://data.androidplay.in/wfy/terms-and-conditions") },
-                                onPrivacyPolicyClick = { context.openUrlInBrowser("https://data.androidplay.in/wfy/privacy-policy") },
-                                isLoading = authState is AuthState.Loading
-                            )
+                            // State for web view
+                            var currentWebUrl by remember { mutableStateOf<String?>(null) }
+
+                            // Show web view if a URL is selected
+                            if (currentWebUrl != null) {
+                                InAppWebView(
+                                    url = currentWebUrl!!,
+                                    onClose = { currentWebUrl = null }
+                                )
+                            } else {
+                                // Only show login screen if not logged in and auth is initialized
+                                LoginScreen(
+                                    onLoginClick = { email, password ->
+                                        viewModel.login(
+                                            email,
+                                            password
+                                        )
+                                    },
+                                    onRegisterClick = { email, password ->
+                                        viewModel.register(
+                                            email,
+                                            password
+                                        )
+                                    },
+                                    onWebUrlClick = { url -> currentWebUrl = url },
+                                    isLoading = authState is AuthState.Loading
+                                )
+                            }
                         }
                     }
-                    // Overlay glassmorphic snackbar
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.BottomCenter
-                    ) { snackbarContent() }
+                    NotificationToast(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        message = toastMessage,
+                        title = toastTitle,
+                        type = toastType,
+                        isVisible = toastVisible,
+                        onDismiss = { toastVisible = false },
+                        anchorState = toastAnchorState
+                    )
                 }
             }
         }

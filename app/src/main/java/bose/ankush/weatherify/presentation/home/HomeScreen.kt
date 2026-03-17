@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import bose.ankush.sunriseui.components.SunriseSunsetCombinedAnimation
+import bose.ankush.sunriseui.components.ToastAnchorState
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.presentation.MainViewModel
@@ -48,7 +49,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun HomeScreen(
     viewModel: MainViewModel,
-    navController: NavController
+    navController: NavController,
+    toastAnchorState: ToastAnchorState? = null
 ) {
     val context: Context = LocalContext.current
     val uiState: UIState = viewModel.uiState.collectAsState().value
@@ -66,7 +68,7 @@ fun HomeScreen(
         uiState.weatherData?.current?.weather?.isNotEmpty() == true ||
                 uiState.airQualityData != null -> {
             // Show data on UI
-            ShowUIContainer(uiState, navController, viewModel)
+            ShowUIContainer(uiState, navController, viewModel, toastAnchorState)
         }
 
         else -> {
@@ -131,7 +133,8 @@ fun HandleScreenError(
 private fun ShowUIContainer(
     uiState: UIState,
     navController: NavController,
-    viewModel: MainViewModel? = null
+    viewModel: MainViewModel? = null,
+    toastAnchorState: ToastAnchorState? = null
 ) {
     val weatherReports = uiState.weatherData
     val airQualityReports = uiState.airQualityData
@@ -300,7 +303,8 @@ private fun ShowUIContainer(
             }, bottomBar = {
                 AppBottomBar(
                     isVisible = rememberSaveable { mutableStateOf(true) },
-                    navController = navController
+                    navController = navController,
+                    toastAnchorState = toastAnchorState
                 )
             })
     }

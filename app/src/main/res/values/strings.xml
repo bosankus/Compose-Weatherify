@@ -8,6 +8,14 @@
     <string name="account_screen">Profile</string>
     <string name="settings_screen">Settings</string>
 
+    <!-- Notification Strings -->
+    <string name="default_notification_channel_id" translatable="false">weatherify_notifications</string>
+    <string name="notification_channel_name" translatable="false">Weather Alerts</string>
+    <string name="notification_channel_description" translatable="false">Weather alerts and updates</string>
+    <string name="notification_title_default" translatable="false">Weather Update</string>
+    <string name="notification_message_default" translatable="false">New weather alert</string>
+
+
     <!--Nested NavGraph group name-->
     <string name="home_nested_nav">home_nested_nav</string>
     <string name="profile_nested_nav">profile_nested_nav</string>

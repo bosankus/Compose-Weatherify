@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import bose.ankush.language.presentation.LanguageScreen
+import bose.ankush.sunriseui.components.ToastAnchorState
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
@@ -25,7 +26,7 @@ const val LANGUAGE_ARGUMENT_KEY = "country_config"
 @SuppressLint("NewApi")
 @ExperimentalAnimationApi
 @Composable
-fun AppNavigation(viewModel: MainViewModel) {
+fun AppNavigation(viewModel: MainViewModel, toastAnchorState: ToastAnchorState? = null) {
     val navController = rememberNavController()
     val context = LocalContext.current
     NavHost(
@@ -42,7 +43,8 @@ fun AppNavigation(viewModel: MainViewModel) {
             ) {
                 HomeScreen(
                     viewModel = viewModel,
-                    navController = navController
+                    navController = navController,
+                    toastAnchorState = toastAnchorState
                 )
             }
             composable(
@@ -87,6 +89,7 @@ fun AppNavigation(viewModel: MainViewModel) {
                 SettingsScreen(
                     viewModel = viewModel,
                     navController = navController,
+                    toastAnchorState = toastAnchorState,
                     onLanguageNavAction = {
                         if (isDeviceSDKAndroid13OrAbove()) {
                             navController.navigate(Screen.LanguageScreen.withArgs(it))

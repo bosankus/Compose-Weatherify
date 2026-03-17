@@ -5,6 +5,8 @@ import android.app.NotificationManager
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 import javax.inject.Inject
@@ -23,8 +25,25 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
     override fun onCreate() {
         super.onCreate()
         enableTimber()
+        initializeFirebase()
         createNotificationChannel()
         initializeRemoteConfig()
+        subscribeToTopics()
+    }
+
+    private fun initializeFirebase() {
+        FirebaseApp.initializeApp(this)
+    }
+
+    private fun subscribeToTopics() {
+        FirebaseMessaging.getInstance().subscribeToTopic("weather_alerts")
+            .addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Timber.e(task.exception, "Failed to subscribe to weather_alerts topic")
+                } else {
+                    Timber.d("Successfully subscribed to weather_alerts topic")
+                }
+            }
     }
 
     private fun initializeRemoteConfig() {
@@ -50,9 +69,14 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
             NOTIFICATION_CHANNEL_ID,
             NOTIFICATION_NAME,
             NotificationManager.IMPORTANCE_HIGH
-        )
+        ).apply {
+            description = "Channel for weather alerts and updates"
+            enableVibration(true)
+        }
+
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
+        Timber.d("Notification channel created: $NOTIFICATION_CHANNEL_ID")
     }
 }

@@ -51,6 +51,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +62,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -69,15 +71,16 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.presentation.ui.Dimensions
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import bose.ankush.sunriseui.components.ToastAnchorState
 import bose.ankush.sunriseui.premium.PremiumBottomSheetContent
 import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.base.LocaleConfigMapper
-import bose.ankush.weatherify.base.common.Extension.openUrlInBrowser
 import bose.ankush.weatherify.presentation.AuthState
 import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
 import bose.ankush.weatherify.presentation.payment.PaymentStage
 import bose.ankush.weatherify.presentation.payment.PaymentUiState
+import bose.ankush.weatherify.presentation.web.InAppWebView
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -88,6 +91,7 @@ import java.util.Locale
 internal fun SettingsScreen(
     viewModel: MainViewModel,
     navController: NavController,
+    toastAnchorState: ToastAnchorState? = null,
     onLanguageNavAction: (Array<String>) -> Unit,
     onNotificationNavAction: () -> Unit
 ) {
@@ -108,6 +112,9 @@ internal fun SettingsScreen(
     // State for Premium bottom sheet
     val showPremiumBottomSheet = remember { mutableStateOf(false) }
     val bottomSheetState = rememberModalBottomSheetState()
+
+    // State for web view
+    val currentWebUrl = remember { mutableStateOf<String?>(null) }
 
     val paymentUiState = viewModel.paymentUiState.collectAsState().value
 
@@ -154,12 +161,12 @@ internal fun SettingsScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.profile_title), fontWeight = FontWeight.SemiBold) },
+                title = { Text("Profile", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.back_button_content)
+                            contentDescription = "Back"
                         )
                     }
                 },
@@ -173,28 +180,28 @@ internal fun SettingsScreen(
             LazyColumn(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .padding(horizontal = Dimensions.screen_horizontal_padding)
+                    .padding(horizontal = 16.dp)
             ) {
                 // Future enhancement: Add user profile section here
 
-                item { Spacer(modifier = Modifier.height(Dimensions.spacing_24)) }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
 
                 item {
                     PremiumCard(
                         paymentUiState = paymentUiState,
-                        onClick = onShowPremiumSheet
+                        onClick = { showPremiumBottomSheet.value = true }
                     )
                 }
 
-                item { Spacer(modifier = Modifier.height(Dimensions.spacing_24)) }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
 
                 // Settings Section
                 item {
                     AnimatedVisibility(
                         visibleState = settingsSectionState,
-                        enter = fadeIn(animationSpec = tween(durationMillis = Dimensions.Animation.SLOW)) +
+                        enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
                                 slideInVertically(
-                                    animationSpec = tween(durationMillis = Dimensions.Animation.SLOW),
+                                    animationSpec = tween(durationMillis = 500),
                                     initialOffsetY = { it / 3 }
                                 ),
                         exit = fadeOut()
@@ -206,15 +213,15 @@ internal fun SettingsScreen(
                     }
                 }
 
-                item { Spacer(modifier = Modifier.height(Dimensions.spacing_24)) }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
 
                 // Legal Section
                 item {
                     AnimatedVisibility(
                         visibleState = legalSectionState,
-                        enter = fadeIn(animationSpec = tween(durationMillis = Dimensions.Animation.SLOW)) +
+                        enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
                                 slideInVertically(
-                                    animationSpec = tween(durationMillis = Dimensions.Animation.SLOW),
+                                    animationSpec = tween(durationMillis = 500),
                                     initialOffsetY = { it / 3 }
                                 ),
                         exit = fadeOut()
@@ -223,21 +230,21 @@ internal fun SettingsScreen(
                     }
                 }
 
-                item { Spacer(modifier = Modifier.height(Dimensions.spacing_24)) }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
 
                 // Logout Button
                 item {
                     AnimatedVisibility(
                         visibleState = logoutButtonState,
-                        enter = fadeIn(animationSpec = tween(durationMillis = Dimensions.Animation.SLOW)) +
+                        enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
                                 slideInVertically(
-                                    animationSpec = tween(durationMillis = Dimensions.Animation.SLOW),
+                                    animationSpec = tween(durationMillis = 500),
                                     initialOffsetY = { it / 3 }
                                 ),
                         exit = fadeOut()
                     ) {
                         TextButton(
-                            onClick = onShowLogoutDialog,
+                            onClick = { showLogoutDialog.value = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
@@ -250,36 +257,20 @@ internal fun SettingsScreen(
                     }
                 }
 
-                item { Spacer(modifier = Modifier.height(Dimensions.spacing_24)) }
+                item { Spacer(modifier = Modifier.height(24.dp)) }
             }
 
             if (showLogoutDialog.value) {
                 AlertDialog(
                     onDismissRequest = { if (!isLoggingOut) showLogoutDialog.value = false },
-                    title = { Text(stringResource(R.string.logout_btn_txt)) },
-                    text = {
-                        Column {
-                            Text(stringResource(R.string.logout_confirmation_txt))
-                            Spacer(modifier = Modifier.height(Dimensions.spacing_8))
-                            Text(
-                                text = stringResource(R.string.logout_warning_txt),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                            )
-                        }
-                    },
+                    title = { Text(text = "Logout") },
+                    text = { Text(text = "Are you sure you want to logout?") },
                     confirmButton = {
-                        if (isLoggingOut) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(Dimensions.icon_default),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            TextButton(
-                                onClick = { viewModel.logout() }
-                            ) {
-                                Text(stringResource(R.string.confirm_btn_txt))
-                            }
+                        TextButton(
+                            onClick = { viewModel.logout() },
+                            enabled = !isLoggingOut
+                        ) {
+                            Text("Confirm")
                         }
                     },
                     dismissButton = {
@@ -287,7 +278,7 @@ internal fun SettingsScreen(
                             onClick = { showLogoutDialog.value = false },
                             enabled = !isLoggingOut
                         ) {
-                            Text(stringResource(R.string.cancel_btn_txt))
+                            Text("Cancel")
                         }
                     }
                 )
@@ -312,7 +303,7 @@ internal fun SettingsScreen(
         },
         bottomBar = {
             AppBottomBar(
-                isVisible = remember { mutableStateOf(true) },
+                isVisible = rememberSaveable { mutableStateOf(true) },
                 navController = navController
             )
         }
@@ -505,27 +496,26 @@ fun SettingsSection(
 }
 
 @Composable
-fun LegalSection() {
-    val context = LocalContext.current
-    val onPrivacyPolicyClick = remember(context) { { context.openUrlInBrowser("https://data.androidplay.in/wfy/privacy-policy") } }
-    val onTermsOfUseClick = remember(context) { { context.openUrlInBrowser("https://data.androidplay.in/wfy/terms-and-conditions") } }
-
+fun LegalSection(currentWebUrl: MutableState<String?>) {
+    LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(Dimensions.corner_radius_large))
+            .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .padding(vertical = Dimensions.spacing_8)
+            .padding(vertical = 8.dp)
     ) {
         SettingsItem(
             icon = Icons.Outlined.PrivacyTip,
-            title = stringResource(R.string.legal_privacy_policy_txt),
-            onClick = onPrivacyPolicyClick
+            title = "Privacy Policy",
+            onClick = { currentWebUrl.value = "https://data.androidplay.in/wfy/privacy-policy" }
         )
         SettingsItem(
             icon = Icons.Outlined.Gavel,
-            title = stringResource(R.string.legal_terms_of_use_txt),
-            onClick = onTermsOfUseClick
+            title = "Terms of Use",
+            onClick = {
+                currentWebUrl.value = "https://data.androidplay.in/wfy/terms-and-conditions"
+            }
         )
         SettingsItem(
             icon = Icons.Outlined.Info,
@@ -589,4 +579,69 @@ fun SettingsItem(
             )
         }
     }
+}
+
+// Preview functions
+
+@Preview(showBackground = true, name = "Unsubscribed Premium Card")
+@Composable
+fun PreviewUnsubscribedPremiumCard() {
+    PremiumCard(
+        paymentUiState = PaymentUiState(),
+        onClick = {}
+    )
+}
+
+@Preview(showBackground = true, name = "Subscribed Premium Card")
+@Composable
+fun PreviewSubscribedPremiumCard() {
+    val futureDate = System.currentTimeMillis() + (30 * 24 * 60 * 60 * 1000) // 30 days from now
+    PremiumCard(
+        paymentUiState = PaymentUiState(
+            isPremiumActivated = true,
+            expiryMillis = futureDate
+        ),
+        onClick = {}
+    )
+}
+
+@Preview(showBackground = true, name = "Settings Section")
+@Composable
+fun PreviewSettingsSection() {
+    SettingsSection(
+        onNotificationNavAction = {},
+        onLanguageNavAction = {}
+    )
+}
+
+@Preview(showBackground = true, name = "Legal Section")
+@Composable
+fun PreviewLegalSection() {
+    LegalSection(remember { mutableStateOf(null) })
+}
+
+@Preview(showBackground = true, name = "Settings Item")
+@Composable
+fun PreviewSettingsItem() {
+    SettingsItem(
+        icon = Icons.Outlined.Language,
+        title = "Language",
+        onClick = {}
+    )
+}
+
+@Preview(showBackground = true, name = "Settings Item with Trailing Content")
+@Composable
+fun PreviewSettingsItemWithTrailing() {
+    SettingsItem(
+        icon = Icons.Outlined.Info,
+        title = "App Version",
+        trailingContent = {
+            Text(
+                text = "1.0.0",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+    )
 }

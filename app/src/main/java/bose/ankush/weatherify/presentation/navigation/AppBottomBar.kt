@@ -30,12 +30,15 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import bose.ankush.sunriseui.components.ToastAnchorState
+import bose.ankush.sunriseui.components.toastAnchor
 import bose.ankush.weatherify.R
 
 @Composable
 fun AppBottomBar(
     isVisible: MutableState<Boolean>,
-    navController: NavController
+    navController: NavController,
+    toastAnchorState: ToastAnchorState? = null
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -46,6 +49,7 @@ fun AppBottomBar(
     )
 
     AnimatedVisibility(
+        modifier = if (toastAnchorState != null) Modifier.toastAnchor(toastAnchorState) else Modifier,
         visible = isVisible.value,
         enter = slideInVertically(initialOffsetY = { it }),
         exit = slideOutVertically(targetOffsetY = { it }),

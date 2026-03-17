@@ -15,11 +15,11 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,16 +59,14 @@ import androidx.compose.ui.unit.dp
  *
  * @param onLoginClick Callback when the login button is clicked
  * @param onRegisterClick Callback when the register button is clicked
- * @param onTermsClick Callback when the terms & conditions link is clicked
- * @param onPrivacyPolicyClick Callback when the privacy policy link is clicked
+ * @param onWebUrlClick Callback when a web URL (terms/privacy) link is clicked
  * @param isLoading Whether the screen is in loading state
  */
 @Composable
 fun LoginScreen(
     onLoginClick: (email: String, password: String) -> Unit,
     onRegisterClick: (email: String, password: String) -> Unit,
-    onTermsClick: () -> Unit = {},
-    onPrivacyPolicyClick: () -> Unit = {},
+    onWebUrlClick: (url: String) -> Unit = {},
     isLoading: Boolean = false
 ) {
     // State for form fields and validation
@@ -145,8 +142,9 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
                 .imePadding()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             // Header Section with creative typography
             Column(
@@ -220,15 +218,13 @@ fun LoginScreen(
                 )
             }
 
-            // Spacer to push form to bottom
-            Spacer(modifier = Modifier.height(32.dp))
+            // Spacer to push form to the bottom when there's available space
+            Spacer(modifier = Modifier.weight(1f))
 
-            // Form Section - scrollable when keyboard appears
-            val formScrollState = rememberScrollState()
+            // Form Section - naturally positioned after spacer
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(formScrollState),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
@@ -377,8 +373,6 @@ fun LoginScreen(
 
                     // Store the latest layout result for tap detection
                     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-                    val currentOnTermsClick by rememberUpdatedState(onTermsClick)
-                    val currentOnPrivacyPolicyClick by rememberUpdatedState(onPrivacyPolicyClick)
 
                     BasicText(
                         text = termsText,
@@ -401,8 +395,13 @@ fun LoginScreen(
                                             )
                                                 .firstOrNull()?.let { annotation ->
                                                     when (annotation.tag) {
-                                                        "terms" -> currentOnTermsClick()
-                                                        "privacy" -> currentOnPrivacyPolicyClick()
+                                                        "terms" -> {
+                                                            onWebUrlClick("https://data.androidplay.in/wfy/terms-and-conditions")
+                                                        }
+
+                                                        "privacy" -> {
+                                                            onWebUrlClick("https://data.androidplay.in/wfy/privacy-policy")
+                                                        }
                                                     }
                                                 }
                                         }
