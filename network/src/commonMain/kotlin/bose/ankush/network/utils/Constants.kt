@@ -17,7 +17,7 @@ object NetworkConstants {
     /**
      * Maximum number of retries for network requests
      */
-    const val MAX_RETRIES = 3
+    const val MAX_RETRIES = 1
 
     /**
      * Initial backoff delay in milliseconds for retry mechanism

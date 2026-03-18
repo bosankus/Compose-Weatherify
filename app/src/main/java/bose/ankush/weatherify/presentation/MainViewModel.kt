@@ -38,8 +38,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -245,12 +243,12 @@ class MainViewModel @Inject constructor(
                         Timber.tag(tag).e(e, "Location fetch failed")
                         val error = if (e is Exception) errorResponseFromException(e)
                         else UiText.StringResource(resId = R.string.general_error_txt)
-                        _uiState.update { UIState(error = error) }
+                        _uiState.update { it.copy(error = error) }
                     }
                 )
             } catch (e: CancellationException) {
                 Timber.tag(tag).d("Location fetch cancelled")
-                throw e
+                _uiState.update { it.copy(error = errorResponseFromException(e)) }
             } catch (e: Exception) {
                 Timber.tag(tag).e(e, "Error fetching location coordinates")
                 _uiState.update { it.copy(error = errorResponseFromException(e)) }
@@ -294,12 +292,11 @@ class MainViewModel @Inject constructor(
                             else UiText.StringResource(resId = R.string.general_error_txt)
                             _uiState.update { it.copy(isLoading = false, error = error) }
                         }
-                        .onEach { state -> _uiState.value = state }
-                        .launchIn(this)
+                        .collectLatest { state -> _uiState.value = state }
                 } else {
                     Timber.tag(tag).w("Location coordinates not found in preferences")
                     _uiState.update {
-                        UIState(
+                        it.copy(
                             isLoading = false,
                             error = UiText.StringResource(R.string.default_coordinates_txt)
                         )
@@ -307,7 +304,12 @@ class MainViewModel @Inject constructor(
                 }
             } catch (e: CancellationException) {
                 Timber.tag(tag).d("Initial data loading cancelled")
-                throw e
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = errorResponseFromException(e)
+                    )
+                }
             } catch (e: Exception) {
                 Timber.tag(tag).e(e, "Error in initial data loading")
                 _uiState.update {
