@@ -44,6 +44,7 @@ fun createBasicHttpClient(): HttpClient {
         isLenient = true
         prettyPrint = false
         encodeDefaults = true
+        coerceInputValues = true
     }
     return HttpClient(createPlatformHttpClient(json).engine) {
         install(ContentNegotiation) {
@@ -118,6 +119,7 @@ fun createAuthenticatedHttpClient(tokenManager: TokenManager): HttpClient {
         isLenient = true
         prettyPrint = false
         encodeDefaults = true
+        coerceInputValues = true
     }
 
     // Create a platform-specific HttpClient with authentication configuration
@@ -150,6 +152,7 @@ fun createAuthenticatedHttpClient(tokenStorage: TokenStorage): HttpClient {
         isLenient = true
         prettyPrint = false
         encodeDefaults = true
+        coerceInputValues = true
     }
 
     // Create a platform-specific HttpClient with authentication configuration
@@ -180,7 +183,7 @@ fun createAuthRepository(
 ): AuthRepository {
     // Use the legacy HttpClient for AuthRepository to avoid circular dependency
     val httpClient = createAuthenticatedHttpClient(tokenStorage)
-    val apiService = KtorAuthApiService(httpClient, baseUrl, tokenStorage)
+    val apiService = KtorAuthApiService(httpClient, baseUrl)
     return AuthRepositoryImpl(apiService, tokenStorage)
 }
 

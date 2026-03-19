@@ -3,6 +3,7 @@ package bose.ankush.weatherify.presentation.settings
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
@@ -38,10 +39,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -55,6 +56,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,18 +64,16 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import android.widget.Toast
-import bose.ankush.weatherify.R
-import bose.ankush.weatherify.presentation.ui.Dimensions
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import bose.ankush.sunriseui.components.ToastAnchorState
 import bose.ankush.sunriseui.premium.PremiumBottomSheetContent
 import bose.ankush.weatherify.BuildConfig
+import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.presentation.AuthState
 import bose.ankush.weatherify.presentation.MainViewModel
@@ -122,8 +122,8 @@ internal fun SettingsScreen(
     val showLogoutDialog = remember { mutableStateOf(false) }
 
     // Memoized callbacks
-    val onShowPremiumSheet = remember { { showPremiumBottomSheet.value = true } }
-    val onShowLogoutDialog = remember { { showLogoutDialog.value = true } }
+    remember { { showPremiumBottomSheet.value = true } }
+    remember { { showLogoutDialog.value = true } }
 
     // Observe auth state to reflect logout loading/success
     val authState = viewModel.authState.collectAsState().value
@@ -149,17 +149,24 @@ internal fun SettingsScreen(
         legalSectionState.targetState = false
         logoutButtonState.targetState = false
 
-        delay(Dimensions.Animation.STAGGER_DELAY_SMALL.toLong())
+        delay(100)
         settingsSectionState.targetState = true
-        delay(Dimensions.Animation.STAGGER_DELAY_MEDIUM.toLong())
+        delay(150)
         legalSectionState.targetState = true
-        delay(Dimensions.Animation.STAGGER_DELAY_MEDIUM.toLong())
+        delay(150)
         logoutButtonState.targetState = true
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
+    // Show web view if a URL is selected
+    if (currentWebUrl.value != null) {
+        InAppWebView(
+            url = currentWebUrl.value!!,
+            onClose = { currentWebUrl.value = null }
+        )
+    } else {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Profile", fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
@@ -226,7 +233,7 @@ internal fun SettingsScreen(
                                 ),
                         exit = fadeOut()
                     ) {
-                        LegalSection()
+                        LegalSection(currentWebUrl)
                     }
                 }
 
@@ -304,10 +311,12 @@ internal fun SettingsScreen(
         bottomBar = {
             AppBottomBar(
                 isVisible = rememberSaveable { mutableStateOf(true) },
-                navController = navController
+                navController = navController,
+                toastAnchorState = toastAnchorState
             )
         }
     )
+    }
 }
 
 @Composable
@@ -364,38 +373,39 @@ fun UnsubscribedPremiumCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(Dimensions.spacing_16),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(Dimensions.icon_xlarge),
-                strokeWidth = 3.dp,
-                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f)
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp),
+                color = MaterialTheme.colorScheme.tertiary
             )
-        } else {
-            Icon(
-                imageVector = Icons.Outlined.WorkspacePremium,
-                contentDescription = stringResource(R.string.premium_icon_content),
-                modifier = Modifier.size(Dimensions.icon_xlarge),
-                tint = MaterialTheme.colorScheme.onTertiaryContainer
-            )
+            Spacer(modifier = Modifier.height(12.dp))
         }
-        Spacer(modifier = Modifier.height(Dimensions.spacing_16))
+        Icon(
+            imageVector = Icons.Outlined.WorkspacePremium,
+            contentDescription = stringResource(R.string.premium_icon_content),
+            modifier = Modifier.size(56.dp),
+            tint = MaterialTheme.colorScheme.onTertiaryContainer
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(if (isLoading) R.string.premium_processing_txt else R.string.premium_get_txt),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onTertiaryContainer
         )
-        Spacer(modifier = Modifier.height(Dimensions.spacing_8))
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = stringResource(if (isLoading) R.string.premium_processing_desc_txt else R.string.premium_unlock_desc_txt),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f),
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(Dimensions.spacing_16))
+        Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = onClick,
             enabled = !isLoading,
@@ -414,23 +424,23 @@ fun SubscribedPremiumCard(paymentUiState: PaymentUiState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(Dimensions.spacing_16),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = Icons.Outlined.WorkspacePremium,
             contentDescription = stringResource(R.string.premium_icon_content),
-            modifier = Modifier.size(Dimensions.icon_xlarge),
+            modifier = Modifier.size(56.dp),
             tint = MaterialTheme.colorScheme.onPrimaryContainer
         )
-        Spacer(modifier = Modifier.height(Dimensions.spacing_16))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.premium_active_txt),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onPrimaryContainer
         )
-        Spacer(modifier = Modifier.height(Dimensions.spacing_8))
+        Spacer(modifier = Modifier.height(8.dp))
         val expiryTop = paymentUiState.expiryMillis
         if (expiryTop != null) {
             val dateStr = remember(expiryTop) {
@@ -476,9 +486,9 @@ fun SettingsSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(Dimensions.corner_radius_large))
+            .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .padding(vertical = Dimensions.spacing_8)
+            .padding(vertical = 8.dp)
     ) {
         if (shouldShowNotificationItem) {
             SettingsItem(
@@ -543,7 +553,7 @@ fun SettingsItem(
         modifier = Modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = Dimensions.spacing_16, vertical = Dimensions.spacing_16),
+            .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -554,10 +564,10 @@ fun SettingsItem(
             Icon(
                 imageVector = icon,
                 contentDescription = title,
-                modifier = Modifier.size(Dimensions.icon_default),
+                modifier = Modifier.size(24.dp),
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
-            Spacer(modifier = Modifier.width(Dimensions.spacing_16))
+            Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
@@ -569,7 +579,7 @@ fun SettingsItem(
             )
         }
         if (trailingContent != null) {
-            Spacer(modifier = Modifier.width(Dimensions.spacing_12))
+            Spacer(modifier = Modifier.width(12.dp))
             trailingContent()
         } else if (onClick != null) {
             Icon(

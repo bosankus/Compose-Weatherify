@@ -37,15 +37,29 @@ data class RefreshTokenRequest(
 )
 
 /**
- * Data class for authentication response data
+ * User role returned by the server on login/register/refresh.
+ * Unknown values from the server coerce to null (requires coerceInputValues = true in Json config).
+ */
+@Serializable
+enum class UserRole {
+    USER,
+    ADMIN
+}
+
+/**
+ * Data class for authentication response data.
+ * Defaults allow this to be used for both success and error shapes
+ * (e.g. TOKEN_NOT_EXPIRED only has errorCode, no token/email).
  */
 @Serializable
 data class AuthData(
-    val token: String? = null,
-    val email: String? = null,
-    val role: String? = null,
-    val isActive: Boolean? = null,
-    val isPremium: Boolean? = null
+    val token: String = "",
+    val email: String = "",
+    val role: UserRole? = null,
+    val isActive: Boolean = false,
+    val isPremium: Boolean = false,
+    val premiumExpiresAt: String? = null,
+    val errorCode: String? = null
 )
 
 /**

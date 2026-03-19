@@ -3,6 +3,8 @@ package bose.ankush.weatherify.presentation
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.network.auth.events.AuthEvent
+import bose.ankush.network.auth.events.AuthEventBus.emit
 import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.model.CreateOrderRequest
@@ -144,6 +146,11 @@ class MainViewModel @Inject constructor(
                     _isAuthInitialized.value = true
                     initialized = true
                     Timber.tag(tag).d("Auth initialization completed")
+
+                    // Silently refresh token in the background if user is logged in
+                    if (loggedIn) {
+                        silentTokenRefresh()
+                    }
                 }
             }
         }
@@ -383,16 +390,70 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /** Silently refresh token in the background (on app startup). */
+    private fun silentTokenRefresh() = viewModelScope.launch(dispatchers.io) {
+        try {
+            Timber.tag(tag).d("Starting silent token refresh")
+            val response = authRepository.refreshToken()
+
+            when {
+                response == null -> {
+                    Timber.tag(tag).w("Token refresh failed - null response")
+                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+                }
+
+                response.isSuccess() -> {
+                    Timber.tag(tag).i("Token refreshed successfully")
+                }
+
+                response.data?.errorCode == "TOKEN_NOT_EXPIRED" -> {
+                    // Token is still valid — no action needed
+                    Timber.tag(tag).d("Token is still valid, no refresh needed")
+                }
+
+                else -> {
+                    Timber.tag(tag).w("Token refresh failed - response: ${response.message}")
+                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+                }
+            }
+        } catch (e: Exception) {
+            Timber.tag(tag).e(e, "Silent token refresh error")
+            emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+        }
+    }
+
     /** Handle authentication response. */
     private fun handleAuthResponse(response: AuthResponse) {
         val token = response.data?.token
         if (response.isSuccess() && !token.isNullOrBlank()) {
             Timber.tag(tag).i("Authentication successful")
+            val data = response.data
+            if (data != null && data.isPremium) {
+                viewModelScope.launch {
+                    Timber.tag(tag).i("User is premium, saving premium status")
+                    val expiryMillis = data.premiumExpiresAt
+                        ?.let { parseIsoToMillis(it) }
+                        ?: (System.currentTimeMillis() + (365 * 24 * 60 * 60 * 1000L))
+                    preferenceManager.savePremiumStatus(
+                        isPremium = true,
+                        expiryMillis = expiryMillis
+                    )
+                    _paymentUiState.value = _paymentUiState.value.copy(isPremiumActivated = true)
+                }
+            }
             _authState.value = AuthState.Success
         } else {
-            Timber.tag(tag).w("Authentication failed - success: ${response.isSuccess()}, has token: ${!token.isNullOrBlank()}")
-            _authState.value = AuthState.Error(UiText.DynamicText(response.message ?: "Authentication failed"))
+            Timber.tag(tag)
+                .w("Authentication failed - success: ${response.isSuccess()}, has token: ${!token.isNullOrBlank()}")
+            _authState.value =
+                AuthState.Error(UiText.DynamicText(response.message ?: "Authentication failed"))
         }
+    }
+
+    private fun parseIsoToMillis(isoDate: String): Long? = try {
+        java.time.Instant.parse(isoDate).toEpochMilli()
+    } catch (_: Exception) {
+        null
     }
 
     /** Reset authentication state. */
@@ -444,6 +505,7 @@ class MainViewModel @Inject constructor(
                                     stage = PaymentStage.Failure
                                 )
                             }
+
                             key.isBlank() -> {
                                 Timber.tag(tag).e("Razorpay key not configured")
                                 _paymentUiState.value = _paymentUiState.value.copy(
@@ -452,16 +514,20 @@ class MainViewModel @Inject constructor(
                                     stage = PaymentStage.Failure
                                 )
                             }
+
                             data.orderId.isBlank() || data.amount <= 0L || data.currency.isBlank() -> {
-                                Timber.tag(tag).e("Invalid order data - orderId: ${data.orderId.isNotBlank()}, amount: ${data.amount > 0}, currency: ${data.currency.isNotBlank()}")
+                                Timber.tag(tag)
+                                    .e("Invalid order data - orderId: ${data.orderId.isNotBlank()}, amount: ${data.amount > 0}, currency: ${data.currency.isNotBlank()}")
                                 _paymentUiState.value = _paymentUiState.value.copy(
                                     loading = false,
                                     message = "We couldn't start the payment. Please try again.",
                                     stage = PaymentStage.Failure
                                 )
                             }
+
                             else -> {
-                                Timber.tag(tag).i("Order created successfully - orderId: ${data.orderId}")
+                                Timber.tag(tag)
+                                    .i("Order created successfully - orderId: ${data.orderId}")
                                 _paymentEvents.trySend(
                                     PaymentEvent.LaunchCheckout(
                                         keyId = key,
@@ -502,7 +568,8 @@ class MainViewModel @Inject constructor(
     /** Verify payment. */
     fun verifyPayment(orderId: String, paymentId: String, signature: String) =
         viewModelScope.launch {
-            Timber.tag(tag).d("Starting payment verification - orderId: $orderId, paymentId: $paymentId")
+            Timber.tag(tag)
+                .d("Starting payment verification - orderId: $orderId, paymentId: $paymentId")
 
             _paymentUiState.value =
                 _paymentUiState.value.copy(
@@ -532,7 +599,8 @@ class MainViewModel @Inject constructor(
                             withContext(dispatchers.io) {
                                 try {
                                     preferenceManager.savePremiumStatus(true, expiry)
-                                    Timber.tag(tag).d("Premium status saved to preferences - expiry: $expiry")
+                                    Timber.tag(tag)
+                                        .d("Premium status saved to preferences - expiry: $expiry")
                                 } catch (e: Exception) {
                                     Timber.tag(tag).e(e, "Error saving premium status")
                                 }

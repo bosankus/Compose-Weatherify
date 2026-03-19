@@ -1,13 +1,16 @@
 package bose.ankush.network.auth.interceptor
 
+import bose.ankush.network.auth.events.AuthEvent
+import bose.ankush.network.auth.events.AuthEventBus
 import bose.ankush.network.auth.storage.TokenStorage
 import bose.ankush.network.auth.token.TokenManager
+import bose.ankush.network.auth.token.TokenResult
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.plugins.HttpResponseValidator
+import io.ktor.client.plugins.api.Send
+import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.observer.ResponseObserver
 import io.ktor.client.request.header
-import io.ktor.client.statement.request
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 
@@ -18,58 +21,49 @@ import kotlinx.coroutines.runBlocking
  * @return A configured HttpClient with authentication headers and token refresh
  */
 fun HttpClientConfig<*>.configureAuth(tokenManager: TokenManager) {
-    // Add authorization header to all requests
-    defaultRequest {
-        runBlocking {
-            val token = tokenManager.getValidToken()
-            if (!token.isNullOrBlank()) {
-                header("Authorization", "Bearer $token")
+    install(createClientPlugin("AuthTokenPlugin") {
+        on(Send) { request ->
+            // Attach token before sending (suspend-friendly, no runBlocking)
+            tokenManager.getValidToken().tokenOrNull()?.takeIf { it.isNotBlank() }?.let { token ->
+                request.headers.append(HttpHeaders.Authorization, "Bearer $token")
             }
-        }
-    }
 
-    // Handle 401 Unauthorized responses by refreshing the token
-    HttpResponseValidator {
-        handleResponseExceptionWithRequest { exception, request ->
-            // Re-throw the exception to let the caller handle it
-            throw exception
-        }
-    }
+            val originalCall = proceed(request)
 
-    // Add response observer to handle 401 responses
-    install(ResponseObserver) {
-        onResponse { response ->
-            if (response.status == HttpStatusCode.Unauthorized) {
-                // Log the 401 response
-                println("[DEBUG_LOG] Received 401 Unauthorized response from ${response.request.url}")
+            // On 401, refresh token and retry once
+            if (originalCall.response.status == HttpStatusCode.Unauthorized) {
+                when (val refreshResult = tokenManager.handleUnauthorized()) {
+                    is TokenResult.Valid -> {
+                        request.headers.remove(HttpHeaders.Authorization)
+                        request.headers.append(
+                            HttpHeaders.Authorization,
+                            "Bearer ${refreshResult.token}"
+                        )
+                        proceed(request)
+                    }
 
-                // Attempt to refresh the token
-                runBlocking {
-                    val refreshed = tokenManager.handleUnauthorized()
-                    if (refreshed) {
-                        println("[DEBUG_LOG] Token refreshed successfully after 401 response")
-                    } else {
-                        println("[DEBUG_LOG] Failed to refresh token after 401 response; forcing logout and notifying UI")
-                        try {
-                            // Clear token so that app considers user logged out
-                            tokenManager.forceLogout()
-                        } catch (_: Exception) {
-                        }
-                        // Emit a global unauthorized event for the UI to react (navigate to login + snackbar)
-                        try {
-                            bose.ankush.network.auth.events.AuthEventBus.emit(
-                                bose.ankush.network.auth.events.AuthEvent.Unauthorized(
-                                    message = "For security, please log in again to continue using the app."
-                                )
-                            )
-                        } catch (e: Exception) {
-                            println("[DEBUG_LOG] Failed to emit Unauthorized event: ${e.message}")
-                        }
+                    is TokenResult.Error -> {
+                        val event = AuthEvent.Unauthorized(
+                            message = "Network error during re-authentication: ${refreshResult.exception.message}"
+                        )
+                        AuthEventBus.tryEmit(event)
+                        originalCall
+                    }
+
+                    is TokenResult.InvalidToken, is TokenResult.NoToken -> {
+                        tokenManager.forceLogout()
+                        val event = AuthEvent.Unauthorized(
+                            message = "For security, please log in again to continue using the app."
+                        )
+                        AuthEventBus.tryEmit(event)
+                        originalCall
                     }
                 }
+            } else {
+                originalCall
             }
         }
-    }
+    })
 }
 
 /**

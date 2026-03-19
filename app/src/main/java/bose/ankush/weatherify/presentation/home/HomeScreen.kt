@@ -38,7 +38,7 @@ import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportC
 import bose.ankush.weatherify.presentation.home.component.CurrentWeatherReportLayout
 import bose.ankush.weatherify.presentation.home.component.DailyWeatherForecastReportLayout
 import bose.ankush.weatherify.presentation.home.component.HourlyWeatherForecastReportLayout
-import bose.ankush.weatherify.presentation.home.component.NotificationPermissionCard
+import bose.ankush.weatherify.presentation.home.component.NotificationPermissionCardLayout
 import bose.ankush.weatherify.presentation.home.component.WeatherAlertLayout
 import bose.ankush.weatherify.presentation.home.state.ErrorBackgroundAnimation
 import bose.ankush.weatherify.presentation.home.state.ShowError
@@ -54,6 +54,7 @@ fun HomeScreen(
 ) {
     val context: Context = LocalContext.current
     val uiState: UIState = viewModel.uiState.collectAsState().value
+    val showNotificationCard = viewModel.showNotificationCardItem.collectAsState().value
 
     // reacting as per response state change
     when {
@@ -68,7 +69,14 @@ fun HomeScreen(
         uiState.weatherData?.current?.weather?.isNotEmpty() == true ||
                 uiState.airQualityData != null -> {
             // Show data on UI
-            ShowUIContainer(uiState, navController, viewModel, toastAnchorState)
+            ShowUIContainer(
+                uiState = uiState,
+                navController = navController,
+                toastAnchorState = toastAnchorState,
+                showNotificationCard = showNotificationCard,
+                onEnableNotificationClick = { viewModel.updateNotificationPermission(true) },
+                onDismissNotificationClick = { viewModel.updateShowNotificationBannerState(false) }
+            )
         }
 
         else -> {
@@ -133,12 +141,13 @@ fun HandleScreenError(
 private fun ShowUIContainer(
     uiState: UIState,
     navController: NavController,
-    viewModel: MainViewModel? = null,
-    toastAnchorState: ToastAnchorState? = null
+    toastAnchorState: ToastAnchorState? = null,
+    showNotificationCard: Boolean = false,
+    onEnableNotificationClick: () -> Unit = {},
+    onDismissNotificationClick: () -> Unit = {}
 ) {
     val weatherReports = uiState.weatherData
     val airQualityReports = uiState.airQualityData
-    val showNotificationCard = viewModel?.showNotificationCardItem?.collectAsState()?.value ?: false
 
     // Create transition states for animations
     val currentWeatherTransitionState = remember { MutableTransitionState(false) }
@@ -193,19 +202,6 @@ private fun ShowUIContainer(
                     // Add state key to prevent unnecessary recompositions
                     state = rememberLazyListState()
                 ) {
-                    // Show notification permission card
-                    item(key = "notification_card") {
-                        NotificationPermissionCard(
-                            isVisible = showNotificationCard,
-                            onEnableClick = {
-                                viewModel?.updateNotificationPermission(launchState = true)
-                            },
-                            onDismiss = {
-                                viewModel?.updateShowNotificationBannerState(false)
-                            }
-                        )
-                    }
-
                     // Show current weather report - prioritize loading this first
                     item(key = "current_weather") {
                         weatherReports?.current?.let {
@@ -224,6 +220,16 @@ private fun ShowUIContainer(
                                     weatherReports.daily?.firstOrNull()?.summary
                                 )
                             }
+                        }
+                    }
+
+                    // Show notification permission card if needed
+                    if (showNotificationCard) {
+                        item(key = "notification_permission") {
+                            NotificationPermissionCardLayout(
+                                onEnableClick = onEnableNotificationClick,
+                                onDismissClick = onDismissNotificationClick
+                            )
                         }
                     }
 

@@ -1,5 +1,6 @@
 package bose.ankush.network.auth.events
 
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -12,10 +13,16 @@ sealed class AuthEvent {
 }
 
 object AuthEventBus {
-    private val _events = MutableSharedFlow<AuthEvent>(extraBufferCapacity = 1)
+    private val _events = MutableSharedFlow<AuthEvent>(
+        replay = 1,
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
     val events: SharedFlow<AuthEvent> = _events
 
-    suspend fun emit(event: AuthEvent) {
-        _events.emit(event)
-    }
+    /** Suspends only if buffer == capacity after dropping oldest. */
+    suspend fun emit(event: AuthEvent) = _events.emit(event)
+
+    /** Never suspends; drops oldest if full. */
+    fun tryEmit(event: AuthEvent): Boolean = _events.tryEmit(event)
 }

@@ -11,8 +11,7 @@ import kotlinx.datetime.Clock
  */
 class TokenManager(
     private val tokenStorage: TokenStorage,
-    private val authRepository: AuthRepository,
-    private val debugLogging: Boolean = true
+    private val authRepository: AuthRepository
 ) {
     private val refreshMutex = Mutex()
     private var lastRefreshTime: Long = 0
@@ -21,14 +20,18 @@ class TokenManager(
     /**
      * Returns the current valid token, refreshing if necessary.
      */
-    suspend fun getValidToken(forceRefresh: Boolean = false): String? {
-        val currentToken = tokenStorage.getToken() ?: return null
+    suspend fun getValidToken(forceRefresh: Boolean = false): TokenResult {
+        val currentToken = tokenStorage.getToken()
+            ?: return TokenResult.NoToken
         val now = Clock.System.now().epochSeconds
         if (forceRefresh || canAttemptRefresh(now)) {
-            val refreshedToken = refreshToken(now)
-            if (refreshedToken != null) return refreshedToken
+            val result = refreshToken(now)
+            if (result.isValid()) return result
+            // On error, propagate it instead of falling back silently
+            if (result is TokenResult.Error) return result
+            if (result is TokenResult.InvalidToken) return result
         }
-        return currentToken
+        return TokenResult.Valid(currentToken)
     }
 
     private fun canAttemptRefresh(currentTime: Long): Boolean {
@@ -38,42 +41,54 @@ class TokenManager(
     /**
      * Refreshes the token if possible.
      */
-    suspend fun refreshToken(currentTime: Long = Clock.System.now().epochSeconds): String? =
+    suspend fun refreshToken(currentTime: Long = Clock.System.now().epochSeconds): TokenResult =
         refreshMutex.withLock {
             lastRefreshTime = currentTime
             try {
-                val response = authRepository.refreshToken() ?: return null
+                val response = authRepository.refreshToken()
+                    ?: return TokenResult.Error(IllegalStateException("Refresh returned null response"))
                 val newToken = response.data?.token
                 if (response.isSuccess() && !newToken.isNullOrBlank()) {
                     tokenStorage.saveToken(newToken)
-                    if (debugLogging) println("[DEBUG_LOG] Token refreshed successfully")
-                    return newToken
-                } else {
-                    if (debugLogging) println("[DEBUG_LOG] Token refresh failed: Invalid response")
+                    return TokenResult.Valid(newToken)
+                }
+                when (response.data?.errorCode) {
+                    "TOKEN_NOT_EXPIRED" -> {
+                        val existingToken = tokenStorage.getToken()
+                        return if (existingToken != null) TokenResult.Valid(existingToken)
+                        else TokenResult.NoToken
+                    }
+
+                    "TOKEN_INVALID" -> {
+                        return TokenResult.InvalidToken(response.data.errorCode)
+                    }
+
+                    else -> {
+                        return TokenResult.InvalidToken(response.data?.errorCode)
+                    }
                 }
             } catch (e: Exception) {
-                if (debugLogging) println("[DEBUG_LOG] Token refresh failed: ${e.message}")
+                return TokenResult.Error(e)
             }
-            return null
         }
 
     /**
      * Handles 401 Unauthorized by forcing a token refresh.
      */
-    suspend fun handleUnauthorized(): Boolean {
+    suspend fun handleUnauthorized(): TokenResult {
         lastRefreshTime = 0
-        return refreshToken() != null
+        return refreshToken()
     }
 
     /**
      * Forces logout by clearing any stored token.
      */
-    suspend fun forceLogout() {
-        try {
+    suspend fun forceLogout(): TokenResult {
+        return try {
             tokenStorage.clearToken()
-            if (debugLogging) println("[DEBUG_LOG] Forced logout: token cleared")
+            TokenResult.NoToken
         } catch (e: Exception) {
-            if (debugLogging) println("[DEBUG_LOG] Error during forceLogout: ${e.message}")
+            TokenResult.Error(e)
         }
     }
 }
