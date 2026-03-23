@@ -324,21 +324,13 @@ fun PremiumCard(
     paymentUiState: PaymentUiState,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
+    LocalContext.current
     val isPremiumActive =
         paymentUiState.isPremiumActivated || paymentUiState.stage == PaymentStage.Success
     val cardColors = if (isPremiumActive) {
         CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
     } else {
         CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-    }
-
-    // Show toast on successful payment
-    val toastMessage = stringResource(R.string.premium_activated_txt)
-    LaunchedEffect(paymentUiState.stage) {
-        if (paymentUiState.stage == PaymentStage.Success) {
-            Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show()
-        }
     }
 
     Card(

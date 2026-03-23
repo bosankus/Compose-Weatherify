@@ -38,7 +38,7 @@ data class RefreshTokenRequest(
 
 /**
  * User role returned by the server on login/register/refresh.
- * Unknown values from the server coerce to null (requires coerceInputValues = true in Json config).
+ * Unknown values from the server coerce to null (requires coerceInputValues = true in JSON config).
  */
 @Serializable
 enum class UserRole {
