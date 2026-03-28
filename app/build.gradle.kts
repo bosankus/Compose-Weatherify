@@ -71,6 +71,7 @@ ksp {
 
 dependencies {
 
+    api(project(":common-ui"))
     api(project(":language"))
     api(project(":storage"))
     api(project(":network"))

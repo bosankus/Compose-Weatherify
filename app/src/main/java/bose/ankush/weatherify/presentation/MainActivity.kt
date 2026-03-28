@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,7 +36,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import bose.ankush.sunriseui.auth.LoginScreen
+import bose.ankush.commonui.auth.LoginScreen
+import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.sunriseui.components.NotificationToast
 import bose.ankush.sunriseui.components.ToastType
 import bose.ankush.sunriseui.components.rememberToastAnchorState
@@ -47,7 +49,6 @@ import bose.ankush.weatherify.base.common.startInAppUpdate
 import bose.ankush.weatherify.base.location.LocationClient
 import bose.ankush.weatherify.base.permissions.CoarseLocationPermissionTextProvider
 import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvider
-import bose.ankush.weatherify.base.permissions.PermissionAlertDialog
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import bose.ankush.weatherify.presentation.web.InAppWebView
@@ -281,19 +282,31 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                 })
 
         permissionQueue.reversed().forEach { permission ->
+            val isPermanentlyDeclined = !shouldShowRequestPermissionRationale(permission)
+            val textProvider = when (permission) {
+                Manifest.permission.ACCESS_FINE_LOCATION -> FineLocationPermissionTextProvider()
+                Manifest.permission.ACCESS_COARSE_LOCATION -> CoarseLocationPermissionTextProvider()
+                else -> return@forEach
+            }
+
+            // Consumer owns back-press: exit the app when permanently declined
+            BackHandler(enabled = isPermanentlyDeclined) { finish() }
+
             PermissionAlertDialog(
-                permissionTextProvider = when (permission) {
-                    Manifest.permission.ACCESS_FINE_LOCATION -> FineLocationPermissionTextProvider()
-                    Manifest.permission.ACCESS_COARSE_LOCATION -> CoarseLocationPermissionTextProvider()
-                    else -> return@forEach
+                descriptionText = textProvider.getDescription(isPermanentlyDeclined),
+                isPermanentlyDeclined = isPermanentlyDeclined,
+                onPositiveAction = if (isPermanentlyDeclined) {
+                    { context.openAppSystemSettings() }
+                } else {
+                    {
+                        viewModel.dismissDialog()
+                        locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
+                    }
                 },
-                isPermanentlyDeclined = !shouldShowRequestPermissionRationale(permission),
-                onDismissClick = viewModel::dismissDialog,
-                onOkClick = {
-                    viewModel.dismissDialog()
-                    locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
-                },
-                onGoToAppSettingClick = { context.openAppSystemSettings() })
+                onNegativeAction = { finish() },
+                positiveButtonLabel = if (isPermanentlyDeclined) "Grant Permission" else "OK",
+                negativeButtonLabel = "Exit",
+            )
         }
 
         // Launch initial permission request if missing and queue is empty (first-launch scenario)
@@ -303,9 +316,11 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
             }
         }
 
-        // Also launch when there are items in the queue (e.g., after denial to show rationale)
+        // Re-launch only when rationale should be shown (not permanently declined)
         LaunchedEffect(permissionQueue.size) {
-            if (permissionQueue.isNotEmpty()) {
+            val hasRationalePermission =
+                permissionQueue.any { shouldShowRequestPermissionRationale(it) }
+            if (permissionQueue.isNotEmpty() && hasRationalePermission) {
                 locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
             }
         }
@@ -338,6 +353,13 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
     override fun onResume() {
         super.onResume()
         startInAppUpdate(this)
+        // If user granted a permission via system Settings and returned, clear it from the queue
+        val granted = viewModel.permissionDialogQueue.filter { permission ->
+            checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        }
+        if (granted.isNotEmpty()) {
+            viewModel.removeGrantedPermissions(granted)
+        }
     }
 
     /**

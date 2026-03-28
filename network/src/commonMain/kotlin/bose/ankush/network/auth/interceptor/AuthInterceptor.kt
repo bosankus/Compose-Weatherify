@@ -23,8 +23,8 @@ import kotlinx.coroutines.runBlocking
 fun HttpClientConfig<*>.configureAuth(tokenManager: TokenManager) {
     install(createClientPlugin("AuthTokenPlugin") {
         on(Send) { request ->
-            // Attach token before sending (suspend-friendly, no runBlocking)
-            tokenManager.getValidToken().tokenOrNull()?.takeIf { it.isNotBlank() }?.let { token ->
+            // Attach stored token before sending — no proactive refresh here
+            tokenManager.getStoredToken()?.takeIf { it.isNotBlank() }?.let { token ->
                 request.headers.append(HttpHeaders.Authorization, "Bearer $token")
             }
 

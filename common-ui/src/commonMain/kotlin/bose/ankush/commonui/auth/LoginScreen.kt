@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui.auth
+package bose.ankush.commonui.auth
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -50,12 +50,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
+// Multiplatform-safe email regex (replaces android.util.Patterns)
+private val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
 /**
  * Login Screen composable that displays a login form with email and password fields,
  * login/register toggle, and terms & conditions link.
+ *
+ * CMP-compatible: works on Android and iOS via Compose Multiplatform.
  *
  * @param onLoginClick Callback when the login button is clicked
  * @param onRegisterClick Callback when the register button is clicked
@@ -67,55 +71,40 @@ fun LoginScreen(
     onLoginClick: (email: String, password: String) -> Unit,
     onRegisterClick: (email: String, password: String) -> Unit,
     onWebUrlClick: (url: String) -> Unit = {},
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
 ) {
-    // State for form fields and validation
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var isLoginMode by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // State for header text animations
     var isTitleClicked by remember { mutableStateOf(false) }
     var isSubtitleClicked by remember { mutableStateOf(false) }
 
-    // Focus manager for keyboard navigation
     val focusManager = LocalFocusManager.current
 
-    // Email validation function
-    val isEmailValid = { email: String ->
-        android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    }
+    val isEmailValid = { input: String -> EMAIL_REGEX.matches(input) }
+    val isPasswordValid = { input: String -> input.length >= 6 }
 
-    // Password validation function
-    val isPasswordValid = { password: String ->
-        password.length >= 6
-    }
-
-    // Validate form inputs
     val validateInputs = {
         when {
             email.isBlank() -> {
                 errorMessage = "Email cannot be empty"
                 false
             }
-
             !isEmailValid(email) -> {
                 errorMessage = "Please enter a valid email address"
                 false
             }
-
             password.isBlank() -> {
                 errorMessage = "Password cannot be empty"
                 false
             }
-
             !isPasswordValid(password) -> {
                 errorMessage = "Password must be at least 6 characters"
                 false
             }
-
             else -> {
                 errorMessage = null
                 true
@@ -123,46 +112,34 @@ fun LoginScreen(
         }
     }
 
-    // Handle form submission
     val handleSubmit = {
         if (!isLoading && validateInputs()) {
-            if (isLoginMode) {
-                onLoginClick(email, password)
-            } else {
-                onRegisterClick(email, password)
-            }
+            if (isLoginMode) onLoginClick(email, password) else onRegisterClick(email, password)
         }
     }
 
-    // Main layout
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.background,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
         ) {
-            // Header Section with creative typography
+            // Header
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 80.dp)
+                    .padding(top = 80.dp),
             ) {
-                // Animate the scale of the title when clicked
                 val titleScale by animateFloatAsState(
                     targetValue = if (isTitleClicked) 1.1f else 1.0f,
-                    animationSpec = spring(
-                        dampingRatio = 0.4f,
-                        stiffness = 300f
-                    ),
-                    label = "titleScale"
+                    animationSpec = spring(dampingRatio = 0.4f, stiffness = 300f),
+                    label = "titleScale",
                 )
-
-                // Animate the color of the title when clicked
                 val titleColor = if (isTitleClicked) {
                     MaterialTheme.colorScheme.tertiary
                 } else {
@@ -171,32 +148,24 @@ fun LoginScreen(
 
                 Text(
                     text = if (isLoginMode) "Welcome Back" else "Create Account",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                     color = titleColor,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
                         .scale(titleScale)
-                        .clickable {
-                            // Toggle the clicked state
-                            isTitleClicked = !isTitleClicked
-                        }
+                        .clickable { isTitleClicked = !isTitleClicked },
                 )
 
-                // Animate the scale of the subtitle when clicked
                 val subtitleScale by animateFloatAsState(
                     targetValue = if (isSubtitleClicked) 1.1f else 1.0f,
                     animationSpec = tween(
                         durationMillis = 300,
-                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                        easing = androidx.compose.animation.core.FastOutSlowInEasing,
                     ),
-                    label = "subtitleScale"
+                    label = "subtitleScale",
                 )
-
-                // Animate the color of the subtitle when clicked
                 val subtitleColor = if (isSubtitleClicked) {
                     MaterialTheme.colorScheme.secondary
                 } else {
@@ -211,153 +180,142 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .scale(subtitleScale)
-                        .clickable {
-                            // Toggle the clicked state
-                            isSubtitleClicked = !isSubtitleClicked
-                        }
+                        .clickable { isSubtitleClicked = !isSubtitleClicked },
                 )
             }
 
-            // Spacer to push form to the bottom when there's available space
             Spacer(modifier = Modifier.weight(1f))
 
-            // Form Section - naturally positioned after spacer
+            // Form
             Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    // Email field
                     OutlinedTextField(
                         value = email,
-                        onValueChange = {
-                            email = it
-                            errorMessage = null
-                        },
+                        onValueChange = { email = it; errorMessage = null },
                         label = { Text("Email address") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
+                            imeAction = ImeAction.Next,
                         ),
                         keyboardActions = KeyboardActions(
-                            onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                            onNext = { focusManager.moveFocus(FocusDirection.Down) },
                         ),
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
                     )
 
-                    // Password field
                     OutlinedTextField(
                         value = password,
-                        onValueChange = {
-                            password = it
-                            errorMessage = null
-                        },
+                        onValueChange = { password = it; errorMessage = null },
                         label = { Text("Password") },
                         singleLine = true,
-                        visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                        visualTransformation = if (isPasswordVisible) {
+                            VisualTransformation.None
+                        } else {
+                            PasswordVisualTransformation()
+                        },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
+                            imeAction = ImeAction.Done,
                         ),
                         keyboardActions = KeyboardActions(
                             onDone = {
                                 focusManager.clearFocus()
                                 handleSubmit()
-                            }
+                            },
                         ),
                         trailingIcon = {
                             TextButton(
                                 onClick = { isPasswordVisible = !isPasswordVisible },
                                 enabled = !isLoading,
-                                contentPadding = ButtonDefaults.TextButtonWithIconContentPadding
+                                contentPadding = ButtonDefaults.TextButtonWithIconContentPadding,
                             ) {
                                 Text(
                                     text = if (isPasswordVisible) "Hide" else "Show",
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = MaterialTheme.colorScheme.primary,
                                 )
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
                     )
 
-                    // Error message
                     if (errorMessage != null) {
                         Text(
                             text = errorMessage!!,
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Login/Register button
                     Button(
                         onClick = { handleSubmit() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
                         enabled = !isLoading,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(24.dp),
+                                modifier = Modifier.size(24.dp),
                                 color = MaterialTheme.colorScheme.onPrimary,
-                                strokeWidth = 2.dp
+                                strokeWidth = 2.dp,
                             )
                         } else {
                             Text(
                                 text = if (isLoginMode) "Sign In" else "Create Account",
                                 style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                )
+                                    fontWeight = FontWeight.Bold,
+                                ),
                             )
                         }
                     }
                 }
 
-                // Footer Section - moved outside the card
+                // Footer
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    // Login/Register toggle
                     TextButton(
                         onClick = { isLoginMode = !isLoginMode },
-                        enabled = !isLoading
+                        enabled = !isLoading,
                     ) {
                         Text(
-                            text = if (isLoginMode) "Don't have an account? Register" else "Already registered? Login",
+                            text = if (isLoginMode) {
+                                "Don't have an account? Register"
+                            } else {
+                                "Already registered? Login"
+                            },
                             color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
 
-                    // Terms & Conditions - using BasicText with pointerInput for links
                     val termsText = buildAnnotatedString {
                         append("By continuing, you agree to our ")
                         pushStringAnnotation(tag = "terms", annotation = "terms")
                         withStyle(
                             style = SpanStyle(
                                 color = MaterialTheme.colorScheme.primary,
-                                textDecoration = TextDecoration.Underline
-                            )
+                                textDecoration = TextDecoration.Underline,
+                            ),
                         ) { append("Terms & Conditions") }
                         pop()
                         append(" & ")
@@ -365,20 +323,19 @@ fun LoginScreen(
                         withStyle(
                             style = SpanStyle(
                                 color = MaterialTheme.colorScheme.primary,
-                                textDecoration = TextDecoration.Underline
-                            )
+                                textDecoration = TextDecoration.Underline,
+                            ),
                         ) { append("Privacy Policy") }
                         pop()
                     }
 
-                    // Store the latest layout result for tap detection
                     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
                     BasicText(
                         text = termsText,
                         style = MaterialTheme.typography.bodySmall.copy(
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -395,68 +352,18 @@ fun LoginScreen(
                                             )
                                                 .firstOrNull()?.let { annotation ->
                                                     when (annotation.tag) {
-                                                        "terms" -> {
-                                                            onWebUrlClick("https://data.androidplay.in/wfy/terms-and-conditions")
-                                                        }
-
-                                                        "privacy" -> {
-                                                            onWebUrlClick("https://data.androidplay.in/wfy/privacy-policy")
-                                                        }
+                                                        "terms" -> onWebUrlClick("https://data.androidplay.in/wfy/terms-and-conditions")
+                                                        "privacy" -> onWebUrlClick("https://data.androidplay.in/wfy/privacy-policy")
                                                     }
                                                 }
                                         }
                                     }
                                 }
                             },
-                        onTextLayout = { textLayoutResult = it }
+                        onTextLayout = { textLayoutResult = it },
                     )
                 }
             }
         }
-    }
-}
-
-/**
- * Preview of the LoginScreen in login mode (default state).
- */
-@Preview(showBackground = true, name = "Login Screen")
-@Composable
-fun LoginScreenPreview() {
-    MaterialTheme {
-        LoginScreen(
-            onLoginClick = { _, _ -> },
-            onRegisterClick = { _, _ -> },
-            isLoading = false
-        )
-    }
-}
-
-/**
- * Preview of the LoginScreen in register mode.
- */
-@Preview(showBackground = true, name = "Register Screen")
-@Composable
-fun RegisterScreenPreview() {
-    MaterialTheme {
-        LoginScreen(
-            onLoginClick = { _, _ -> },
-            onRegisterClick = { _, _ -> },
-            isLoading = false
-        )
-    }
-}
-
-/**
- * Preview of the LoginScreen with loading state.
- */
-@Preview(showBackground = true, name = "Loading State Screen")
-@Composable
-fun LoadingStatePreview() {
-    MaterialTheme {
-        LoginScreen(
-            onLoginClick = { _, _ -> },
-            onRegisterClick = { _, _ -> },
-            isLoading = true
-        )
     }
 }

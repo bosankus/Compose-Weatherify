@@ -1,5 +1,27 @@
 import org.gradle.api.artifacts.dsl.DependencyHandler
 
+// Compose Multiplatform runtime dependencies for the common-ui KMP module.
+// The version MUST match your Kotlin version. Check the table at:
+// https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-compatibility-and-versioning.html
+// Known mapping: Kotlin 2.1.x → CMP 1.7.x  |  Update below for your exact Kotlin version.
+object CmpVersions {
+    const val composeMultiplatform = "1.7.3"
+}
+
+object CmpDeps {
+    const val runtime = "org.jetbrains.compose.runtime:runtime:${CmpVersions.composeMultiplatform}"
+    const val ui = "org.jetbrains.compose.ui:ui:${CmpVersions.composeMultiplatform}"
+    const val foundation =
+        "org.jetbrains.compose.foundation:foundation:${CmpVersions.composeMultiplatform}"
+    const val material3 =
+        "org.jetbrains.compose.material3:material3:${CmpVersions.composeMultiplatform}"
+    const val animation =
+        "org.jetbrains.compose.animation:animation:${CmpVersions.composeMultiplatform}"
+    const val components =
+        "org.jetbrains.compose.components:components-resources:${CmpVersions.composeMultiplatform}"
+    const val uiTooling = "org.jetbrains.compose.ui:ui-tooling:${CmpVersions.composeMultiplatform}"
+}
+
 object KmmVersions {
     const val ktor = "2.3.13"
     const val kotlinxSerialization = "1.7.3"

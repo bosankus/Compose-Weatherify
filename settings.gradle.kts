@@ -24,6 +24,7 @@ rootProject.name = "Weatherify"
 
 include(
     ":app",
+    ":common-ui",
     ":language",
     ":network",
     ":storage",

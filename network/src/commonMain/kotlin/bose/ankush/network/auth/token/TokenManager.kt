@@ -15,28 +15,6 @@ class TokenManager(
 ) {
     private val refreshMutex = Mutex()
     private var lastRefreshTime: Long = 0
-    private val minRefreshInterval = 5 * 60L
-
-    /**
-     * Returns the current valid token, refreshing if necessary.
-     */
-    suspend fun getValidToken(forceRefresh: Boolean = false): TokenResult {
-        val currentToken = tokenStorage.getToken()
-            ?: return TokenResult.NoToken
-        val now = Clock.System.now().epochSeconds
-        if (forceRefresh || canAttemptRefresh(now)) {
-            val result = refreshToken(now)
-            if (result.isValid()) return result
-            // On error, propagate it instead of falling back silently
-            if (result is TokenResult.Error) return result
-            if (result is TokenResult.InvalidToken) return result
-        }
-        return TokenResult.Valid(currentToken)
-    }
-
-    private fun canAttemptRefresh(currentTime: Long): Boolean {
-        return (currentTime - lastRefreshTime) >= minRefreshInterval
-    }
 
     /**
      * Refreshes the token if possible.
@@ -71,6 +49,12 @@ class TokenManager(
                 return TokenResult.Error(e)
             }
         }
+
+    /**
+     * Returns the currently stored token without attempting a refresh.
+     * Used by the auth interceptor to attach a token to every outgoing request.
+     */
+    suspend fun getStoredToken(): String? = tokenStorage.getToken()
 
     /**
      * Handles 401 Unauthorized by forcing a token refresh.

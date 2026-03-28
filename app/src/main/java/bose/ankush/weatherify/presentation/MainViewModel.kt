@@ -7,6 +7,8 @@ import bose.ankush.network.auth.events.AuthEvent
 import bose.ankush.network.auth.events.AuthEventBus.emit
 import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.repository.AuthRepository
+import bose.ankush.network.auth.token.TokenManager
+import bose.ankush.network.auth.token.TokenResult
 import bose.ankush.network.model.CreateOrderRequest
 import bose.ankush.network.model.VerifyPaymentRequest
 import bose.ankush.weatherify.BuildConfig
@@ -63,6 +65,7 @@ class MainViewModel @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val remoteConfigService: RemoteConfigService,
     private val authRepository: AuthRepository,
+    private val tokenManager: TokenManager,
     private val createOrder: CreateOrder,
     private val verifyPayment: VerifyPayment
 ) : ViewModel() {
@@ -192,6 +195,25 @@ class MainViewModel @Inject constructor(
         if (permissionDialogQueue.isNotEmpty()) {
             val dismissed = permissionDialogQueue.removeAt(0)
             Timber.tag(tag).d("Dismissed permission dialog: $dismissed")
+        }
+    }
+
+    /** Remove all permissions from the queue that have been granted (e.g. via system Settings).
+     *  Also triggers location fetch if a location permission was among those granted. */
+    fun removeGrantedPermissions(grantedPermissions: List<String>) {
+        var locationGranted = false
+        grantedPermissions.forEach { permission ->
+            permissionDialogQueue.remove(permission)
+            Timber.tag(tag).d("Removed granted permission from queue: $permission")
+            if (permission == android.Manifest.permission.ACCESS_FINE_LOCATION ||
+                permission == android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) {
+                locationGranted = true
+            }
+        }
+        if (locationGranted) {
+            Timber.tag(tag).d("Location permission granted via Settings, fetching location")
+            fetchAndSaveLocationCoordinates()
         }
     }
 
@@ -392,33 +414,15 @@ class MainViewModel @Inject constructor(
 
     /** Silently refresh token in the background (on app startup). */
     private fun silentTokenRefresh() = viewModelScope.launch(dispatchers.io) {
-        try {
-            Timber.tag(tag).d("Starting silent token refresh")
-            val response = authRepository.refreshToken()
-
-            when {
-                response == null -> {
-                    Timber.tag(tag).w("Token refresh failed - null response")
-                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
-                }
-
-                response.isSuccess() -> {
-                    Timber.tag(tag).i("Token refreshed successfully")
-                }
-
-                response.data?.errorCode == "TOKEN_NOT_EXPIRED" -> {
-                    // Token is still valid — no action needed
-                    Timber.tag(tag).d("Token is still valid, no refresh needed")
-                }
-
-                else -> {
-                    Timber.tag(tag).w("Token refresh failed - response: ${response.message}")
-                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
-                }
+        Timber.tag(tag).d("Starting silent token refresh")
+        when (val result = tokenManager.refreshToken()) {
+            is TokenResult.Valid -> Timber.tag(tag).i("Token refreshed successfully")
+            is TokenResult.NoToken -> emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+            is TokenResult.InvalidToken -> emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+            is TokenResult.Error -> {
+                Timber.tag(tag).e(result.exception, "Silent token refresh error")
+                emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
             }
-        } catch (e: Exception) {
-            Timber.tag(tag).e(e, "Silent token refresh error")
-            emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
         }
     }
 

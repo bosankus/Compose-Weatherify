@@ -3,11 +3,13 @@ package bose.ankush.weatherify.di
 import android.content.Context
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.auth.storage.TokenStorage
+import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.common.AndroidNetworkConnectivity
 import bose.ankush.network.common.NetworkConnectivity
 import bose.ankush.network.di.createAuthRepository
 import bose.ankush.network.di.createFeedbackRepository
 import bose.ankush.network.di.createPaymentRepository
+import bose.ankush.network.di.createTokenManager
 import bose.ankush.network.di.createWeatherRepository
 import bose.ankush.network.repository.FeedbackRepository
 import bose.ankush.network.repository.PaymentRepository
@@ -71,6 +73,19 @@ object NetworkModule {
         tokenStorage: TokenStorage
     ): AuthRepository {
         return createAuthRepository(tokenStorage)
+    }
+
+    /**
+     * Provides TokenManager singleton for use in ViewModels.
+     * Shares the same AuthRepository singleton used elsewhere in the app.
+     */
+    @Provides
+    @Singleton
+    fun provideTokenManager(
+        tokenStorage: TokenStorage,
+        authRepository: AuthRepository
+    ): TokenManager {
+        return createTokenManager(tokenStorage, authRepository)
     }
 
     /**
