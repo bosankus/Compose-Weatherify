@@ -348,8 +348,10 @@ private fun configureWebView(
             error: WebResourceError?
         ) {
             super.onReceivedError(view, request, error)
-            val errorDesc = error?.description?.toString() ?: "Unknown error"
-            onError("Failed to load: $errorDesc")
+            if (request?.isForMainFrame == true) {
+                val errorDesc = error?.description?.toString() ?: "Unknown error"
+                onError("Failed to load: $errorDesc")
+            }
         }
 
         override fun onReceivedHttpError(
@@ -358,9 +360,11 @@ private fun configureWebView(
             errorResponse: android.webkit.WebResourceResponse?
         ) {
             super.onReceivedHttpError(view, request, errorResponse)
-            val statusCode = errorResponse?.statusCode ?: 0
-            val reason = errorResponse?.reasonPhrase ?: "Unknown error"
-            onError("HTTP Error $statusCode: $reason")
+            if (request?.isForMainFrame == true) {
+                val statusCode = errorResponse?.statusCode ?: 0
+                val reason = errorResponse?.reasonPhrase ?: "Unknown error"
+                onError("HTTP Error $statusCode: $reason")
+            }
         }
 
         override fun onReceivedSslError(
