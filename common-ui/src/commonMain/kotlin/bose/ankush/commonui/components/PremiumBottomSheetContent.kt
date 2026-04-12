@@ -30,36 +30,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 /**
+ * Holds localized strings for PremiumBottomSheetContent.
+ * Allows the KMP composable to accept platform-specific localized resources.
+ */
+data class PremiumBottomSheetStrings(
+    val title: String,
+    val features: List<String>,
+    val priceText: String,
+    val trialText: String,
+    val subscribeButtonText: String,
+    val startingText: String,
+    val cancelText: String
+)
+
+/**
  * Premium bottom sheet content UI. Stateless composable for multiplatform (CMP) compatibility.
  *
  * This is a pure presentation component with no internal state, allowing it to be used
  * across Android, iOS, and other Compose Multiplatform targets.
  *
- * @param title Header title text (e.g., "Premium")
- * @param features List of premium feature descriptions
- * @param priceText Pricing text (e.g., "$4.99/month")
- * @param trialText Trial information text (e.g., "7-day free trial, cancel anytime")
- * @param subscribeButtonText Text for subscribe button (e.g., "Subscribe")
- * @param startingText Text shown while loading (e.g., "Starting...")
- * @param cancelText Text for cancel button (e.g., "No Thanks")
+ * @param strings Localized strings for the premium UI (title, features, pricing, buttons)
  * @param isLoading Whether subscription is in progress - drives button state (disable/loading indicator)
  * @param onDismiss Callback when user cancels
  * @param onSubscribe Callback when user clicks subscribe
  */
 @Composable
 fun PremiumBottomSheetContent(
-    title: String = "Premium",
-    features: List<String> = listOf(
-        "Ad-Free Experience",
-        "Extended 15-day Forecasts",
-        "Severe Weather Alerts",
-        "Detailed Air Quality Data"
-    ),
-    priceText: String = "$4.99/month",
-    trialText: String = "7-day free trial, cancel anytime",
-    subscribeButtonText: String = "Subscribe",
-    startingText: String = "Starting...",
-    cancelText: String = "No Thanks",
+    strings: PremiumBottomSheetStrings,
     isLoading: Boolean = false,
     onDismiss: () -> Unit,
     onSubscribe: () -> Unit
@@ -72,7 +69,7 @@ fun PremiumBottomSheetContent(
     ) {
         // Header
         Text(
-            text = title,
+            text = strings.title,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
@@ -91,7 +88,7 @@ fun PremiumBottomSheetContent(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                features.forEach { feature ->
+                strings.features.forEach { feature ->
                     SimplePremiumFeature(feature)
                 }
             }
@@ -101,14 +98,14 @@ fun PremiumBottomSheetContent(
 
         // Pricing
         Text(
-            text = priceText,
+            text = strings.priceText,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
 
         Text(
-            text = trialText,
+            text = strings.trialText,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.padding(top = 4.dp)
@@ -138,7 +135,7 @@ fun PremiumBottomSheetContent(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = startingText,
+                        text = strings.startingText,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
@@ -146,7 +143,7 @@ fun PremiumBottomSheetContent(
                 }
             } else {
                 Text(
-                    text = subscribeButtonText,
+                    text = strings.subscribeButtonText,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
@@ -158,7 +155,7 @@ fun PremiumBottomSheetContent(
 
         // Cancel Button
         Text(
-            text = cancelText,
+            text = strings.cancelText,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier

@@ -54,6 +54,16 @@
     <string name="premium_expires_txt">%1$s ರಂದು ಅವಧಿ ಮೀರುತ್ತದೆ</string>
     <string name="premium_active_status_txt">ಸಕ್ರಿಯ</string>
     <string name="premium_activated_txt">ಪ್ರೀಮಿಯಂ ಯಶಸ್ವಿಯಾಗಿ ಸಕ್ರಿಯಗೊಂಡಿದೆ!</string>
+    <string name="premium_title_txt">ಪ್ರೀಮಿಯಂ</string>
+    <string name="premium_price_txt">$4.99/ತಿಂಗಳು</string>
+    <string name="premium_trial_txt">7 ದಿನಗಳ ಉಚಿತ ಪ್ರಯತ್ನ, ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ರದ್ದುಮಾಡಿ</string>
+    <string name="premium_subscribe_btn_txt">ಚಂದಾದಾರಿ</string>
+    <string name="premium_starting_txt">ಪ್ರಾರಂಭವಾಗುತ್ತಿದೆ…</string>
+    <string name="premium_no_thanks_txt">ಧನ್ಯವಾದ, ಇಲ್ಲ</string>
+    <string name="premium_feature_1_txt">ಜಾಹೀರಾತು-ಮುಕ್ತ ಅನುಭವ</string>
+    <string name="premium_feature_2_txt">ವಿಸ್ತೃತ 15-ದಿನಗಳ ಮುನ್ಸೂಚನೆ</string>
+    <string name="premium_feature_3_txt">ತೀವ್ರ ಹವಾಮಾನ ಎಚ್ಚರಿಕೆ</string>
+    <string name="premium_feature_4_txt">ವಿವರವಾದ ವಾಯು ಗುಣಮಟ್ಟ ಡೇಟಾ</string>
     <string name="settings_notifications_txt">ಅಧಿಸೂಚನೆಗಳು</string>
     <string name="settings_language_txt">ಭಾಷೆ</string>
     <string name="legal_privacy_policy_txt">ಗೋಪ್ಯತಾ ನೀತಿ</string>

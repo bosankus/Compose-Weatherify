@@ -54,6 +54,16 @@
     <string name="premium_expires_txt">%1$s அன்று காலாவதியாகும்</string>
     <string name="premium_active_status_txt">செயலில்</string>
     <string name="premium_activated_txt">பிரீமியம் வெற்றிகரமாக செயல்படுத்தப்பட்டது!</string>
+    <string name="premium_title_txt">பிரீமியம்</string>
+    <string name="premium_price_txt">$4.99/மாதம்</string>
+    <string name="premium_trial_txt">7 நாட்கள் இலவச சோதனை, எந்த நேரத்திலும் ரத்து செய்யலாம்</string>
+    <string name="premium_subscribe_btn_txt">சந்தா செய்க</string>
+    <string name="premium_starting_txt">தொடங்குகிறது…</string>
+    <string name="premium_no_thanks_txt">இல்லை, நன்றி</string>
+    <string name="premium_feature_1_txt">விளம்பரம் இல்லாத அভிজ்ஞதை</string>
+    <string name="premium_feature_2_txt">நீட்டிக்கப்பட்ட 15 நாட்கள் முன்னறிவிப்பு</string>
+    <string name="premium_feature_3_txt">கடுமையான வானிலை எச்சரிக்கைகள்</string>
+    <string name="premium_feature_4_txt">விரிவான காற்றின் தரம் தரவு</string>
     <string name="settings_notifications_txt">அறிவிப்புகள்</string>
     <string name="settings_language_txt">மொழி</string>
     <string name="legal_privacy_policy_txt">தனியுரிமைக் கொள்கை</string>

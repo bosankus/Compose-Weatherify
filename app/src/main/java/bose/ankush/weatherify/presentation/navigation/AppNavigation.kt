@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import bose.ankush.commonui.settings.SettingsScreen
+import bose.ankush.commonui.settings.SettingsScreenStrings
+import bose.ankush.commonui.components.PremiumBottomSheetStrings
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.payment.presentation.PaymentViewModel
@@ -104,6 +107,7 @@ fun AppNavigation(
                 val authState = viewModel.authState.collectAsState().value
                 val paymentUiState = paymentViewModel.uiState.collectAsState().value
                 val localeErrorMessage = stringResource(R.string.locale_config_error_txt)
+                val showLocaleError = remember { mutableStateOf(false) }
                 val languageList = remember(context) {
                     try {
                         LocaleConfigMapper.getAvailableLanguagesFromJson(
@@ -111,8 +115,15 @@ fun AppNavigation(
                             context = context
                         )
                     } catch (_: Exception) {
-                        Toast.makeText(context, localeErrorMessage, Toast.LENGTH_SHORT).show()
+                        showLocaleError.value = true
                         emptyArray()
+                    }
+                }
+
+                LaunchedEffect(showLocaleError.value) {
+                    if (showLocaleError.value) {
+                        Toast.makeText(context, localeErrorMessage, Toast.LENGTH_SHORT).show()
+                        showLocaleError.value = false
                     }
                 }
                 SettingsScreen(
@@ -138,6 +149,42 @@ fun AppNavigation(
                             viewModel.updateNotificationPermission(launchState = true)
                         }
                     },
+                    strings = SettingsScreenStrings(
+                        profileTitle = stringResource(R.string.profile_title),
+                        logout = stringResource(R.string.logout_btn_txt),
+                        logoutConfirmation = stringResource(R.string.logout_confirmation_txt),
+                        confirm = stringResource(R.string.confirm_btn_txt),
+                        cancel = stringResource(R.string.cancel_btn_txt),
+                        getPremium = stringResource(R.string.premium_get_txt),
+                        processing = stringResource(R.string.premium_processing_txt),
+                        processingDescription = stringResource(R.string.premium_processing_desc_txt),
+                        unlockDescription = stringResource(R.string.premium_unlock_desc_txt),
+                        upgradeNow = stringResource(R.string.premium_upgrade_btn_txt),
+                        premiumActive = stringResource(R.string.premium_active_txt),
+                        premiumExpires = stringResource(R.string.premium_expires_txt),
+                        premiumActiveStatus = stringResource(R.string.premium_active_status_txt),
+                        notificationsTitle = stringResource(R.string.settings_notifications_txt),
+                        languageTitle = stringResource(R.string.settings_language_txt),
+                        privacyPolicy = stringResource(R.string.legal_privacy_policy_txt),
+                        termsOfUse = stringResource(R.string.legal_terms_of_use_txt),
+                        appVersion = stringResource(R.string.legal_app_version_txt),
+                        backButtonDesc = stringResource(R.string.back_button_content),
+                        arrowRightDesc = stringResource(R.string.arrow_right_icon_content)
+                    ),
+                    premiumStrings = PremiumBottomSheetStrings(
+                        title = stringResource(R.string.premium_title_txt),
+                        features = listOf(
+                            stringResource(R.string.premium_feature_1_txt),
+                            stringResource(R.string.premium_feature_2_txt),
+                            stringResource(R.string.premium_feature_3_txt),
+                            stringResource(R.string.premium_feature_4_txt)
+                        ),
+                        priceText = stringResource(R.string.premium_price_txt),
+                        trialText = stringResource(R.string.premium_trial_txt),
+                        subscribeButtonText = stringResource(R.string.premium_subscribe_btn_txt),
+                        startingText = stringResource(R.string.premium_starting_txt),
+                        cancelText = stringResource(R.string.premium_no_thanks_txt)
+                    ),
                     toastAnchorState = toastAnchorState,
                     bottomBar = {
                         AppBottomBar(

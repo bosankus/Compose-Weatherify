@@ -59,6 +59,16 @@
     <string name="premium_expires_txt">פוקסה ב- %1$s</string>
     <string name="premium_active_status_txt">פעיל</string>
     <string name="premium_activated_txt">Premium הופעל בהצלחה!</string>
+    <string name="premium_title_txt">פרימיום</string>
+    <string name="premium_price_txt">$4.99/חודש</string>
+    <string name="premium_trial_txt">ניסיון בחינם של 7 ימים, ביטול בכל זמן</string>
+    <string name="premium_subscribe_btn_txt">הנו</string>
+    <string name="premium_starting_txt">בעדכון…</string>
+    <string name="premium_no_thanks_txt">לא, תודה</string>
+    <string name="premium_feature_1_txt">חוויה ללא פרסומות</string>
+    <string name="premium_feature_2_txt">תחזיות מעולות של 15 ימים</string>
+    <string name="premium_feature_3_txt">התראות מזג אוויר קשות</string>
+    <string name="premium_feature_4_txt">נתוני איכות אוויר מפורטים</string>
     <string name="settings_notifications_txt">הודעות</string>
     <string name="settings_language_txt">שפה</string>
     <string name="legal_privacy_policy_txt">מדיניות פרטיות</string>

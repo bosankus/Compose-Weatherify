@@ -54,6 +54,16 @@
     <string name="premium_expires_txt">%1$s ന് കാലഹരണപ്പെടും</string>
     <string name="premium_active_status_txt">സജീവം</string>
     <string name="premium_activated_txt">പ്രീമിയം വിജയകരമായി ആക്ടിവേറ്റ് ചെയ്തു!</string>
+    <string name="premium_title_txt">പ്രീമിയം</string>
+    <string name="premium_price_txt">$4.99/മാസം</string>
+    <string name="premium_trial_txt">7 ദിവസത്തെ ഫ്രീ ട്രയൽ, ഏത് സമയത്തും റദ്ദാക്കുക</string>
+    <string name="premium_subscribe_btn_txt">സബ്‌സ്‌ക്രൈബ് ചെയ്യുക</string>
+    <string name="premium_starting_txt">ആരംഭിക്കുന്നു…</string>
+    <string name="premium_no_thanks_txt">വേണ്ട, നന്ദി</string>
+    <string name="premium_feature_1_txt">പരസ്യം ഇല്ലാത്ത അനുഭവം</string>
+    <string name="premium_feature_2_txt">വിപുലമായ 15 ദിവസത്തെ പ്രവചനം</string>
+    <string name="premium_feature_3_txt">കഠിനമായ കാലാവസ്ഥ അലേർട്ടുകൾ</string>
+    <string name="premium_feature_4_txt">വിശദമായ വായു ഗുണനിലവാരം ഡേറ്റ</string>
     <string name="settings_notifications_txt">അറിയിപ്പുകൾ</string>
     <string name="settings_language_txt">ഭാഷ</string>
     <string name="legal_privacy_policy_txt">സ്വകാര്യതാ നയം</string>

@@ -45,6 +45,8 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
+            // Release signing config should be configured via gradle.properties or build command
+            // e.g., -Pandroid.injected.signing.store.file=/path/to/release.keystore
         }
     }
 

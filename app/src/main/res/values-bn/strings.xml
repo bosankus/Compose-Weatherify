@@ -54,6 +54,16 @@
     <string name="premium_expires_txt">%1$s তারিখে মেয়াদ শেষ</string>
     <string name="premium_active_status_txt">সক্রিয়</string>
     <string name="premium_activated_txt">প্রিমিয়াম সফলভাবে সক্রিয় হয়েছে!</string>
+    <string name="premium_title_txt">প্রিমিয়াম</string>
+    <string name="premium_price_txt">$4.99/মাস</string>
+    <string name="premium_trial_txt">7 দিনের বিনামূল্যে ট্রায়াল, যেকোনো সময় বাতিল করুন</string>
+    <string name="premium_subscribe_btn_txt">সাবস্ক্রাইব করুন</string>
+    <string name="premium_starting_txt">শুরু হচ্ছে…</string>
+    <string name="premium_no_thanks_txt">না, ধন্যবাদ</string>
+    <string name="premium_feature_1_txt">বিজ্ঞাপনমুক্ত অভিজ্ঞতা</string>
+    <string name="premium_feature_2_txt">বর্ধিত 15-দিনের পূর্বাভাস</string>
+    <string name="premium_feature_3_txt">গুরুতর আবহাওয়া সতর্কতা</string>
+    <string name="premium_feature_4_txt">বিস্তারিত বায়ু গুণমান ডেটা</string>
     <string name="settings_notifications_txt">বিজ্ঞপ্তি</string>
     <string name="settings_language_txt">ভাষা</string>
     <string name="legal_privacy_policy_txt">গোপনীয়তা নীতি</string>

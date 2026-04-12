@@ -4,8 +4,10 @@ import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.room.AirQualityEntity
 import bose.ankush.storage.room.WeatherDatabase
 import bose.ankush.storage.room.WeatherEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
 
 /**
  * Implementation of WeatherStorage that uses Room database for persistence.
@@ -53,10 +55,12 @@ class WeatherStorageImpl(
      * @param weatherEntity The weather data to save
      * @param airQualityEntity The air quality data to save
      */
-    fun saveWeatherData(
+    suspend fun saveWeatherData(
         weatherEntity: WeatherEntity,
         airQualityEntity: AirQualityEntity
     ) {
-        weatherDatabase.weatherDao().refreshWeather(weatherEntity, airQualityEntity)
+        withContext(Dispatchers.IO) {
+            weatherDatabase.weatherDao().refreshWeather(weatherEntity, airQualityEntity)
+        }
     }
 }

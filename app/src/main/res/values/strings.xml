@@ -68,6 +68,16 @@
     <string name="premium_expires_txt">Expires %1$s</string>
     <string name="premium_active_status_txt">Active</string>
     <string name="premium_activated_txt">Premium activated successfully!</string>
+    <string name="premium_title_txt">Premium</string>
+    <string name="premium_price_txt">$4.99/month</string>
+    <string name="premium_trial_txt">7-day free trial, cancel anytime</string>
+    <string name="premium_subscribe_btn_txt">Subscribe</string>
+    <string name="premium_starting_txt">Starting…</string>
+    <string name="premium_no_thanks_txt">No Thanks</string>
+    <string name="premium_feature_1_txt">Ad-Free Experience</string>
+    <string name="premium_feature_2_txt">Extended 15-day Forecasts</string>
+    <string name="premium_feature_3_txt">Severe Weather Alerts</string>
+    <string name="premium_feature_4_txt">Detailed Air Quality Data</string>
     <string name="settings_notifications_txt">Notifications</string>
     <string name="settings_language_txt">Language</string>
     <string name="legal_privacy_policy_txt">Privacy Policy</string>

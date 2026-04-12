@@ -59,13 +59,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.PremiumBottomSheetContent
+import bose.ankush.commonui.components.PremiumBottomSheetStrings
 import bose.ankush.commonui.components.ToastAnchorState
+import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.util.formatDate
 import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.payment.presentation.PaymentStage
 import bose.ankush.payment.presentation.PaymentUiState
 import kotlinx.coroutines.delay
+
+/**
+ * Holds localized strings for SettingsScreen.
+ * Allows the KMP composable to accept platform-specific localized resources.
+ */
+data class SettingsScreenStrings(
+    val profileTitle: String = "Profile",
+    val logout: String = "Logout",
+    val logoutConfirmation: String = "Are you sure you want to logout?",
+    val confirm: String = "Confirm",
+    val cancel: String = "Cancel",
+    val getPremium: String = "Get Premium",
+    val processing: String = "Processing…",
+    val processingDescription: String = "Please wait while we activate your premium subscription.",
+    val unlockDescription: String = "Unlock all features and enjoy an ad-free experience.",
+    val upgradeNow: String = "Upgrade Now",
+    val premiumActive: String = "You are a Premium User",
+    val premiumExpires: String = "Expires %s",
+    val premiumActiveStatus: String = "Active",
+    val notificationsTitle: String = "Notifications",
+    val languageTitle: String = "Language",
+    val privacyPolicy: String = "Privacy Policy",
+    val termsOfUse: String = "Terms of Use",
+    val appVersion: String = "App Version",
+    val backButtonDesc: String = "Back",
+    val arrowRightDesc: String = "Navigate to next screen"
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +112,8 @@ fun SettingsScreen(
     onBackNavAction: () -> Unit,
     onLanguageNavAction: (Array<String>) -> Unit,
     onNotificationNavAction: () -> Unit,
+    strings: SettingsScreenStrings = SettingsScreenStrings(),
+    premiumStrings: PremiumBottomSheetStrings? = null,
     toastAnchorState: ToastAnchorState? = null,
     bottomBar: @Composable () -> Unit = {}
 ) {
@@ -89,6 +121,14 @@ fun SettingsScreen(
     val bottomSheetState = rememberModalBottomSheetState()
     val currentWebUrl = remember { mutableStateOf<String?>(null) }
     val showLogoutDialog = remember { mutableStateOf(false) }
+    val showPremiumActivationToast = remember { mutableStateOf(false) }
+
+    LaunchedEffect(paymentUiState.stage) {
+        if (paymentUiState.stage == PaymentStage.Success) {
+            showPremiumActivationToast.value = true
+            showPremiumBottomSheet.value = false
+        }
+    }
 
     LaunchedEffect(isLoggedOut) {
         if (isLoggedOut) {
@@ -124,12 +164,12 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 CenterAlignedTopAppBar(
-                    title = { Text("Profile", fontWeight = FontWeight.SemiBold) },
+                    title = { Text(strings.profileTitle, fontWeight = FontWeight.SemiBold) },
                     navigationIcon = {
                         IconButton(onClick = onBackNavAction) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = "Back"
+                                contentDescription = strings.backButtonDesc
                             )
                         }
                     },
@@ -152,7 +192,8 @@ fun SettingsScreen(
                     item {
                         PremiumCard(
                             paymentUiState = paymentUiState,
-                            onClick = { showPremiumBottomSheet.value = true }
+                            onClick = { showPremiumBottomSheet.value = true },
+                            strings = strings
                         )
                     }
 
@@ -171,7 +212,8 @@ fun SettingsScreen(
                             SettingsSection(
                                 shouldShowNotificationItem = shouldShowNotificationItem,
                                 onNotificationNavAction = onNotificationNavAction,
-                                onLanguageNavAction = { onLanguageNavAction(languageList) }
+                                onLanguageNavAction = { onLanguageNavAction(languageList) },
+                                strings = strings
                             )
                         }
                     }
@@ -190,7 +232,8 @@ fun SettingsScreen(
                         ) {
                             LegalSection(
                                 versionName = versionName,
-                                currentWebUrl = currentWebUrl
+                                currentWebUrl = currentWebUrl,
+                                strings = strings
                             )
                         }
                     }
@@ -212,7 +255,7 @@ fun SettingsScreen(
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Text(
-                                    text = "Logout",
+                                    text = strings.logout,
                                     color = MaterialTheme.colorScheme.error,
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Medium
@@ -227,14 +270,14 @@ fun SettingsScreen(
                 if (showLogoutDialog.value) {
                     AlertDialog(
                         onDismissRequest = { if (!isLoggingOut) showLogoutDialog.value = false },
-                        title = { Text(text = "Logout") },
-                        text = { Text(text = "Are you sure you want to logout?") },
+                        title = { Text(text = strings.logout) },
+                        text = { Text(text = strings.logoutConfirmation) },
                         confirmButton = {
                             TextButton(
                                 onClick = onLogout,
                                 enabled = !isLoggingOut
                             ) {
-                                Text("Confirm")
+                                Text(strings.confirm)
                             }
                         },
                         dismissButton = {
@@ -242,19 +285,20 @@ fun SettingsScreen(
                                 onClick = { showLogoutDialog.value = false },
                                 enabled = !isLoggingOut
                             ) {
-                                Text("Cancel")
+                                Text(strings.cancel)
                             }
                         }
                     )
                 }
 
-                if (showPremiumBottomSheet.value) {
+                if (showPremiumBottomSheet.value && premiumStrings != null) {
                     ModalBottomSheet(
                         onDismissRequest = { showPremiumBottomSheet.value = false },
                         sheetState = bottomSheetState,
                         containerColor = MaterialTheme.colorScheme.surface,
                     ) {
                         PremiumBottomSheetContent(
+                            strings = premiumStrings,
                             isLoading = paymentUiState.loading,
                             onDismiss = { showPremiumBottomSheet.value = false },
                             onSubscribe = onStartPayment
@@ -264,13 +308,23 @@ fun SettingsScreen(
             },
             bottomBar = bottomBar
         )
+
+        NotificationToast(
+            message = "Your premium subscription is now active!",
+            title = "Premium Activated",
+            type = ToastType.SUCCESS,
+            isVisible = showPremiumActivationToast.value,
+            onDismiss = { showPremiumActivationToast.value = false },
+            anchorState = toastAnchorState
+        )
     }
 }
 
 @Composable
 fun PremiumCard(
     paymentUiState: PaymentUiState,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    strings: SettingsScreenStrings = SettingsScreenStrings()
 ) {
     val isPremiumActive =
         paymentUiState.isPremiumActivated || paymentUiState.stage == PaymentStage.Success
@@ -288,9 +342,9 @@ fun PremiumCard(
         colors = cardColors
     ) {
         if (isPremiumActive) {
-            SubscribedPremiumCard(paymentUiState)
+            SubscribedPremiumCard(paymentUiState, strings)
         } else {
-            UnsubscribedPremiumCard(paymentUiState, onClick)
+            UnsubscribedPremiumCard(paymentUiState, onClick, strings)
         }
     }
 }
@@ -298,7 +352,8 @@ fun PremiumCard(
 @Composable
 fun UnsubscribedPremiumCard(
     paymentUiState: PaymentUiState,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    strings: SettingsScreenStrings = SettingsScreenStrings()
 ) {
     val loadingStages = remember {
         listOf(
@@ -332,15 +387,15 @@ fun UnsubscribedPremiumCard(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = if (isLoading) "Processing\u2026" else "Get Premium",
+            text = if (isLoading) strings.processing else strings.getPremium,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onTertiaryContainer
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = if (isLoading) "Please wait while we activate your premium subscription."
-            else "Unlock all features and enjoy an ad-free experience.",
+            text = if (isLoading) strings.processingDescription
+            else strings.unlockDescription,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f),
             textAlign = TextAlign.Center
@@ -354,13 +409,16 @@ fun UnsubscribedPremiumCard(
                 contentColor = MaterialTheme.colorScheme.onTertiary
             )
         ) {
-            Text(if (isLoading) "Processing\u2026" else "Upgrade Now")
+            Text(if (isLoading) strings.processing else strings.upgradeNow)
         }
     }
 }
 
 @Composable
-fun SubscribedPremiumCard(paymentUiState: PaymentUiState) {
+fun SubscribedPremiumCard(
+    paymentUiState: PaymentUiState,
+    strings: SettingsScreenStrings = SettingsScreenStrings()
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -375,7 +433,7 @@ fun SubscribedPremiumCard(paymentUiState: PaymentUiState) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "You are a Premium User",
+            text = strings.premiumActive,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -385,13 +443,13 @@ fun SubscribedPremiumCard(paymentUiState: PaymentUiState) {
         if (expiryTop != null) {
             val dateStr = remember(expiryTop) { formatDate(expiryTop) }
             Text(
-                text = "Expires $dateStr",
+                text = strings.premiumExpires.replace($$"%1$s", dateStr).replace("%s", dateStr),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
             )
         } else {
             Text(
-                text = "Active",
+                text = strings.premiumActiveStatus,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold
@@ -405,6 +463,7 @@ fun SettingsSection(
     shouldShowNotificationItem: Boolean,
     onNotificationNavAction: () -> Unit,
     onLanguageNavAction: () -> Unit,
+    strings: SettingsScreenStrings = SettingsScreenStrings()
 ) {
     Column(
         modifier = Modifier
@@ -416,13 +475,13 @@ fun SettingsSection(
         if (shouldShowNotificationItem) {
             SettingsItem(
                 icon = Icons.Outlined.Notifications,
-                title = "Notifications",
+                title = strings.notificationsTitle,
                 onClick = onNotificationNavAction
             )
         }
         SettingsItem(
             icon = Icons.Outlined.Language,
-            title = "Language",
+            title = strings.languageTitle,
             onClick = onLanguageNavAction
         )
     }
@@ -431,7 +490,8 @@ fun SettingsSection(
 @Composable
 fun LegalSection(
     versionName: String,
-    currentWebUrl: MutableState<String?>
+    currentWebUrl: MutableState<String?>,
+    strings: SettingsScreenStrings = SettingsScreenStrings()
 ) {
     Column(
         modifier = Modifier
@@ -442,19 +502,19 @@ fun LegalSection(
     ) {
         SettingsItem(
             icon = Icons.Outlined.PrivacyTip,
-            title = "Privacy Policy",
+            title = strings.privacyPolicy,
             onClick = { currentWebUrl.value = "https://data.androidplay.in/wfy/privacy-policy" }
         )
         SettingsItem(
             icon = Icons.Outlined.Gavel,
-            title = "Terms of Use",
+            title = strings.termsOfUse,
             onClick = {
                 currentWebUrl.value = "https://data.androidplay.in/wfy/terms-and-conditions"
             }
         )
         SettingsItem(
             icon = Icons.Outlined.Info,
-            title = "App Version",
+            title = strings.appVersion,
             trailingContent = {
                 Text(
                     text = versionName,
@@ -508,7 +568,7 @@ fun SettingsItem(
         } else if (onClick != null) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "Navigate to next screen",
+                contentDescription = SettingsScreenStrings().arrowRightDesc,
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }

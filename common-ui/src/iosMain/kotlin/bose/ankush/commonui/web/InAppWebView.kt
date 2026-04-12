@@ -50,6 +50,8 @@ import platform.Foundation.NSURLRequest
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.WebKit.WKNavigation
+import platform.WebKit.WKNavigationAction
+import platform.WebKit.WKNavigationActionPolicy
 import platform.WebKit.WKNavigationDelegateProtocol
 import platform.WebKit.WKWebView
 import platform.WebKit.WKWebViewConfiguration
@@ -89,6 +91,7 @@ actual fun InAppWebView(
     }
 
     // Wire delegate callbacks to the latest captured state setters on each recomposition
+    delegate.initialUrl = url
     delegate.onLoadStart = {
         isLoading = true
         loadError = false
@@ -103,6 +106,9 @@ actual fun InAppWebView(
         isLoading = false
         loadError = true
         errorMessage = msg
+    }
+    delegate.onNavigationBlocked = {
+        onClose()
     }
 
     // Load (or reload) the URL whenever it changes
@@ -275,11 +281,16 @@ actual fun InAppWebView(
  * WKNavigationDelegate implementation that forwards load events to Compose state setters.
  * Kept as a named class so that a strong Kotlin reference can be held (WKWebView.navigationDelegate
  * is a weak ObjC reference and would otherwise be immediately deallocated).
+ *
+ * URL whitelist enforcement: decidePolicyForNavigationAction validates navigation URLs
+ * against the same trusted domain list used on Android (e.g., data.androidplay.in).
  */
 private class InAppWebViewDelegate : NSObject(), WKNavigationDelegateProtocol {
     var onLoadStart: () -> Unit = {}
     var onLoadFinish: (WKWebView) -> Unit = {}
     var onLoadError: (String) -> Unit = {}
+    var onNavigationBlocked: () -> Unit = {}
+    var initialUrl: String = ""
 
     @ObjCSignatureOverride
     override fun webView(webView: WKWebView, didStartProvisionalNavigation: WKNavigation?) {
@@ -307,5 +318,40 @@ private class InAppWebViewDelegate : NSObject(), WKNavigationDelegateProtocol {
         withError: NSError
     ) {
         onLoadError(withError.localizedDescription)
+    }
+
+    @ObjCSignatureOverride
+    override fun webView(
+        webView: WKWebView,
+        decidePolicyForNavigationAction: WKNavigationAction,
+        decisionHandler: (WKNavigationActionPolicy) -> Unit
+    ) {
+        val requestUrl = decidePolicyForNavigationAction.request.URL?.absoluteString ?: ""
+
+        // Allow initial URL load
+        if (requestUrl == initialUrl) {
+            decisionHandler(WKNavigationActionPolicy.WKNavigationActionPolicyAllow)
+            return
+        }
+
+        // Validate subsequent navigation against whitelist
+        if (isWhitelistedUrl(requestUrl)) {
+            decisionHandler(WKNavigationActionPolicy.WKNavigationActionPolicyAllow)
+        } else {
+            // Block navigation from untrusted domains
+            decisionHandler(WKNavigationActionPolicy.WKNavigationActionPolicyCancel)
+            onNavigationBlocked()
+        }
+    }
+
+    private fun isWhitelistedUrl(urlString: String): Boolean {
+        val url = NSURL.URLWithString(urlString) ?: return false
+        val host = url.host?.lowercase() ?: return false
+        val whitelistedDomains = setOf(
+            "data.androidplay.in",     // Terms, Privacy Policy
+        )
+        return whitelistedDomains.any { trustedDomain ->
+            host == trustedDomain || host.endsWith(".$trustedDomain")
+        }
     }
 }

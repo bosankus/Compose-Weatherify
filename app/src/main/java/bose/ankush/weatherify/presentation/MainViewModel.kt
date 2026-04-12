@@ -360,6 +360,7 @@ class MainViewModel @Inject constructor(
         try {
             handleAuthResponse(block())
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             logger.e("$actionName failed for email: $email", e)
             _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "$actionName failed"))
         }

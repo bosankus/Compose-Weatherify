@@ -61,6 +61,9 @@ import androidx.core.net.toUri
 
 /**
  * Android actual: security-hardened WebView wrapped in AndroidView.
+ *
+ * Note: State assignments (pageTitle, progress, currentUrl) are read through Compose's
+ * recomposition system, so IDE warnings about unused assignments are false positives.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +82,7 @@ actual fun InAppWebView(
     var currentUrl by remember { mutableStateOf(url) }
 
     // Keep a single WebView instance across recompositions
-    val webView = remember {
+    val webView = remember(context) {
         WebView(context).apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -182,6 +185,8 @@ actual fun InAppWebView(
                 AndroidView(
                     factory = { ctx ->
                         webView.apply {
+                            // Note: State assignments in these callbacks (pageTitle, progress) trigger
+                            // Compose recomposition. IDE warnings about unused assignments are false positives.
                             configureWebView(
                                 view = this,
                                 onTitle = { pageTitle = it },
@@ -205,6 +210,7 @@ actual fun InAppWebView(
                     },
                     update = { view ->
                         if (view.url != url) {
+                            //noinspection ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE
                             currentUrl = url
                             view.loadUrl(url)
                         }
@@ -394,7 +400,8 @@ private fun configureWebView(
             resultMsg: Message?
         ): Boolean {
             val transport = resultMsg?.obj as? WebView.WebViewTransport ?: return false
-            val tempWebView = WebView(view?.context!!)
+            val context = view?.context ?: return false
+            val tempWebView = WebView(context)
             tempWebView.webViewClient = object : WebViewClient() {
                 override fun onPageStarted(v: WebView?, url: String?, favicon: Bitmap?) {
                     super.onPageStarted(v, url, favicon)
@@ -417,26 +424,24 @@ private fun handleUrl(
     scheme: String,
     onExternalIntent: (Intent) -> Unit
 ): Boolean {
-    return when (scheme.lowercase()) {
+    when (scheme.lowercase()) {
         "http", "https" -> {
             if (isWhitelistedUrl(uri)) {
                 webView?.loadUrl(uri.toString())
-                true
             } else {
                 // Reject URLs from untrusted domains
                 Log.w("InAppWebView", "Blocked untrusted URL: $uri")
-                true
             }
         }
         "tel", "mailto", "geo", "sms", "intent" -> {
             onExternalIntent(Intent(Intent.ACTION_VIEW, uri))
-            true
         }
         else -> {
             onExternalIntent(Intent(Intent.ACTION_VIEW, uri))
-            true
         }
     }
+    // Always return true to indicate we handled the URL loading
+    return true
 }
 
 /**

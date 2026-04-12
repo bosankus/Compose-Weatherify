@@ -2,6 +2,7 @@ package bose.ankush.network.auth.token
 
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.storage.api.TokenStorage
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
@@ -46,6 +47,7 @@ class TokenManager(
                     }
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 return TokenResult.Error(e)
             }
         }
@@ -72,6 +74,7 @@ class TokenManager(
             tokenStorage.clearToken()
             TokenResult.NoToken
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             TokenResult.Error(e)
         }
     }

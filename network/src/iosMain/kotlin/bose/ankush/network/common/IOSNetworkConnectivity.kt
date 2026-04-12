@@ -8,6 +8,7 @@ import kotlinx.cinterop.value
 import platform.SystemConfiguration.SCNetworkReachabilityCreateWithName
 import platform.SystemConfiguration.SCNetworkReachabilityFlagsVar
 import platform.SystemConfiguration.SCNetworkReachabilityGetFlags
+import platform.SystemConfiguration.kSCNetworkReachabilityFlagsConnectionRequired
 import platform.SystemConfiguration.kSCNetworkReachabilityFlagsReachable
 
 /**
@@ -25,7 +26,8 @@ class IOSNetworkConnectivity : NetworkConnectivity {
         return memScoped {
             val flags = alloc<SCNetworkReachabilityFlagsVar>()
             if (SCNetworkReachabilityGetFlags(reachability, flags.ptr)) {
-                (flags.value and kSCNetworkReachabilityFlagsReachable) != 0u
+                (flags.value and kSCNetworkReachabilityFlagsReachable) != 0u &&
+                (flags.value and kSCNetworkReachabilityFlagsConnectionRequired) == 0u
             } else {
                 false
             }

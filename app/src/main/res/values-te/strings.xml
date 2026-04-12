@@ -54,6 +54,16 @@
     <string name="premium_expires_txt">%1$s న గడువు ముగుస్తుంది</string>
     <string name="premium_active_status_txt">యాక్టివ్</string>
     <string name="premium_activated_txt">ప్రీమియం విజయవంతంగా యాక్టివేట్ అయింది!</string>
+    <string name="premium_title_txt">ప్రీమియం</string>
+    <string name="premium_price_txt">$4.99/నెల</string>
+    <string name="premium_trial_txt">7 రోజుల ఉచిత ట్రయల్, ఎప్పుడైనా రద్దు చేయండి</string>
+    <string name="premium_subscribe_btn_txt">సభ్యుడిగా చేరండి</string>
+    <string name="premium_starting_txt">ప్రారంభమవుతోంది…</string>
+    <string name="premium_no_thanks_txt">కాదు, ధన్యవాదాలు</string>
+    <string name="premium_feature_1_txt">ప్రకటనలు లేని అనుభవం</string>
+    <string name="premium_feature_2_txt">విస్తరించిన 15-రోజుల సూచనలు</string>
+    <string name="premium_feature_3_txt">తీవ్ర వాతావరణ హెచ్చరికలు</string>
+    <string name="premium_feature_4_txt">వివరణాత్మక వాయు నాణ్యత డేటా</string>
     <string name="settings_notifications_txt">నోటిఫికేషన్లు</string>
     <string name="settings_language_txt">భాష</string>
     <string name="legal_privacy_policy_txt">గోప్యతా విధానం</string>

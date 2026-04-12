@@ -145,12 +145,12 @@ fun NotificationToast(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

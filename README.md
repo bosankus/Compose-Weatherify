@@ -22,7 +22,7 @@ A production-grade Android weather app built with **Jetpack Compose**, **Clean A
 | **Air Quality** | Real-time AQI with pollutant details |
 | **Location** | GPS-based auto-detection + manual city search |
 | **Sunrise/Sunset** | Custom animated sunrise/sunset arc (`:sunriseui` module) |
-| **Multi-language** | English, Hindi (हिन्दी), Hebrew (עברית) via Per-App Language API |
+| **Multi-language** | English, Bengali (বাংলা), Hindi (हिन्दी), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), Tamil (தமிழ்), Telugu (తెలుగు), Hebrew (עברית) via Per-App Language API |
 | **Premium** | In-app purchase flow via Razorpay with a premium bottom sheet |
 | **Notifications** | Firebase Cloud Messaging (FCM) push notifications |
 | **In-App Updates** | Google Play in-app update prompts |

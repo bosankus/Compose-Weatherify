@@ -59,6 +59,16 @@
     <string name="premium_expires_txt">%1$s को समाप्त होता है</string>
     <string name="premium_active_status_txt">सक्रिय</string>
     <string name="premium_activated_txt">प्रीमियम सफलतापूर्वक सक्रिय किया गया!</string>
+    <string name="premium_title_txt">प्रीमियम</string>
+    <string name="premium_price_txt">$4.99/माह</string>
+    <string name="premium_trial_txt">7 दिन की मुफ्त परीक्षा, किसी भी समय रद्द करें</string>
+    <string name="premium_subscribe_btn_txt">सदस्य बनें</string>
+    <string name="premium_starting_txt">शुरू हो रहा है…</string>
+    <string name="premium_no_thanks_txt">नहीं, धन्यवाद</string>
+    <string name="premium_feature_1_txt">विज्ञापन-मुक्त अनुभव</string>
+    <string name="premium_feature_2_txt">विस्तारित 15-दिन का पूर्वानुमान</string>
+    <string name="premium_feature_3_txt">गंभीर मौसम सतर्कता</string>
+    <string name="premium_feature_4_txt">विस्तृत वायु गुणवत्ता डेटा</string>
     <string name="settings_notifications_txt">सूचनाएं</string>
     <string name="settings_language_txt">भाषा</string>
     <string name="legal_privacy_policy_txt">गोपनीयता नीति</string>

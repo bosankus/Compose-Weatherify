@@ -68,7 +68,7 @@ data class AuthData(
 @Serializable
 data class AuthResponse(
     val success: Boolean? = null,
-    val status: Boolean = true,
+    val status: Boolean = false,
     val message: String? = null,
     val data: AuthData? = null
 ) {
