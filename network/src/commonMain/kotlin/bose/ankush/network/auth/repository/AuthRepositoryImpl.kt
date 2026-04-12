@@ -22,27 +22,11 @@ class AuthRepositoryImpl(
 
         // Save token on successful login
         val token = response.data?.token
-        if (response.isSuccess() && token != null && token.isNotBlank()) {
+        if (response.isSuccess() && !token.isNullOrBlank()) {
             tokenStorage.saveToken(token)
-
-            // Verify token was saved correctly
-            verifyTokenSaved(token)
         }
 
         return response
-    }
-
-    /**
-     * Verifies that a token was correctly saved to the database
-     * @param originalToken The token that was supposed to be saved
-     */
-    private suspend fun verifyTokenSaved(originalToken: String) {
-        val savedToken = tokenStorage.getToken()
-        if (savedToken != originalToken) {
-            println("[DEBUG_LOG] Token verification failed: token mismatch")
-        } else {
-            println("[DEBUG_LOG] Token verification successful")
-        }
     }
 
     override suspend fun register(
@@ -73,11 +57,8 @@ class AuthRepositoryImpl(
 
         // Save token on successful registration
         val token = response.data?.token
-        if (response.isSuccess() && token != null && token.isNotBlank()) {
+        if (response.isSuccess() && !token.isNullOrBlank()) {
             tokenStorage.saveToken(token)
-
-            // Verify token was saved correctly
-            verifyTokenSaved(token)
         }
 
         return response
@@ -99,11 +80,8 @@ class AuthRepositoryImpl(
 
         // Save new token on successful refresh
         val token = response.data?.token
-        if (response.isSuccess() && token != null && token.isNotBlank()) {
+        if (response.isSuccess() && !token.isNullOrBlank()) {
             tokenStorage.saveToken(token)
-
-            // Verify token was saved correctly
-            verifyTokenSaved(token)
         }
 
         return response

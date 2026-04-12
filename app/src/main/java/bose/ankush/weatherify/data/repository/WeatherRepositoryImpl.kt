@@ -2,7 +2,6 @@ package bose.ankush.weatherify.data.repository
 
 import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 import bose.ankush.storage.api.WeatherStorage
-import bose.ankush.storage.impl.WeatherStorageImpl
 import bose.ankush.storage.room.AirQualityEntity
 import bose.ankush.storage.room.WeatherEntity
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
@@ -81,7 +80,7 @@ class WeatherRepositoryImpl @Inject constructor(
                         val airQualityEntity = NetworkToStorageMapper.mapAirQualityToStorageEntity(airQualityData)
 
                         // Step 4: Save to storage
-                        (weatherStorage as WeatherStorageImpl).saveWeatherData(weatherEntity, airQualityEntity)
+                        weatherStorage.saveWeatherData(weatherEntity, airQualityEntity)
                     }
                 }
             } catch (e: Exception) {

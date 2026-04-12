@@ -11,6 +11,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -91,7 +92,10 @@ class DeviceLocationClient @Inject constructor(
                 return@suspendCancellableCoroutine
             }
 
-            client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+            // Create a cancellation token source to allow cancellation of the location request
+            val cts = CancellationTokenSource()
+
+            client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
                 .addOnSuccessListener { location ->
                     if (location != null) {
                         continuation.resume(Result.success(Coordinates(location.latitude, location.longitude)))
@@ -104,7 +108,8 @@ class DeviceLocationClient @Inject constructor(
                 }
 
             continuation.invokeOnCancellation {
-                // No need to cancel anything for getCurrentLocation as it's a one-time operation
+                // Cancel the Play Services location request when the coroutine is cancelled
+                cts.cancel()
             }
         }
 

@@ -50,10 +50,11 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
 
     actual override suspend fun saveToken(token: String) {
         withContext(Dispatchers.IO) {
-            @Suppress("ApplySharedPref")
-            encryptedSharedPreferences.edit().putString(TOKEN_KEY, token).apply()
+            val success = encryptedSharedPreferences.edit().putString(TOKEN_KEY, token).commit()
+            if (success) {
+                _hasToken.value = true
+            }
         }
-        _hasToken.value = true
     }
 
     actual override suspend fun getToken(): String? {
@@ -66,10 +67,11 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
 
     actual override suspend fun clearToken() {
         withContext(Dispatchers.IO) {
-            @Suppress("ApplySharedPref")
-            encryptedSharedPreferences.edit().remove(TOKEN_KEY).apply()
+            val success = encryptedSharedPreferences.edit().remove(TOKEN_KEY).commit()
+            if (success) {
+                _hasToken.value = false
+            }
         }
-        _hasToken.value = false
     }
 
     companion object {

@@ -27,7 +27,7 @@ android {
 
     @Suppress("UnstableApiUsage")
     androidResources {
-        localeFilters.addAll(listOf("en", "hi", "he", "bn", "kn", "ml", "ta", "te"))
+        localeFilters.addAll(listOf("en", "hi", "iw", "bn", "kn", "ml", "ta", "te"))
     }
 
     packaging {

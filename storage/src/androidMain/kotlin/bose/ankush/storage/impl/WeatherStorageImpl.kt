@@ -32,35 +32,17 @@ class WeatherStorageImpl(
         return weatherDatabase.weatherDao().getAirQuality()
     }
 
-    override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>) {
-        // This is handled by the orchestration layer (WeatherRepository)
-        // Storage should not be responsible for fetching or syncing data
-        throw UnsupportedOperationException(
-            "Use WeatherRepository from app layer to refresh data. " +
-            "Storage module only handles persistence."
-        )
-    }
 
     override suspend fun getLastWeatherUpdateTime(): Long {
         val weatherEntity = weatherDatabase.weatherDao().getWeather().firstOrNull()
         return weatherEntity?.lastUpdated ?: 0L
     }
 
-    /**
-     * Save weather and air quality data to the database.
-     * Called by the orchestration layer (WeatherRepository in app module) after fetching and mapping from network.
-     *
-     * This is public because it's called by the orchestration layer in the app module.
-     *
-     * @param weatherEntity The weather data to save
-     * @param airQualityEntity The air quality data to save
-     */
-    suspend fun saveWeatherData(
-        weatherEntity: WeatherEntity,
-        airQualityEntity: AirQualityEntity
-    ) {
+    override suspend fun saveWeatherData(weatherEntity: Any, airQualityEntity: Any) {
         withContext(Dispatchers.IO) {
-            weatherDatabase.weatherDao().refreshWeather(weatherEntity, airQualityEntity)
+            if (weatherEntity is WeatherEntity && airQualityEntity is AirQualityEntity) {
+                weatherDatabase.weatherDao().refreshWeather(weatherEntity, airQualityEntity)
+            }
         }
     }
 }

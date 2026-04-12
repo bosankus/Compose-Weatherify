@@ -218,6 +218,9 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                             }
                             LaunchedEffect(launchNotificationPermissionState.value) {
                                 viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
+                                // Update whether notification permission is permanently declined
+                                val isPermanentlyDeclined = !shouldShowRequestPermissionRationale(ACCESS_NOTIFICATION)
+                                viewModel.updateNotificationPermissionPermanentlyDeclined(isPermanentlyDeclined)
                             }
                             AppNavigation(viewModel, paymentViewModel, toastAnchorState)
                         }

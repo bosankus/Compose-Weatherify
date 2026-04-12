@@ -100,9 +100,21 @@ fun NotificationToast(
     }
 
     val (backgroundColor, icon, iconColor) = when (type) {
-        ToastType.SUCCESS -> Triple(Color(0xFFE5F3E5), Icons.Filled.CheckCircle, Color(0xFF3F8F3F))
-        ToastType.WARNING -> Triple(Color(0xFFFFF4E5), Icons.Filled.Warning, Color(0xFFFFA500))
-        ToastType.ERROR -> Triple(Color(0xFFFDE5E5), Icons.Filled.Close, Color(0xFFB00020))
+        ToastType.SUCCESS -> Triple(
+            MaterialTheme.colorScheme.primaryContainer,
+            Icons.Filled.CheckCircle,
+            MaterialTheme.colorScheme.primary
+        )
+        ToastType.WARNING -> Triple(
+            MaterialTheme.colorScheme.tertiaryContainer,
+            Icons.Filled.Warning,
+            MaterialTheme.colorScheme.tertiary
+        )
+        ToastType.ERROR -> Triple(
+            MaterialTheme.colorScheme.errorContainer,
+            Icons.Filled.Close,
+            MaterialTheme.colorScheme.error
+        )
     }
 
     Box(

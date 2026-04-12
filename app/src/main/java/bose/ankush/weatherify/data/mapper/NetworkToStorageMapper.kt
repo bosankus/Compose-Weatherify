@@ -107,7 +107,17 @@ object NetworkToStorageMapper {
                     )
                 }
             },
-            alerts = null
+            alerts = data?.alerts?.mapNotNull { alert ->
+                alert?.let {
+                    WeatherEntity.Alert(
+                        description = it.description,
+                        end = it.end,
+                        event = it.event,
+                        sender_name = it.senderName,
+                        start = it.start
+                    )
+                }
+            } ?: emptyList()
         )
     }
 

@@ -39,10 +39,14 @@ class PreferenceManagerImpl @Inject constructor(@get:ApplicationContext private 
         }
     }
 
-    override suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long) {
+    override suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long?) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceManager.IS_PREMIUM] = isPremium
-            preferences[PreferenceManager.PREMIUM_EXPIRY] = expiryMillis
+            if (expiryMillis != null) {
+                preferences[PreferenceManager.PREMIUM_EXPIRY] = expiryMillis
+            } else {
+                preferences.remove(PreferenceManager.PREMIUM_EXPIRY)
+            }
         }
     }
 }

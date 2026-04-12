@@ -22,6 +22,6 @@ internal class PreferenceManagerPremiumStore(
             )
         }
 
-    override suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long) =
+    override suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long?) =
         preferenceManager.savePremiumStatus(isPremium, expiryMillis)
 }

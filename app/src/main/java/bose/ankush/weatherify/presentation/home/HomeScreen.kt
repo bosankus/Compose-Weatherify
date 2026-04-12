@@ -59,6 +59,7 @@ fun HomeScreen(
     val context: Context = LocalContext.current
     val uiState: UIState = viewModel.uiState.collectAsState().value
     val showNotificationCard = viewModel.showNotificationCardItem.collectAsState().value
+    val isNotificationPermissionPermanentlyDeclined = viewModel.isNotificationPermissionPermanentlyDeclined.collectAsState().value
 
     // reacting as per response state change
     when {
@@ -80,6 +81,7 @@ fun HomeScreen(
                 navController = navController,
                 toastAnchorState = toastAnchorState,
                 showNotificationCard = showNotificationCard,
+                isNotificationPermissionPermanentlyDeclined = isNotificationPermissionPermanentlyDeclined,
                 onEnableNotificationClick = { viewModel.updateNotificationPermission(true) },
                 onDismissNotificationClick = { viewModel.updateShowNotificationBannerState(false) },
                 onRefresh = { viewModel.refreshWeatherData() }
@@ -138,6 +140,7 @@ private fun ShowUIContainer(
     navController: NavController,
     toastAnchorState: ToastAnchorState? = null,
     showNotificationCard: Boolean = false,
+    isNotificationPermissionPermanentlyDeclined: Boolean = false,
     onEnableNotificationClick: () -> Unit = {},
     onDismissNotificationClick: () -> Unit = {},
     onRefresh: () -> Unit = {}
@@ -193,7 +196,7 @@ private fun ShowUIContainer(
         if (showNotificationCard) {
             PermissionAlertDialog(
                 descriptionText = stringResource(R.string.notification_permission_message),
-                isPermanentlyDeclined = true,
+                isPermanentlyDeclined = isNotificationPermissionPermanentlyDeclined,
                 onPositiveAction = onEnableNotificationClick,
                 onNegativeAction = onDismissNotificationClick,
                 positiveButtonLabel = stringResource(R.string.enable_notification_btn),

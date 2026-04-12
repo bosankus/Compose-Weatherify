@@ -22,4 +22,3 @@ class CityRepositoryImpl @Inject constructor(
     }
 
 }
-

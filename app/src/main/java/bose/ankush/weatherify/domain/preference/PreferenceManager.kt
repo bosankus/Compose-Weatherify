@@ -23,7 +23,7 @@ interface PreferenceManager {
     /**
      * Save premium subscription status and expiry
      */
-    suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long)
+    suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long?)
 
     /**
      * Preference keys

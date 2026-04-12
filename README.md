@@ -115,7 +115,7 @@ graph LR
 
 ## Data Flow
 
-```
+```text
 OpenWeatherMap API
        │  JSON (Ktor + Kotlinx Serialization)
        ▼
@@ -146,6 +146,7 @@ OpenWeatherMap API
 ## Tech Stack
 
 ### UI
+
 | Library | Version | Purpose |
 |---|---|---|
 | Jetpack Compose BOM | `2025.06.01` | Declarative UI framework |
@@ -156,6 +157,7 @@ OpenWeatherMap API
 | Splash Screen API | `1.2.0` | Android 12+ splash screen |
 
 ### Architecture & DI
+
 | Library | Version | Purpose |
 |---|---|---|
 | Hilt | `2.58` | Dependency injection (Android) |
@@ -164,6 +166,7 @@ OpenWeatherMap API
 | StateFlow / Flow | — | Reactive UI state management |
 
 ### Networking
+
 | Library | Version | Purpose |
 |---|---|---|
 | Ktor Client | — | KMP-compatible HTTP client |
@@ -171,6 +174,7 @@ OpenWeatherMap API
 | OkHttp MockWebServer | `4.12.0` | Network mocking in tests |
 
 ### Local Storage
+
 | Library | Version | Purpose |
 |---|---|---|
 | Room | `2.8.4` | SQLite ORM (weather cache) |
@@ -178,6 +182,7 @@ OpenWeatherMap API
 | Kotlinx DateTime | `0.6.2` | KMP-compatible date/time |
 
 ### Firebase
+
 | SDK | Purpose |
 |---|---|
 | Firebase BOM `34.10.0` | BoM for consistent versions |
@@ -187,6 +192,7 @@ OpenWeatherMap API
 | Cloud Messaging (FCM) | Push notifications |
 
 ### Testing
+
 | Library | Purpose |
 |---|---|
 | JUnit 4 + Truth | Unit assertions |
@@ -197,6 +203,7 @@ OpenWeatherMap API
 | Hilt Testing | DI in Android tests |
 
 ### Other
+
 | Library | Purpose |
 |---|---|
 | Timber `5.0.1` | Structured logging |
@@ -209,7 +216,7 @@ OpenWeatherMap API
 
 ## Screens
 
-```
+```text
 MainActivity
 ├── HomeScreen          — current weather + AQI card + hourly strip
 ├── CitiesListScreen    — search & manage saved cities
@@ -262,7 +269,7 @@ Contributions are very welcome!
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
 3. Commit using the project convention:
-   ```
+   ```text
    feat|fix|refactor|migrate|update: short description
    ```
 4. Push and open a Pull Request against **`develop`**

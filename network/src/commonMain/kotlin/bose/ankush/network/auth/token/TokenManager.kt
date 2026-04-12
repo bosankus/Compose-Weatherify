@@ -25,11 +25,15 @@ class TokenManager(
             lastRefreshTime = currentTime
             try {
                 val response = authRepository.refreshToken()
-                    ?: return TokenResult.Error(IllegalStateException("Refresh returned null response"))
+                    ?: return TokenResult.NoToken
                 val newToken = response.data?.token
                 if (response.isSuccess() && !newToken.isNullOrBlank()) {
                     tokenStorage.saveToken(newToken)
                     return TokenResult.Valid(newToken)
+                }
+                // If token is missing in a successful response, treat as no token
+                if (response.isSuccess() && newToken.isNullOrBlank()) {
+                    return TokenResult.NoToken
                 }
                 when (response.data?.errorCode) {
                     "TOKEN_NOT_EXPIRED" -> {

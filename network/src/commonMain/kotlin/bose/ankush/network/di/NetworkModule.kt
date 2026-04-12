@@ -44,7 +44,8 @@ fun createBasicHttpClient(): HttpClient {
         encodeDefaults = true
         coerceInputValues = true
     }
-    return HttpClient(createPlatformHttpClient(json).engine) {
+    val client = createPlatformHttpClient(json)
+    return client.config {
         install(ContentNegotiation) {
             json(json)
         }
@@ -119,7 +120,8 @@ fun createAuthenticatedHttpClient(tokenManager: TokenManager): HttpClient {
     }
 
     // Create a platform-specific HttpClient with authentication configuration
-    return HttpClient(createPlatformHttpClient(json).engine) {
+    val client = createPlatformHttpClient(json)
+    return client.config {
         // Install ContentNegotiation plugin
         install(ContentNegotiation) {
             json(json)
@@ -153,7 +155,8 @@ fun createAuthenticatedHttpClient(tokenStorage: TokenStorage): HttpClient {
     }
 
     // Create a platform-specific HttpClient with authentication configuration
-    return HttpClient(createPlatformHttpClient(json).engine) {
+    val client = createPlatformHttpClient(json)
+    return client.config {
         // Install ContentNegotiation plugin
         install(ContentNegotiation) {
             json(json)

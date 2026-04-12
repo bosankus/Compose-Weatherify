@@ -3,9 +3,7 @@ package bose.ankush.commonui.web
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Message
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.CookieManager
@@ -321,7 +319,8 @@ private fun configureWebView(
         loadWithOverviewMode = true
         // SECURITY: Disable multiple windows to prevent popup injection attacks
         setSupportMultipleWindows(false)
-        mediaPlaybackRequiresUserGesture = false
+        // SECURITY: Require user gesture for media playback to prevent unwanted autoplay
+        mediaPlaybackRequiresUserGesture = true
     }
 
     // SECURITY: Only accept cookies from trusted legal content domains
@@ -348,6 +347,7 @@ private fun configureWebView(
             error: WebResourceError?
         ) {
             super.onReceivedError(view, request, error)
+            // Only report errors for main-frame loads, ignore subresource failures
             if (request?.isForMainFrame == true) {
                 val errorDesc = error?.description?.toString() ?: "Unknown error"
                 onError("Failed to load: $errorDesc")
@@ -360,6 +360,7 @@ private fun configureWebView(
             errorResponse: android.webkit.WebResourceResponse?
         ) {
             super.onReceivedHttpError(view, request, errorResponse)
+            // Only report errors for main-frame loads, ignore subresource failures
             if (request?.isForMainFrame == true) {
                 val statusCode = errorResponse?.statusCode ?: 0
                 val reason = errorResponse?.reasonPhrase ?: "Unknown error"
@@ -394,30 +395,6 @@ private fun configureWebView(
         override fun onReceivedTitle(view: WebView?, title: String?) {
             super.onReceivedTitle(view, title)
             if (!title.isNullOrBlank()) onTitle(title)
-        }
-
-        // Handle target=_blank and window.open to keep in same WebView
-        override fun onCreateWindow(
-            view: WebView?,
-            isDialog: Boolean,
-            isUserGesture: Boolean,
-            resultMsg: Message?
-        ): Boolean {
-            val transport = resultMsg?.obj as? WebView.WebViewTransport ?: return false
-            val context = view?.context ?: return false
-            val tempWebView = WebView(context)
-            tempWebView.webViewClient = object : WebViewClient() {
-                override fun onPageStarted(v: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(v, url, favicon)
-                    if (!url.isNullOrBlank()) {
-                        view.loadUrl(url)
-                        tempWebView.destroy()
-                    }
-                }
-            }
-            transport.webView = tempWebView
-            resultMsg.sendToTarget()
-            return true
         }
     }
 }

@@ -86,6 +86,9 @@ class MainViewModel @Inject constructor(
     private val _showNotificationCardItem = MutableStateFlow(false)
     val showNotificationCardItem = _showNotificationCardItem.asStateFlow()
 
+    private val _isNotificationPermissionPermanentlyDeclined = MutableStateFlow(false)
+    val isNotificationPermissionPermanentlyDeclined = _isNotificationPermissionPermanentlyDeclined.asStateFlow()
+
     // Auth state flows
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -188,6 +191,12 @@ class MainViewModel @Inject constructor(
                 _uiState.update { it.copy(error = errorResponseFromException(e)) }
             }
         }
+    }
+
+    /** Update whether notification permission is permanently declined. */
+    fun updateNotificationPermissionPermanentlyDeclined(isPermanentlyDeclined: Boolean) {
+        logger.d("Notification permission permanently declined: $isPermanentlyDeclined")
+        _isNotificationPermissionPermanentlyDeclined.update { isPermanentlyDeclined }
     }
 
     /** Fetch and save user location, then load initial data. */

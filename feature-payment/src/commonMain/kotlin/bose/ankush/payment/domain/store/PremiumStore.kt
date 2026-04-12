@@ -17,9 +17,9 @@ interface PremiumStore {
      * Persists the user's premium subscription status.
      *
      * @param isPremium True if the user has an active premium subscription, false otherwise.
-     * @param expiryMillis The expiration time of the premium subscription in milliseconds.
+     * @param expiryMillis The expiration time of the premium subscription in milliseconds, or null if not applicable.
      */
-    suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long)
+    suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long?)
 }
 
 /**

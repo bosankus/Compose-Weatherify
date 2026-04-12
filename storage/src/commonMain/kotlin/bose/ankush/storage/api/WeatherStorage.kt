@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 /**
  * Interface for weather data storage operations.
- * 
+ *
  * This interface defines the contract for storing and retrieving weather and air quality data.
  * It abstracts the underlying storage mechanism (e.g., Room database) from the rest of the application.
  * Implementations of this interface are responsible for:
@@ -28,15 +28,18 @@ interface WeatherStorage {
     fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<Any?>
 
     /**
-     * Refresh weather data from the network and store it
-     * @param coordinates Pair of latitude and longitude
-     * @throws Exception if there's an error refreshing the data
-     */
-    suspend fun refreshWeatherData(coordinates: Pair<Double, Double>)
-
-    /**
      * Get the timestamp of the last weather data update
      * @return Timestamp in milliseconds
      */
     suspend fun getLastWeatherUpdateTime(): Long
+
+    /**
+     * Save weather and air quality data to storage.
+     *
+     * This method is called by the orchestration layer after fetching and mapping data from network.
+     *
+     * @param weatherEntity The weather data to save
+     * @param airQualityEntity The air quality data to save
+     */
+    suspend fun saveWeatherData(weatherEntity: Any, airQualityEntity: Any)
 }
