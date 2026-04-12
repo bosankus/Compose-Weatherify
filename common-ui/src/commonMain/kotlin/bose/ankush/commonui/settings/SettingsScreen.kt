@@ -443,7 +443,9 @@ fun SubscribedPremiumCard(
         if (expiryTop != null) {
             val dateStr = remember(expiryTop) { formatDate(expiryTop) }
             Text(
-                text = strings.premiumExpires.replace($$"%1$s", dateStr).replace("%s", dateStr),
+                text = strings.premiumExpires
+                    .replace("%1\$s", dateStr)
+                    .replace("%s", dateStr),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
             )
