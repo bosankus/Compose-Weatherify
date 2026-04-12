@@ -4,7 +4,12 @@
   "languages": [
     "en-IN",
     "hi-IN",
-    "iw-IL"
+    "iw-IL",
+    "kn-IN",
+    "ta-IN",
+    "te-IN",
+    "bn-IN",
+    "ml-IN"
   ],
   "defaultLanguage": "en-IN",
   "localCurrency": ["INR"]

@@ -7,8 +7,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import bose.ankush.weatherify.base.common.APP_PREFERENCE_KEY
 import bose.ankush.weatherify.domain.preference.PreferenceManager
+import bose.ankush.weatherify.domain.preference.UserPreferences
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,7 +23,14 @@ class PreferenceManagerImpl @Inject constructor(@get:ApplicationContext private 
 
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = APP_PREFERENCE_KEY)
 
-    override fun getLocationPreferenceFlow(): Flow<Preferences> = context.dataStore.data
+    override fun getUserPreferencesFlow(): Flow<UserPreferences> = context.dataStore.data.map { preferences ->
+        UserPreferences(
+            latitude = preferences[PreferenceManager.USER_LAT_LOCATION],
+            longitude = preferences[PreferenceManager.USER_LON_LOCATION],
+            isPremium = preferences[PreferenceManager.IS_PREMIUM] ?: false,
+            premiumExpiry = preferences[PreferenceManager.PREMIUM_EXPIRY]
+        )
+    }
 
     override suspend fun saveLocationPreferences(coordinates: Pair<Double, Double>) {
         context.dataStore.edit { preferences ->

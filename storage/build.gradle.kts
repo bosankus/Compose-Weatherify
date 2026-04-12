@@ -14,6 +14,10 @@ kotlin {
         }
     }
 
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -45,11 +49,12 @@ kotlin {
                 // Room dependencies
                 implementation(Deps.room)
                 implementation(Deps.roomKtx)
+                // Security: Encrypted token storage
+                implementation(Deps.securityCrypto)
                 // Gson for JSON serialization
                 implementation("com.google.code.gson:gson:2.10.1")
-                // Network module dependency
-                implementation(project(":network"))
-                // Note: Hilt is provided from app module; storage has no DI annotations now
+                // Note: Network dependency removed to avoid circular dependency
+                // WeatherDataFetcher is injected via DI from app module
             }
         }
 

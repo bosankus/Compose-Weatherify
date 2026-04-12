@@ -30,8 +30,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
-import bose.ankush.sunriseui.components.ToastAnchorState
-import bose.ankush.sunriseui.components.toastAnchor
+import bose.ankush.commonui.components.ToastAnchorState
+import bose.ankush.commonui.components.toastAnchor
 import bose.ankush.weatherify.R
 
 @Composable

@@ -49,9 +49,11 @@ private data class AqiUiState(
 private fun rememberAqiUiState(aqi: Int): AqiUiState {
     return remember(aqi) {
         val (fullStatusText, _) = getAQIAnalysedText(aqi)
+        // Convert OpenWeatherMap 1-6 scale to EPA 0-500 scale for color mapping
+        val epaAqi = convertOwmAqiToEpa(aqi)
         AqiUiState(
             statusText = fullStatusText.split(" at").firstOrNull() ?: "",
-            qualityColor = getAirQualityColor(aqi),
+            qualityColor = getAirQualityColor(epaAqi),
             formattedAqi = aqi.getFormattedAQI()
         )
     }
@@ -206,6 +208,37 @@ fun ExpandedPollutantsDetails(airQuality: AirQuality) {
     }
 }
 
+
+/**
+ * Converts OpenWeatherMap AQI scale (1-6) to EPA AQI scale (0-500)
+ *
+ * OWM Scale:
+ * - 1: Good
+ * - 2: Fair
+ * - 3: Moderate
+ * - 4: Poor
+ * - 5: Very Poor
+ * - 6: Extreme
+ *
+ * EPA Scale:
+ * - 0-50: Good (Green)
+ * - 51-100: Moderate (Yellow)
+ * - 101-150: Unhealthy for Sensitive Groups (Orange)
+ * - 151-200: Unhealthy (Red)
+ * - 201-300: Very Unhealthy (Purple)
+ * - 301+: Hazardous (Dark Red)
+ */
+private fun convertOwmAqiToEpa(owmAqi: Int): Int {
+    return when (owmAqi) {
+        1 -> 25    // Good
+        2 -> 75    // Fair -> Moderate
+        3 -> 125   // Moderate -> Unhealthy for Sensitive Groups
+        4 -> 175   // Poor -> Unhealthy
+        5 -> 250   // Very Poor -> Very Unhealthy
+        6 -> 425   // Extreme -> Hazardous
+        else -> owmAqi.coerceIn(0, 500)  // Fallback for invalid values
+    }
+}
 
 /**
  * Returns a color based on the air quality index value

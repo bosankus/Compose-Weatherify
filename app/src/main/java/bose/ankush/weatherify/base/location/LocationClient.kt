@@ -1,15 +1,18 @@
 package bose.ankush.weatherify.base.location
 
-import android.location.Location
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Platform-agnostic location client interface.
+ * Uses [Coordinates] instead of android.location.Location to enable KMP compatibility.
+ */
 interface LocationClient {
 
-    fun getLocationUpdates(interval: Long): Flow<Location>
+    fun getLocationUpdates(interval: Long): Flow<Coordinates>
 
-    suspend fun getCurrentLocation(): Result<Location>
+    suspend fun getCurrentLocation(): Result<Coordinates>
 
     fun hasLocationPermission(): Boolean
 
-    class LocationException(message: String): Exception()
+    class LocationException(message: String) : Exception(message)
 }

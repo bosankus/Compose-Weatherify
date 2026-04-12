@@ -2,6 +2,7 @@ package bose.ankush.weatherify.presentation
 
 import android.Manifest
 import android.content.Context
+import android.location.LocationManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -38,9 +39,10 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import bose.ankush.commonui.auth.LoginScreen
 import bose.ankush.commonui.permissions.PermissionAlertDialog
-import bose.ankush.sunriseui.components.NotificationToast
-import bose.ankush.sunriseui.components.ToastType
-import bose.ankush.sunriseui.components.rememberToastAnchorState
+import bose.ankush.commonui.components.NotificationToast
+import bose.ankush.commonui.components.ToastType
+import bose.ankush.commonui.components.rememberToastAnchorState
+import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
@@ -51,7 +53,7 @@ import bose.ankush.weatherify.base.permissions.CoarseLocationPermissionTextProvi
 import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvider
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
-import bose.ankush.weatherify.presentation.web.InAppWebView
+import bose.ankush.commonui.web.InAppWebView
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
@@ -59,6 +61,7 @@ import com.razorpay.PaymentResultWithDataListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
+import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -67,6 +70,9 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
 
     private val viewModel: MainViewModel by viewModels()
+
+    // Koin-managed: owns payment state and Razorpay flow
+    private val paymentViewModel: PaymentViewModel by koinViewModel()
 
     @Inject
     lateinit var locationClient: LocationClient
@@ -150,35 +156,32 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                     }
                 }
 
-                // Collect payment events and launch Razorpay Checkout
+                // Collect checkout params from PaymentViewModel and launch Razorpay
                 LaunchedEffect(Unit) {
-                    viewModel.paymentEvents.collect { evt ->
-                        if (evt is bose.ankush.weatherify.presentation.payment.PaymentEvent.LaunchCheckout) {
-                            try {
-                                Checkout.preload(applicationContext)
-                                razorpayCheckout = Checkout()
-                                razorpayCheckout?.setKeyID(evt.keyId)
-                                val options = JSONObject().apply {
-                                    put("name", evt.name)
-                                    put("description", evt.description)
-                                    put("order_id", evt.orderId)
-                                    put("currency", evt.currency)
-                                    put("amount", evt.amount)
-                                    val prefill = JSONObject().apply {
-                                        evt.email?.let { put("email", it) }
-                                        evt.contact?.let { put("contact", it) }
-                                    }
-                                    put("prefill", prefill)
+                    paymentViewModel.checkoutParams.collect { params ->
+                        try {
+                            Checkout.preload(applicationContext)
+                            razorpayCheckout = Checkout()
+                            razorpayCheckout?.setKeyID(params.keyId)
+                            val options = JSONObject().apply {
+                                put("name", params.name)
+                                put("description", params.description)
+                                put("order_id", params.orderId)
+                                put("currency", params.currency)
+                                put("amount", params.amount)
+                                val prefill = JSONObject().apply {
+                                    params.email?.let { put("email", it) }
+                                    params.contact?.let { put("contact", it) }
                                 }
-                                razorpayCheckout?.open(this@MainActivity, options)
-                            } catch (e: Exception) {
-                                viewModel.onPaymentFailed(
-                                    e.message ?: "Unable to open payment checkout"
-                                )
-                                // Clean up in case of error
-                                Checkout.clearUserData(context)
-                                razorpayCheckout = null
+                                put("prefill", prefill)
                             }
+                            razorpayCheckout?.open(this@MainActivity, options)
+                        } catch (e: Exception) {
+                            paymentViewModel.onPaymentFailed(
+                                e.message ?: "Unable to open payment checkout"
+                            )
+                            Checkout.clearUserData(context)
+                            razorpayCheckout = null
                         }
                     }
                 }
@@ -216,7 +219,7 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                             LaunchedEffect(launchNotificationPermissionState.value) {
                                 viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
                             }
-                            AppNavigation(viewModel, toastAnchorState)
+                            AppNavigation(viewModel, paymentViewModel, toastAnchorState)
                         }
                         else -> {
                             // State for web view
@@ -360,29 +363,38 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
         if (granted.isNotEmpty()) {
             viewModel.removeGrantedPermissions(granted)
         }
+        // If GPS was disabled and user returned from location settings, retry location fetch
+        if (viewModel.uiState.value.isGpsDisabled && locationClient.hasLocationPermission()) {
+            val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+            val isLocationAvailable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                    locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+            if (isLocationAvailable) {
+                viewModel.fetchAndSaveLocationCoordinates()
+            }
+        }
     }
 
     /**
-     * Razorpay payment success callback.
+     * Razorpay payment success callback — delegates to [PaymentViewModel].
      */
     override fun onPaymentSuccess(razorpayPaymentID: String?, paymentData: PaymentData?) {
         val orderId = paymentData?.orderId.orEmpty()
         val paymentId = paymentData?.paymentId ?: razorpayPaymentID.orEmpty()
         val signature = paymentData?.signature.orEmpty()
         if (orderId.isNotBlank() && paymentId.isNotBlank() && signature.isNotBlank()) {
-            viewModel.verifyPayment(orderId, paymentId, signature)
+            paymentViewModel.verifyPayment(orderId, paymentId, signature)
         } else {
-            viewModel.onPaymentFailed("Payment succeeded but missing data")
+            paymentViewModel.onPaymentFailed("Payment succeeded but missing data")
         }
         razorpayCheckout = null
     }
 
     /**
-     * Razorpay payment error callback.
+     * Razorpay payment error callback — delegates to [PaymentViewModel].
      */
     override fun onPaymentError(code: Int, response: String?, paymentData: PaymentData?) {
         val message = response ?: "Payment failed with code $code"
-        viewModel.onPaymentFailed(message)
+        paymentViewModel.onPaymentFailed(message)
         razorpayCheckout = null
     }
 

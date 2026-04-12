@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,8 +32,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import bose.ankush.sunriseui.components.SunriseSunsetCombinedAnimation
-import bose.ankush.sunriseui.components.ToastAnchorState
+import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.weatherify.R
+import bose.ankush.weatherify.base.common.Extension.openLocationSettings
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.UIState
@@ -38,7 +42,7 @@ import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportC
 import bose.ankush.weatherify.presentation.home.component.CurrentWeatherReportLayout
 import bose.ankush.weatherify.presentation.home.component.DailyWeatherForecastReportLayout
 import bose.ankush.weatherify.presentation.home.component.HourlyWeatherForecastReportLayout
-import bose.ankush.weatherify.presentation.home.component.NotificationPermissionCardLayout
+import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.weatherify.presentation.home.component.WeatherAlertLayout
 import bose.ankush.weatherify.presentation.home.state.ErrorBackgroundAnimation
 import bose.ankush.weatherify.presentation.home.state.ShowError
@@ -61,8 +65,10 @@ fun HomeScreen(
         !uiState.error?.asString(context).isNullOrEmpty() -> {
             // Screen error handler
             HandleScreenError(
-                context,
-                uiState.error
+                context = context,
+                errorText = uiState.error,
+                isLoading = uiState.isLoading,
+                isGpsDisabled = uiState.isGpsDisabled
             ) { viewModel.fetchAndSaveLocationCoordinates() }
         }
 
@@ -75,7 +81,8 @@ fun HomeScreen(
                 toastAnchorState = toastAnchorState,
                 showNotificationCard = showNotificationCard,
                 onEnableNotificationClick = { viewModel.updateNotificationPermission(true) },
-                onDismissNotificationClick = { viewModel.updateShowNotificationBannerState(false) }
+                onDismissNotificationClick = { viewModel.updateShowNotificationBannerState(false) },
+                onRefresh = { viewModel.refreshWeatherData() }
             )
         }
 
@@ -100,23 +107,11 @@ fun HandleScreenLoading() {
 fun HandleScreenError(
     context: Context,
     errorText: UiText?,
+    isLoading: Boolean = false,
+    isGpsDisabled: Boolean = false,
     onErrorAction: () -> Unit
 ) {
-    // State to track if retry operation is in progress
-    val (isRetrying, setRetrying) = remember { mutableStateOf(false) }
-
-    // Reset loading state after a delay to give visual feedback
-    // In a real app, this would be reset when the operation completes
-    LaunchedEffect(isRetrying) {
-        if (isRetrying) {
-            delay(2000) // Show loading for at least 2 seconds for better UX
-            setRetrying(false)
-        }
-    }
-
-    // Add a background animation that's appropriate for error state
     Box(modifier = Modifier.fillMaxSize()) {
-        // Create a subtle animated background
         ErrorBackgroundAnimation()
 
         ShowError(
@@ -124,19 +119,19 @@ fun HandleScreenError(
                 .fillMaxSize()
                 .padding(all = 16.dp),
             msg = errorText?.asString(context),
-            buttonText = stringResource(id = R.string.retry_btn_txt),
-            isLoading = isRetrying,
-            buttonAction = {
-                // Set loading state to true when retry is clicked
-                setRetrying(true)
-
-                // Call the original action
-                onErrorAction()
+            buttonText = if (isGpsDisabled) stringResource(id = R.string.enable_gps_btn_txt)
+                         else stringResource(id = R.string.retry_btn_txt),
+            isLoading = isLoading,
+            buttonAction = if (isGpsDisabled) {
+                { context.openLocationSettings() }
+            } else {
+                onErrorAction
             }
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ShowUIContainer(
     uiState: UIState,
@@ -144,10 +139,13 @@ private fun ShowUIContainer(
     toastAnchorState: ToastAnchorState? = null,
     showNotificationCard: Boolean = false,
     onEnableNotificationClick: () -> Unit = {},
-    onDismissNotificationClick: () -> Unit = {}
+    onDismissNotificationClick: () -> Unit = {},
+    onRefresh: () -> Unit = {}
 ) {
     val weatherReports = uiState.weatherData
     val airQualityReports = uiState.airQualityData
+
+    val pullToRefreshState = rememberPullToRefreshState()
 
     // Create transition states for animations
     val currentWeatherTransitionState = remember { MutableTransitionState(false) }
@@ -192,9 +190,26 @@ private fun ShowUIContainer(
             )
         }
 
+        if (showNotificationCard) {
+            PermissionAlertDialog(
+                descriptionText = stringResource(R.string.notification_permission_message),
+                isPermanentlyDeclined = true,
+                onPositiveAction = onEnableNotificationClick,
+                onNegativeAction = onDismissNotificationClick,
+                positiveButtonLabel = stringResource(R.string.enable_notification_btn),
+                negativeButtonLabel = stringResource(R.string.cancel_btn_txt)
+            )
+        }
+
         Scaffold(
             containerColor = Color.Transparent, // Make the scaffold background transparent
             content = { innerPadding ->
+                PullToRefreshBox(
+                    isRefreshing = uiState.isRefreshing,
+                    onRefresh = onRefresh,
+                    state = pullToRefreshState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = innerPadding,
@@ -220,16 +235,6 @@ private fun ShowUIContainer(
                                     weatherReports.daily?.firstOrNull()?.summary
                                 )
                             }
-                        }
-                    }
-
-                    // Show notification permission card if needed
-                    if (showNotificationCard) {
-                        item(key = "notification_permission") {
-                            NotificationPermissionCardLayout(
-                                onEnableClick = onEnableNotificationClick,
-                                onDismissClick = onDismissNotificationClick
-                            )
                         }
                     }
 
@@ -306,6 +311,7 @@ private fun ShowUIContainer(
                         }
                     }
                 }
+                } // end PullToRefreshBox
             }, bottomBar = {
                 AppBottomBar(
                     isVisible = rememberSaveable { mutableStateOf(true) },

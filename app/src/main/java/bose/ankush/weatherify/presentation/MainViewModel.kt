@@ -9,31 +9,24 @@ import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.auth.token.TokenResult
-import bose.ankush.network.model.CreateOrderRequest
-import bose.ankush.network.model.VerifyPaymentRequest
-import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
-import bose.ankush.weatherify.base.common.Extension
+import bose.ankush.weatherify.base.common.DeviceInfoProvider
+import bose.ankush.weatherify.base.common.LoggerFactory
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.base.common.errorResponseFromException
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.base.location.LocationClient
+import bose.ankush.weatherify.base.location.LocationPermissions
+import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.domain.preference.PreferenceManager
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetWeatherReport
-import bose.ankush.weatherify.domain.use_case.payment.CreateOrder
-import bose.ankush.weatherify.domain.use_case.payment.VerifyPayment
 import bose.ankush.weatherify.domain.use_case.refresh_weather_reports.RefreshWeatherReport
-import bose.ankush.weatherify.presentation.payment.PaymentEvent
-import bose.ankush.weatherify.presentation.payment.PaymentStage
-import bose.ankush.weatherify.presentation.payment.PaymentUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,18 +35,25 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
-import java.util.Calendar
-import java.util.TimeZone
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import javax.inject.Inject
 
 /**
  * Main ViewModel for Weatherify.
- * Handles UI state, authentication, location, notifications, and payment.
+ * Handles UI state, authentication, location, and notifications.
+ *
+ * Payment state and logic lives in [bose.ankush.payment.presentation.PaymentViewModel].
+ *
+ * All platform-specific dependencies are injected via interfaces so this class
+ * is ready to be moved to a KMP commonMain source set with minimal changes.
+ *
+ * Remaining KMP TODO: [UiText.StringResource] still references Android R.string resources.
+ * When migrating UiText to a KMP-compatible text-resource system, replace the
+ * [UiText.StringResource] usages below with the new type.
  */
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -66,28 +66,11 @@ class MainViewModel @Inject constructor(
     private val remoteConfigService: RemoteConfigService,
     private val authRepository: AuthRepository,
     private val tokenManager: TokenManager,
-    private val createOrder: CreateOrder,
-    private val verifyPayment: VerifyPayment
+    loggerFactory: LoggerFactory,
+    private val deviceInfoProvider: DeviceInfoProvider,
 ) : ViewModel() {
 
-    private fun friendlyMessageFromThrowable(t: Throwable?): String {
-        return when (t) {
-            null -> "Something went wrong. Please try again."
-            is CancellationException -> "Request was cancelled. Please try again."
-            else -> "Something went wrong. Please try again."
-        }
-    }
-
-    private fun friendlyMessageFromServer(message: String?): String {
-        if (message.isNullOrBlank()) return "Something went wrong. Please try again."
-        val lower = message.lowercase()
-        return when {
-            "timeout" in lower -> "The server took too long to respond. Please try again."
-            "cancel" in lower -> "Payment was cancelled."
-            "network" in lower || "unable to resolve host" in lower -> "Please check your internet connection and try again."
-            else -> "Something went wrong. Please try again."
-        }
-    }
+    private val logger = loggerFactory.create("${MainViewModel::class.simpleName} ->")
 
     // Permission dialog queue for UI
     var permissionDialogQueue = mutableStateListOf<String>()
@@ -113,19 +96,10 @@ class MainViewModel @Inject constructor(
     private val _isAuthInitialized = MutableStateFlow(false)
     val isAuthInitialized: StateFlow<Boolean> = _isAuthInitialized.asStateFlow()
 
-    // Payment state
-    private val _paymentUiState = MutableStateFlow(PaymentUiState())
-    val paymentUiState: StateFlow<PaymentUiState> = _paymentUiState.asStateFlow()
-
-    private val _paymentEvents = Channel<PaymentEvent>(Channel.BUFFERED)
-    val paymentEvents = _paymentEvents.receiveAsFlow()
-
     // Coroutine jobs
     private var notificationBannerJob: Job? = null
     private var locationJob: Job? = null
     private var dataLoadingJob: Job? = null
-
-    private val tag = "${MainViewModel::class.simpleName} ->"
 
     // Exception handler for data fetch
     private val dataFetchExceptionHandler = CoroutineExceptionHandler { _, e ->
@@ -137,55 +111,19 @@ class MainViewModel @Inject constructor(
     }
 
     init {
-        Timber.tag(tag).d("MainViewModel initialized")
+        logger.d("MainViewModel initialized")
 
-        // Observe login state and set auth initialized
         viewModelScope.launch {
             var initialized = false
             authRepository.isLoggedIn().collectLatest { loggedIn ->
                 _isLoggedIn.value = loggedIn
-                Timber.tag(tag).d("Auth state changed - isLoggedIn: $loggedIn")
+                logger.d("Auth state changed - isLoggedIn: $loggedIn")
                 if (!initialized) {
                     _isAuthInitialized.value = true
                     initialized = true
-                    Timber.tag(tag).d("Auth initialization completed")
-
-                    // Silently refresh token in the background if user is logged in
-                    if (loggedIn) {
-                        silentTokenRefresh()
-                    }
+                    logger.d("Auth initialization completed")
+                    if (loggedIn) silentTokenRefresh()
                 }
-            }
-        }
-
-        // Load premium status and expiry from preferences
-        viewModelScope.launch(dispatchers.io) {
-            try {
-                Timber.tag(tag).d("Loading premium status from preferences")
-                val prefs = preferenceManager.getLocationPreferenceFlow().first()
-                val isPremiumStored = prefs[PreferenceManager.IS_PREMIUM] ?: false
-                val expiry = prefs[PreferenceManager.PREMIUM_EXPIRY]
-                val now = System.currentTimeMillis()
-                val isActive = isPremiumStored && (expiry == null || expiry > now)
-
-                Timber.tag(tag).d(
-                    "Premium status loaded - stored: $isPremiumStored, expiry: $expiry, active: $isActive"
-                )
-
-                withContext(dispatchers.main) {
-                    _paymentUiState.update { state ->
-                        state.copy(
-                            isPremiumActivated = isActive,
-                            expiryMillis = expiry,
-                            stage = if (isActive) PaymentStage.Success else state.stage
-                        )
-                    }
-                    if (isActive) {
-                        Timber.tag(tag).i("Premium status active on app start")
-                    }
-                }
-            } catch (e: Exception) {
-                Timber.tag(tag).e(e, "Error loading premium status from preferences")
             }
         }
     }
@@ -194,7 +132,7 @@ class MainViewModel @Inject constructor(
     fun dismissDialog() {
         if (permissionDialogQueue.isNotEmpty()) {
             val dismissed = permissionDialogQueue.removeAt(0)
-            Timber.tag(tag).d("Dismissed permission dialog: $dismissed")
+            logger.d("Dismissed permission dialog: $dismissed")
         }
     }
 
@@ -204,34 +142,34 @@ class MainViewModel @Inject constructor(
         var locationGranted = false
         grantedPermissions.forEach { permission ->
             permissionDialogQueue.remove(permission)
-            Timber.tag(tag).d("Removed granted permission from queue: $permission")
-            if (permission == android.Manifest.permission.ACCESS_FINE_LOCATION ||
-                permission == android.Manifest.permission.ACCESS_COARSE_LOCATION
+            logger.d("Removed granted permission from queue: $permission")
+            if (permission == LocationPermissions.FINE_LOCATION ||
+                permission == LocationPermissions.COARSE_LOCATION
             ) {
                 locationGranted = true
             }
         }
         if (locationGranted) {
-            Timber.tag(tag).d("Location permission granted via Settings, fetching location")
+            logger.d("Location permission granted via Settings, fetching location")
             fetchAndSaveLocationCoordinates()
         }
     }
 
     /** Handle permission result, fetch location if granted. */
     fun onPermissionResult(permission: String, isGranted: Boolean) {
-        Timber.tag(tag).d("Permission result - permission: $permission, granted: $isGranted")
-        if (!isGranted && !permissionDialogQueue.contains(permission)) {
-            permissionDialogQueue.add(permission)
-            Timber.tag(tag).w("Permission denied: $permission, added to queue")
-        } else {
-            Timber.tag(tag).d("Permission granted, fetching location")
+        logger.d("Permission result - permission: $permission, granted: $isGranted")
+        if (isGranted) {
+            logger.d("Permission granted, fetching location")
             fetchAndSaveLocationCoordinates()
+        } else if (!permissionDialogQueue.contains(permission)) {
+            permissionDialogQueue.add(permission)
+            logger.w("Permission denied: $permission, added to queue")
         }
     }
 
     /** Show/hide notification permission dialog. */
     fun updateNotificationPermission(launchState: Boolean) {
-        Timber.tag(tag).d("Updating notification permission dialog - show: $launchState")
+        logger.d("Updating notification permission dialog - show: $launchState")
         _launchNotificationPermission.update { launchState }
     }
 
@@ -242,12 +180,11 @@ class MainViewModel @Inject constructor(
             try {
                 val enabled = remoteConfigService.getBoolean(ENABLE_NOTIFICATION)
                 _showNotificationCardItem.update { enabled && launchState }
-                Timber.tag(tag)
-                    .d("Notification feature is ${if (enabled) "enabled" else "disabled"}")
-            } catch (e: CancellationException) {
-                throw e
+                logger.d("Notification feature is ${if (enabled) "enabled" else "disabled"}")
+            } catch (_: CancellationException) {
+                throw CancellationException()
             } catch (e: Exception) {
-                Timber.tag(tag).e(e, "Error updating notification banner state")
+                logger.e("Error updating notification banner state", e)
                 _uiState.update { it.copy(error = errorResponseFromException(e)) }
             }
         }
@@ -255,56 +192,103 @@ class MainViewModel @Inject constructor(
 
     /** Fetch and save user location, then load initial data. */
     fun fetchAndSaveLocationCoordinates() {
-        Timber.tag(tag).d("Starting location fetch")
+        logger.d("Starting location fetch")
+        _uiState.update { UIState(isLoading = true) }
         locationJob?.cancel()
         locationJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
             try {
                 locationClient.getCurrentLocation().fold(
                     onSuccess = { loc ->
-                        Timber.tag(tag).i(
-                            "Location fetched successfully - lat: ${loc.latitude}, lon: ${loc.longitude}"
-                        )
+                        logger.i("Location fetched successfully - lat: ${loc.latitude}, lon: ${loc.longitude}")
                         preferenceManager.saveLocationPreferences(loc.latitude to loc.longitude)
-                        Timber.tag(tag).d("Location preferences saved")
+                        logger.d("Location preferences saved")
                         performInitialDataLoading()
                     },
                     onFailure = { e ->
-                        Timber.tag(tag).e(e, "Location fetch failed")
-                        val error = if (e is Exception) errorResponseFromException(e)
+                        logger.e("Location fetch failed", e)
+                        val isGpsDisabled = e is LocationClient.LocationException &&
+                                e.message?.contains("GPS is disabled", ignoreCase = true) == true
+                        val error = if (isGpsDisabled)
+                            UiText.StringResource(resId = R.string.gps_disabled_error_txt)
+                        else if (e is Exception) errorResponseFromException(e)
                         else UiText.StringResource(resId = R.string.general_error_txt)
-                        _uiState.update { it.copy(error = error) }
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = error,
+                                isGpsDisabled = isGpsDisabled
+                            )
+                        }
                     }
                 )
-            } catch (e: CancellationException) {
-                Timber.tag(tag).d("Location fetch cancelled")
-                _uiState.update { it.copy(error = errorResponseFromException(e)) }
+            } catch (_: CancellationException) {
+                logger.d("Location fetch cancelled")
             } catch (e: Exception) {
-                Timber.tag(tag).e(e, "Error fetching location coordinates")
-                _uiState.update { it.copy(error = errorResponseFromException(e)) }
+                logger.e("Error fetching location coordinates", e)
+                _uiState.update {
+                    it.copy(isLoading = false, error = errorResponseFromException(e))
+                }
+            }
+        }
+    }
+
+    /** Refresh weather data without clearing the existing UI (pull-to-refresh). */
+    fun refreshWeatherData() {
+        logger.d("Starting pull-to-refresh")
+        _uiState.update { it.copy(isRefreshing = true) }
+        locationJob?.cancel()
+        locationJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+            try {
+                locationClient.getCurrentLocation().fold(
+                    onSuccess = { loc ->
+                        logger.i("Location fetched for refresh - lat: ${loc.latitude}, lon: ${loc.longitude}")
+                        preferenceManager.saveLocationPreferences(loc.latitude to loc.longitude)
+                        performInitialDataLoading(forceRefresh = true)
+                    },
+                    onFailure = { e ->
+                        logger.e("Location fetch failed during refresh", e)
+                        val isGpsDisabled = e is LocationClient.LocationException &&
+                                e.message?.contains("GPS is disabled", ignoreCase = true) == true
+                        val error = if (isGpsDisabled)
+                            UiText.StringResource(resId = R.string.gps_disabled_error_txt)
+                        else if (e is Exception) errorResponseFromException(e)
+                        else UiText.StringResource(resId = R.string.general_error_txt)
+                        _uiState.update {
+                            it.copy(isRefreshing = false, error = error, isGpsDisabled = isGpsDisabled)
+                        }
+                    }
+                )
+            } catch (_: CancellationException) {
+                logger.d("Pull-to-refresh cancelled")
+            } catch (e: Exception) {
+                logger.e("Error during pull-to-refresh", e)
+                _uiState.update {
+                    it.copy(isRefreshing = false, error = errorResponseFromException(e))
+                }
             }
         }
     }
 
     /** Load weather and air quality data for UI. */
-    private fun performInitialDataLoading() {
-        Timber.tag(tag).d("Starting initial data loading")
+    private fun performInitialDataLoading(forceRefresh: Boolean = false) {
+        logger.d("Starting initial data loading (forceRefresh=$forceRefresh)")
         dataLoadingJob?.cancel()
         dataLoadingJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
             try {
-                val prefs = preferenceManager.getLocationPreferenceFlow().first()
-                val lat = prefs[PreferenceManager.USER_LAT_LOCATION]
-                val lon = prefs[PreferenceManager.USER_LON_LOCATION]
+                val prefs = preferenceManager.getUserPreferencesFlow().first()
+                val lat = prefs.latitude
+                val lon = prefs.longitude
 
                 if (lat != null && lon != null) {
                     val location = lat to lon
-                    Timber.tag(tag).d("Loading data for location - lat: $lat, lon: $lon")
+                    logger.d("Loading data for location - lat: $lat, lon: $lon")
 
-                    refreshWeatherReport(location)
-                    Timber.tag(tag).v("Refreshed weather report cache")
+                    refreshWeatherReport(location, forceRefresh)
+                    logger.v("Refreshed weather report cache")
 
                     getAirQuality(location.first, location.second)
                         .combine(getWeatherReport(location)) { air, weather ->
-                            Timber.tag(tag).d("Data loaded successfully")
+                            logger.d("Data loaded successfully")
                             UIState(
                                 isLoading = false,
                                 userLocation = location,
@@ -316,349 +300,150 @@ class MainViewModel @Inject constructor(
                         .flowOn(dispatchers.io)
                         .catch { e ->
                             if (e is CancellationException) throw e
-                            Timber.tag(tag).e(e, "Error loading weather data")
+                            logger.e("Error loading weather data", e)
                             val error = if (e is Exception) errorResponseFromException(e)
                             else UiText.StringResource(resId = R.string.general_error_txt)
-                            _uiState.update { it.copy(isLoading = false, error = error) }
+                            _uiState.update {
+                                it.copy(isLoading = false, isRefreshing = false, error = error)
+                            }
                         }
                         .collectLatest { state -> _uiState.value = state }
                 } else {
-                    Timber.tag(tag).w("Location coordinates not found in preferences")
+                    logger.w("Location coordinates not found in preferences")
                     _uiState.update {
                         it.copy(
                             isLoading = false,
+                            isRefreshing = false,
                             error = UiText.StringResource(R.string.default_coordinates_txt)
                         )
                     }
                 }
-            } catch (e: CancellationException) {
-                Timber.tag(tag).d("Initial data loading cancelled")
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = errorResponseFromException(e)
-                    )
-                }
+            } catch (_: CancellationException) {
+                logger.d("Initial data loading cancelled")
             } catch (e: Exception) {
-                Timber.tag(tag).e(e, "Error in initial data loading")
+                logger.e("Error in initial data loading", e)
                 _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = errorResponseFromException(e)
-                    )
+                    it.copy(isLoading = false, isRefreshing = false, error = errorResponseFromException(e))
                 }
             }
         }
     }
 
     /** Login with email and password. */
-    fun login(email: String, password: String) = viewModelScope.launch {
-        Timber.tag(tag).d("Login attempt for email: $email")
-        _authState.value = AuthState.Loading
-        try {
-            handleAuthResponse(authRepository.login(email, password))
-        } catch (e: Exception) {
-            Timber.tag(tag).e(e, "Login failed for email: $email")
-            _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "Login failed"))
-        }
+    fun login(email: String, password: String) = launchAuth("Login", email) {
+        authRepository.login(email, password)
     }
 
     /** Register with email and password. */
-    fun register(email: String, password: String) = viewModelScope.launch {
-        Timber.tag(tag).d("Registration attempt for email: $email")
+    fun register(email: String, password: String) = launchAuth("Registration", email) {
+        authRepository.register(
+            email = email,
+            password = password,
+            timestampOfRegistration = deviceInfoProvider.getCurrentUtcTimestamp(),
+            deviceModel = deviceInfoProvider.getDeviceModel(),
+            operatingSystem = deviceInfoProvider.getOperatingSystem(),
+            osVersion = deviceInfoProvider.getOsVersion(),
+            appVersion = deviceInfoProvider.getAppVersion(),
+            ipAddress = deviceInfoProvider.getIpAddress(),
+            registrationSource = deviceInfoProvider.getRegistrationSource(),
+            firebaseToken = deviceInfoProvider.getFirebaseToken()
+        )
+    }
+
+    private fun launchAuth(
+        actionName: String,
+        email: String,
+        block: suspend () -> AuthResponse
+    ) = viewModelScope.launch(dispatchers.io) {
+        logger.d("$actionName attempt for email: $email")
         _authState.value = AuthState.Loading
         try {
-            val resp = authRepository.register(
-                email = email,
-                password = password,
-                timestampOfRegistration = Extension.getCurrentUtcTimestamp(),
-                deviceModel = Extension.getDeviceModel(),
-                operatingSystem = Extension.getOperatingSystem(),
-                osVersion = Extension.getOsVersion(),
-                appVersion = Extension.getAppVersion(),
-                ipAddress = Extension.getIpAddress(),
-                registrationSource = Extension.getRegistrationSource(),
-                firebaseToken = Extension.getFirebaseToken()
-            )
-            Timber.tag(tag).d("Registration response received for email: $email")
-            handleAuthResponse(resp)
+            handleAuthResponse(block())
         } catch (e: Exception) {
-            Timber.tag(tag).e(e, "Registration failed for email: $email")
-            _authState.value =
-                AuthState.Error(UiText.DynamicText(e.message ?: "Registration failed"))
+            logger.e("$actionName failed for email: $email", e)
+            _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "$actionName failed"))
         }
     }
 
     /** Logout user. */
-    fun logout() = viewModelScope.launch {
-        Timber.tag(tag).d("Logout initiated")
+    fun logout() = viewModelScope.launch(dispatchers.io) {
+        logger.d("Logout initiated")
         _authState.value = AuthState.LogoutLoading
-        try {
-            val result = authRepository.logout()
-            if (result.isSuccess) {
-                Timber.tag(tag).i("Logout successful")
+        authRepository.logout().fold(
+            onSuccess = {
+                logger.i("Logout successful")
                 _authState.value = AuthState.LoggedOut
-            } else {
-                Timber.tag(tag).e(result.exceptionOrNull(), "Logout failed")
-                _authState.value = AuthState.Error(
-                    UiText.DynamicText(
-                        result.exceptionOrNull()?.message ?: "Logout failed"
-                    )
-                )
+            },
+            onFailure = { e ->
+                logger.e("Logout failed", e)
+                _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "Logout failed"))
             }
-        } catch (e: Exception) {
-            Timber.tag(tag).e(e, "Logout exception")
-            _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "Logout failed"))
-        }
+        )
     }
 
-    /** Silently refresh token in the background (on app startup). */
     private fun silentTokenRefresh() = viewModelScope.launch(dispatchers.io) {
-        Timber.tag(tag).d("Starting silent token refresh")
+        logger.d("Starting silent token refresh")
         when (val result = tokenManager.refreshToken()) {
-            is TokenResult.Valid -> Timber.tag(tag).i("Token refreshed successfully")
-            is TokenResult.NoToken -> emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
-            is TokenResult.InvalidToken -> emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+            is TokenResult.Valid -> logger.i("Token refreshed successfully")
+            is TokenResult.NoToken -> {
+                tokenManager.forceLogout()
+                emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+            }
+            is TokenResult.InvalidToken -> {
+                tokenManager.forceLogout()
+                emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+            }
             is TokenResult.Error -> {
-                Timber.tag(tag).e(result.exception, "Silent token refresh error")
+                logger.e("Silent token refresh error", result.exception)
                 emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
             }
         }
     }
 
-    /** Handle authentication response. */
     private fun handleAuthResponse(response: AuthResponse) {
-        val token = response.data?.token
-        if (response.isSuccess() && !token.isNullOrBlank()) {
-            Timber.tag(tag).i("Authentication successful")
-            val data = response.data
-            if (data != null && data.isPremium) {
-                viewModelScope.launch {
-                    Timber.tag(tag).i("User is premium, saving premium status")
-                    val expiryMillis = data.premiumExpiresAt
-                        ?.let { parseIsoToMillis(it) }
-                        ?: (System.currentTimeMillis() + (365 * 24 * 60 * 60 * 1000L))
-                    preferenceManager.savePremiumStatus(
-                        isPremium = true,
-                        expiryMillis = expiryMillis
-                    )
-                    _paymentUiState.value = _paymentUiState.value.copy(isPremiumActivated = true)
-                }
+        val data = response.data
+            ?.takeIf { response.isSuccess() && it.token.isNotBlank() }
+            ?: run {
+                logger.w("Authentication failed - success: ${response.isSuccess()}")
+                _authState.value =
+                    AuthState.Error(UiText.DynamicText(response.message ?: "Authentication failed"))
+                return
             }
+
+        logger.i("Authentication successful")
+
+        if (!data.isPremium) {
             _authState.value = AuthState.Success
-        } else {
-            Timber.tag(tag)
-                .w("Authentication failed - success: ${response.isSuccess()}, has token: ${!token.isNullOrBlank()}")
-            _authState.value =
-                AuthState.Error(UiText.DynamicText(response.message ?: "Authentication failed"))
+            return
+        }
+
+        // Save premium status to preferences so PaymentViewModel observes the update reactively.
+        viewModelScope.launch(dispatchers.io) {
+            logger.i("User is premium, saving premium status")
+            val expiryMillis = data.premiumExpiresAt?.let { parseIsoToMillis(it) }
+                ?: (Clock.System.now().toEpochMilliseconds() + 365L * 24 * 60 * 60 * 1000)
+            preferenceManager.savePremiumStatus(isPremium = true, expiryMillis = expiryMillis)
+            withContext(dispatchers.main) {
+                _authState.value = AuthState.Success
+            }
         }
     }
 
     private fun parseIsoToMillis(isoDate: String): Long? = try {
-        java.time.Instant.parse(isoDate).toEpochMilli()
+        Instant.parse(isoDate).toEpochMilliseconds()
     } catch (_: Exception) {
         null
     }
 
     /** Reset authentication state. */
     fun resetAuthState() {
-        Timber.tag(tag).d("Auth state reset to Initial")
+        logger.d("Auth state reset to Initial")
         _authState.value = AuthState.Initial
     }
 
-    // --- Payment ---
-
-    /** Start payment process. */
-    fun startPayment(amountPaise: Long = 10_000L, currency: String = "INR") =
-        viewModelScope.launch {
-            Timber.tag(tag).d("Starting payment process - amount: ${amountPaise / 100.0} $currency")
-
-            _paymentUiState.value =
-                _paymentUiState.value.copy(
-                    loading = true,
-                    message = "Creating order...",
-                    stage = PaymentStage.CreatingOrder
-                )
-
-            try {
-                val receipt = "receipt_${System.currentTimeMillis()}"
-                Timber.tag(tag).v("Creating order with receipt: $receipt")
-
-                val result = createOrder(
-                    CreateOrderRequest(
-                        amount = amountPaise,
-                        currency = currency,
-                        receipt = receipt,
-                        partialPayment = true,
-                        firstPaymentMinAmount = 500L,
-                        notes = mapOf("note1" to "This is a note", "note2" to "Another note")
-                    )
-                )
-
-                result.fold(
-                    onSuccess = { response ->
-                        val data = response.extractData()
-                        val key = BuildConfig.RAZORPAY_KEY
-
-                        when {
-                            data == null -> {
-                                Timber.tag(tag).e("Order creation failed - no data in response")
-                                _paymentUiState.value = _paymentUiState.value.copy(
-                                    loading = false,
-                                    message = friendlyMessageFromServer(response.message),
-                                    stage = PaymentStage.Failure
-                                )
-                            }
-
-                            key.isBlank() -> {
-                                Timber.tag(tag).e("Razorpay key not configured")
-                                _paymentUiState.value = _paymentUiState.value.copy(
-                                    loading = false,
-                                    message = "Payment is temporarily unavailable. Please try again later.",
-                                    stage = PaymentStage.Failure
-                                )
-                            }
-
-                            data.orderId.isBlank() || data.amount <= 0L || data.currency.isBlank() -> {
-                                Timber.tag(tag)
-                                    .e("Invalid order data - orderId: ${data.orderId.isNotBlank()}, amount: ${data.amount > 0}, currency: ${data.currency.isNotBlank()}")
-                                _paymentUiState.value = _paymentUiState.value.copy(
-                                    loading = false,
-                                    message = "We couldn't start the payment. Please try again.",
-                                    stage = PaymentStage.Failure
-                                )
-                            }
-
-                            else -> {
-                                Timber.tag(tag)
-                                    .i("Order created successfully - orderId: ${data.orderId}")
-                                _paymentEvents.trySend(
-                                    PaymentEvent.LaunchCheckout(
-                                        keyId = key,
-                                        orderId = data.orderId,
-                                        amount = data.amount,
-                                        currency = data.currency,
-                                        name = "Weatherify Subscription",
-                                        description = "Premium Plan"
-                                    )
-                                )
-                                _paymentUiState.value = _paymentUiState.value.copy(
-                                    loading = false,
-                                    message = response.message ?: "Order created",
-                                    stage = PaymentStage.AwaitingPayment
-                                )
-                            }
-                        }
-                    },
-                    onFailure = { e ->
-                        Timber.tag(tag).e(e, "Order creation failed")
-                        _paymentUiState.value = _paymentUiState.value.copy(
-                            loading = false,
-                            message = friendlyMessageFromThrowable(e),
-                            stage = PaymentStage.Failure
-                        )
-                    }
-                )
-            } catch (e: Exception) {
-                Timber.tag(tag).e(e, "Exception during payment start")
-                _paymentUiState.value = _paymentUiState.value.copy(
-                    loading = false,
-                    message = friendlyMessageFromThrowable(e),
-                    stage = PaymentStage.Failure
-                )
-            }
-        }
-
-    /** Verify payment. */
-    fun verifyPayment(orderId: String, paymentId: String, signature: String) =
-        viewModelScope.launch {
-            Timber.tag(tag)
-                .d("Starting payment verification - orderId: $orderId, paymentId: $paymentId")
-
-            _paymentUiState.value =
-                _paymentUiState.value.copy(
-                    loading = true,
-                    message = "Verifying payment...",
-                    stage = PaymentStage.Verifying
-                )
-
-            try {
-                val result = verifyPayment(
-                    VerifyPaymentRequest(
-                        razorpayOrderId = orderId,
-                        razorpayPaymentId = paymentId,
-                        razorpaySignature = signature
-                    )
-                )
-
-                result.fold(
-                    onSuccess = { resp ->
-                        if (resp.success) {
-                            Timber.tag(tag).i("Payment verified successfully")
-                            val cal = Calendar.getInstance(TimeZone.getDefault())
-                            cal.timeInMillis = System.currentTimeMillis()
-                            cal.add(Calendar.MONTH, 1)
-                            val expiry = cal.timeInMillis
-
-                            withContext(dispatchers.io) {
-                                try {
-                                    preferenceManager.savePremiumStatus(true, expiry)
-                                    Timber.tag(tag)
-                                        .d("Premium status saved to preferences - expiry: $expiry")
-                                } catch (e: Exception) {
-                                    Timber.tag(tag).e(e, "Error saving premium status")
-                                }
-                            }
-
-                            _paymentUiState.value = _paymentUiState.value.copy(
-                                loading = false,
-                                message = "Payment verified",
-                                stage = PaymentStage.Success,
-                                isPremiumActivated = true,
-                                expiryMillis = expiry
-                            )
-                        } else {
-                            Timber.tag(tag).e("Payment verification failed - success: false")
-                            _paymentUiState.value = _paymentUiState.value.copy(
-                                loading = false,
-                                message = friendlyMessageFromServer(resp.message),
-                                stage = PaymentStage.Failure
-                            )
-                        }
-                    },
-                    onFailure = { e ->
-                        Timber.tag(tag).e(e, "Payment verification failed")
-                        _paymentUiState.value = _paymentUiState.value.copy(
-                            loading = false,
-                            message = friendlyMessageFromThrowable(e),
-                            stage = PaymentStage.Failure
-                        )
-                    }
-                )
-            } catch (e: Exception) {
-                Timber.tag(tag).e(e, "Exception during payment verification")
-                _paymentUiState.value = _paymentUiState.value.copy(
-                    loading = false,
-                    message = friendlyMessageFromThrowable(e),
-                    stage = PaymentStage.Failure
-                )
-            }
-        }
-
-    /** Handle payment failure. */
-    fun onPaymentFailed(message: String) {
-        Timber.tag(tag).e("Payment failed - message: $message")
-        _paymentUiState.value = _paymentUiState.value.copy(
-            loading = false,
-            message = friendlyMessageFromServer(message),
-            stage = PaymentStage.Failure
-        )
-    }
-
-    /** Cancel all jobs on ViewModel clear. */
     override fun onCleared() {
         super.onCleared()
-        Timber.tag(tag).d("MainViewModel cleared - cancelling all jobs")
+        logger.d("MainViewModel cleared - cancelling all jobs")
         notificationBannerJob?.cancel()
         locationJob?.cancel()
         dataLoadingJob?.cancel()

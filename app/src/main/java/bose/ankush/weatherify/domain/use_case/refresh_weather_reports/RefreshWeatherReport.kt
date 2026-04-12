@@ -6,7 +6,7 @@ import javax.inject.Inject
 class RefreshWeatherReport @Inject constructor(
     private val repository: WeatherRepository
 ) {
-    suspend operator fun invoke(coordinates: Pair<Double, Double>) {
-        repository.refreshWeatherData(coordinates)
+    suspend operator fun invoke(coordinates: Pair<Double, Double>, forceRefresh: Boolean = false) {
+        repository.refreshWeatherData(coordinates, forceRefresh)
     }
 }

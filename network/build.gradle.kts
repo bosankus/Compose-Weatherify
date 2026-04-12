@@ -26,6 +26,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(project(":storage"))
                 implementation(KmmDeps.ktorCore)
                 implementation(KmmDeps.ktorSerialization)
                 implementation(KmmDeps.ktorContentNegotiation)

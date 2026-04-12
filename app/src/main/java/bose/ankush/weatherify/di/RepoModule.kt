@@ -1,6 +1,7 @@
 package bose.ankush.weatherify.di
 
 import android.content.Context
+import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.data.repository.CityRepositoryImpl
@@ -18,13 +19,20 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object RepoModule {
 
+    /**
+     * Provides the domain-layer WeatherRepository that orchestrates network and storage.
+     *
+     * This is the single source of truth for weather data operations in the app.
+     */
     @Singleton
     @Provides
     fun provideWeatherRepository(
+        networkRepository: NetworkWeatherRepository,
         weatherStorage: WeatherStorage,
         dispatcherProvider: DispatcherProvider
     ): WeatherRepository =
         WeatherRepositoryImpl(
+            networkRepository,
             weatherStorage,
             dispatcherProvider
         )

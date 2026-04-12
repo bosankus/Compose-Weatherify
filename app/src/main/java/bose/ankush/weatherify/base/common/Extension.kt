@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import bose.ankush.weatherify.BuildConfig
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -33,21 +32,16 @@ object Extension {
 
     fun String.formatTextCapitalization() = replaceFirstChar { it.uppercaseChar() }
 
-    /**
-     * Opens a URL in the device's default browser
-     * @param url The URL to open
-     */
-    fun Context.openUrlInBrowser(url: String) {
-        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-        startActivity(intent)
-    }
-
     fun isDeviceSDKAndroid13OrAbove() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
     fun Context.openAppSystemSettings() = startActivity(
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.fromParts("package", packageName, null)
         }
+    )
+
+    fun Context.openLocationSettings() = startActivity(
+        Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
     )
 
     @SuppressLint("QueryPermissionsNeeded")

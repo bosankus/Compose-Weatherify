@@ -46,6 +46,8 @@
     <string name="network_unavailable_txt">Umm… Can you re-check internet connectivity!</string>
     <string name="network_timeout_txt">Request timed out. Please try again later.</string>
     <string name="general_error_txt">Oops!..Something went wrong.</string>
+    <string name="gps_disabled_error_txt">Location services are turned off. Enable GPS to get your local weather.</string>
+    <string name="enable_gps_btn_txt">Enable GPS</string>
     <string name="default_coordinates_txt">Location coordinates not yet updated.</string>
     <string name="empty_city_list_error_txt">Oh no! No cities found at this moment. Check back later</string>
     <string name="empty_list">No details found. Try after sometime.</string>

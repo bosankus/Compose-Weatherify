@@ -27,7 +27,9 @@ object KmmVersions {
     const val kotlinxSerialization = "1.7.3"
     const val kotlinxCoroutines = "1.9.0"
     const val koin = "3.5.6"
+    const val koinAndroidCompose = "3.5.6"
     const val kotlinxDateTime = "0.6.1"
+    const val kmpLifecycleViewModel = "2.8.4"
 }
 
 object KmmDeps {
@@ -37,22 +39,27 @@ object KmmDeps {
     const val ktorContentNegotiation = "io.ktor:ktor-client-content-negotiation:${KmmVersions.ktor}"
     const val ktorJson = "io.ktor:ktor-serialization-kotlinx-json:${KmmVersions.ktor}"
     const val ktorLogging = "io.ktor:ktor-client-logging:${KmmVersions.ktor}"
-    
+
     // Platform-specific Ktor engines
     const val ktorAndroid = "io.ktor:ktor-client-android:${KmmVersions.ktor}"
     const val ktorIOS = "io.ktor:ktor-client-darwin:${KmmVersions.ktor}"
-    
+
     // Kotlinx Serialization
     const val kotlinxSerialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:${KmmVersions.kotlinxSerialization}"
-    
+
     // Kotlinx Coroutines
     const val kotlinxCoroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${KmmVersions.kotlinxCoroutines}"
-    
+
     // Koin
     const val koinCore = "io.insert-koin:koin-core:${KmmVersions.koin}"
-    
+    const val koinAndroid = "io.insert-koin:koin-android:${KmmVersions.koin}"
+    const val koinAndroidCompose = "io.insert-koin:koin-androidx-compose:${KmmVersions.koinAndroidCompose}"
+
     // DateTime
     const val kotlinxDateTime = "org.jetbrains.kotlinx:kotlinx-datetime:${KmmVersions.kotlinxDateTime}"
+
+    // KMP-compatible ViewModel (JetBrains port of AndroidX lifecycle-viewmodel)
+    const val kmpLifecycleViewModel = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:${KmmVersions.kmpLifecycleViewModel}"
 }
 
 @Suppress("unused")

@@ -2,7 +2,7 @@ package bose.ankush.network.auth.interceptor
 
 import bose.ankush.network.auth.events.AuthEvent
 import bose.ankush.network.auth.events.AuthEventBus
-import bose.ankush.network.auth.storage.TokenStorage
+import bose.ankush.storage.api.TokenStorage
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.auth.token.TokenResult
 import io.ktor.client.HttpClientConfig

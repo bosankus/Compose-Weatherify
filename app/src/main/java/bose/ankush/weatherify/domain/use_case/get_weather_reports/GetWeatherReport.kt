@@ -5,5 +5,5 @@ import javax.inject.Inject
 
 class GetWeatherReport @Inject constructor(private val repository: WeatherRepository) {
 
-    suspend operator fun invoke(location: Pair<Double, Double>) = repository.getWeatherReport(location)
+    operator fun invoke(location: Pair<Double, Double>) = repository.getWeatherReport(location)
 }

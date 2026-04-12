@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lib_screen_header">மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="back_content_description">திரும்பி செல்லவும்</string>
+    <string name="language_screen_title">உங்கள் மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="language_screen_subtitle">தனிப்பயனாக்கப்பட்ட அனுபவத்திற்கு உங்களுக்கு விருப்பமான மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="language_selected">%s தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="navigate_back">பின்னால் செல்லவும்</string>
+</resources>

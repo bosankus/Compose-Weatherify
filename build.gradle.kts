@@ -4,6 +4,7 @@ buildscript {
         classpath(BuildPlugins.buildGradle)
         classpath(BuildPlugins.kotlinGradlePlugin)
         classpath(BuildPlugins.googleServicePlugin)
+        classpath(BuildPlugins.composeMultiplatformPlugin)
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -22,6 +23,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version Versions.detekt apply false
     id("com.github.ben-manes.versions") version Versions.benManes
     id("org.jetbrains.kotlin.plugin.compose") version Versions.kotlin apply false
+    id("org.jetbrains.compose") version Versions.composeMultiplatform apply false
 }
 
 tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("dependencyUpdates").configure {
@@ -91,7 +93,7 @@ subprojects {
     }
 
     tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-        jvmTarget = "21"
+        jvmTarget = "17"
         reports {
             xml.required.set(false)
             txt.required.set(false)

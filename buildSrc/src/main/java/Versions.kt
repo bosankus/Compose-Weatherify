@@ -1,10 +1,11 @@
 object Versions {
 
     // Kotlin
-    const val kotlin = "2.2.0"
+    const val kotlin = "2.2.21"
 
     // Compose
     const val composeBom = "2025.06.01"
+    const val composeMultiplatform = "1.8.0"  // for Compose Multiplatform (iOS + Android)
 
     // Plugins
     const val buildGradle = "8.12.0"
@@ -42,7 +43,8 @@ object Versions {
     const val googlePlayLocation = "21.3.0"
     const val accompanist = "0.36.0"
     const val dataStore = "1.1.1"
-    const val splashScreen = "1.2.0-rc01"
+    const val splashScreen = "1.2.0"
+    const val securityCrypto = "1.1.0-alpha06"
 
     // Room
     const val room = "2.8.4"
@@ -55,6 +57,9 @@ object Versions {
 
     // Coroutines
     const val coroutines = "1.10.2"
+
+    // Kotlinx Date/Time (KMP-compatible, replaces java.time)
+    const val kotlinxDatetime = "0.6.2"
 
     // Dependency Injection
     const val hilt = "2.58"

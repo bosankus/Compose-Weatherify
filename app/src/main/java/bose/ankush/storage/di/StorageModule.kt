@@ -2,10 +2,10 @@ package bose.ankush.storage.di
 
 import android.content.Context
 import androidx.room.Room
-import bose.ankush.network.auth.storage.TokenStorage
+import bose.ankush.storage.api.TokenStorage
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.common.WEATHER_DATABASE_NAME
-import bose.ankush.storage.impl.TokenStorageImpl
+import bose.ankush.storage.impl.EncryptedTokenStorageImpl
 import bose.ankush.storage.impl.WeatherStorageImpl
 import bose.ankush.storage.room.JsonParser
 import bose.ankush.storage.room.WeatherDataModelConverters
@@ -17,7 +17,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -55,17 +54,20 @@ object StorageModule {
     @Provides
     @Singleton
     fun provideWeatherStorage(
-        networkRepository: NetworkWeatherRepository,
         weatherDatabase: WeatherDatabase
     ): WeatherStorage {
-        return WeatherStorageImpl(networkRepository, weatherDatabase)
+        // Storage module is responsible ONLY for database operations
+        // Network synchronization is handled by WeatherRepository in the orchestration layer
+        return WeatherStorageImpl(weatherDatabase)
     }
 
     @Provides
     @Singleton
     fun provideTokenStorage(
-        weatherDatabase: WeatherDatabase
+        @ApplicationContext context: Context
     ): TokenStorage {
-        return TokenStorageImpl(weatherDatabase)
+        // SECURITY: Initialize Android context for platform-specific token storage
+        bose.ankush.storage.impl.setApplicationContext(context)
+        return EncryptedTokenStorageImpl()
     }
 }

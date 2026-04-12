@@ -1,32 +1,47 @@
 package bose.ankush.weatherify.presentation.navigation
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import bose.ankush.commonui.settings.SettingsScreen
 import bose.ankush.language.presentation.LanguageScreen
-import bose.ankush.sunriseui.components.ToastAnchorState
+import bose.ankush.commonui.components.ToastAnchorState
+import bose.ankush.payment.presentation.PaymentViewModel
+import bose.ankush.weatherify.BuildConfig
+import bose.ankush.weatherify.R
+import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
+import bose.ankush.weatherify.presentation.AuthState
 import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
 import bose.ankush.weatherify.presentation.home.HomeScreen
-import bose.ankush.weatherify.presentation.settings.SettingsScreen
 
 const val LANGUAGE_ARGUMENT_KEY = "country_config"
 
 @SuppressLint("NewApi")
 @ExperimentalAnimationApi
 @Composable
-fun AppNavigation(viewModel: MainViewModel, toastAnchorState: ToastAnchorState? = null) {
+fun AppNavigation(
+    viewModel: MainViewModel,
+    paymentViewModel: PaymentViewModel,
+    toastAnchorState: ToastAnchorState? = null,
+) {
     val navController = rememberNavController()
     val context = LocalContext.current
     NavHost(
@@ -86,13 +101,34 @@ fun AppNavigation(viewModel: MainViewModel, toastAnchorState: ToastAnchorState? 
             composable(
                 route = Screen.SettingsScreen.route,
             ) {
+                val authState = viewModel.authState.collectAsState().value
+                val paymentUiState = paymentViewModel.uiState.collectAsState().value
+                val localeErrorMessage = stringResource(R.string.locale_config_error_txt)
+                val languageList = remember(context) {
+                    try {
+                        LocaleConfigMapper.getAvailableLanguagesFromJson(
+                            jsonFile = "countryConfig.json",
+                            context = context
+                        )
+                    } catch (_: Exception) {
+                        Toast.makeText(context, localeErrorMessage, Toast.LENGTH_SHORT).show()
+                        emptyArray()
+                    }
+                }
                 SettingsScreen(
-                    viewModel = viewModel,
-                    navController = navController,
-                    toastAnchorState = toastAnchorState,
-                    onLanguageNavAction = {
+                    paymentUiState = paymentUiState,
+                    isLoggingOut = authState is AuthState.LogoutLoading,
+                    isLoggedOut = authState is AuthState.LoggedOut,
+                    versionName = BuildConfig.VERSION_NAME,
+                    shouldShowNotificationItem = isDeviceSDKAndroid13OrAbove() && !context.hasNotificationPermission(),
+                    languageList = languageList,
+                    onLogout = { viewModel.logout() },
+                    onLoggedOutHandled = { viewModel.resetAuthState() },
+                    onStartPayment = { paymentViewModel.startPayment() },
+                    onBackNavAction = { navController.popBackStack() },
+                    onLanguageNavAction = { list ->
                         if (isDeviceSDKAndroid13OrAbove()) {
-                            navController.navigate(Screen.LanguageScreen.withArgs(it))
+                            navController.navigate(Screen.LanguageScreen.withArgs(list))
                         } else {
                             context.openAppLocaleSettings()
                         }
@@ -101,6 +137,14 @@ fun AppNavigation(viewModel: MainViewModel, toastAnchorState: ToastAnchorState? 
                         if (!context.hasNotificationPermission()) {
                             viewModel.updateNotificationPermission(launchState = true)
                         }
+                    },
+                    toastAnchorState = toastAnchorState,
+                    bottomBar = {
+                        AppBottomBar(
+                            isVisible = rememberSaveable { mutableStateOf(true) },
+                            navController = navController,
+                            toastAnchorState = toastAnchorState
+                        )
                     }
                 )
             }

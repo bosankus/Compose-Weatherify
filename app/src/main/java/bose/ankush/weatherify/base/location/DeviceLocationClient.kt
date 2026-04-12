@@ -2,7 +2,6 @@ package bose.ankush.weatherify.base.location
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
 import bose.ankush.weatherify.base.common.Extension.hasLocationPermission
@@ -15,6 +14,7 @@ import com.google.android.gms.location.Priority
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
@@ -48,7 +48,7 @@ class DeviceLocationClient @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    override fun getLocationUpdates(interval: Long): Flow<Location> {
+    override fun getLocationUpdates(interval: Long): Flow<Coordinates> {
         return callbackFlow {
             checkLocationPermission()
             checkGpsEnabled()
@@ -77,35 +77,36 @@ class DeviceLocationClient @Inject constructor(
             )
 
             awaitClose { client.removeLocationUpdates(locationCallback) }
-        }
+        }.map { loc -> Coordinates(loc.latitude, loc.longitude) }
     }
 
     @SuppressLint("MissingPermission")
-    override suspend fun getCurrentLocation(): Result<Location> = suspendCancellableCoroutine { continuation ->
-        try {
-            checkLocationPermission()
-            checkGpsEnabled()
-        } catch (e: LocationClient.LocationException) {
-            continuation.resume(Result.failure(e))
-            return@suspendCancellableCoroutine
-        }
+    override suspend fun getCurrentLocation(): Result<Coordinates> =
+        suspendCancellableCoroutine { continuation ->
+            try {
+                checkLocationPermission()
+                checkGpsEnabled()
+            } catch (e: LocationClient.LocationException) {
+                continuation.resume(Result.failure(e))
+                return@suspendCancellableCoroutine
+            }
 
-        client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    continuation.resume(Result.success(location))
-                } else {
-                    continuation.resume(Result.failure(LocationClient.LocationException("Location is null")))
+            client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        continuation.resume(Result.success(Coordinates(location.latitude, location.longitude)))
+                    } else {
+                        continuation.resume(Result.failure(LocationClient.LocationException("Location is null")))
+                    }
                 }
-            }
-            .addOnFailureListener { e ->
-                continuation.resume(Result.failure(LocationClient.LocationException(e.message ?: "Unknown error")))
-            }
+                .addOnFailureListener { e ->
+                    continuation.resume(Result.failure(LocationClient.LocationException(e.message ?: "Unknown error")))
+                }
 
-        continuation.invokeOnCancellation {
-            // No need to cancel anything for lastLocation as it's a one-time operation
+            continuation.invokeOnCancellation {
+                // No need to cancel anything for getCurrentLocation as it's a one-time operation
+            }
         }
-    }
 
     override fun hasLocationPermission(): Boolean = context.hasLocationPermission()
 }

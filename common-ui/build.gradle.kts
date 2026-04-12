@@ -1,15 +1,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// NOTE: This module uses Compose Multiplatform (CMP) via direct Maven coordinates — no
-// org.jetbrains.compose Gradle plugin needed. The Kotlin compose compiler is applied via
-// org.jetbrains.kotlin.plugin.compose (declared in root build.gradle.kts).
-// Before building, update CmpVersions.composeMultiplatform in buildSrc/KmmDeps.kt
-// to the version compatible with your Kotlin version.
-
 plugins {
-    kotlin("multiplatform")
     id("com.android.library")
+    kotlin("multiplatform")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.compose")
 }
 
 kotlin {
@@ -25,21 +20,45 @@ kotlin {
         iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
-            baseName = "commonui"
+            baseName = "common_ui"
+            isStatic = true
         }
     }
 
     sourceSets {
-        commonMain.dependencies {
-            implementation(CmpDeps.runtime)
-            implementation(CmpDeps.ui)
-            implementation(CmpDeps.foundation)
-            implementation(CmpDeps.material3)
-            implementation(CmpDeps.animation)
-            implementation(CmpDeps.components)
+        val commonMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-stdlib")
+                // Compose Multiplatform — works on Android + iOS
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.ui)
+                implementation(compose.materialIconsExtended)
+                // Payment UI state types (PaymentUiState, PaymentStage) used in SettingsScreen
+                implementation(project(":feature-payment"))
+            }
         }
-        androidMain.dependencies {
-            implementation(CmpDeps.uiTooling)
+
+        @Suppress("UNUSED_VARIABLE")
+        val androidMain by getting {
+            dependencies {
+                implementation(KmmDeps.kotlinxCoroutinesCore)
+                // BackHandler support for InAppWebView
+                implementation("androidx.activity:activity-compose:1.9.0")
+            }
+        }
+
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+
+        @Suppress("UNUSED_VARIABLE")
+        val iosMain by creating {
+            dependsOn(commonMain)
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
         }
     }
 }
@@ -50,11 +69,14 @@ android {
 
     defaultConfig {
         minSdk = ConfigData.minSdkVersion
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        compose = true
     }
 }

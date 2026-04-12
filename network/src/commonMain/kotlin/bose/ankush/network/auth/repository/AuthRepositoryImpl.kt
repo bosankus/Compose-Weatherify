@@ -5,7 +5,7 @@ import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.model.LoginRequest
 import bose.ankush.network.auth.model.RefreshTokenRequest
 import bose.ankush.network.auth.model.RegisterRequest
-import bose.ankush.network.auth.storage.TokenStorage
+import bose.ankush.storage.api.TokenStorage
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -112,16 +112,12 @@ class AuthRepositoryImpl(
     override suspend fun logout(): Result<Unit> {
         return try {
             val response = apiService.logout()
-            val message = response.message ?: ""
-            val isSuccess = response.data == null && (
-                    message.contains("Logout successful", ignoreCase = true) ||
-                            message.contains("Logged out successfully", ignoreCase = true)
-                    )
+            val isSuccess = response.data == null
             if (isSuccess) {
                 tokenStorage.clearToken()
                 Result.success(Unit)
             } else {
-                val errorMsg = response.data?.errorMessage
+                val errorMsg = response.data.errorMessage
                 val message = if (!errorMsg.isNullOrBlank()) {
                     errorMsg
                 } else {

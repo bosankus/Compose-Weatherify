@@ -1,193 +1,290 @@
 [![Dependency Updates](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependecy-updates.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependecy-updates.yml)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/dda6430161e146518704730d9916dba7)](https://www.codacy.com/gh/bosankus/Compose-Weatherify/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=bosankus/Compose-Weatherify&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/dda6430161e146518704730d9916dba7)](https://www.codacy.com/gh/bosankus/Compose-Weatherify/dashboard?utm_source=github.com&utm_medium=referral&utm_content=bosankus/Compose-Weatherify&utm_campaign=Badge_Grade)
 [![Qodana](https://github.com/bosankus/Compose-Weatherify/actions/workflows/code_quality.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/code_quality.yml)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-7F52FF?style=flat&logo=kotlin&logoColor=white)
+![Android](https://img.shields.io/badge/Min%20SDK-26%20(Oreo)-3DDC84?style=flat&logo=android&logoColor=white)
+![Version](https://img.shields.io/badge/Version-1.1-0078D4?style=flat)
 
 # Weatherify
 
-A modern weather application built with Jetpack Compose that provides current weather conditions, forecasts, and air quality information.
+A production-grade Android weather app built with **Jetpack Compose**, **Clean Architecture**, and a **Kotlin Multiplatform-ready** module structure. It shows real-time weather, 5-day forecasts, air quality data, and sunrise/sunset animations — with multi-language support and an in-app premium upgrade flow.
 
-[![Download APK](https://img.shields.io/badge/download-APK-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)](https://github.com/bosankus/Compose-Weatherify/releases/latest)
+[![Download APK](https://img.shields.io/badge/Download%20Latest%20APK-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)](https://github.com/bosankus/Compose-Weatherify/releases/latest)
 
-## 📱 Features
+---
 
-- **Current Weather**: View today's temperature and weather conditions
-- **5-Day Forecast**: See weather predictions for the next 5 days
-- **Air Quality Index**: Monitor air pollution levels
-- **Multiple Cities**: Search and save your favorite locations
-- **Multi-language Support**: Available in English, Hindi, and Hebrew
-- **Material 3 Design**: Modern UI with dynamic theming
-- **Location-based Weather**: Automatic weather updates based on your current location
+## Features
 
-## 🏗️ Architecture
+| Category | Details |
+|---|---|
+| **Weather** | Current conditions, feels-like temp, humidity, wind speed |
+| **Forecast** | 5-day weather forecast with hourly breakdown |
+| **Air Quality** | Real-time AQI with pollutant details |
+| **Location** | GPS-based auto-detection + manual city search |
+| **Sunrise/Sunset** | Custom animated sunrise/sunset arc (`:sunriseui` module) |
+| **Multi-language** | English, Hindi (हिन्दी), Hebrew (עברית) via Per-App Language API |
+| **Premium** | In-app purchase flow via Razorpay with a premium bottom sheet |
+| **Notifications** | Firebase Cloud Messaging (FCM) push notifications |
+| **In-App Updates** | Google Play in-app update prompts |
+| **Theming** | Material 3 + dynamic color + dark/light mode |
 
-The app follows Clean Architecture principles with MVVM pattern:
+---
 
-```
-┌─────────────────────────┐
-│                         │
-│    Presentation Layer   │
-│                         │
-└───────────┬─────────────┘
-            │
-            │ ViewModel calls Use Cases
-            ▼
-┌─────────────────────────┐
-│                         │
-│      Domain Layer       │
-│                         │
-└───────────┬─────────────┘
-            │
-            │ Use Cases call Repository
-            ▼
-┌─────────────────────────┐
-│                         │
-│       Data Layer        │
-│                         │
-└───────────┬─────────────┘
-            │
-            │ Repository calls API/Storage
-            ▼
-┌─────────────────────────┐
-│                         │
-│   External Data Sources │
-│                         │
-└─────────────────────────┘
-```
+## Module Architecture
 
-### Data Flow
+The project is split into clearly bounded Gradle modules. `common-ui` and `feature-payment` are **Kotlin Multiplatform (KMP)** modules with `commonMain`, `androidMain`, and `iosMain` source sets — making the app iOS-portable without a full rewrite.
 
-```
-┌───────────────┐     API Data     ┌───────────────┐     Network     ┌───────────────┐
-│               │────────────────> │               │────────────────>│               │
-│ Androidplay   │                  │ Network       │                 │ Network       │
-│ API           │                  │ Module        │                 │ Repository    │
-└───────────────┘                  └───────────────┘                 └───────┬───────┘
-                                                                             │
-                                                                             │ Network Models
-                                                                             │
-                                                                             ▼
-┌───────────────┐     Cache      ┌───────────────┐     Entities     ┌───────────────┐
-│               │◄──────────────>│               │<────────────────>│               │
-│ Local DB      │                │ Storage       │                  │ Repository    │
-│               │                │ Module        │                  │               │
-└───────────────┘                └───────────────┘                  └───────┬───────┘
-                                                                            │
-                                                                            │ Domain Models
-                                                                            │
-                                                                            ▼
-                                                                    ┌───────────────┐
-                                                                    │               │
-                                                                    │ Use Cases     │
-                                                                    │               │
-                                                                    └───────┬───────┘
-                                                                            │
-                                                                            │ View States
-                                                                            │
-                                                                            ▼
-                                                                    ┌───────────────┐
-                                                                    │               │
-                                                                    │ ViewModel     │
-                                                                    │               │
-                                                                    └───────┬───────┘
-                                                                            │
-                                                                            │ UI Events
-                                                                            │
-                                                                            ▼
-                                                                    ┌───────────────┐
-                                                                    │               │
-                                                                    │ Compose UI    │
-                                                                    │               │
-                                                                    └───────────────┘
+```mermaid
+graph TD
+    subgraph APP["🟦 :app  (Android)"]
+        A[WeatherifyApplication\nMainActivity\nMainViewModel]
+    end
+
+    subgraph COMMON["🟩 :common-ui  (KMP)"]
+        B[SettingsScreen\nLoginScreen\nInAppWebView\nPermissionDialog\nDateFormatter]
+    end
+
+    subgraph PAYMENT["🟨 :feature-payment  (KMP)"]
+        C[PaymentViewModel\nCreateOrderUseCase\nVerifyPaymentUseCase\nPremiumStore]
+    end
+
+    subgraph NETWORK["🟧 :network  (Android)"]
+        D[Ktor Client\nWeatherApi\nKotlinx Serialization]
+    end
+
+    subgraph STORAGE["🟥 :storage  (Android)"]
+        E[Room Database\nDataStore Preferences\nWeatherDao]
+    end
+
+    subgraph LANGUAGE["🟪 :language  (Android)"]
+        F[LanguageScreen\nLocale Config]
+    end
+
+    subgraph SUNRISE["⬛ :sunriseui  (Android)"]
+        G[Sunrise/Sunset\nCanvas Animation]
+    end
+
+    APP --> COMMON
+    APP --> PAYMENT
+    APP --> NETWORK
+    APP --> STORAGE
+    APP --> LANGUAGE
+    APP --> SUNRISE
 ```
 
-## 🚀 Recent Updates
+---
 
-### 🧩 Language Support
-- App language change implemented using [Per App Language Preference](https://developer.android.com/guide/topics/resources/app-languages#androidx-impl)
-- Material 3 migration
-- Added dynamic theme
+## Clean Architecture
 
-### 📱 Demo
-[POC-1.webm](https://github.com/bosankus/Compose-Weatherify/assets/46471379/455f1c9d-f1e5-482d-9c29-a1c23b4e3679)
+Each feature inside `:app` is structured across three layers. Dependency arrows always point **inward** — the domain layer has zero Android or framework dependencies.
 
-## 🛠️ Tech Stack
+```mermaid
+graph LR
+    subgraph Presentation["🎨 Presentation Layer"]
+        UI["Compose Screens\n(HomeScreen, CitiesListScreen\nProfileScreen, PaymentScreen)"]
+        VM["ViewModels\n(MainViewModel, CitiesViewModel)"]
+        UI -- "UI Events" --> VM
+        VM -- "UI State (StateFlow)" --> UI
+    end
 
-- **UI Framework**:
-  - Jetpack Compose with Material 3
-  - Compose Navigation
-  - Compose Permissions
-  - Lottie Compose for animations
-  - Coil Compose for image loading
-  - Custom Sunrise/Sunset animation UI
+    subgraph Domain["🧠 Domain Layer"]
+        UC["Use Cases\n(GetWeatherReports\nGetForecastReports\nGetAirQuality...)"]
+        REPO_IF["Repository Interfaces"]
+        UC --> REPO_IF
+    end
 
-- **Architecture**:
-  - MVVM (Model-View-ViewModel)
-  - Clean Architecture (Presentation, Domain, Data layers)
-  - Multi-module project structure
-  - Kotlin Multiplatform Mobile (KMM) for shared code
+    subgraph Data["💾 Data Layer"]
+        REPO_IMPL["WeatherRepositoryImpl"]
+        MAPPER["Mappers\n(Network → Storage\nStorage → Domain)"]
+        REPO_IMPL --> MAPPER
+    end
 
-- **Concurrency & Reactive Programming**:
-  - Kotlin Coroutines
-  - Flow
-  - StateFlow for UI state management
+    subgraph External["🌐 External Sources"]
+        NET[":network\nKtor + OpenWeatherMap API"]
+        DB[":storage\nRoom DB + DataStore"]
+    end
 
-- **Dependency Injection**:
-  - Hilt for Android
-  - Koin for KMM modules
+    VM -- "calls" --> UC
+    UC -- "calls" --> REPO_IF
+    REPO_IF -. "implemented by" .-> REPO_IMPL
+    REPO_IMPL --> NET
+    REPO_IMPL --> DB
+```
 
-- **Networking**:
-  - Ktor client
-  - Kotlinx Serialization
-  - Content negotiation
+---
 
-- **Local Storage**:
-  - Room Database
-  - DataStore Preferences
-  - Kotlinx DateTime
+## Data Flow
 
-- **Testing**:
-  - JUnit for unit tests
-  - Turbine for Flow testing
-  - Mockk and Mockito for mocking
-  - Espresso for UI testing
+```
+OpenWeatherMap API
+       │  JSON (Ktor + Kotlinx Serialization)
+       ▼
+  :network module  ──────►  Network Models
+                                  │
+                             NetworkToStorageMapper
+                                  │
+                                  ▼
+                         :storage module (Room DB / DataStore)
+                                  │
+                             Storage → Domain mapper
+                                  │
+                                  ▼
+                            Domain Models
+                                  │
+                           Use Cases (domain layer)
+                                  │
+                                  ▼
+                          MainViewModel / CitiesViewModel
+                          (StateFlow<UIState>)
+                                  │
+                                  ▼
+                        Jetpack Compose UI (screens)
+```
 
-- **Firebase**:
-  - Analytics
-  - Remote Config
-  - Performance Monitoring
+---
 
-- **Other Tools & Libraries**:
-  - Timber for logging
-  - LeakCanary for memory leak detection
-  - In-app updates
-  - Splash Screen API
-  - Dynamic theming
-  - Multi-language support
+## Tech Stack
 
-## 🔧 Setup & Installation
+### UI
+| Library | Version | Purpose |
+|---|---|---|
+| Jetpack Compose BOM | `2025.06.01` | Declarative UI framework |
+| Material 3 | BOM-managed | Design system + dynamic theming |
+| Compose Navigation | `2.7.7` | Type-safe screen navigation |
+| Accompanist Permissions | `0.36.0` | Runtime permissions in Compose |
+| Coil Compose | `2.7.0` | Async image loading |
+| Splash Screen API | `1.2.0` | Android 12+ splash screen |
 
-1. Clone the repository
+### Architecture & DI
+| Library | Version | Purpose |
+|---|---|---|
+| Hilt | `2.58` | Dependency injection (Android) |
+| Koin | — | DI bridge for KMP modules |
+| Kotlin Coroutines | `1.10.2` | Async & structured concurrency |
+| StateFlow / Flow | — | Reactive UI state management |
+
+### Networking
+| Library | Version | Purpose |
+|---|---|---|
+| Ktor Client | — | KMP-compatible HTTP client |
+| Kotlinx Serialization | — | JSON parsing |
+| OkHttp MockWebServer | `4.12.0` | Network mocking in tests |
+
+### Local Storage
+| Library | Version | Purpose |
+|---|---|---|
+| Room | `2.8.4` | SQLite ORM (weather cache) |
+| DataStore Preferences | `1.1.1` | Key-value persistent settings |
+| Kotlinx DateTime | `0.6.2` | KMP-compatible date/time |
+
+### Firebase
+| SDK | Purpose |
+|---|---|
+| Firebase BOM `34.10.0` | BoM for consistent versions |
+| Analytics | User behaviour tracking |
+| Remote Config | Server-driven feature flags |
+| Performance Monitoring | Network + rendering metrics |
+| Cloud Messaging (FCM) | Push notifications |
+
+### Testing
+| Library | Purpose |
+|---|---|
+| JUnit 4 + Truth | Unit assertions |
+| Turbine `1.2.1` | Flow/StateFlow testing |
+| Mockk `1.14.9` | Kotlin-first mocking |
+| Mockito + Nhaarman | Java-style mocking |
+| Espresso | Instrumentation UI tests |
+| Hilt Testing | DI in Android tests |
+
+### Other
+| Library | Purpose |
+|---|---|
+| Timber `5.0.1` | Structured logging |
+| LeakCanary `2.13` | Memory leak detection (debug) |
+| Razorpay `1.6.41` | In-app payment checkout |
+| Google Play In-App Update | Forced/flexible update prompts |
+| Google Play Location `21.3.0` | FusedLocationProvider |
+
+---
+
+## Screens
+
+```
+MainActivity
+├── HomeScreen          — current weather + AQI card + hourly strip
+├── CitiesListScreen    — search & manage saved cities
+├── ProfileScreen       — user profile & settings shortcut
+├── SettingsScreen      — language, theme, notification toggles
+├── LoginScreen         — authentication entry point
+├── PaymentScreen       — Razorpay premium upgrade flow
+└── InAppWebView        — in-app browser for T&C / privacy policy
+```
+
+---
+
+## Setup & Installation
+
+### Prerequisites
+- Android Studio Narwhal or later
+- JDK 17
+- An [OpenWeatherMap](https://openweathermap.org/api) API key (free tier works)
+
+### Steps
+
+1. **Clone the repo**
    ```bash
    git clone https://github.com/bosankus/Compose-Weatherify.git
+   cd Compose-Weatherify
    ```
 
-2. Open the project in Android Studio
-
-3. Get an API key from [OpenWeatherMap](https://openweathermap.org/api)
-
-4. Add your API key to `local.properties`:
-   ```
+2. **Add your API key** to `local.properties` (create the file if it doesn't exist):
+   ```properties
    OPEN_WEATHER_API_KEY=your_api_key_here
    ```
 
-5. Build and run the app
+3. **Add `google-services.json`** to `app/` (from Firebase console — required for Analytics/FCM to compile).
 
-## 🤝 Contributing
+4. **Build & run**
+   ```bash
+   ./gradlew assembleDebug
+   # or just hit Run in Android Studio
+   ```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+> **Minimum Android version:** API 26 (Android 8.0 Oreo)  
+> **Target SDK:** 36
+
+---
+
+## Contributing
+
+Contributions are very welcome!
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat/bug/refactor/migrate/update:Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit using the project convention:
+   ```
+   feat|fix|refactor|migrate|update: short description
+   ```
+4. Push and open a Pull Request against **`develop`**
+
+Please check the [PR template](.github/PULL_REQUEST_TEMPLATE.md) before submitting.
+
+---
+
+## What's Next
+
+These are the planned improvements currently in progress or on the roadmap:
+
+- **iOS target** — the KMP foundation is in place (`commonMain`/`iosMain` source sets exist in `:common-ui` and `:feature-payment`). The next step is wiring up a SwiftUI host app and completing the iOS-specific implementations.
+- **Navigation v3 migration** — active migration branch (`migration/navigation-3`) moving from Navigation 2.x to the new type-safe Navigation 3 APIs with full back-stack support.
+- **Offline-first strategy** — full read-from-cache-then-network flow using Room as the single source of truth, with explicit stale-data indicators in the UI.
+- **Widget support** — a Glance-based home screen widget showing current temperature and conditions.
+- **Wear OS companion** — lightweight Wear Compose screen for wrist-based weather glances.
+- **CI/CD pipeline** — automated release builds and Play Store internal track deployments via GitHub Actions.
+- **Accessibility pass** — semantic descriptions, touch target sizing, and TalkBack compatibility audit.
+
+---
+
+## License
+
+This project is open-sourced under the [MIT License](LICENSE).

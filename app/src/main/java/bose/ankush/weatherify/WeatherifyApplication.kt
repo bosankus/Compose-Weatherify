@@ -2,12 +2,16 @@ package bose.ankush.weatherify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import bose.ankush.payment.di.featurePaymentModules
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
+import bose.ankush.weatherify.di.appPaymentKoinModule
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -23,12 +27,20 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
     lateinit var remoteConfigService: RemoteConfigService
 
     override fun onCreate() {
-        super.onCreate()
+        super.onCreate() // Hilt initializes here — EntryPointAccessors is safe after this call
+        initKoin()
         enableTimber()
         initializeFirebase()
         createNotificationChannel()
         initializeRemoteConfig()
         subscribeToTopics()
+    }
+
+    private fun initKoin() {
+        startKoin {
+            androidContext(this@WeatherifyApplication)
+            modules(featurePaymentModules + appPaymentKoinModule(this@WeatherifyApplication))
+        }
     }
 
     private fun initializeFirebase() {

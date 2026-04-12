@@ -3,6 +3,7 @@ object BuildPlugins {
     val buildGradle by lazy { "com.android.tools.build:gradle:${Versions.buildGradle}" }
     val kotlinGradlePlugin by lazy { "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}" }
     val googleServicePlugin by lazy { "com.google.gms:google-services:${Versions.googleServices}" }
+    val composeMultiplatformPlugin by lazy { "org.jetbrains.compose:compose-gradle-plugin:${Versions.composeMultiplatform}" }
 }
 
 // Dependencies
@@ -20,6 +21,7 @@ object Deps {
     val systemUIController by lazy { "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}" }
     val dataStore by lazy { "androidx.datastore:datastore-preferences:${Versions.dataStore}" }
     val splashScreen by lazy { "androidx.core:core-splashscreen:${Versions.splashScreen}" }
+    val securityCrypto by lazy { "androidx.security:security-crypto:${Versions.securityCrypto}" }
 
     // Compose
     val composeBom by lazy { "androidx.compose:compose-bom:${Versions.composeBom}" }
@@ -56,14 +58,18 @@ object Deps {
 
     // Firebase
     val firebaseBom by lazy { "com.google.firebase:firebase-bom:${Versions.firebaseBom}" }
-    val firebaseConfig by lazy { "com.google.firebase:firebase-config-ktx" }
-    val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics-ktx" }
+    // Firebase dependencies will use versions from BOM - no explicit versions needed
+    val firebaseConfig by lazy { "com.google.firebase:firebase-config" }
+    val firebaseAnalytics by lazy { "com.google.firebase:firebase-analytics" }
     val firebasePerformanceMonitoring by lazy { "com.google.firebase:firebase-perf" }
-    val firebaseMessaging by lazy { "com.google.firebase:firebase-messaging-ktx" }
+    val firebaseMessaging by lazy { "com.google.firebase:firebase-messaging" }
 
     // Coroutines
     val coroutinesCore by lazy { "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}" }
     val coroutinesAndroid by lazy { "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutines}" }
+
+    // Date/Time (KMP-compatible, replaces java.time)
+    val kotlinxDatetime by lazy { "org.jetbrains.kotlinx:kotlinx-datetime:${Versions.kotlinxDatetime}" }
 
     // Dependency Injection
     val hilt by lazy { "com.google.dagger:hilt-android:${Versions.hilt}" }

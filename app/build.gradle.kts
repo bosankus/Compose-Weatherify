@@ -44,6 +44,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -72,6 +73,7 @@ ksp {
 dependencies {
 
     api(project(":common-ui"))
+    api(project(":feature-payment"))
     api(project(":language"))
     api(project(":storage"))
     api(project(":network"))
@@ -124,17 +126,21 @@ dependencies {
     // Room runtime for providing WeatherDatabase from app DI
     implementation(Deps.room)
     implementation(Deps.roomKtx)
+    ksp(Deps.roomCompiler)
 
-    // Firebase
+    // Firebase - BOM
     implementation(platform(Deps.firebaseBom))
-    implementation("com.google.firebase:firebase-config")
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(Deps.firebaseConfig)
+    implementation(Deps.firebaseAnalytics)
     implementation(Deps.firebasePerformanceMonitoring)
-    implementation("com.google.firebase:firebase-messaging")
+    implementation(Deps.firebaseMessaging)
 
     // Coroutines
     implementation(Deps.coroutinesCore)
     implementation(Deps.coroutinesAndroid)
+
+    // Date/Time (KMP-compatible, replaces java.time)
+    implementation(Deps.kotlinxDatetime)
 
     // Dependency Injection
     implementation(Deps.hilt)
@@ -150,8 +156,12 @@ dependencies {
     // Memory leak
     debugImplementation(Deps.leakCanary)
 
-    // Payment SDK moved to app module
+    // Payment SDK (Android-only — Razorpay checkout is launched from the app layer)
     implementation(Deps.razorPay)
+
+    // Koin — bridges the feature-payment Koin module with Hilt-managed singletons
+    implementation(KmmDeps.koinAndroid)
+    implementation(KmmDeps.koinAndroidCompose)
 }
 
 
@@ -159,8 +169,8 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.addAll(
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=androidx.compose.animation.ExperimentalAnimationApi"
+            "-opt-in=kotlin.RequiresOptIn",
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi"
         )
     }
 }
