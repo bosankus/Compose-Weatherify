@@ -2,7 +2,7 @@
 object Versions {
 
     // Kotlin
-    const val kotlin = "2.0.20"
+    const val kotlin = "2.3.21"
     const val kotlinCompiler = "1.9"
 
     // Compose
