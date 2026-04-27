@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui.components
+package bose.ankush.commonui.sunriseui.components
 
 enum class WeatherCondition(val description: String) {
     // Group 2xx: Thunderstorm

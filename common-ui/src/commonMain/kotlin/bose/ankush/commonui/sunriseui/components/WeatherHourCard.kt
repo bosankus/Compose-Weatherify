@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui.components
+package bose.ankush.commonui.sunriseui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,7 +19,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
@@ -95,44 +94,3 @@ fun WeatherHourCard(
     }
 }
 
-// Preview functions
-
-@Preview(showBackground = true, name = "Weather Hour Card - Unselected")
-@Composable
-fun PreviewWeatherHourCardUnselected() {
-    WeatherHourCard(
-        time = "12:00 PM",
-        temperature = "24°C",
-        isSelected = false,
-        iconContent = {
-            Text("☀️", modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
-        }
-    )
-}
-
-@Preview(showBackground = true, name = "Weather Hour Card - Selected")
-@Composable
-fun PreviewWeatherHourCardSelected() {
-    WeatherHourCard(
-        time = "1:00 PM",
-        temperature = "25°C",
-        isSelected = true,
-        iconContent = {
-            Text("☀️", modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
-        }
-    )
-}
-
-@Preview(showBackground = true, name = "Weather Hour Card - With Description")
-@Composable
-fun PreviewWeatherHourCardWithDescription() {
-    WeatherHourCard(
-        time = "3:00 PM",
-        temperature = "22°C",
-        weatherDescription = "Cloudy",
-        isSelected = false,
-        iconContent = {
-            Text("⛅", modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
-        }
-    )
-}

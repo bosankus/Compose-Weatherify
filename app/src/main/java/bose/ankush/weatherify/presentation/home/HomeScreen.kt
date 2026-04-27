@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.permissions.PermissionAlertDialog
-import bose.ankush.sunriseui.components.SunriseSunsetCombinedAnimation
+import bose.ankush.commonui.sunriseui.components.SunriseSunsetCombinedAnimation
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.Extension.openLocationSettings
 import bose.ankush.weatherify.base.common.UiText

@@ -11,8 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import bose.ankush.sunriseui.components.AnimatedWeatherIcon
-import bose.ankush.sunriseui.components.WeatherDayCard
+import bose.ankush.commonui.sunriseui.components.AnimatedWeatherIcon
+import bose.ankush.commonui.sunriseui.components.WeatherDayCard
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.dayName
 import bose.ankush.weatherify.base.common.Extension.toCelsius

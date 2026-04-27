@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui.components
+package bose.ankush.commonui.sunriseui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -40,11 +40,10 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * A composable that displays weather alert information.
@@ -322,42 +321,14 @@ private data class AlertCardColors(
  * Formats a timestamp into a readable date and time string.
  */
 private fun formatTimestamp(timestamp: Long): String {
-    val date = Date(timestamp * 1000) // Convert to milliseconds
-    val formatter = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
-    return formatter.format(date)
+    val instant = Instant.fromEpochSeconds(timestamp)
+    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+    val month = localDateTime.month.name.take(3)
+    val day = localDateTime.dayOfMonth
+    val hour12 =
+        if (localDateTime.hour == 0) 12 else if (localDateTime.hour > 12) localDateTime.hour - 12 else localDateTime.hour
+    val minute = localDateTime.minute.toString().padStart(2, '0')
+    val amPm = if (localDateTime.hour < 12) "AM" else "PM"
+    return "$month $day, $hour12:$minute $amPm"
 }
 
-/**
- * Preview of the WeatherAlertCard in collapsed state.
- */
-@Preview(showBackground = true)
-@Composable
-private fun WeatherAlertCardPreviewCollapsed() {
-    MaterialTheme {
-        WeatherAlertCard(
-            title = "Severe Thunderstorm Warning",
-            description = "The National Weather Service has issued a severe thunderstorm warning for your area. Expect heavy rain, strong winds, and possible hail. Take necessary precautions and stay indoors if possible.",
-            startTime = System.currentTimeMillis() / 1000,
-            endTime = (System.currentTimeMillis() / 1000) + 3600 * 3, // 3 hours later
-            source = "National Weather Service"
-        )
-    }
-}
-
-/**
- * Preview of the WeatherAlertCard in expanded state.
- */
-@Preview(showBackground = true)
-@Composable
-private fun WeatherAlertCardPreviewExpanded() {
-    MaterialTheme {
-        WeatherAlertCard(
-            title = "Severe Thunderstorm Warning",
-            description = "The National Weather Service has issued a severe thunderstorm warning for your area. Expect heavy rain, strong winds, and possible hail. Take necessary precautions and stay indoors if possible.",
-            startTime = System.currentTimeMillis() / 1000,
-            endTime = (System.currentTimeMillis() / 1000) + 3600 * 3, // 3 hours later
-            source = "National Weather Service",
-            initiallyExpanded = true
-        )
-    }
-}

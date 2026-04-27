@@ -1,8 +1,8 @@
-package bose.ankush.sunriseui.components
+package bose.ankush.commonui.sunriseui.components
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import bose.ankush.sunriseui.constants.WeatherIconConstants
+import bose.ankush.commonui.sunriseui.constants.WeatherIconConstants
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -12,8 +12,8 @@ import kotlin.math.sin
  * Uses theme-aware colors that adapt to light/dark mode.
  */
 fun DrawScope.drawSun(
-    animationProgress: Float, 
-    scale: Float = 1.0f, 
+    animationProgress: Float,
+    scale: Float = 1.0f,
     offsetX: Float = 0f,
     sunColor: Color,
     sunGlowColor: Color
@@ -23,7 +23,8 @@ fun DrawScope.drawSun(
     val radius = size.width.coerceAtMost(size.height) * 0.25f * scale
 
     // Enhanced glow effect with smoother pulsing
-    val glowRadius = radius * (1.0f + WeatherIconConstants.SUN_PULSE_SCALE * sin(animationProgress * PI).toFloat())
+    val glowRadius =
+        radius * (1.0f + WeatherIconConstants.SUN_PULSE_SCALE * sin(animationProgress * PI).toFloat())
     drawCircle(
         color = sunGlowColor,
         radius = glowRadius * WeatherIconConstants.SUN_GLOW_SCALE,
@@ -71,7 +72,7 @@ fun DrawScope.drawSun(
  * Uses theme-aware colors that adapt to light/dark mode.
  */
 fun DrawScope.drawClouds(
-    animationProgress: Float, 
+    animationProgress: Float,
     cloudiness: Float,
     cloudColor: Color
 ) {
@@ -80,8 +81,10 @@ fun DrawScope.drawClouds(
     for (i in 0 until cloudCount) {
         // Smoother cloud movement with varying speeds
         val speedFactor = 0.8f + (i % 3) * 0.1f
-        val baseX = size.width * (0.3f + (i * 0.15f) + animationProgress * WeatherIconConstants.CLOUD_MOVEMENT_SCALE * speedFactor) % size.width
-        val baseY = size.height * (0.4f + (i % 2) * 0.1f + sin(animationProgress * PI * speedFactor) * 0.02f)
+        val baseX =
+            size.width * (0.3f + (i * 0.15f) + animationProgress * WeatherIconConstants.CLOUD_MOVEMENT_SCALE * speedFactor) % size.width
+        val baseY =
+            size.height * (0.4f + (i % 2) * 0.1f + sin(animationProgress * PI * speedFactor) * 0.02f)
 
         // Draw cloud as multiple overlapping circles with varying sizes
         val puffCount = 3
@@ -90,10 +93,12 @@ fun DrawScope.drawClouds(
         for (j in 0 until puffCount) {
             val puffX = baseX + (j - 1) * (puffRadius * 1.2f)
             val puffY = baseY + sin((j + animationProgress * 1.5f) * PI).toFloat() * 2f
-            val puffSize = puffRadius * (0.8f + (j % 2) * 0.4f + sin(animationProgress * PI + j) * 0.05f)
+            val puffSize =
+                puffRadius * (0.8f + (j % 2) * 0.4f + sin(animationProgress * PI + j) * 0.05f)
 
             // Vary opacity slightly for more natural appearance
-            val alpha = WeatherIconConstants.CLOUD_BASE_ALPHA + 0.2f * sin((animationProgress * PI + j * 0.5f).toFloat())
+            val alpha =
+                WeatherIconConstants.CLOUD_BASE_ALPHA + 0.2f * sin((animationProgress * PI + j * 0.5f).toFloat())
 
             drawCircle(
                 color = cloudColor.copy(alpha = alpha),
@@ -110,7 +115,7 @@ fun DrawScope.drawClouds(
  * Uses theme-aware colors that adapt to light/dark mode.
  */
 fun DrawScope.drawRain(
-    animationProgress: Float, 
+    animationProgress: Float,
     intensity: Float,
     rainColor: Color
 ) {
@@ -163,8 +168,9 @@ fun DrawScope.drawRain(
 
         // Vary opacity based on thickness and random factors
         // Thinner drops are more transparent
-        val baseAlpha = (WeatherIconConstants.RAIN_BASE_ALPHA - 0.2f + 0.4f * (dropThickness / 3.0f))
-            .coerceIn(0.3f, 0.9f)
+        val baseAlpha =
+            (WeatherIconConstants.RAIN_BASE_ALPHA - 0.2f + 0.4f * (dropThickness / 3.0f))
+                .coerceIn(0.3f, 0.9f)
         val alphaVariation = 0.15f * sin((animationProgress * PI * 0.7f + seed).toFloat())
         val dropAlpha = (baseAlpha + alphaVariation).coerceIn(0.2f, 0.95f)
 
@@ -190,7 +196,10 @@ fun DrawScope.drawRain(
                 drawCircle(
                     color = rainColor.copy(alpha = splashAlpha),
                     radius = splashSize,
-                    center = androidx.compose.ui.geometry.Offset(endX.toFloat(), size.height * 0.98f)
+                    center = androidx.compose.ui.geometry.Offset(
+                        endX.toFloat(),
+                        size.height * 0.98f
+                    )
                 )
 
                 // For heavier rain, add a second splash ripple
@@ -203,7 +212,10 @@ fun DrawScope.drawRain(
                         drawCircle(
                             color = rainColor.copy(alpha = rippleAlpha),
                             radius = rippleSize,
-                            center = androidx.compose.ui.geometry.Offset(endX.toFloat(), size.height * 0.98f)
+                            center = androidx.compose.ui.geometry.Offset(
+                                endX.toFloat(),
+                                size.height * 0.98f
+                            )
                         )
                     }
                 }
@@ -217,7 +229,7 @@ fun DrawScope.drawRain(
  * Uses theme-aware colors that adapt to light/dark mode.
  */
 fun DrawScope.drawSnow(
-    animationProgress: Float, 
+    animationProgress: Float,
     intensity: Float,
     snowColor: Color
 ) {
@@ -226,7 +238,8 @@ fun DrawScope.drawSnow(
     for (i in 0 until flakeCount) {
         // Vary flake speeds and paths for more realistic snow
         val speedFactor = 0.6f + (i % 5) * 0.1f
-        val horizontalMovement = sin((animationProgress + i * 0.1f) * PI * 2) * size.width * WeatherIconConstants.SNOW_HORIZONTAL_MOVEMENT
+        val horizontalMovement =
+            sin((animationProgress + i * 0.1f) * PI * 2) * size.width * WeatherIconConstants.SNOW_HORIZONTAL_MOVEMENT
         val flakeX = size.width * ((i * 0.1f) % 1.0f) + horizontalMovement
         val flakeProgress = (animationProgress * speedFactor + (i * 0.1f)) % 1.0f
         val flakeY = size.height * (0.5f + flakeProgress * 0.5f)
@@ -298,10 +311,12 @@ fun DrawScope.drawFog(
         val layerY = size.height * (0.3f + i * 0.1f)
         val layerWidth = size.width * (0.6f + (i % 3) * 0.1f)
         val speedFactor = 0.8f + (i % 3) * 0.1f
-        val layerOffset = size.width * 0.15f + sin((animationProgress * speedFactor + i * 0.2f) * PI).toFloat() * size.width * 0.08f
+        val layerOffset =
+            size.width * 0.15f + sin((animationProgress * speedFactor + i * 0.2f) * PI).toFloat() * size.width * 0.08f
 
         // Vary opacity for more natural appearance
-        val alpha = WeatherIconConstants.FOG_BASE_ALPHA + 0.2f * sin((animationProgress * PI + i * 0.5f)).toFloat()
+        val alpha =
+            WeatherIconConstants.FOG_BASE_ALPHA + 0.2f * sin((animationProgress * PI + i * 0.5f)).toFloat()
 
         // Draw fog layer with rounded ends for more natural appearance
         drawLine(
@@ -340,6 +355,7 @@ fun mapToWeatherCondition(description: String?): WeatherCondition {
                 else -> WeatherCondition.THUNDERSTORM
             }
         }
+
         "drizzle" in lowerDesc -> {
             when {
                 "light" in lowerDesc || "slight" in lowerDesc -> WeatherCondition.LIGHT_INTENSITY_DRIZZLE
@@ -347,6 +363,7 @@ fun mapToWeatherCondition(description: String?): WeatherCondition {
                 else -> WeatherCondition.DRIZZLE
             }
         }
+
         "rain" in lowerDesc -> {
             when {
                 "light" in lowerDesc || "slight" in lowerDesc -> WeatherCondition.LIGHT_RAIN
@@ -355,6 +372,7 @@ fun mapToWeatherCondition(description: String?): WeatherCondition {
                 else -> WeatherCondition.MODERATE_RAIN
             }
         }
+
         "snow" in lowerDesc -> {
             when {
                 "light" in lowerDesc || "slight" in lowerDesc || "flurries" in lowerDesc -> WeatherCondition.LIGHT_SNOW
@@ -362,6 +380,7 @@ fun mapToWeatherCondition(description: String?): WeatherCondition {
                 else -> WeatherCondition.SNOW
             }
         }
+
         "sleet" in lowerDesc -> WeatherCondition.SLEET
         "clear" in lowerDesc || "sunny" in lowerDesc || "fair" in lowerDesc -> WeatherCondition.CLEAR_SKY
         "cloud" in lowerDesc -> {
@@ -373,6 +392,7 @@ fun mapToWeatherCondition(description: String?): WeatherCondition {
                 else -> WeatherCondition.SCATTERED_CLOUDS
             }
         }
+
         "mist" in lowerDesc -> WeatherCondition.MIST
         "fog" in lowerDesc -> WeatherCondition.FOG
         "haze" in lowerDesc -> WeatherCondition.HAZE

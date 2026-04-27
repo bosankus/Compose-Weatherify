@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui.components
+package bose.ankush.commonui.sunriseui.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInOutCubic
@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import bose.ankush.sunriseui.constants.WeatherIconConstants
+import bose.ankush.commonui.sunriseui.constants.WeatherIconConstants
 
 /**
  * Holds color values for weather icons that adapt to light/dark theme.

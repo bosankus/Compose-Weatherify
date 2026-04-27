@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui.constants
+package bose.ankush.commonui.sunriseui.constants
 
 /**
  * Constants for weather icon drawing

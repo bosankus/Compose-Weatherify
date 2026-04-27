@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.presentation.home.component
 
 import androidx.compose.runtime.Composable
-import bose.ankush.sunriseui.components.WeatherAlertCard
+import bose.ankush.commonui.sunriseui.components.WeatherAlertCard
 import bose.ankush.weatherify.domain.model.WeatherForecast
 
 /**

@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import bose.ankush.sunriseui.components.WeatherHourCard
+import bose.ankush.commonui.sunriseui.components.WeatherHourCard
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.toFormattedTime
 import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization

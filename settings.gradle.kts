@@ -28,6 +28,5 @@ include(
     ":feature-payment",
     ":language",
     ":network",
-    ":storage",
-    ":sunriseui",
+    ":storage"
 )

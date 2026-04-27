@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui.components
+package bose.ankush.commonui.sunriseui.components
 
 /**
  * Dynamic sunrise/sunset landscape animation that responds to real-time data.
@@ -34,7 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import bose.ankush.sunriseui.constants.SunriseConstants
+import bose.ankush.commonui.sunriseui.constants.SunriseConstants
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin

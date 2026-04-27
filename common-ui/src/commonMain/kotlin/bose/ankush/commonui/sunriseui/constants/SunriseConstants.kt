@@ -1,4 +1,4 @@
-package bose.ankush.sunriseui.constants
+package bose.ankush.commonui.sunriseui.constants
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -98,7 +98,7 @@ object SunriseConstants {
         // Celestial body colors
         val MOON_COLOR = Color(0xFFF5F5DC)
         val MOON_PHASE_COLOR = Color(0xFF0F0F23)
-        val STAR_COLOR = Color.Companion.White
+        val STAR_COLOR = Color.White
 
         // Cloud colors - Adjusted to match realistic sky gradients
         val CLOUD_DAY_COLOR = Color(0xFFFFFFFF)  // Pure white for daytime

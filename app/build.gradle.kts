@@ -84,7 +84,6 @@ dependencies {
     api(project(":language"))
     api(project(":storage"))
     api(project(":network"))
-    api(project(":sunriseui"))
 
     // Core
     implementation(Deps.androidCore)
