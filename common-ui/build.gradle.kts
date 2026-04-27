@@ -39,6 +39,8 @@ kotlin {
                 implementation(project(":feature-payment"))
                 // Location models (SavedLocation, PlaceSuggestion) and repositories for SavedLocationsScreen
                 implementation(project(":network"))
+                // Date/time utilities for KMP
+                implementation(KmmDeps.kotlinxDateTime)
             }
         }
 
