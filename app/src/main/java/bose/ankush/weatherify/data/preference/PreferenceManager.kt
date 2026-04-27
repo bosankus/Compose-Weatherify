@@ -49,4 +49,8 @@ class PreferenceManagerImpl @Inject constructor(@get:ApplicationContext private 
             }
         }
     }
+
+    override suspend fun clearAll() {
+        context.dataStore.edit { it.clear() }
+    }
 }

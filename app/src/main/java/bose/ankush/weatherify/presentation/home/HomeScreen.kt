@@ -31,8 +31,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import bose.ankush.sunriseui.components.SunriseSunsetCombinedAnimation
 import bose.ankush.commonui.components.ToastAnchorState
+import bose.ankush.commonui.permissions.PermissionAlertDialog
+import bose.ankush.sunriseui.components.SunriseSunsetCombinedAnimation
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.Extension.openLocationSettings
 import bose.ankush.weatherify.base.common.UiText
@@ -42,7 +43,6 @@ import bose.ankush.weatherify.presentation.home.component.BriefAirQualityReportC
 import bose.ankush.weatherify.presentation.home.component.CurrentWeatherReportLayout
 import bose.ankush.weatherify.presentation.home.component.DailyWeatherForecastReportLayout
 import bose.ankush.weatherify.presentation.home.component.HourlyWeatherForecastReportLayout
-import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.weatherify.presentation.home.component.WeatherAlertLayout
 import bose.ankush.weatherify.presentation.home.state.ErrorBackgroundAnimation
 import bose.ankush.weatherify.presentation.home.state.ShowError
@@ -187,8 +187,8 @@ private fun ShowUIContainer(
         // Add the SunriseSunsetCombinedAnimation as a full-screen background
         weatherReports?.current?.let { currentWeather ->
             SunriseSunsetCombinedAnimation(
-                sunriseTimestamp = currentWeather.sunrise?.toLong(),
-                sunsetTimestamp = currentWeather.sunset?.toLong(),
+                sunriseTimestamp = currentWeather.sunrise,
+                sunsetTimestamp = currentWeather.sunset,
                 currentTimestamp = System.currentTimeMillis() / 1000
             )
         }
@@ -253,19 +253,14 @@ private fun ShowUIContainer(
                                         ),
                                 exit = fadeOut()
                             ) {
-                                WeatherAlertLayout(
-                                    alerts = alerts,
-                                    onReadMoreClick = {
-                                        // Optional: Add analytics logging or navigation here
-                                    }
-                                )
+                                WeatherAlertLayout(alerts = alerts)
                             }
                         }
                     }
 
                     // Show brief air quality report
                     item(key = "air_quality") {
-                        airQualityReports?.let {
+                        airQualityReports?.takeIf { it.aqi > 0 }?.let { aq ->
                             AnimatedVisibility(
                                 visibleState = airQualityTransitionState,
                                 enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
@@ -275,7 +270,7 @@ private fun ShowUIContainer(
                                         ),
                                 exit = fadeOut()
                             ) {
-                                BriefAirQualityReportCardLayout(airQualityReports)
+                                BriefAirQualityReportCardLayout(aq)
                             }
                         }
                     }

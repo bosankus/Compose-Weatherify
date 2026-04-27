@@ -1,6 +1,5 @@
 package bose.ankush.network.api
 
-import bose.ankush.network.model.AirQuality
 import bose.ankush.network.model.WeatherForecast
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -14,16 +13,6 @@ class KtorWeatherApiService(
     private val httpClient: HttpClient,
     private val baseUrl: String
 ) : WeatherApiService {
-
-    override suspend fun getCurrentAirQuality(
-        latitude: String,
-        longitude: String
-    ): AirQuality {
-        return httpClient.get("$baseUrl/air-pollution") {
-            parameter("lat", latitude)
-            parameter("lon", longitude)
-        }.body()
-    }
 
     override suspend fun getOneCallWeather(
         latitude: String,

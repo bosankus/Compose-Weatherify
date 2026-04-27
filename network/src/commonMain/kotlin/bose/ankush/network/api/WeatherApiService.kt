@@ -1,6 +1,5 @@
 package bose.ankush.network.api
 
-import bose.ankush.network.model.AirQuality
 import bose.ankush.network.model.WeatherForecast
 
 /**
@@ -8,21 +7,11 @@ import bose.ankush.network.model.WeatherForecast
  */
 interface WeatherApiService {
     /**
-     * Get current air quality for a location
+     * Get unified weather data for a location (current, hourly, daily, alerts, air quality).
+     * Air quality and premium-only fields are null for free tier users.
      * @param latitude Latitude of the location
      * @param longitude Longitude of the location
-     * @return AirQuality
-     */
-    suspend fun getCurrentAirQuality(
-        latitude: String,
-        longitude: String
-    ): AirQuality
-
-    /**
-     * Get weather forecast for a location
-     * @param latitude Latitude of the location
-     * @param longitude Longitude of the location
-     * @return WeatherForecast
+     * @return WeatherForecast containing all available data for the user's subscription tier
      */
     suspend fun getOneCallWeather(
         latitude: String,

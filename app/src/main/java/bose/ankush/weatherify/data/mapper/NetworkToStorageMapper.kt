@@ -1,10 +1,10 @@
 package bose.ankush.weatherify.data.mapper
 
-import bose.ankush.network.model.AirQuality as NetworkAirQuality
-import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
 import bose.ankush.storage.room.AirQualityEntity
 import bose.ankush.storage.room.Weather
 import bose.ankush.storage.room.WeatherEntity
+import bose.ankush.network.model.AirQuality as NetworkAirQuality
+import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
 
 /**
  * Mapper to convert Network layer models to Storage layer entities.
@@ -26,7 +26,7 @@ object NetworkToStorageMapper {
             current = data?.current?.let { current ->
                 WeatherEntity.Current(
                     clouds = current.clouds,
-                    dt = current.dt?.toLong(),
+                    dt = current.dt,
                     feels_like = current.feelsLike,
                     humidity = current.humidity,
                     pressure = current.pressure,
@@ -53,7 +53,7 @@ object NetworkToStorageMapper {
                     WeatherEntity.Daily(
                         clouds = it.clouds,
                         dew_point = it.dewPoint,
-                        dt = it.dt?.toLong(),
+                        dt = it.dt,
                         humidity = it.humidity,
                         pressure = it.pressure,
                         rain = it.rain,
@@ -90,7 +90,7 @@ object NetworkToStorageMapper {
                 hourly?.let { it ->
                     WeatherEntity.Hourly(
                         clouds = it.clouds,
-                        dt = it.dt?.toLong(),
+                        dt = it.dt,
                         feels_like = it.feelsLike,
                         humidity = it.humidity,
                         temp = it.temp,
@@ -122,18 +122,21 @@ object NetworkToStorageMapper {
     }
 
     /**
-     * Maps NetworkAirQuality (API model) to AirQualityEntity (database model)
+     * Maps the air quality data embedded in the unified weather response to AirQualityEntity.
+     * When [airQualityData] is null (free tier — air quality not included), stores a default
+     * entity so existing storage contracts are preserved.
      */
-    fun mapAirQualityToStorageEntity(airQualityData: NetworkAirQuality): AirQualityEntity {
+    fun mapAirQualityToStorageEntity(airQualityData: NetworkAirQuality.Data?): AirQualityEntity {
+        val entry = airQualityData?.list?.firstOrNull()
         return AirQualityEntity(
             id = null,
-            aqi = airQualityData.aqi,
-            co = airQualityData.co,
-            no2 = airQualityData.no2,
-            o3 = airQualityData.o3,
-            so2 = airQualityData.so2,
-            pm10 = airQualityData.pm10,
-            pm25 = airQualityData.pm25
+            aqi = entry?.main?.aqi,
+            co = entry?.components?.co,
+            no2 = entry?.components?.no2,
+            o3 = entry?.components?.o3,
+            so2 = entry?.components?.so2,
+            pm10 = entry?.components?.pm10,
+            pm25 = entry?.components?.pm25
         )
     }
 }

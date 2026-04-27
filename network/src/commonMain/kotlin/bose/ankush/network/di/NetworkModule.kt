@@ -2,21 +2,28 @@ package bose.ankush.network.di
 
 import bose.ankush.network.api.FeedbackApiService
 import bose.ankush.network.api.KtorFeedbackApiService
+import bose.ankush.network.api.KtorLocationApiService
 import bose.ankush.network.api.KtorPaymentApiService
+import bose.ankush.network.api.KtorServiceApiService
 import bose.ankush.network.api.KtorWeatherApiService
 import bose.ankush.network.api.PaymentApiService
+import bose.ankush.network.api.ServiceApiService
 import bose.ankush.network.auth.api.KtorAuthApiService
 import bose.ankush.network.auth.interceptor.configureAuth
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.auth.repository.AuthRepositoryImpl
-import bose.ankush.storage.api.TokenStorage
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.common.NetworkConnectivity
 import bose.ankush.network.repository.FeedbackRepository
 import bose.ankush.network.repository.FeedbackRepositoryImpl
+import bose.ankush.network.repository.LocationRepository
+import bose.ankush.network.repository.LocationRepositoryImpl
+import bose.ankush.network.repository.ServiceRepository
+import bose.ankush.network.repository.ServiceRepositoryImpl
 import bose.ankush.network.repository.WeatherRepository
 import bose.ankush.network.repository.WeatherRepositoryImpl
 import bose.ankush.network.utils.NetworkConstants
+import bose.ankush.storage.api.TokenStorage
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -190,6 +197,21 @@ fun createAuthRepository(
 
 
 /**
+ * Factory function to create a LocationRepository instance.
+ * Uses an authenticated HTTP client so all requests carry a valid JWT.
+ */
+fun createLocationRepository(
+    tokenStorage: TokenStorage,
+    baseUrl: String = NetworkConstants.WEATHER_BASE_URL
+): LocationRepository {
+    val authRepository = createAuthRepository(tokenStorage, baseUrl)
+    val tokenManager = createTokenManager(tokenStorage, authRepository)
+    val httpClient = createAuthenticatedHttpClient(tokenManager)
+    val apiService = KtorLocationApiService(httpClient, baseUrl)
+    return LocationRepositoryImpl(apiService)
+}
+
+/**
  * Factory function to create a FeedbackRepository instance
  */
 fun createFeedbackRepository(
@@ -202,4 +224,16 @@ fun createFeedbackRepository(
     val httpClient = createAuthenticatedHttpClient(tokenManager)
     val apiService: FeedbackApiService = KtorFeedbackApiService(httpClient, baseUrl)
     return FeedbackRepositoryImpl(apiService, networkConnectivity)
+}
+
+/**
+ * Factory function to create a ServiceRepository instance.
+ * Uses a basic HTTP client; the /services/public endpoint requires NO authentication.
+ */
+fun createServiceRepository(
+    baseUrl: String = NetworkConstants.WEATHER_BASE_URL
+): ServiceRepository {
+    val httpClient = createBasicHttpClient()
+    val apiService: ServiceApiService = KtorServiceApiService(httpClient, baseUrl)
+    return ServiceRepositoryImpl(apiService)
 }

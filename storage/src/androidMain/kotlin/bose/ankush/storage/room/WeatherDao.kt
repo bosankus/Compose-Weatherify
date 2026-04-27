@@ -37,4 +37,10 @@ interface WeatherDao {
 
     @Query("DELETE from $AQ_DATABASE_NAME")
     fun deleteAllAirQualityDetails()
+
+    @Transaction
+    fun clearAll() {
+        deleteAllWeatherDetails()
+        deleteAllAirQualityDetails()
+    }
 }

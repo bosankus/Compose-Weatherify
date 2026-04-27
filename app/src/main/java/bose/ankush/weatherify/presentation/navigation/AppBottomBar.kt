@@ -8,6 +8,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -17,8 +19,6 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -42,9 +42,9 @@ fun AppBottomBar(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val selectedItem = remember { mutableIntStateOf(0) }
     val screenItems = listOf(
         Screen.HomeNestedNav,
+        Screen.SavedLocationsNestedNav,
         Screen.ProfileNestedNav
     )
 
@@ -75,13 +75,18 @@ fun AppBottomBar(
                 ),
             containerColor = Color.Transparent // Make the container transparent to show our custom background
         ) {
-            screenItems.forEachIndexed { index, screen ->
+            screenItems.forEachIndexed { _, screen ->
                 NavigationBarItem(
                     icon = {
                         when (screen.resourceId) {
                             R.string.home_nested_nav -> Icon(
                                 painter = painterResource(id = R.drawable.ic_home),
                                 contentDescription = stringResource(id = screen.resourceId)
+                            )
+
+                            R.string.saved_locations_nested_nav -> Icon(
+                                imageVector = Icons.Outlined.BookmarkBorder,
+                                contentDescription = stringResource(id = R.string.saved_locations_icon_content)
                             )
 
                             R.string.profile_nested_nav -> Icon(
@@ -92,7 +97,6 @@ fun AppBottomBar(
                     },
                     selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                     onClick = {
-                        selectedItem.intValue = index
                         navController.navigate(screen.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true

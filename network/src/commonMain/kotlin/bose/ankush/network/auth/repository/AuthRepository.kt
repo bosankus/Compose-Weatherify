@@ -24,7 +24,6 @@ interface AuthRepository {
      * @param operatingSystem Operating system (e.g., "Android")
      * @param osVersion Operating system version (e.g., "14")
      * @param appVersion App version
-     * @param ipAddress Client's IP address (if obtainable)
      * @param registrationSource Registration source (e.g., "Android App")
      * @return AuthResponse
      */
@@ -36,7 +35,6 @@ interface AuthRepository {
         operatingSystem: String? = null,
         osVersion: String? = null,
         appVersion: String? = null,
-        ipAddress: String? = null,
         registrationSource: String? = null,
         firebaseToken: String? = null
     ): AuthResponse

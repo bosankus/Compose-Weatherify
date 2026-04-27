@@ -1,6 +1,5 @@
 package bose.ankush.network.repository
 
-import bose.ankush.network.model.AirQuality
 import bose.ankush.network.model.WeatherForecast
 import kotlinx.coroutines.flow.Flow
 
@@ -9,21 +8,16 @@ import kotlinx.coroutines.flow.Flow
  */
 interface WeatherRepository {
     /**
-     * Get air quality report for a location
-     * @param coordinates Pair of latitude and longitude
-     * @return Flow of AirQuality
-     */
-    fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality>
-
-    /**
-     * Get weather report for a location
+     * Get unified weather report for a location.
+     * The response includes current, hourly, daily, alerts, and air quality.
+     * Premium-only fields are null for free tier users — check entitlements.upgradeRequired.
      * @param coordinates Pair of latitude and longitude
      * @return Flow of WeatherForecast
      */
     fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherForecast?>
 
     /**
-     * Refresh weather data for a location
+     * Force a fresh fetch from the network for a location
      * @param coordinates Pair of latitude and longitude
      */
     suspend fun refreshWeatherData(coordinates: Pair<Double, Double>)

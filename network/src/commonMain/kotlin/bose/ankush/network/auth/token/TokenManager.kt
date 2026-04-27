@@ -35,21 +35,7 @@ class TokenManager(
                 if (response.isSuccess() && newToken.isNullOrBlank()) {
                     return TokenResult.NoToken
                 }
-                when (response.data?.errorCode) {
-                    "TOKEN_NOT_EXPIRED" -> {
-                        val existingToken = tokenStorage.getToken()
-                        return if (existingToken != null) TokenResult.Valid(existingToken)
-                        else TokenResult.NoToken
-                    }
-
-                    "TOKEN_INVALID" -> {
-                        return TokenResult.InvalidToken(response.data.errorCode)
-                    }
-
-                    else -> {
-                        return TokenResult.InvalidToken(response.data?.errorCode)
-                    }
-                }
+                return TokenResult.InvalidToken(response.data?.errorCode)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 return TokenResult.Error(e)

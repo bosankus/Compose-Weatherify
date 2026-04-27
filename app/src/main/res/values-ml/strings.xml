@@ -45,25 +45,6 @@
     <string name="logout_warning_txt">നിങ്ങളുടെ അക്കൗണ്ട് ആക്സസ് ചെയ്യാൻ വീണ്ടും ലോഗിൻ ചെയ്യേണ്ടതായി വരും.</string>
     <string name="confirm_btn_txt">ഉറപ്പാക്കുക</string>
     <string name="cancel_btn_txt">റദ്ദാക്കുക</string>
-    <string name="premium_get_txt">പ്രീമിയം നേടുക</string>
-    <string name="premium_processing_txt">പ്രോസസ് ചെയ്യുന്നു…</string>
-    <string name="premium_processing_desc_txt">നിങ്ങളുടെ പ്രീമിയം സബ്‌സ്‌ക്രിപ്‌ഷൻ ആക്ടിവേറ്റ് ചെയ്യുന്ന സമയം ദയവായി കാത്തിരിക്കുക.</string>
-    <string name="premium_unlock_desc_txt">എല്ലാ ഫീച്ചറുകളും അൺലോക്ക് ചെയ്ത് പരസ്യം ഇല്ലാത്ത അനുഭവം ആസ്വദിക്കുക.</string>
-    <string name="premium_upgrade_btn_txt">ഇപ്പോൾ അപ്‌ഗ്രേഡ് ചെയ്യുക</string>
-    <string name="premium_active_txt">നിങ്ങൾ ഒരു പ്രീമിയം ഉപയോക്താവാണ്</string>
-    <string name="premium_expires_txt">%1$s ന് കാലഹരണപ്പെടും</string>
-    <string name="premium_active_status_txt">സജീവം</string>
-    <string name="premium_activated_txt">പ്രീമിയം വിജയകരമായി ആക്ടിവേറ്റ് ചെയ്തു!</string>
-    <string name="premium_title_txt">പ്രീമിയം</string>
-    <string name="premium_price_txt">$4.99/മാസം</string>
-    <string name="premium_trial_txt">7 ദിവസത്തെ ഫ്രീ ട്രയൽ, ഏത് സമയത്തും റദ്ദാക്കുക</string>
-    <string name="premium_subscribe_btn_txt">സബ്‌സ്‌ക്രൈബ് ചെയ്യുക</string>
-    <string name="premium_starting_txt">ആരംഭിക്കുന്നു…</string>
-    <string name="premium_no_thanks_txt">വേണ്ട, നന്ദി</string>
-    <string name="premium_feature_1_txt">പരസ്യം ഇല്ലാത്ത അനുഭവം</string>
-    <string name="premium_feature_2_txt">വിപുലമായ 15 ദിവസത്തെ പ്രവചനം</string>
-    <string name="premium_feature_3_txt">കഠിനമായ കാലാവസ്ഥ അലേർട്ടുകൾ</string>
-    <string name="premium_feature_4_txt">വിശദമായ വായു ഗുണനിലവാരം ഡേറ്റ</string>
     <string name="settings_notifications_txt">അറിയിപ്പുകൾ</string>
     <string name="settings_language_txt">ഭാഷ</string>
     <string name="legal_privacy_policy_txt">സ്വകാര്യതാ നയം</string>
@@ -81,7 +62,6 @@
     <string name="error_icon_content">പിശക് ഐക്കൺ</string>
     <string name="close_icon_content">അടയ്‌ക്കുക ഐക്കൺ</string>
     <string name="back_button_content">പിറകോട്ട് ബട്ടൺ</string>
-    <string name="premium_icon_content">പ്രീമിയം സബ്‌സ്‌ക്രിപ്‌ഷൻ ഐക്കൺ</string>
     <string name="notification_icon_content">അറിയിപ്പ് ക്രമീകരണ ഐക്കൺ</string>
     <string name="privacy_icon_content">സ്വകാര്യതാ നയ ഐക്കൺ</string>
     <string name="terms_icon_content">ഉപയോഗ നിബന്ധനകൾ ഐക്കൺ</string>
@@ -93,4 +73,39 @@
     <string name="notification_permission_title">അപ്‌ഡേറ്റ് ആയിരിക്കുക</string>
     <string name="notification_permission_message">കാലാവസ്ഥ അലേർട്ടുകൾക്ക് അറിയിപ്പുകൾ ഓൺ ചെയ്യുക</string>
     <string name="enable_notification_btn">ഓൺ ചെയ്യുക</string>
+
+    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
+    <string name="premium_get_txt">പ്രിമിയം നേടുക</string>
+    <string name="premium_processing_txt">പ്രോസെസ്സിംഗ്…</string>
+    <string name="premium_processing_desc_txt">ഞങ്ങൾ നിങ്ങളുടെ പ്രിമിയം സബ്‌സ്ക്രിപ്ഷൻ സജ്ജമാക്കുന്നതിനായി ദയവായി കാത്തിരിക്കുക.</string>
+    <string name="premium_unlock_desc_txt">എല്ലാ ഫീച്ചറുകൾ അൺലോക്ക് ചെയ്യുക കൂടാതെ പരസ്യരഹിത അനുഭവം ആസ്വദിക്കുക.</string>
+    <string name="premium_upgrade_btn_txt">ഇപ്പോൾ അപ്‌ഗ്രേഡ് ചെയ്യുക</string>
+    <string name="premium_active_txt">നിങ്ങൾ പ്രിമിയം ഉപയോക്താവാണ്</string>
+    <string name="premium_expires_txt">%1$s ആയി സ്ഫുടിക്കുന്നു</string>
+    <string name="premium_active_status_txt">സജീവ</string>
+    <string name="premium_activated_title_txt">പ്രിമിയം സജീവമാണ്</string>
+    <string name="premium_activated_msg_txt">നിങ്ങളുടെ പ്രിമിയം സബ്‌സ്ക്രിപ്ഷൻ ഇപ്പോൾ സജീവമാണ്!</string>
+
+    <!--Saved Locations (Premium Feature)-->
+    <string name="saved_locations_screen">സംരക്ഷിത സ്ഥാനങ്ങൾ</string>
+    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
+    <string name="saved_locations_title">സംരക്ഷിത സ്ഥാനങ്ങൾ</string>
+    <string name="saved_locations_empty_txt">ഇതുവരെ സംരക്ഷിത സ്ഥാനങ്ങൾ ഇല്ല. ഒന്ന് ചേർക്കാൻ + ടാപ്പ് ചെയ്യുക.</string>
+    <string name="saved_locations_add_btn">സ്ഥാനം ചേർക്കുക</string>
+    <string name="saved_locations_delete_btn">ഇല്ലാതാക്കുക</string>
+    <string name="saved_locations_save_btn">സംരക്ഷിക്കുക</string>
+    <string name="saved_locations_name_hint">സ്ഥാനത്തിന്റെ പേര് (ഉദാ. വീട്)</string>
+    <string name="saved_locations_premium_title">പ്രിമിയം ഫീച്ചർ</string>
+    <string name="saved_locations_premium_desc">നിങ്ങളുടെ പ്രിയപ്പെട്ട സ്ഥാനങ്ങൾ സംരക്ഷിക്കുക കൂടാതെ ഉടനടി ആക്സസ് ചെയ്യുക. ഈ ഫീച്ചർ അൺലോക്ക് ചെയ്യാൻ പ്രിമിയമായി അപ്‌ഗ്രേഡ് ചെയ്യുക.</string>
+    <string name="saved_locations_error_txt">സംരക്ഷിത സ്ഥാനങ്ങൾ ലോഡ് ചെയ്യാൻ പരാജയപ്പെട്ടു.</string>
+    <string name="saved_locations_save_success">സ്ഥാനം വിജയകരമായി സംരക്ഷിക്കപ്പെട്ടു.</string>
+    <string name="saved_locations_delete_success">സ്ഥാനം നീക്കം ചെയ്യപ്പെട്ടു.</string>
+    <string name="saved_locations_icon_content">സംരക്ഷിത സ്ഥാനങ്ങൾ</string>
+    <string name="add_icon_content">പുതിയ സ്ഥാനം ചേർക്കുക</string>
+    <string name="delete_icon_content">സ്ഥാനം ഇല്ലാതാക്കുക</string>
+
+    <!--Place Search Dialog-->
+    <string name="place_search_dialog_title">ഒരു സ്ഥാനം തിരയുക</string>
+    <string name="place_search_hint">നഗരം അല്ലെങ്കിൽ വിലാസം ടൈപ്പ് ചെയ്യുക…</string>
+    <string name="place_search_no_results">\'%1$s\'ക്കായി ഒരു സ്ഥാനവും കണ്ടെത്തിയില്ല</string>
 </resources>

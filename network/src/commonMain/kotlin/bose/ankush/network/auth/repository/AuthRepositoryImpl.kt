@@ -37,7 +37,6 @@ class AuthRepositoryImpl(
         operatingSystem: String?,
         osVersion: String?,
         appVersion: String?,
-        ipAddress: String?,
         registrationSource: String?,
         firebaseToken: String?
     ): AuthResponse {
@@ -49,7 +48,6 @@ class AuthRepositoryImpl(
             operatingSystem = operatingSystem,
             osVersion = osVersion,
             appVersion = appVersion,
-            ipAddress = ipAddress,
             registrationSource = registrationSource,
             firebaseToken = firebaseToken
         )

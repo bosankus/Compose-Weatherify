@@ -2,16 +2,22 @@ package bose.ankush.weatherify.di
 
 import android.content.Context
 import bose.ankush.network.auth.repository.AuthRepository
-import bose.ankush.storage.api.TokenStorage
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.common.AndroidNetworkConnectivity
 import bose.ankush.network.common.NetworkConnectivity
 import bose.ankush.network.di.createAuthRepository
 import bose.ankush.network.di.createFeedbackRepository
+import bose.ankush.network.di.createLocationRepository
+import bose.ankush.network.di.createServiceRepository
 import bose.ankush.network.di.createTokenManager
 import bose.ankush.network.di.createWeatherRepository
+import bose.ankush.network.domain.SavedLocationsUseCase
+import bose.ankush.network.domain.SearchPlacesUseCase
 import bose.ankush.network.repository.FeedbackRepository
+import bose.ankush.network.repository.LocationRepository
+import bose.ankush.network.repository.ServiceRepository
 import bose.ankush.network.repository.WeatherRepository
+import bose.ankush.storage.api.TokenStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -84,5 +90,48 @@ object NetworkModule {
         tokenStorage: TokenStorage
     ): FeedbackRepository {
         return createFeedbackRepository(networkConnectivity, tokenStorage)
+    }
+
+    /**
+     * Provides LocationRepository for saved favourite locations (premium feature).
+     */
+    @Provides
+    @Singleton
+    fun provideLocationRepository(
+        tokenStorage: TokenStorage
+    ): LocationRepository {
+        return createLocationRepository(tokenStorage)
+    }
+
+    /**
+     * Provides ServiceRepository for premium service subscriptions.
+     * Uses basic HTTP client; /services/public endpoint requires no authentication.
+     */
+    @Provides
+    @Singleton
+    fun provideServiceRepository(): ServiceRepository {
+        return createServiceRepository()
+    }
+
+    /**
+     * Provides SearchPlacesUseCase for searching places.
+     */
+    @Provides
+    @Singleton
+    fun provideSearchPlacesUseCase(
+        repository: LocationRepository
+    ): SearchPlacesUseCase {
+        return SearchPlacesUseCase(repository)
+    }
+
+    /**
+     * Provides SavedLocationsUseCase for managing saved locations.
+     */
+    @Provides
+    @Singleton
+    fun provideSavedLocationsUseCase(
+        repository: LocationRepository
+    ): SavedLocationsUseCase {
+        return SavedLocationsUseCase(repository)
     }
 }

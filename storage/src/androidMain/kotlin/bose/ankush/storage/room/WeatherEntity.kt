@@ -18,10 +18,10 @@ data class WeatherEntity(
 ) {
     data class Alert(
         val description: String?,
-        val end: Int?,
+        val end: Long?,
         val event: String?,
         val sender_name: String?,
-        val start: Int?
+        val start: Long?
     )
 
     data class Current(
@@ -30,8 +30,8 @@ data class WeatherEntity(
         val feels_like: Double?,
         val humidity: Int?,
         val pressure: Int?,
-        val sunrise: Int?,
-        val sunset: Int?,
+        val sunrise: Long?,
+        val sunset: Long?,
         val temp: Double?,
         val uvi: Double?,
         @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
@@ -47,8 +47,8 @@ data class WeatherEntity(
         val pressure: Int?,
         val rain: Double?,
         val summary: String?,
-        val sunrise: Int?,
-        val sunset: Int?,
+        val sunrise: Long?,
+        val sunset: Long?,
         @Embedded val temp: Temp?,
         val uvi: Double?,
         @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),

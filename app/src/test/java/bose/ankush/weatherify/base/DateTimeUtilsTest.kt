@@ -42,8 +42,8 @@ class DateTimeUtilsTest {
      */
     @Test
     fun `verify that getDayWiseDifferenceFromToday returns day difference successfully`() {
-        every { DateTimeUtils.getDayWiseDifferenceFromToday(now.toInt()) } returns 0
-        val numberOfDays = DateTimeUtils.getDayWiseDifferenceFromToday(now.toInt())
+        every { DateTimeUtils.getDayWiseDifferenceFromToday(now) } returns 0
+        val numberOfDays = DateTimeUtils.getDayWiseDifferenceFromToday(now)
         assertThat(numberOfDays).isEqualTo(0)
     }
 

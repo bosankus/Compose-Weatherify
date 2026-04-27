@@ -45,25 +45,6 @@
     <string name="logout_warning_txt">ನಿಮ್ಮ ಖಾತೆ ಪ್ರವೇಶಿಸಲು ಮತ್ತೆ ಲಾಗಿನ್ ಮಾಡಬೇಕಾಗುತ್ತದೆ.</string>
     <string name="confirm_btn_txt">ದೃಢೀಕರಿಸಿ</string>
     <string name="cancel_btn_txt">ರದ್ದುಮಾಡಿ</string>
-    <string name="premium_get_txt">ಪ್ರೀಮಿಯಂ ಪಡೆಯಿರಿ</string>
-    <string name="premium_processing_txt">ಪ್ರಕ್ರಿಯೆ ನಡೆಯುತ್ತಿದೆ…</string>
-    <string name="premium_processing_desc_txt">ನಿಮ್ಮ ಪ್ರೀಮಿಯಂ ಚಂದಾದಾರಿಕೆ ಸಕ್ರಿಯಗೊಳಿಸುವ ಸಮಯದಲ್ಲಿ ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ.</string>
-    <string name="premium_unlock_desc_txt">ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ ಮತ್ತು ಜಾಹೀರಾತು-ಮುಕ್ತ ಅನುಭವ ಆನಂದಿಸಿ.</string>
-    <string name="premium_upgrade_btn_txt">ಈಗ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ</string>
-    <string name="premium_active_txt">ನೀವು ಪ್ರೀಮಿಯಂ ಬಳಕೆದಾರರಾಗಿದ್ದೀರಿ</string>
-    <string name="premium_expires_txt">%1$s ರಂದು ಅವಧಿ ಮೀರುತ್ತದೆ</string>
-    <string name="premium_active_status_txt">ಸಕ್ರಿಯ</string>
-    <string name="premium_activated_txt">ಪ್ರೀಮಿಯಂ ಯಶಸ್ವಿಯಾಗಿ ಸಕ್ರಿಯಗೊಂಡಿದೆ!</string>
-    <string name="premium_title_txt">ಪ್ರೀಮಿಯಂ</string>
-    <string name="premium_price_txt">$4.99/ತಿಂಗಳು</string>
-    <string name="premium_trial_txt">7 ದಿನಗಳ ಉಚಿತ ಪ್ರಯತ್ನ, ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ರದ್ದುಮಾಡಿ</string>
-    <string name="premium_subscribe_btn_txt">ಚಂದಾದಾರಿ</string>
-    <string name="premium_starting_txt">ಪ್ರಾರಂಭವಾಗುತ್ತಿದೆ…</string>
-    <string name="premium_no_thanks_txt">ಧನ್ಯವಾದ, ಇಲ್ಲ</string>
-    <string name="premium_feature_1_txt">ಜಾಹೀರಾತು-ಮುಕ್ತ ಅನುಭವ</string>
-    <string name="premium_feature_2_txt">ವಿಸ್ತೃತ 15-ದಿನಗಳ ಮುನ್ಸೂಚನೆ</string>
-    <string name="premium_feature_3_txt">ತೀವ್ರ ಹವಾಮಾನ ಎಚ್ಚರಿಕೆ</string>
-    <string name="premium_feature_4_txt">ವಿವರವಾದ ವಾಯು ಗುಣಮಟ್ಟ ಡೇಟಾ</string>
     <string name="settings_notifications_txt">ಅಧಿಸೂಚನೆಗಳು</string>
     <string name="settings_language_txt">ಭಾಷೆ</string>
     <string name="legal_privacy_policy_txt">ಗೋಪ್ಯತಾ ನೀತಿ</string>
@@ -81,7 +62,6 @@
     <string name="error_icon_content">ದೋಷ ಐಕಾನ್</string>
     <string name="close_icon_content">ಮುಚ್ಚಿ ಐಕಾನ್</string>
     <string name="back_button_content">ಹಿಂದೆ ಬಟನ್</string>
-    <string name="premium_icon_content">ಪ್ರೀಮಿಯಂ ಚಂದಾದಾರಿಕೆ ಐಕಾನ್</string>
     <string name="notification_icon_content">ಅಧಿಸೂಚನೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಐಕಾನ್</string>
     <string name="privacy_icon_content">ಗೋಪ್ಯತಾ ನೀತಿ ಐಕಾನ್</string>
     <string name="terms_icon_content">ಬಳಕೆ ನಿಯಮಗಳ ಐಕಾನ್</string>
@@ -93,4 +73,39 @@
     <string name="notification_permission_title">ನವೀಕರಿತರಾಗಿರಿ</string>
     <string name="notification_permission_message">ಹವಾಮಾನ ಎಚ್ಚರಿಕೆಗಳಿಗಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ</string>
     <string name="enable_notification_btn">ಸಕ್ರಿಯಗೊಳಿಸಿ</string>
+
+    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
+    <string name="premium_get_txt">ಪ್ರೀಮಿಯಂ ಪಡೆಯಿರಿ</string>
+    <string name="premium_processing_txt">ಸಂಸ್ಕರಣೆಯಲ್ಲಿ…</string>
+    <string name="premium_processing_desc_txt">ಆಪ್ತ ಪ್ರೀಮಿಯಂ ಗ್ರಾಹಕತ್ವವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವಾಗ ದಯವಿಟ್ಟು ತಡೆದುಕೊಳ್ಳಿ.</string>
+    <string name="premium_unlock_desc_txt">ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ ಮತ್ತು ವಿಜ್ಞಾಪನ-ಮುಕ್ತ ಅನುಭವವನ್ನು ಆನಂದಿಸಿ.</string>
+    <string name="premium_upgrade_btn_txt">ಈಗ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ</string>
+    <string name="premium_active_txt">ನೀವು ಪ್ರೀಮಿಯಂ ಬಳಕೆದಾರ</string>
+    <string name="premium_expires_txt">%1$s ಗಾಗಿ ಮುಕ್ತಾಯ</string>
+    <string name="premium_active_status_txt">ಸಕ್ರಿಯ</string>
+    <string name="premium_activated_title_txt">ಪ್ರೀಮಿಯಂ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ</string>
+    <string name="premium_activated_msg_txt">ನಿಮ್ಮ ಪ್ರೀಮಿಯಂ ಗ್ರಾಹಕತ್ವ ಈಗ ಸಕ್ರಿಯವಾಗಿದೆ!</string>
+
+    <!--Saved Locations (Premium Feature)-->
+    <string name="saved_locations_screen">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳು</string>
+    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
+    <string name="saved_locations_title">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳು</string>
+    <string name="saved_locations_empty_txt">ಇನ್ನೂ ಸಂರಕ್ಷಿತ ಸ್ಥಳಗಳಿಲ್ಲ. ಸೇರಿಸಲು + ಟ್ಯಾಪ್ ಮಾಡಿ.</string>
+    <string name="saved_locations_add_btn">ಸ್ಥಳ ಸೇರಿಸಿ</string>
+    <string name="saved_locations_delete_btn">ಅಳಿಸಿ</string>
+    <string name="saved_locations_save_btn">ಉಳಿಸಿ</string>
+    <string name="saved_locations_name_hint">ಸ್ಥಳ ಹೆಸರು (ಉದಾ. ಮನೆ)</string>
+    <string name="saved_locations_premium_title">ಪ್ರೀಮಿಯಂ ವೈಶಿಷ್ಟ್ಯ</string>
+    <string name="saved_locations_premium_desc">ನಿಮ್ಮ ಮೆಚ್ಚುವ ಸ್ಥಳಗಳನ್ನು ಉಳಿಸಿ ಮತ್ತು ತಕ್ಷಣ ಪ್ರವೇಶಿಸಿ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಪ್ರೀಮಿಯಂಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ.</string>
+    <string name="saved_locations_error_txt">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ.</string>
+    <string name="saved_locations_save_success">ಸ್ಥಳ ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ.</string>
+    <string name="saved_locations_delete_success">ಸ್ಥಳ ತೆಗೆದುಹಾಕಲಾಗಿದೆ.</string>
+    <string name="saved_locations_icon_content">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳು</string>
+    <string name="add_icon_content">ಹೊಸ ಸ್ಥಳ ಸೇರಿಸಿ</string>
+    <string name="delete_icon_content">ಸ್ಥಳ ಅಳಿಸಿ</string>
+
+    <!--Place Search Dialog-->
+    <string name="place_search_dialog_title">ಸ್ಥಳವನ್ನು ಹುಡುಕಿ</string>
+    <string name="place_search_hint">ಪಟ್ಟಣ ಅಥವಾ ವಿಳಾಸ ಟೈಪ್ ಮಾಡಿ…</string>
+    <string name="place_search_no_results">\'%1$s\'ಗೆ ಯಾವುದೇ ಸ್ಥಳಗಳು ಕಂಡುಬಂದಿಲ್ಲ</string>
 </resources>

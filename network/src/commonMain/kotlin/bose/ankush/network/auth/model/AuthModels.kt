@@ -23,7 +23,6 @@ data class RegisterRequest(
     val operatingSystem: String? = null,
     val osVersion: String? = null,
     val appVersion: String? = null,
-    val ipAddress: String? = null,
     val registrationSource: String? = null,
     val firebaseToken: String? = null
 )
@@ -37,16 +36,6 @@ data class RefreshTokenRequest(
 )
 
 /**
- * User role returned by the server on login/register/refresh.
- * Unknown values from the server coerce to null (requires coerceInputValues = true in JSON config).
- */
-@Serializable
-enum class UserRole {
-    USER,
-    ADMIN
-}
-
-/**
  * Data class for authentication response data.
  * Defaults allow this to be used for both success and error shapes
  * (e.g. TOKEN_NOT_EXPIRED only has errorCode, no token/email).
@@ -55,7 +44,6 @@ enum class UserRole {
 data class AuthData(
     val token: String = "",
     val email: String = "",
-    val role: UserRole? = null,
     val isActive: Boolean = false,
     val isPremium: Boolean = false,
     val premiumExpiresAt: String? = null,

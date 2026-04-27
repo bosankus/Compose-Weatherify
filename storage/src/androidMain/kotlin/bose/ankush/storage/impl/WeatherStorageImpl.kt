@@ -6,7 +6,6 @@ import bose.ankush.storage.room.WeatherDatabase
 import bose.ankush.storage.room.WeatherEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 
 /**
@@ -24,6 +23,13 @@ class WeatherStorageImpl(
     private val weatherDatabase: WeatherDatabase
 ) : WeatherStorage {
 
+    // In-memory per-location timestamp map. Keyed by "lat_lon" string.
+    // Reset on process restart intentionally — fresh data should be fetched after a cold start.
+    private val locationTimestamps = mutableMapOf<String, Long>()
+
+    private fun locationKey(coordinates: Pair<Double, Double>) =
+        "${coordinates.first}_${coordinates.second}"
+
     override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<Any?> {
         return weatherDatabase.weatherDao().getWeather()
     }
@@ -33,9 +39,11 @@ class WeatherStorageImpl(
     }
 
 
-    override suspend fun getLastWeatherUpdateTime(): Long {
-        val weatherEntity = weatherDatabase.weatherDao().getWeather().firstOrNull()
-        return weatherEntity?.lastUpdated ?: 0L
+    override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long =
+        locationTimestamps[locationKey(coordinates)] ?: 0L
+
+    override suspend fun saveLastWeatherUpdateTime(coordinates: Pair<Double, Double>, time: Long) {
+        locationTimestamps[locationKey(coordinates)] = time
     }
 
     override suspend fun saveWeatherData(weatherEntity: Any, airQualityEntity: Any) {
@@ -44,5 +52,12 @@ class WeatherStorageImpl(
                 weatherDatabase.weatherDao().refreshWeather(weatherEntity, airQualityEntity)
             }
         }
+    }
+
+    override suspend fun clearAllData() {
+        withContext(Dispatchers.IO) {
+            weatherDatabase.weatherDao().clearAll()
+        }
+        locationTimestamps.clear()
     }
 }

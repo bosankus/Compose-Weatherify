@@ -40,6 +40,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Services for foreground location tracking and persistent per-app locale preferences. -->
         <service
             android:name=".base.location.LocationService"
             android:foregroundServiceType="location" />

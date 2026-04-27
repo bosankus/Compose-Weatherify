@@ -3,29 +3,36 @@ package bose.ankush.weatherify.presentation
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.commonui.locations.PlaceSearchUiState
+import bose.ankush.commonui.locations.SavedLocationsUiState
 import bose.ankush.network.auth.events.AuthEvent
 import bose.ankush.network.auth.events.AuthEventBus.emit
 import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.auth.token.TokenResult
+import bose.ankush.network.auth.utils.isPremiumActive
+import bose.ankush.network.domain.SavedLocationsUseCase
+import bose.ankush.network.domain.SearchPlacesUseCase
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.DeviceInfoProvider
+import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.base.common.LoggerFactory
 import bose.ankush.weatherify.base.common.UiText
 import bose.ankush.weatherify.base.common.errorResponseFromException
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.base.location.LocationClient
 import bose.ankush.weatherify.base.location.LocationPermissions
-import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.domain.preference.PreferenceManager
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
+import bose.ankush.weatherify.domain.repository.WeatherRepository
 import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetWeatherReport
 import bose.ankush.weatherify.domain.use_case.refresh_weather_reports.RefreshWeatherReport
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,8 +40,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -55,17 +67,21 @@ import javax.inject.Inject
  * When migrating UiText to a KMP-compatible text-resource system, replace the
  * [UiText.StringResource] usages below with the new type.
  */
+@OptIn(FlowPreview::class)
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val refreshWeatherReport: RefreshWeatherReport,
     private val getWeatherReport: GetWeatherReport,
     private val getAirQuality: GetAirQuality,
+    private val weatherRepository: WeatherRepository,
     private val locationClient: LocationClient,
     private val preferenceManager: PreferenceManager,
     private val dispatchers: DispatcherProvider,
     private val remoteConfigService: RemoteConfigService,
     private val authRepository: AuthRepository,
     private val tokenManager: TokenManager,
+    private val searchPlacesUseCase: SearchPlacesUseCase,
+    private val savedLocationsUseCase: SavedLocationsUseCase,
     loggerFactory: LoggerFactory,
     private val deviceInfoProvider: DeviceInfoProvider,
 ) : ViewModel() {
@@ -99,6 +115,15 @@ class MainViewModel @Inject constructor(
     private val _isAuthInitialized = MutableStateFlow(false)
     val isAuthInitialized: StateFlow<Boolean> = _isAuthInitialized.asStateFlow()
 
+    // Location state flows
+    private val _savedLocationsState = MutableStateFlow(SavedLocationsUiState())
+    val savedLocationsState: StateFlow<SavedLocationsUiState> = _savedLocationsState.asStateFlow()
+
+    private val _placeSearchState = MutableStateFlow(PlaceSearchUiState())
+    val placeSearchState: StateFlow<PlaceSearchUiState> = _placeSearchState.asStateFlow()
+
+    private val _queryFlow = MutableStateFlow("")
+
     // Coroutine jobs
     private var notificationBannerJob: Job? = null
     private var locationJob: Job? = null
@@ -122,11 +147,47 @@ class MainViewModel @Inject constructor(
                 _isLoggedIn.value = loggedIn
                 logger.d("Auth state changed - isLoggedIn: $loggedIn")
                 if (!initialized) {
+                    if (loggedIn) silentTokenRefresh()
                     _isAuthInitialized.value = true
                     initialized = true
                     logger.d("Auth initialization completed")
-                    if (loggedIn) silentTokenRefresh()
                 }
+            }
+        }
+
+        // Reactively refresh weather data when premium tier changes (activation or expiry).
+        // drop(1) skips the initial emission so we only react to actual changes.
+        viewModelScope.launch {
+            preferenceManager.getUserPreferencesFlow()
+                .map { it.isPremium }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect { isPremium ->
+                    logger.d("Premium status changed to $isPremium — forcing weather data refresh")
+                    performInitialDataLoading(forceRefresh = true)
+                }
+        }
+
+        // Setup debounced place search
+        viewModelScope.launch(dispatchers.io) {
+            _queryFlow
+                .debounce(400L)
+                .filter { it.length >= 2 }
+                .distinctUntilChanged()
+                .collect { query -> fetchPlaceSuggestions(query) }
+        }
+
+        // Load saved locations and premium status on init
+        viewModelScope.launch(dispatchers.io) {
+            preferenceManager.getUserPreferencesFlow().collect { prefs ->
+                val premiumActive = isPremiumActive(
+                    prefs.premiumExpiry?.let { millis ->
+                        Instant.fromEpochMilliseconds(millis).toString()
+                    }
+                )
+                val wasPremium = _savedLocationsState.value.isPremium
+                _savedLocationsState.update { it.copy(isPremium = premiumActive) }
+                if (premiumActive && !wasPremium) loadSavedLocations()
             }
         }
     }
@@ -353,7 +414,6 @@ class MainViewModel @Inject constructor(
             operatingSystem = deviceInfoProvider.getOperatingSystem(),
             osVersion = deviceInfoProvider.getOsVersion(),
             appVersion = deviceInfoProvider.getAppVersion(),
-            ipAddress = deviceInfoProvider.getIpAddress(),
             registrationSource = deviceInfoProvider.getRegistrationSource(),
             firebaseToken = deviceInfoProvider.getFirebaseToken()
         )
@@ -382,6 +442,8 @@ class MainViewModel @Inject constructor(
         authRepository.logout().fold(
             onSuccess = {
                 logger.i("Logout successful")
+                weatherRepository.clearAllData()
+                preferenceManager.clearAll()
                 _authState.value = AuthState.LoggedOut
             },
             onFailure = { e ->
@@ -391,7 +453,7 @@ class MainViewModel @Inject constructor(
         )
     }
 
-    private fun silentTokenRefresh() = viewModelScope.launch(dispatchers.io) {
+    private suspend fun silentTokenRefresh() = withContext(dispatchers.io) {
         logger.d("Starting silent token refresh")
         when (val result = tokenManager.refreshToken()) {
             is TokenResult.Valid -> logger.i("Token refreshed successfully")
@@ -410,6 +472,26 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /** Called on every app foreground to sync token and premium status with the server. */
+    fun refreshTokenOnForeground() = viewModelScope.launch(dispatchers.io) {
+        try {
+            val response = authRepository.refreshToken() ?: return@launch
+            if (response.isSuccess()) {
+                val expiryMillis = response.data?.premiumExpiresAt?.let { parseIsoToMillis(it) }
+                val active = isPremiumActive(response.data?.premiumExpiresAt)
+                preferenceManager.savePremiumStatus(isPremium = active, expiryMillis = expiryMillis)
+            } else {
+                // 400 Bad Request — token is invalid, force logout
+                tokenManager.forceLogout()
+                emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+            }
+        } catch (_: CancellationException) {
+            // ignore
+        } catch (e: Exception) {
+            logger.e("Foreground token refresh error", e)
+        }
+    }
+
     private fun handleAuthResponse(response: AuthResponse) {
         val data = response.data
             ?.takeIf { response.isSuccess() && it.token.isNotBlank() }
@@ -422,7 +504,13 @@ class MainViewModel @Inject constructor(
 
         logger.i("Authentication successful")
 
-        if (!data.isPremium) {
+        val premiumActive = isPremiumActive(data.premiumExpiresAt)
+        val expiryMillis = data.premiumExpiresAt?.let { parseIsoToMillis(it) }
+
+        if (!premiumActive) {
+            viewModelScope.launch(dispatchers.io) {
+                preferenceManager.savePremiumStatus(isPremium = false, expiryMillis = expiryMillis)
+            }
             _authState.value = AuthState.Success
             return
         }
@@ -430,9 +518,9 @@ class MainViewModel @Inject constructor(
         // Save premium status to preferences so PaymentViewModel observes the update reactively.
         viewModelScope.launch(dispatchers.io) {
             logger.i("User is premium, saving premium status")
-            val expiryMillis = data.premiumExpiresAt?.let { parseIsoToMillis(it) }
+            val millis = expiryMillis
                 ?: (Clock.System.now().toEpochMilliseconds() + 365L * 24 * 60 * 60 * 1000)
-            preferenceManager.savePremiumStatus(isPremium = true, expiryMillis = expiryMillis)
+            preferenceManager.savePremiumStatus(isPremium = true, expiryMillis = millis)
             withContext(dispatchers.main) {
                 _authState.value = AuthState.Success
             }
@@ -449,6 +537,131 @@ class MainViewModel @Inject constructor(
     fun resetAuthState() {
         logger.d("Auth state reset to Initial")
         _authState.value = AuthState.Initial
+    }
+
+    // ============ Location Management ============
+
+    /** Load saved locations for the current user. */
+    fun loadSavedLocations() {
+        viewModelScope.launch(dispatchers.io) {
+            _savedLocationsState.update { it.copy(isLoading = true, error = null) }
+            savedLocationsUseCase.getSavedLocations().fold(
+                onSuccess = { locations ->
+                    _savedLocationsState.update {
+                        it.copy(
+                            isLoading = false,
+                            locations = locations
+                        )
+                    }
+                },
+                onFailure = { e ->
+                    if (e !is CancellationException) {
+                        _savedLocationsState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = e.message ?: "Failed to load saved locations."
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    /** Save a new location. */
+    fun saveLocation(name: String, lat: Double, lon: Double) {
+        viewModelScope.launch(dispatchers.io) {
+            _savedLocationsState.update { it.copy(isLoading = true, error = null) }
+            savedLocationsUseCase.saveLocation(name, lat, lon).fold(
+                onSuccess = {
+                    _savedLocationsState.update {
+                        it.copy(
+                            isLoading = false,
+                            successMessage = "Location saved successfully"
+                        )
+                    }
+                    loadSavedLocations()
+                },
+                onFailure = { e ->
+                    if (e !is CancellationException) {
+                        _savedLocationsState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = e.message ?: "Failed to save location."
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    /** Delete a saved location by ID. */
+    fun deleteLocation(id: String) {
+        viewModelScope.launch(dispatchers.io) {
+            _savedLocationsState.update { it.copy(isLoading = true, error = null) }
+            savedLocationsUseCase.deleteLocation(id).fold(
+                onSuccess = {
+                    _savedLocationsState.update {
+                        it.copy(
+                            isLoading = false,
+                            successMessage = "Location deleted successfully"
+                        )
+                    }
+                    loadSavedLocations()
+                },
+                onFailure = { e ->
+                    if (e !is CancellationException) {
+                        _savedLocationsState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = e.message ?: "Failed to delete location."
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+
+    /** Update place search query. */
+    fun onPlaceSearchQueryChanged(query: String) {
+        _placeSearchState.update { it.copy(searchQuery = query, error = null) }
+        _queryFlow.value = query
+        if (query.length < 2) {
+            _placeSearchState.update { it.copy(results = emptyList(), isLoading = false) }
+        }
+    }
+
+    /** Clear place search results. */
+    fun clearPlaceSearch() {
+        _placeSearchState.value = PlaceSearchUiState()
+        _queryFlow.value = ""
+    }
+
+    /** Clear location success/error messages. */
+    fun clearLocationMessage() {
+        _savedLocationsState.update { it.copy(error = null, successMessage = null) }
+    }
+
+    /** Fetch place suggestions for given query. */
+    private suspend fun fetchPlaceSuggestions(query: String) {
+        _placeSearchState.update { it.copy(isLoading = true, error = null) }
+        searchPlacesUseCase(query).fold(
+            onSuccess = { suggestions ->
+                _placeSearchState.update { it.copy(isLoading = false, results = suggestions) }
+            },
+            onFailure = { e ->
+                if (e !is CancellationException) {
+                    _placeSearchState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Unable to fetch places. Please try again."
+                        )
+                    }
+                }
+            }
+        )
     }
 
     override fun onCleared() {

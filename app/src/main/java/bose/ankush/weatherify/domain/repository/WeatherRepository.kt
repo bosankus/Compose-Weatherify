@@ -16,4 +16,6 @@ interface WeatherRepository {
     fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherForecast?>
 
     suspend fun refreshWeatherData(coordinates: Pair<Double, Double>, forceRefresh: Boolean = false)
+
+    suspend fun clearAllData()
 }

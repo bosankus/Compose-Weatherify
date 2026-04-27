@@ -37,6 +37,8 @@ kotlin {
                 implementation(compose.materialIconsExtended)
                 // Payment UI state types (PaymentUiState, PaymentStage) used in SettingsScreen
                 implementation(project(":feature-payment"))
+                // Location models (SavedLocation, PlaceSuggestion) and repositories for SavedLocationsScreen
+                implementation(project(":network"))
             }
         }
 

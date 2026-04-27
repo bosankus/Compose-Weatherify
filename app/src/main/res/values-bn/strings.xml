@@ -45,25 +45,15 @@
     <string name="logout_warning_txt">আপনার অ্যাকাউন্ট অ্যাক্সেস করতে আবার লগইন করতে হবে।</string>
     <string name="confirm_btn_txt">নিশ্চিত করুন</string>
     <string name="cancel_btn_txt">বাতিল করুন</string>
-    <string name="premium_get_txt">প্রিমিয়াম নিন</string>
-    <string name="premium_processing_txt">প্রক্রিয়া চলছে…</string>
-    <string name="premium_processing_desc_txt">আপনার প্রিমিয়াম সাবস্ক্রিপশন সক্রিয় করার সময় অপেক্ষা করুন।</string>
-    <string name="premium_unlock_desc_txt">সমস্ত বৈশিষ্ট্য আনলক করুন এবং বিজ্ঞাপনমুক্ত অভিজ্ঞতা উপভোগ করুন।</string>
-    <string name="premium_upgrade_btn_txt">এখনই আপগ্রেড করুন</string>
-    <string name="premium_active_txt">আপনি একজন প্রিমিয়াম ব্যবহারকারী</string>
-    <string name="premium_expires_txt">%1$s তারিখে মেয়াদ শেষ</string>
-    <string name="premium_active_status_txt">সক্রিয়</string>
-    <string name="premium_activated_txt">প্রিমিয়াম সফলভাবে সক্রিয় হয়েছে!</string>
-    <string name="premium_title_txt">প্রিমিয়াম</string>
-    <string name="premium_price_txt">$4.99/মাস</string>
-    <string name="premium_trial_txt">7 দিনের বিনামূল্যে ট্রায়াল, যেকোনো সময় বাতিল করুন</string>
-    <string name="premium_subscribe_btn_txt">সাবস্ক্রাইব করুন</string>
-    <string name="premium_starting_txt">শুরু হচ্ছে…</string>
-    <string name="premium_no_thanks_txt">না, ধন্যবাদ</string>
-    <string name="premium_feature_1_txt">বিজ্ঞাপনমুক্ত অভিজ্ঞতা</string>
-    <string name="premium_feature_2_txt">বর্ধিত 15-দিনের পূর্বাভাস</string>
-    <string name="premium_feature_3_txt">গুরুতর আবহাওয়া সতর্কতা</string>
-    <string name="premium_feature_4_txt">বিস্তারিত বায়ু গুণমান ডেটা</string>
+    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
+    <string name="premium_get_txt">Get Premium</string>
+    <string name="premium_processing_txt">Processing…</string>
+    <string name="premium_processing_desc_txt">Please wait while we activate your premium subscription.</string>
+    <string name="premium_unlock_desc_txt">Unlock all features and enjoy an ad-free experience.</string>
+    <string name="premium_upgrade_btn_txt">Upgrade Now</string>
+    <string name="premium_active_txt">You are a Premium User</string>
+    <string name="premium_expires_txt">Expires %1$s</string>
+    <string name="premium_active_status_txt">Active</string>
     <string name="settings_notifications_txt">বিজ্ঞপ্তি</string>
     <string name="settings_language_txt">ভাষা</string>
     <string name="legal_privacy_policy_txt">গোপনীয়তা নীতি</string>
@@ -81,7 +71,6 @@
     <string name="error_icon_content">ত্রুটি আইকন</string>
     <string name="close_icon_content">বন্ধ করুন আইকন</string>
     <string name="back_button_content">পেছনে বাটন</string>
-    <string name="premium_icon_content">প্রিমিয়াম সাবস্ক্রিপশন আইকন</string>
     <string name="notification_icon_content">বিজ্ঞপ্তি সেটিংস আইকন</string>
     <string name="privacy_icon_content">গোপনীয়তা নীতি আইকন</string>
     <string name="terms_icon_content">ব্যবহারের শর্তাবলী আইকন</string>
@@ -93,4 +82,31 @@
     <string name="notification_permission_title">আপডেট থাকুন</string>
     <string name="notification_permission_message">আবহাওয়া সতর্কতার জন্য বিজ্ঞপ্তি সক্রিয় করুন</string>
     <string name="enable_notification_btn">সক্রিয় করুন</string>
+
+    <!-- Premium Subscription Additional Strings -->
+    <string name="premium_activated_title_txt">প্রিমিয়াম সক্রিয়</string>
+    <string name="premium_activated_msg_txt">আপনার প্রিমিয়াম সাবস্ক্রিপশন এখন সক্রিয়!</string>
+
+    <!--Saved Locations (Premium Feature)-->
+    <string name="saved_locations_screen">সংরক্ষিত অবস্থান</string>
+    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
+    <string name="saved_locations_title">সংরক্ষিত অবস্থান</string>
+    <string name="saved_locations_empty_txt">এখনো কোনো সংরক্ষিত অবস্থান নেই। যোগ করতে + ট্যাপ করুন।</string>
+    <string name="saved_locations_add_btn">অবস্থান যোগ করুন</string>
+    <string name="saved_locations_delete_btn">মুছুন</string>
+    <string name="saved_locations_save_btn">সংরক্ষণ করুন</string>
+    <string name="saved_locations_name_hint">অবস্থানের নাম (যেমন বাড়ি)</string>
+    <string name="saved_locations_premium_title">প্রিমিয়াম বৈশিষ্ট্য</string>
+    <string name="saved_locations_premium_desc">আপনার প্রিয় অবস্থানগুলি সংরক্ষণ করুন এবং তাৎক্ষণিকভাবে অ্যাক্সেস করুন। এই বৈশিষ্ট্যটি আনলক করতে প্রিমিয়ামে আপগ্রেড করুন।</string>
+    <string name="saved_locations_error_txt">সংরক্ষিত অবস্থান লোড করতে ব্যর্থ।</string>
+    <string name="saved_locations_save_success">অবস্থান সফলভাবে সংরক্ষিত হয়েছে।</string>
+    <string name="saved_locations_delete_success">অবস্থান অপসারণ করা হয়েছে।</string>
+    <string name="saved_locations_icon_content">সংরক্ষিত অবস্থান</string>
+    <string name="add_icon_content">নতুন অবস্থান যোগ করুন</string>
+    <string name="delete_icon_content">অবস্থান মুছুন</string>
+
+    <!--Place Search Dialog-->
+    <string name="place_search_dialog_title">কোনো স্থান খুঁজুন</string>
+    <string name="place_search_hint">শহর বা ঠিকানা টাইপ করুন…</string>
+    <string name="place_search_no_results">\'%1$s\'এর জন্য কোনো স্থান পাওয়া যায়নি</string>
 </resources>

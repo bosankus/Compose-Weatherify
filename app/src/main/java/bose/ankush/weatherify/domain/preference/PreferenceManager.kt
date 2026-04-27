@@ -26,6 +26,12 @@ interface PreferenceManager {
     suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long?)
 
     /**
+     * Clear all stored preferences (location, premium status, expiry).
+     * Must be called on logout so no stale state survives into the next session.
+     */
+    suspend fun clearAll()
+
+    /**
      * Preference keys
      */
     companion object PreferenceKeys {

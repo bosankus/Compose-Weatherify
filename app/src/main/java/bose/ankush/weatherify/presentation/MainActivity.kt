@@ -38,10 +38,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import bose.ankush.commonui.auth.LoginScreen
-import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
+import bose.ankush.commonui.permissions.PermissionAlertDialog
+import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
@@ -53,7 +54,6 @@ import bose.ankush.weatherify.base.permissions.CoarseLocationPermissionTextProvi
 import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvider
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
-import bose.ankush.commonui.web.InAppWebView
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
@@ -61,8 +61,8 @@ import com.razorpay.PaymentResultWithDataListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
-import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 import javax.inject.Inject
+import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
@@ -218,9 +218,6 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                             }
                             LaunchedEffect(launchNotificationPermissionState.value) {
                                 viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
-                                // Update whether notification permission is permanently declined
-                                val isPermanentlyDeclined = !shouldShowRequestPermissionRationale(ACCESS_NOTIFICATION)
-                                viewModel.updateNotificationPermissionPermanentlyDeclined(isPermanentlyDeclined)
                             }
                             AppNavigation(viewModel, paymentViewModel, toastAnchorState)
                         }
@@ -341,13 +338,19 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
             rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission(),
                 onResult = { isGranted ->
+                    viewModel.updateShowNotificationBannerState(!isGranted)
                     if (isGranted) {
                         Toast.makeText(
                             context,
                             "Notification permission granted",
                             Toast.LENGTH_SHORT
                         ).show()
-                        viewModel.updateShowNotificationBannerState(false)
+                    } else {
+                        val isPermanentlyDeclined =
+                            !shouldShowRequestPermissionRationale(ACCESS_NOTIFICATION)
+                        viewModel.updateNotificationPermissionPermanentlyDeclined(
+                            isPermanentlyDeclined
+                        )
                     }
                 }
             )
@@ -359,6 +362,7 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
     override fun onResume() {
         super.onResume()
         startInAppUpdate(this)
+        viewModel.refreshTokenOnForeground()
         // If user granted a permission via system Settings and returned, clear it from the queue
         val granted = viewModel.permissionDialogQueue.filter { permission ->
             checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED

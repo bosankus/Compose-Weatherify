@@ -8,7 +8,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,32 +42,32 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.commonui.components.NotificationToast
-import bose.ankush.commonui.components.PremiumBottomSheetContent
-import bose.ankush.commonui.components.PremiumBottomSheetStrings
+import bose.ankush.commonui.components.ServiceSubscriptionBottomSheet
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.util.formatDate
+import bose.ankush.commonui.viewmodel.ServiceSubscriptionUiState
 import bose.ankush.commonui.web.InAppWebView
+import bose.ankush.network.model.PricingTier
+import bose.ankush.network.model.Service
 import bose.ankush.payment.presentation.PaymentStage
 import bose.ankush.payment.presentation.PaymentUiState
 import kotlinx.coroutines.delay
@@ -75,26 +77,39 @@ import kotlinx.coroutines.delay
  * Allows the KMP composable to accept platform-specific localized resources.
  */
 data class SettingsScreenStrings(
-    val profileTitle: String = "Profile",
-    val logout: String = "Logout",
-    val logoutConfirmation: String = "Are you sure you want to logout?",
-    val confirm: String = "Confirm",
-    val cancel: String = "Cancel",
-    val getPremium: String = "Get Premium",
-    val processing: String = "Processing…",
-    val processingDescription: String = "Please wait while we activate your premium subscription.",
-    val unlockDescription: String = "Unlock all features and enjoy an ad-free experience.",
-    val upgradeNow: String = "Upgrade Now",
-    val premiumActive: String = "You are a Premium User",
-    val premiumExpires: String = "Expires %s",
-    val premiumActiveStatus: String = "Active",
-    val notificationsTitle: String = "Notifications",
-    val languageTitle: String = "Language",
-    val privacyPolicy: String = "Privacy Policy",
-    val termsOfUse: String = "Terms of Use",
-    val appVersion: String = "App Version",
-    val backButtonDesc: String = "Back",
-    val arrowRightDesc: String = "Navigate to next screen"
+    val profileTitle: String,
+    val logout: String,
+    val logoutConfirmation: String,
+    val confirm: String,
+    val cancel: String,
+    val getPremium: String,
+    val processing: String,
+    val processingDescription: String,
+    val unlockDescription: String,
+    val upgradeNow: String,
+    val premiumActive: String,
+    val premiumExpires: String,
+    val premiumActiveStatus: String,
+    val notificationsTitle: String,
+    val languageTitle: String,
+    val privacyPolicy: String,
+    val termsOfUse: String,
+    val appVersion: String,
+    val backButtonDesc: String,
+    val arrowRightDesc: String,
+    val premiumActivatedTitle: String,
+    val premiumActivatedMessage: String
+)
+
+/**
+ * Holds UI state for SettingsScreen.
+ * Managed by parent ViewModel, not created within the screen.
+ */
+data class SettingsScreenState(
+    val showPremiumBottomSheet: Boolean = false,
+    val showLogoutDialog: Boolean = false,
+    val showPremiumActivationToast: Boolean = false,
+    val currentWebUrl: String? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,33 +121,53 @@ fun SettingsScreen(
     versionName: String,
     shouldShowNotificationItem: Boolean,
     languageList: Array<String>,
+    uiState: SettingsScreenState,
+    strings: SettingsScreenStrings,
+    serviceSubscriptionBottomSheetUiState: ServiceSubscriptionUiState,
     onLogout: () -> Unit,
     onLoggedOutHandled: () -> Unit,
-    onStartPayment: () -> Unit,
+    onStartPayment: (amountPaise: Long) -> Unit,
+    onLoadServices: () -> Unit,
+    onServiceSelected: (Service) -> Unit,
+    onTierSelected: (PricingTier) -> Unit,
     onBackNavAction: () -> Unit,
     onLanguageNavAction: (Array<String>) -> Unit,
     onNotificationNavAction: () -> Unit,
-    strings: SettingsScreenStrings = SettingsScreenStrings(),
-    premiumStrings: PremiumBottomSheetStrings? = null,
+    onStateChange: (SettingsScreenState) -> Unit,
+    onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     toastAnchorState: ToastAnchorState? = null,
     bottomBar: @Composable () -> Unit = {}
 ) {
-    val showPremiumBottomSheet = remember { mutableStateOf(false) }
-    val bottomSheetState = rememberModalBottomSheetState()
-    val currentWebUrl = remember { mutableStateOf<String?>(null) }
-    val showLogoutDialog = remember { mutableStateOf(false) }
-    val showPremiumActivationToast = remember { mutableStateOf(false) }
+    val previousPaymentStage = remember { mutableStateOf(paymentUiState.stage) }
+
+    LaunchedEffect(uiState.showPremiumBottomSheet) {
+        onBottomBarVisibilityChange(!uiState.showPremiumBottomSheet)
+    }
 
     LaunchedEffect(paymentUiState.stage) {
-        if (paymentUiState.stage == PaymentStage.Success) {
-            showPremiumActivationToast.value = true
-            showPremiumBottomSheet.value = false
+        when {
+            paymentUiState.stage == PaymentStage.CreatingOrder || paymentUiState.stage == PaymentStage.AwaitingPayment ->
+                onStateChange(uiState.copy(showPremiumBottomSheet = false))
+
+            paymentUiState.stage == PaymentStage.Success &&
+                    previousPaymentStage.value != PaymentStage.Success -> {
+                onStateChange(
+                    uiState.copy(
+                        showPremiumActivationToast = true,
+                        showPremiumBottomSheet = false
+                    )
+                )
+            }
+
+            paymentUiState.stage == PaymentStage.Failure ->
+                onStateChange(uiState.copy(showPremiumBottomSheet = false))
         }
+        previousPaymentStage.value = paymentUiState.stage
     }
 
     LaunchedEffect(isLoggedOut) {
         if (isLoggedOut) {
-            showLogoutDialog.value = false
+            onStateChange(uiState.copy(showLogoutDialog = false))
             onLoggedOutHandled()
         }
     }
@@ -154,169 +189,189 @@ fun SettingsScreen(
         logoutButtonState.targetState = true
     }
 
-    if (currentWebUrl.value != null) {
+    if (uiState.currentWebUrl != null) {
         InAppWebView(
-            url = currentWebUrl.value!!,
-            onClose = { currentWebUrl.value = null }
+            url = uiState.currentWebUrl,
+            onClose = { onStateChange(uiState.copy(currentWebUrl = null)) }
         )
     } else {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = { Text(strings.profileTitle, fontWeight = FontWeight.SemiBold) },
-                    navigationIcon = {
-                        IconButton(onClick = onBackNavAction) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = strings.backButtonDesc
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-            },
-            content = { innerPadding ->
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .padding(horizontal = 16.dp)
-                ) {
-                    // Future enhancement: Add user profile section here
-
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                    item {
-                        PremiumCard(
-                            paymentUiState = paymentUiState,
-                            onClick = { showPremiumBottomSheet.value = true },
-                            strings = strings
+        Box(modifier = Modifier.fillMaxSize()) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    CenterAlignedTopAppBar(
+                        title = { Text(strings.profileTitle, fontWeight = FontWeight.SemiBold) },
+                        navigationIcon = {
+                            IconButton(onClick = onBackNavAction) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                                    contentDescription = strings.backButtonDesc
+                                )
+                            }
+                        },
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                            titleContentColor = MaterialTheme.colorScheme.onSurface
                         )
-                    }
+                    )
+                },
+                content = { innerPadding ->
+                    LazyColumn(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        // Future enhancement: Add user profile section here
 
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
 
-                    item {
-                        AnimatedVisibility(
-                            visibleState = settingsSectionState,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                    slideInVertically(
-                                        animationSpec = tween(durationMillis = 500),
-                                        initialOffsetY = { it / 3 }
-                                    ),
-                            exit = fadeOut()
-                        ) {
-                            SettingsSection(
-                                shouldShowNotificationItem = shouldShowNotificationItem,
-                                onNotificationNavAction = onNotificationNavAction,
-                                onLanguageNavAction = { onLanguageNavAction(languageList) },
+                        item {
+                            PremiumCard(
+                                paymentUiState = paymentUiState,
+                                onClick = { onStateChange(uiState.copy(showPremiumBottomSheet = true)) },
                                 strings = strings
                             )
                         }
-                    }
 
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
 
-                    item {
-                        AnimatedVisibility(
-                            visibleState = legalSectionState,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                    slideInVertically(
-                                        animationSpec = tween(durationMillis = 500),
-                                        initialOffsetY = { it / 3 }
-                                    ),
-                            exit = fadeOut()
-                        ) {
-                            LegalSection(
-                                versionName = versionName,
-                                currentWebUrl = currentWebUrl,
-                                strings = strings
-                            )
-                        }
-                    }
-
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                    item {
-                        AnimatedVisibility(
-                            visibleState = logoutButtonState,
-                            enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                    slideInVertically(
-                                        animationSpec = tween(durationMillis = 500),
-                                        initialOffsetY = { it / 3 }
-                                    ),
-                            exit = fadeOut()
-                        ) {
-                            TextButton(
-                                onClick = { showLogoutDialog.value = true },
-                                modifier = Modifier.fillMaxWidth()
+                        item {
+                            AnimatedVisibility(
+                                visibleState = settingsSectionState,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 500),
+                                            initialOffsetY = { it / 3 }
+                                        ),
+                                exit = fadeOut()
                             ) {
-                                Text(
-                                    text = strings.logout,
-                                    color = MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Medium
+                                SettingsSection(
+                                    shouldShowNotificationItem = shouldShowNotificationItem,
+                                    onNotificationNavAction = onNotificationNavAction,
+                                    onLanguageNavAction = { onLanguageNavAction(languageList) },
+                                    strings = strings
                                 )
                             }
                         }
-                    }
 
-                    item { Spacer(modifier = Modifier.height(24.dp)) }
-                }
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
 
-                if (showLogoutDialog.value) {
-                    AlertDialog(
-                        onDismissRequest = { if (!isLoggingOut) showLogoutDialog.value = false },
-                        title = { Text(text = strings.logout) },
-                        text = { Text(text = strings.logoutConfirmation) },
-                        confirmButton = {
-                            TextButton(
-                                onClick = onLogout,
-                                enabled = !isLoggingOut
+                        item {
+                            AnimatedVisibility(
+                                visibleState = legalSectionState,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 500),
+                                            initialOffsetY = { it / 3 }
+                                        ),
+                                exit = fadeOut()
                             ) {
-                                Text(strings.confirm)
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { showLogoutDialog.value = false },
-                                enabled = !isLoggingOut
-                            ) {
-                                Text(strings.cancel)
+                                LegalSection(
+                                    versionName = versionName,
+                                    onUrlClick = { url -> onStateChange(uiState.copy(currentWebUrl = url)) },
+                                    strings = strings
+                                )
                             }
                         }
-                    )
-                }
 
-                if (showPremiumBottomSheet.value && premiumStrings != null) {
-                    ModalBottomSheet(
-                        onDismissRequest = { showPremiumBottomSheet.value = false },
-                        sheetState = bottomSheetState,
-                        containerColor = MaterialTheme.colorScheme.surface,
-                    ) {
-                        PremiumBottomSheetContent(
-                            strings = premiumStrings,
-                            isLoading = paymentUiState.loading,
-                            onDismiss = { showPremiumBottomSheet.value = false },
-                            onSubscribe = onStartPayment
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                        item {
+                            AnimatedVisibility(
+                                visibleState = logoutButtonState,
+                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                        slideInVertically(
+                                            animationSpec = tween(durationMillis = 500),
+                                            initialOffsetY = { it / 3 }
+                                        ),
+                                exit = fadeOut()
+                            ) {
+                                TextButton(
+                                    onClick = { onStateChange(uiState.copy(showLogoutDialog = true)) },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = strings.logout,
+                                        color = MaterialTheme.colorScheme.error,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+
+                        item { Spacer(modifier = Modifier.height(24.dp)) }
+                    }
+
+                    if (uiState.showLogoutDialog) {
+                        AlertDialog(
+                            onDismissRequest = {
+                                if (!isLoggingOut) onStateChange(uiState.copy(showLogoutDialog = false))
+                            },
+                            title = { Text(text = strings.logout) },
+                            text = { Text(text = strings.logoutConfirmation) },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = onLogout,
+                                    enabled = !isLoggingOut
+                                ) {
+                                    Text(strings.confirm)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = { onStateChange(uiState.copy(showLogoutDialog = false)) },
+                                    enabled = !isLoggingOut
+                                ) {
+                                    Text(strings.cancel)
+                                }
+                            }
                         )
                     }
-                }
-            },
-            bottomBar = bottomBar
-        )
 
-        NotificationToast(
-            message = "Your premium subscription is now active!",
-            title = "Premium Activated",
-            type = ToastType.SUCCESS,
-            isVisible = showPremiumActivationToast.value,
-            onDismiss = { showPremiumActivationToast.value = false },
-            anchorState = toastAnchorState
-        )
+                    if (uiState.showPremiumBottomSheet) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.5f))
+                        ) {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxSize(0.2f)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) { onStateChange(uiState.copy(showPremiumBottomSheet = false)) }
+                            )
+
+                            ServiceSubscriptionBottomSheet(
+                                uiState = serviceSubscriptionBottomSheetUiState,
+                                loadService = onLoadServices,
+                                onServiceSelected = onServiceSelected,
+                                onTierSelected = onTierSelected,
+                                onDismiss = { onStateChange(uiState.copy(showPremiumBottomSheet = false)) },
+                                onSubscribe = { _, tier ->
+                                    onStartPayment(tier.getAmountInPaise().toLong())
+                                    onStateChange(uiState.copy(showPremiumBottomSheet = false))
+                                },
+                                modifier = Modifier.align(Alignment.BottomCenter)
+                            )
+                        }
+                    }
+                },
+                bottomBar = bottomBar
+            )
+
+            NotificationToast(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                message = strings.premiumActivatedMessage,
+                title = strings.premiumActivatedTitle,
+                type = ToastType.SUCCESS,
+                isVisible = uiState.showPremiumActivationToast,
+                onDismiss = { onStateChange(uiState.copy(showPremiumActivationToast = false)) },
+                anchorState = toastAnchorState
+            )
+        } // end Box
     }
 }
 
@@ -324,7 +379,7 @@ fun SettingsScreen(
 fun PremiumCard(
     paymentUiState: PaymentUiState,
     onClick: () -> Unit,
-    strings: SettingsScreenStrings = SettingsScreenStrings()
+    strings: SettingsScreenStrings
 ) {
     val isPremiumActive =
         paymentUiState.isPremiumActivated || paymentUiState.stage == PaymentStage.Success
@@ -353,7 +408,7 @@ fun PremiumCard(
 fun UnsubscribedPremiumCard(
     paymentUiState: PaymentUiState,
     onClick: () -> Unit,
-    strings: SettingsScreenStrings = SettingsScreenStrings()
+    strings: SettingsScreenStrings
 ) {
     val loadingStages = remember {
         listOf(
@@ -417,7 +472,7 @@ fun UnsubscribedPremiumCard(
 @Composable
 fun SubscribedPremiumCard(
     paymentUiState: PaymentUiState,
-    strings: SettingsScreenStrings = SettingsScreenStrings()
+    strings: SettingsScreenStrings
 ) {
     Column(
         modifier = Modifier
@@ -443,9 +498,7 @@ fun SubscribedPremiumCard(
         if (expiryTop != null) {
             val dateStr = remember(expiryTop) { formatDate(expiryTop) }
             Text(
-                text = strings.premiumExpires
-                    .replace("%1\$s", dateStr)
-                    .replace("%s", dateStr),
+                text = strings.premiumExpires.replace("%s", dateStr),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
             )
@@ -465,7 +518,7 @@ fun SettingsSection(
     shouldShowNotificationItem: Boolean,
     onNotificationNavAction: () -> Unit,
     onLanguageNavAction: () -> Unit,
-    strings: SettingsScreenStrings = SettingsScreenStrings()
+    strings: SettingsScreenStrings
 ) {
     Column(
         modifier = Modifier
@@ -478,13 +531,15 @@ fun SettingsSection(
             SettingsItem(
                 icon = Icons.Outlined.Notifications,
                 title = strings.notificationsTitle,
-                onClick = onNotificationNavAction
+                onClick = onNotificationNavAction,
+                arrowRightDesc = strings.arrowRightDesc
             )
         }
         SettingsItem(
             icon = Icons.Outlined.Language,
             title = strings.languageTitle,
-            onClick = onLanguageNavAction
+            onClick = onLanguageNavAction,
+            arrowRightDesc = strings.arrowRightDesc
         )
     }
 }
@@ -492,8 +547,8 @@ fun SettingsSection(
 @Composable
 fun LegalSection(
     versionName: String,
-    currentWebUrl: MutableState<String?>,
-    strings: SettingsScreenStrings = SettingsScreenStrings()
+    onUrlClick: (String) -> Unit,
+    strings: SettingsScreenStrings
 ) {
     Column(
         modifier = Modifier
@@ -505,14 +560,16 @@ fun LegalSection(
         SettingsItem(
             icon = Icons.Outlined.PrivacyTip,
             title = strings.privacyPolicy,
-            onClick = { currentWebUrl.value = "https://data.androidplay.in/wfy/privacy-policy" }
+            onClick = { onUrlClick("https://data.androidplay.in/wfy/privacy-policy") },
+            arrowRightDesc = strings.arrowRightDesc
         )
         SettingsItem(
             icon = Icons.Outlined.Gavel,
             title = strings.termsOfUse,
             onClick = {
-                currentWebUrl.value = "https://data.androidplay.in/wfy/terms-and-conditions"
-            }
+                onUrlClick("https://data.androidplay.in/wfy/terms-and-conditions")
+            },
+            arrowRightDesc = strings.arrowRightDesc
         )
         SettingsItem(
             icon = Icons.Outlined.Info,
@@ -523,7 +580,8 @@ fun LegalSection(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
-            }
+            },
+            arrowRightDesc = strings.arrowRightDesc
         )
     }
 }
@@ -533,7 +591,8 @@ fun SettingsItem(
     icon: ImageVector,
     title: String,
     onClick: (() -> Unit)? = null,
-    trailingContent: @Composable (() -> Unit)? = null
+    trailingContent: @Composable (() -> Unit)? = null,
+    arrowRightDesc: String = ""
 ) {
     Row(
         modifier = Modifier
@@ -570,7 +629,7 @@ fun SettingsItem(
         } else if (onClick != null) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = SettingsScreenStrings().arrowRightDesc,
+                contentDescription = arrowRightDesc,
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }

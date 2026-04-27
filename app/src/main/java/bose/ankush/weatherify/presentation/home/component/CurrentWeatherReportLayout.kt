@@ -1,5 +1,6 @@
 package bose.ankush.weatherify.presentation.home.component
 
+import android.annotation.SuppressLint
 import android.location.Geocoder
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -438,15 +439,16 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
     }
 }
 
+@SuppressLint("ConstantLocale")
 private val hourMinuteFormatter = SimpleDateFormat("h:mm", Locale.getDefault())
 
 @Composable
-private fun formatTimeWithAmPm(timestamp: Int?, isSunrise: Boolean): String {
+private fun formatTimeWithAmPm(timestamp: Long?, isSunrise: Boolean): String {
     if (timestamp == null) return "N/A"
 
     // Use remember to cache the formatted time based on the timestamp and isSunrise flag
     return remember(timestamp, isSunrise) {
-        val date = Date(timestamp.toLong() * 1000)
+        val date = Date(timestamp * 1000)
         val timeWithoutAmPm = hourMinuteFormatter.format(date)
 
         // Force AM for sunrise, PM for sunset

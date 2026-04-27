@@ -1,6 +1,5 @@
 package bose.ankush.weatherify.data.repository
 
-import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.room.AirQualityEntity
 import bose.ankush.storage.room.WeatherEntity
@@ -16,19 +15,17 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 
 /**
  * Domain-layer repository that orchestrates between network and storage modules.
  *
  * Responsibilities:
- * - Fetch weather data from network (NetworkWeatherRepository)
+ * - Fetch unified weather data from network (single /weather call)
+ * - Extract both weather and air quality from the unified response
  * - Map network models to storage entities
  * - Save to local storage (WeatherStorage)
  * - Provide domain models to UI layer (via mappers)
- * - Handle business logic (data staleness checking)
- * - Manage IO operations via DispatcherProvider
- *
- * This is the single source of truth for weather data operations in the app.
  */
 class WeatherRepositoryImpl @Inject constructor(
     private val networkRepository: NetworkWeatherRepository,
@@ -47,49 +44,44 @@ class WeatherRepositoryImpl @Inject constructor(
         }
 
     /**
-     * Orchestrates data refresh: fetch from network → map → save to storage
+     * Orchestrates data refresh: fetch unified response from network → extract weather + air
+     * quality → map → save to storage.
      *
-     * This method handles:
-     * 1. Staleness checking (data older than 1 hour)
-     * 2. Network fetching (delegates to NetworkWeatherRepository)
-     * 3. Model mapping (network → storage entities)
-     * 4. Persisting (saves to local storage)
-     *
-     * The app module controls when to refresh based on business rules.
+     * Air quality is now embedded in the /weather response and may be null for free-tier users.
+     * In that case an empty AirQualityEntity is stored to satisfy the storage contract.
      */
     override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>, forceRefresh: Boolean) {
         withContext(dispatcher.io) {
-            try {
-                // Step 1: Check if data is stale (older than 1 hour)
-                val lastUpdateTime = weatherStorage.getLastWeatherUpdateTime()
-                val currentTime = System.currentTimeMillis()
-                val isDataStale = forceRefresh || (currentTime - lastUpdateTime) > ONE_HOUR_IN_MILLIS
+            val lastUpdateTime = weatherStorage.getLastWeatherUpdateTime(coordinates)
+            val currentTime = System.currentTimeMillis()
+            val isDataStale = forceRefresh || (currentTime - lastUpdateTime) > ONE_HOUR_IN_MILLIS
 
-                // Step 2: Refresh data if it's stale or forced
-                if (isDataStale) {
-                    // Fetch from network
-                    networkRepository.refreshWeatherData(coordinates)
+            if (isDataStale) {
+                // Single unified API call — includes air quality for premium users
+                networkRepository.refreshWeatherData(coordinates)
 
-                    // Get the fetched data from network repository
-                    val weatherData = networkRepository.getWeatherReport(coordinates).firstOrNull()
-                    val airQualityData = networkRepository.getAirQualityReport(coordinates).firstOrNull()
+                val weatherData = networkRepository.getWeatherReport(coordinates).firstOrNull()
 
-                    if (weatherData != null && airQualityData != null) {
-                        // Step 3: Map network models to storage entities using mapper
-                        val weatherEntity = NetworkToStorageMapper.mapWeatherToStorageEntity(weatherData)
-                        val airQualityEntity = NetworkToStorageMapper.mapAirQualityToStorageEntity(airQualityData)
-
-                        // Step 4: Save to storage
-                        weatherStorage.saveWeatherData(weatherEntity, airQualityEntity)
-                    }
+                if (weatherData != null) {
+                    val weatherEntity =
+                        NetworkToStorageMapper.mapWeatherToStorageEntity(weatherData)
+                    // Air quality is inside data.airQuality; null for free tier → stores defaults
+                    val airQualityEntity = NetworkToStorageMapper.mapAirQualityToStorageEntity(
+                        weatherData.data?.airQuality
+                    )
+                    weatherStorage.saveWeatherData(weatherEntity, airQualityEntity)
+                    weatherStorage.saveLastWeatherUpdateTime(coordinates, currentTime)
                 }
-            } catch (e: Exception) {
-                // If there's an error, throw a more descriptive exception
-                throw Exception("Failed to refresh weather data: ${e.message}", e)
             }
         }
     }
 
+
+    override suspend fun clearAllData() {
+        withContext(dispatcher.io) {
+            weatherStorage.clearAllData()
+        }
+    }
 
     companion object {
         private const val ONE_HOUR_IN_MILLIS = 60 * 60 * 1000L

@@ -65,6 +65,11 @@ android {
     }
 
     namespace = "bose.ankush.weatherify"
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        }
+    }
 }
 
 

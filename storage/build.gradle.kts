@@ -52,7 +52,7 @@ kotlin {
                 // Security: Encrypted token storage
                 implementation(Deps.securityCrypto)
                 // Gson for JSON serialization
-                implementation("com.google.code.gson:gson:2.10.1")
+                implementation(Deps.gson)
                 // Note: Network dependency removed to avoid circular dependency
                 // WeatherDataFetcher is injected via DI from app module
             }

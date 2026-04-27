@@ -45,8 +45,7 @@ class PaymentViewModel(
         viewModelScope.launch {
             premiumStore.observePremiumStatus().collect { status ->
                 val now = Clock.System.now().toEpochMilliseconds()
-                val isActive = status.isPremium &&
-                        (status.expiryMillis == null || status.expiryMillis > now)
+                val isActive = status.expiryMillis != null && status.expiryMillis > now
                 _uiState.update {
                     it.copy(
                         isPremiumActivated = isActive,
@@ -73,7 +72,6 @@ class PaymentViewModel(
                     receipt = receipt,
                     partialPayment = true,
                     firstPaymentMinAmount = 500L,
-                    notes = mapOf("note1" to "This is a note", "note2" to "Another note"),
                 )
             ).fold(
                 onSuccess = { response ->
@@ -195,8 +193,8 @@ class PaymentViewModel(
         }
     }
 
-    private fun friendlyErrorMessage(t: Throwable?): String = when (t) {
-        null, is CancellationException -> "Request was cancelled. Please try again."
-        else -> "Something went wrong. Please try again."
+    private fun friendlyErrorMessage(t: Throwable?): String {
+        if (t is CancellationException) throw t
+        return "Something went wrong. Please try again."
     }
 }

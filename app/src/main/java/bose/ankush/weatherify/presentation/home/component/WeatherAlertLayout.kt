@@ -28,8 +28,8 @@ fun WeatherAlertLayout(
     WeatherAlertCard(
         title = firstAlert.event,
         description = firstAlert.description,
-        startTime = firstAlert.start?.toLong(),
-        endTime = firstAlert.end?.toLong(),
+        startTime = firstAlert.start,
+        endTime = firstAlert.end,
         source = firstAlert.sender_name,
         onReadMoreClick = onReadMoreClick
     )
