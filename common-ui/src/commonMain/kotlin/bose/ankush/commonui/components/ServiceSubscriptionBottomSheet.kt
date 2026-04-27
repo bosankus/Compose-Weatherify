@@ -63,7 +63,7 @@ fun ServiceSubscriptionBottomSheet(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.8f)
+            .fillMaxHeight(0.7f)
             .background(MaterialTheme.colorScheme.surface)
             .navigationBarsPadding()
             .imePadding()
