@@ -1,0 +1,84 @@
+name: Check Dependency Updates
+
+on:
+  schedule:
+    - cron: "37 13 * * SAT"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  dependency-updates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Check Dependency Updates
+        run: ./gradlew --no-daemon dependencyUpdates
+
+      - name: Log dependency update report
+        run: cat build/dependencyUpdates/dependency_update_report.txt
+
+      - name: Save report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-update-reports
+          path: build/dependencyUpdates
+
+      - name: Create issue if outdated dependencies found
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'build/dependencyUpdates/dependency_update_report.txt';
+            if (!fs.existsSync(reportPath)) return;
+
+            const report = fs.readFileSync(reportPath, 'utf8');
+            const hasUpdates = report.includes('The following dependencies have later milestone versions');
+            if (!hasUpdates) {
+              console.log('No outdated dependencies found.');
+              return;
+            }
+
+            const title = `Dependency updates available (${new Date().toISOString().split('T')[0]})`;
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'dependencies',
+            });
+
+            const alreadyOpen = issues.some(i => i.title === title);
+            if (alreadyOpen) {
+              console.log('Issue already exists for today.');
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body: `## Outdated Dependencies Detected\n\nThe weekly dependency check found updates available.\n\n<details><summary>Full Report</summary>\n\n\`\`\`\n${report}\n\`\`\`\n\n</details>\n\n[View artifact](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
+              labels: ['dependencies'],
+            });

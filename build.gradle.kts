@@ -80,7 +80,7 @@ subprojects {
     }
 }
 
-// Detekt minimal configuration for all subprojects
+// Detekt configuration for all subprojects
 subprojects {
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
@@ -92,6 +92,7 @@ subprojects {
         parallel = true
     }
 
+    // Applies to both `detekt` and `detektAutoCorrect` tasks
     tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         jvmTarget = "17"
         reports {
@@ -102,6 +103,22 @@ subprojects {
             html.required.set(true)
         }
     }
+
+    // Auto-correct variant — fixes the subset of rules detekt can patch automatically
+    tasks.register("detektAutoCorrect", io.gitlab.arturbosch.detekt.Detekt::class.java) {
+        description = "Runs detekt with auto-correct enabled"
+        group = "verification"
+        autoCorrect = true
+        buildUponDefaultConfig = true
+        ignoreFailures = true
+        parallel = true
+        setSource(files("src"))
+        include("**/*.kt", "**/*.kts")
+        exclude("**/build/**")
+    }
+
+    // Ensure detekt auto-correct runs after spotless has already formatted the files
+    tasks.named("detektAutoCorrect") { mustRunAfter("spotlessApply") }
 }
 
 // Aggregator tasks
@@ -123,11 +140,24 @@ tasks.register("detektAll") {
     dependsOn(subprojects.map { "${it.path}:detekt" })
 }
 
-// Convenience task for minimal-risk code cleanup
-// This applies formatting (imports/whitespace) only; safe to run locally
-// Commit separately to avoid noisy diffs.
-tasks.register("applyCodeCleanup") {
+tasks.register("detektAllAutoCorrect") {
     group = "formatting"
-    description = "Applies formatting across all subprojects (spotlessApplyAll)"
-    dependsOn("spotlessApplyAll")
+    description = "Runs detekt with auto-correct in all subprojects"
+    dependsOn(subprojects.map { "${it.path}:detektAutoCorrect" })
 }
+
+// Single command: audit all style and lint issues without modifying files
+tasks.register("codeCheck") {
+    group = "verification"
+    description = "Checks formatting (spotless) and runs detekt across all subprojects"
+    dependsOn("spotlessCheckAll", "detektAll")
+}
+
+// Single command: apply all auto-fixable formatting and lint corrections
+tasks.register("codeFormat") {
+    group = "formatting"
+    description = "Applies spotless formatting and detekt auto-corrections across all subprojects"
+    dependsOn("spotlessApplyAll", "detektAllAutoCorrect")
+}
+
+tasks.named("detektAllAutoCorrect") { mustRunAfter("spotlessApplyAll") }

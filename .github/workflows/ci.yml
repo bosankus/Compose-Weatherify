@@ -46,15 +46,19 @@ jobs:
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
-        if: always()
+        if: always() && hashFiles('**/build/test-results/**/*.xml') != ''
         with:
           files: '**/build/test-results/**/*.xml'
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -73,8 +77,14 @@ jobs:
       - name: Decode google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
 
-      - name: Spotless check
-        run: ./gradlew --no-daemon --parallel spotlessCheckAll
+      - name: Apply code formatting
+        run: ./gradlew --no-daemon --parallel codeFormat
 
-      - name: Detekt
-        run: ./gradlew --no-daemon --parallel detektAll
+      - name: Commit formatting fixes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: apply automatic code formatting"
+          file_pattern: "**/*.kt **/*.kts"
+
+      - name: Code check (spotless + detekt)
+        run: ./gradlew --no-daemon --parallel codeCheck
