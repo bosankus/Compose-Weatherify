@@ -19,8 +19,8 @@ internal object LocaleHelper {
     }
 
     fun String.getDisplayName(): String {
-        val languageCode = this.split("-").firstOrNull() ?: this
-        val locale = Locale.forLanguageTag(languageCode)
+        val locale = if (this.isBlank()) Locale.getDefault()
+        else Locale.forLanguageTag(this)
         return locale.getDisplayName(locale)
     }
 

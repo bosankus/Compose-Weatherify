@@ -6,6 +6,10 @@ on:
   push:
     branches: [ "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,24 +23,58 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0 platform-tools'
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Deep clean (project-local only)
-        run: ./gradlew --no-daemon deepClean
+      - name: Decode google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
 
       - name: Build
-        run: ./gradlew --no-daemon build
+        run: ./gradlew --no-daemon --parallel --configuration-cache build
 
-      - name: Spotless check (soft enforcement for initial adoption)
-        run: ./gradlew --no-daemon spotlessCheckAll
-        continue-on-error: true
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: ignore
 
-      - name: Detekt (soft enforcement for initial adoption)
-        run: ./gradlew --no-daemon detektAll
-        continue-on-error: true
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: '**/build/test-results/**/*.xml'
 
-# Notes:
-# - Spotless and Detekt steps are set to soft-fail initially to avoid breaking CI before the first formatting commit.
-#   After running `./gradlew applyCodeCleanup` and committing the formatting changes, set `continue-on-error: false`
-#   (or remove those lines) to enforce style and static analysis strictly on PRs.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;36.0.0 platform-tools'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode google-services.json
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
+
+      - name: Spotless check
+        run: ./gradlew --no-daemon --parallel spotlessCheckAll
+
+      - name: Detekt
+        run: ./gradlew --no-daemon --parallel detektAll
