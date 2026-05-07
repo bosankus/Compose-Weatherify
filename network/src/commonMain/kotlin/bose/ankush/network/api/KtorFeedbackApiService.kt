@@ -15,15 +15,14 @@ import io.ktor.http.contentType
  */
 class KtorFeedbackApiService(
     private val httpClient: HttpClient,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : FeedbackApiService {
-
-    override suspend fun submitFeedback(request: FeedbackRequest): FeedbackResponse {
-        return NetworkUtils.retryWithExponentialBackoff {
-            httpClient.post("$baseUrl/feedback") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
+    override suspend fun submitFeedback(request: FeedbackRequest): FeedbackResponse =
+        NetworkUtils.retryWithExponentialBackoff {
+            httpClient
+                .post("$baseUrl/feedback") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
         }
-    }
 }

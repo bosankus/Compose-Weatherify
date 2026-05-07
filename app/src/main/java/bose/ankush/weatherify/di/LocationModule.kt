@@ -14,7 +14,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object LocationModule {
-
     @Singleton
     @Provides
     fun provideFusedLocationProviderClient(context: Context): FusedLocationProviderClient =
@@ -24,7 +23,6 @@ object LocationModule {
     @Provides
     fun provideLocationClient(
         context: Context,
-        fusedLocationProviderClient: FusedLocationProviderClient
-    ) : LocationClient =
-        DeviceLocationClient(context, fusedLocationProviderClient)
+        fusedLocationProviderClient: FusedLocationProviderClient,
+    ): LocationClient = DeviceLocationClient(context, fusedLocationProviderClient)
 }

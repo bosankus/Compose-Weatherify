@@ -7,7 +7,7 @@ package bose.ankush.network.common
 class NetworkException(
     val errorCode: Int,
     override val message: String,
-    override val cause: Throwable? = null
+    override val cause: Throwable? = null,
 ) : Exception(message, cause) {
     companion object {
         // Common HTTP error codes
@@ -37,7 +37,7 @@ class NetworkException(
             return NetworkException(
                 errorCode = errorCode,
                 message = e.message ?: "Unknown error",
-                cause = e
+                cause = e,
             )
         }
     }

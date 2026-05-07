@@ -1,4 +1,4 @@
-package bose.ankush.commonui.sunriseui.components
+package bose.ankush.commonui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -40,6 +40,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -57,7 +58,7 @@ fun WeatherAlertCard(
     endTime: Long?,
     source: String?,
     onReadMoreClick: (() -> Unit)? = null,
-    initiallyExpanded: Boolean = false
+    initiallyExpanded: Boolean = false,
 ) {
     // Skip rendering if essential data is missing
     if (title.isNullOrEmpty() || description.isNullOrEmpty()) return
@@ -73,52 +74,59 @@ fun WeatherAlertCard(
     val subtleTextColor = textColor.copy(alpha = 0.7f)
 
     // Create colors object
-    val colors = AlertCardColors(
-        primaryColor = primaryColor,
-        textColor = textColor,
-        accentColor = accentColor,
-        surfaceColor = surfaceColor,
-        subtleTextColor = subtleTextColor
-    )
+    val colors =
+        AlertCardColors(
+            primaryColor = primaryColor,
+            textColor = textColor,
+            accentColor = accentColor,
+            surfaceColor = surfaceColor,
+            subtleTextColor = subtleTextColor,
+        )
 
     // Format timestamps
-    val formattedStartTime = remember(startTime) {
-        startTime?.let { formatTimestamp(it) } ?: "Unknown"
-    }
-    val formattedEndTime = remember(endTime) {
-        endTime?.let { formatTimestamp(it) } ?: "Unknown"
-    }
+    val formattedStartTime =
+        remember(startTime) {
+            startTime?.let { formatTimestamp(it) } ?: "Unknown"
+        }
+    val formattedEndTime =
+        remember(endTime) {
+            endTime?.let { formatTimestamp(it) } ?: "Unknown"
+        }
 
     // Create short description
-    val shortDescription = remember(description) {
-        if (description.length > 100) description.take(100) + "..." else description
-    }
+    val shortDescription =
+        remember(description) {
+            if (description.length > 100) description.take(100) + "..." else description
+        }
 
     // Animation spec for content size changes
-    val contentSizeAnimSpec = spring<androidx.compose.ui.unit.IntSize>(
-        dampingRatio = Spring.DampingRatioLowBouncy,
-        stiffness = Spring.StiffnessMediumLow
-    )
+    val contentSizeAnimSpec =
+        spring<IntSize>(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow,
+        )
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .animateContentSize(animationSpec = contentSizeAnimSpec),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .animateContentSize(animationSpec = contentSizeAnimSpec),
         shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.Start
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+            horizontalAlignment = Alignment.Start,
         ) {
             // Header section with icon, title and timestamp
             AlertHeader(
                 title = title,
                 timestamp = formattedStartTime,
-                colors = colors
+                colors = colors,
             )
 
             // Report section with expandable description
@@ -132,23 +140,25 @@ fun WeatherAlertCard(
                     if (isExpanded && onReadMoreClick != null) {
                         onReadMoreClick()
                     }
-                }
+                },
             )
 
             // Expanded content with source and validity
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = fadeIn(tween(300, easing = FastOutSlowInEasing)) +
+                enter =
+                    fadeIn(tween(300, easing = FastOutSlowInEasing)) +
                         expandVertically(tween(350, easing = FastOutSlowInEasing)),
-                exit = fadeOut(tween(200)) +
-                        shrinkVertically(tween(250))
+                exit =
+                    fadeOut(tween(200)) +
+                            shrinkVertically(tween(250)),
             ) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
                     // Source information
                     AlertInfoSection(
                         title = "Source",
                         content = source ?: "Unknown",
-                        colors = colors
+                        colors = colors,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -157,7 +167,7 @@ fun WeatherAlertCard(
                     AlertInfoSection(
                         title = "Valid Until",
                         content = formattedEndTime,
-                        colors = colors
+                        colors = colors,
                     )
                 }
             }
@@ -172,16 +182,17 @@ fun WeatherAlertCard(
 private fun AlertHeader(
     title: String?,
     timestamp: String,
-    colors: AlertCardColors
+    colors: AlertCardColors,
 ) {
     // Alert Icon
     Icon(
         imageVector = Icons.Filled.Warning,
         contentDescription = "Weather Alert Icon",
         tint = colors.primaryColor,
-        modifier = Modifier
-            .size(32.dp)
-            .padding(bottom = 12.dp)
+        modifier =
+            Modifier
+                .size(32.dp)
+                .padding(bottom = 12.dp),
     )
 
     // Title
@@ -190,7 +201,7 @@ private fun AlertHeader(
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.Bold,
         color = colors.textColor,
-        modifier = Modifier.padding(bottom = 4.dp)
+        modifier = Modifier.padding(bottom = 4.dp),
     )
 
     // Timestamp
@@ -198,7 +209,7 @@ private fun AlertHeader(
         text = "Issued: $timestamp",
         style = MaterialTheme.typography.bodySmall,
         color = colors.subtleTextColor,
-        modifier = Modifier.padding(bottom = 16.dp)
+        modifier = Modifier.padding(bottom = 16.dp),
     )
 }
 
@@ -211,12 +222,12 @@ private fun AlertReportSection(
     shortDescription: String,
     isExpanded: Boolean,
     colors: AlertCardColors,
-    onToggleExpanded: () -> Unit
+    onToggleExpanded: () -> Unit,
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = colors.surfaceColor,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Report label
@@ -225,7 +236,7 @@ private fun AlertReportSection(
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = colors.accentColor,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp),
             )
 
             // Description text
@@ -236,9 +247,10 @@ private fun AlertReportSection(
                 lineHeight = MaterialTheme.typography.bodyMedium.lineHeight * 1.2f,
                 overflow = if (isExpanded) TextOverflow.Visible else TextOverflow.Ellipsis,
                 maxLines = if (isExpanded) Int.MAX_VALUE else 3,
-                modifier = Modifier.semantics {
-                    contentDescription = "Alert description: $description"
-                }
+                modifier =
+                    Modifier.semantics {
+                        contentDescription = "Alert description: $description"
+                    },
             )
 
             // Read more/less button
@@ -246,27 +258,30 @@ private fun AlertReportSection(
             val buttonAlpha by animateFloatAsState(
                 targetValue = 1f,
                 animationSpec = tween(300, easing = FastOutSlowInEasing),
-                label = "Button Alpha"
+                label = "Button Alpha",
             )
 
             TextButton(
                 onClick = onToggleExpanded,
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(top = 4.dp)
-                    .alpha(buttonAlpha)
-                    .semantics {
-                        contentDescription = if (isExpanded)
-                            "Read less about this alert"
-                        else
-                            "Read more about this alert"
-                    }
+                modifier =
+                    Modifier
+                        .align(Alignment.End)
+                        .padding(top = 4.dp)
+                        .alpha(buttonAlpha)
+                        .semantics {
+                            contentDescription =
+                                if (isExpanded) {
+                                    "Read less about this alert"
+                                } else {
+                                    "Read more about this alert"
+                                }
+                        },
             ) {
                 Text(
                     text = readMoreText,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium,
-                    color = colors.primaryColor
+                    color = colors.primaryColor,
                 )
             }
         }
@@ -280,12 +295,12 @@ private fun AlertReportSection(
 private fun AlertInfoSection(
     title: String,
     content: String,
-    colors: AlertCardColors
+    colors: AlertCardColors,
 ) {
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = colors.surfaceColor,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -293,14 +308,14 @@ private fun AlertInfoSection(
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = colors.accentColor,
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp),
             )
 
             Text(
                 text = content,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                color = colors.textColor
+                color = colors.textColor,
             )
         }
     }
@@ -314,7 +329,7 @@ private data class AlertCardColors(
     val textColor: Color,
     val accentColor: Color,
     val surfaceColor: Color,
-    val subtleTextColor: Color
+    val subtleTextColor: Color,
 )
 
 /**
@@ -326,9 +341,12 @@ private fun formatTimestamp(timestamp: Long): String {
     val month = localDateTime.month.name.take(3)
     val day = localDateTime.dayOfMonth
     val hour12 =
-        if (localDateTime.hour == 0) 12 else if (localDateTime.hour > 12) localDateTime.hour - 12 else localDateTime.hour
+        when {
+            localDateTime.hour == 0 -> 12
+            localDateTime.hour > 12 -> localDateTime.hour - 12
+            else -> localDateTime.hour
+        }
     val minute = localDateTime.minute.toString().padStart(2, '0')
     val amPm = if (localDateTime.hour < 12) "AM" else "PM"
     return "$month $day, $hour12:$minute $amPm"
 }
-

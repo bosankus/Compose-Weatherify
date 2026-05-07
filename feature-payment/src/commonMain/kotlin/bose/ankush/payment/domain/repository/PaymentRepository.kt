@@ -7,5 +7,6 @@ import bose.ankush.network.model.VerifyPaymentResponse
 
 interface PaymentRepository {
     suspend fun createOrder(request: CreateOrderRequest): Result<CreateOrderResponse>
+
     suspend fun verifyPayment(request: VerifyPaymentRequest): Result<VerifyPaymentResponse>
 }

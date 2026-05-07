@@ -12,7 +12,7 @@ import kotlinx.datetime.Clock
  */
 class TokenManager(
     private val tokenStorage: TokenStorage,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
 ) {
     private val refreshMutex = Mutex()
     private var lastRefreshTime: Long = 0
@@ -24,8 +24,9 @@ class TokenManager(
         refreshMutex.withLock {
             lastRefreshTime = currentTime
             try {
-                val response = authRepository.refreshToken()
-                    ?: return TokenResult.NoToken
+                val response =
+                    authRepository.refreshToken()
+                        ?: return TokenResult.NoToken
                 val newToken = response.data?.token
                 if (response.isSuccess() && !newToken.isNullOrBlank()) {
                     tokenStorage.saveToken(newToken)
@@ -59,13 +60,12 @@ class TokenManager(
     /**
      * Forces logout by clearing any stored token.
      */
-    suspend fun forceLogout(): TokenResult {
-        return try {
+    suspend fun forceLogout(): TokenResult =
+        try {
             tokenStorage.clearToken()
             TokenResult.NoToken
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             TokenResult.Error(e)
         }
-    }
 }

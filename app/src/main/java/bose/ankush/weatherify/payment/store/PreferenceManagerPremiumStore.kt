@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.map
 internal class PreferenceManagerPremiumStore(
     private val preferenceManager: PreferenceManager,
 ) : PremiumStore {
-
     override fun observePremiumStatus(): Flow<PremiumStatus> =
         preferenceManager.getUserPreferencesFlow().map { prefs ->
             PremiumStatus(
@@ -22,6 +21,8 @@ internal class PreferenceManagerPremiumStore(
             )
         }
 
-    override suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long?) =
-        preferenceManager.savePremiumStatus(isPremium, expiryMillis)
+    override suspend fun savePremiumStatus(
+        isPremium: Boolean,
+        expiryMillis: Long?,
+    ) = preferenceManager.savePremiumStatus(isPremium, expiryMillis)
 }

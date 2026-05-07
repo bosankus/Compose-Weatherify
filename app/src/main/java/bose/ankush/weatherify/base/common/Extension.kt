@@ -25,7 +25,6 @@ Date: 06,May,2021
  **/
 
 object Extension {
-
     fun Double.toCelsius() = (this - 273).roundToInt().toString()
 
     fun String.getIconUrl(size: String = "@2x.png") = "$WEATHER_IMG_URL$this$size"
@@ -34,31 +33,34 @@ object Extension {
 
     fun isDeviceSDKAndroid13OrAbove() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
-    fun Context.openAppSystemSettings() = startActivity(
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = Uri.fromParts("package", packageName, null)
-        }
-    )
+    fun Context.openAppSystemSettings() =
+        startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+            },
+        )
 
-    fun Context.openLocationSettings() = startActivity(
-        Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-    )
+    fun Context.openLocationSettings() =
+        startActivity(
+            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),
+        )
 
     @SuppressLint("QueryPermissionsNeeded")
     fun Context.openAppLocaleSettings() {
         // Try opening the per-app language settings if available, otherwise fall back safely
         val pm = packageManager
         // Primary: Per-app language settings (Android 13+)
-        val appLocaleIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
-                data = Uri.fromParts("package", packageName, null)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val appLocaleIntent =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                    data = Uri.fromParts("package", packageName, null)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            } else {
+                Intent(Settings.ACTION_LOCALE_SETTINGS).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
             }
-        } else {
-            Intent(Settings.ACTION_LOCALE_SETTINGS).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-        }
 
         try {
             val canHandleAppLocale = appLocaleIntent.resolveActivity(pm) != null
@@ -71,10 +73,11 @@ object Extension {
         }
 
         // Fallback 1: App details/settings screen
-        val appDetailsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-            data = Uri.fromParts("package", packageName, null)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val appDetailsIntent =
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         try {
             val canHandleAppDetails = appDetailsIntent.resolveActivity(pm) != null
             if (canHandleAppDetails) {
@@ -86,9 +89,10 @@ object Extension {
         }
 
         // Fallback 2: System language settings
-        val localeSettingsIntent = Intent(Settings.ACTION_LOCALE_SETTINGS).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val localeSettingsIntent =
+            Intent(Settings.ACTION_LOCALE_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
         try {
             val canHandleLocaleSettings = localeSettingsIntent.resolveActivity(pm) != null
             if (canHandleLocaleSettings) {
@@ -100,19 +104,19 @@ object Extension {
         }
     }
 
-    fun Context.hasLocationPermission(): Boolean = listOf(
-        android.Manifest.permission.ACCESS_COARSE_LOCATION,
-        android.Manifest.permission.ACCESS_FINE_LOCATION
-    ).all { permission ->
-        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
-    }
+    fun Context.hasLocationPermission(): Boolean =
+        listOf(
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+        ).all { permission ->
+            ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        }
 
-    fun Context.hasNotificationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
+    fun Context.hasNotificationPermission(): Boolean =
+        ContextCompat.checkSelfPermission(
             this,
-            ACCESS_NOTIFICATION
+            ACCESS_NOTIFICATION,
         ) == PackageManager.PERMISSION_GRANTED
-    }
 
     fun String.wrapText(): String {
         val words: List<String> = this.split(" ")
@@ -127,33 +131,25 @@ object Extension {
      * Gets the device model (e.g., "Pixel 7 Pro", "iPhone 15")
      * @return The device model name
      */
-    fun getDeviceModel(): String {
-        return Build.MODEL
-    }
+    fun getDeviceModel(): String = Build.MODEL
 
     /**
      * Gets the operating system name (e.g., "Android")
      * @return The operating system name
      */
-    fun getOperatingSystem(): String {
-        return "Android"
-    }
+    fun getOperatingSystem(): String = "Android"
 
     /**
      * Gets the operating system version (e.g., "14", "13.1")
      * @return The operating system version
      */
-    fun getOsVersion(): String {
-        return Build.VERSION.RELEASE
-    }
+    fun getOsVersion(): String = Build.VERSION.RELEASE
 
     /**
      * Gets the app version from BuildConfig
      * @return The app version
      */
-    fun getAppVersion(): String {
-        return BuildConfig.VERSION_NAME
-    }
+    fun getAppVersion(): String = BuildConfig.VERSION_NAME
 
     /**
      * Gets the current UTC timestamp in ISO 8601 format
@@ -169,9 +165,7 @@ object Extension {
      * Gets the registration source
      * @return The registration source (e.g., "Android App")
      */
-    fun getRegistrationSource(): String {
-        return "Android App"
-    }
+    fun getRegistrationSource(): String = "Android App"
 
     /**
      * Attempts to get the device's IP address
@@ -201,18 +195,21 @@ object Extension {
      * Best-effort fetch of Firebase Cloud Messaging registration token
      * Kept here to follow the same Extension helper pattern as other device/app info getters
      */
-    suspend fun getFirebaseToken(): String? = try {
-        suspendCancellableCoroutine<String?> { cont ->
-            try {
-                FirebaseMessaging.getInstance().token
-                    .addOnCompleteListener { task: com.google.android.gms.tasks.Task<String> ->
-                        if (cont.isActive) cont.resume(if (task.isSuccessful) task.result else null)
-                    }
-            } catch (_: Exception) {
-                if (cont.isActive) cont.resume(null)
+    suspend fun getFirebaseToken(): String? =
+        try {
+            suspendCancellableCoroutine<String?> { cont ->
+                try {
+                    FirebaseMessaging
+                        .getInstance()
+                        .token
+                        .addOnCompleteListener { task: com.google.android.gms.tasks.Task<String> ->
+                            if (cont.isActive) cont.resume(if (task.isSuccessful) task.result else null)
+                        }
+                } catch (_: Exception) {
+                    if (cont.isActive) cont.resume(null)
+                }
             }
+        } catch (_: Exception) {
+            null
         }
-    } catch (_: Exception) {
-        null
-    }
 }

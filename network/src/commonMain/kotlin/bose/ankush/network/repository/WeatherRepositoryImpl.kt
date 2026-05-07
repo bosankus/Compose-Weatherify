@@ -19,16 +19,15 @@ import kotlinx.datetime.Clock
  */
 class WeatherRepositoryImpl(
     private val apiService: WeatherApiService,
-    private val networkConnectivity: NetworkConnectivity
+    private val networkConnectivity: NetworkConnectivity,
 ) : WeatherRepository {
-
-    private val _weatherData = MutableStateFlow<WeatherForecast?>(null)
+    private val weatherCache = MutableStateFlow<WeatherForecast?>(null)
     private var lastWeatherUpdateTime: Long = 0
 
     override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherForecast?> {
         val currentTime = Clock.System.now().toEpochMilliseconds()
 
-        if (_weatherData.value == null ||
+        if (weatherCache.value == null ||
             (currentTime - lastWeatherUpdateTime > NetworkConstants.CACHE_EXPIRATION_TIME)
         ) {
             CoroutineScope(Dispatchers.Default).launch {
@@ -40,7 +39,7 @@ class WeatherRepositoryImpl(
             }
         }
 
-        return _weatherData.asStateFlow()
+        return weatherCache.asStateFlow()
     }
 
     override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>) {
@@ -48,16 +47,20 @@ class WeatherRepositoryImpl(
         val isNetworkAvailable = networkConnectivity.isNetworkAvailable()
 
         if (isNetworkAvailable &&
-            (_weatherData.value == null || (currentTime - lastWeatherUpdateTime > NetworkConstants.CACHE_EXPIRATION_TIME))
+            (
+                    weatherCache.value == null ||
+                            (currentTime - lastWeatherUpdateTime > NetworkConstants.CACHE_EXPIRATION_TIME)
+                    )
         ) {
             try {
-                val weatherData = NetworkUtils.retryWithExponentialBackoff {
-                    apiService.getOneCallWeather(
-                        coordinates.first.toString(),
-                        coordinates.second.toString()
-                    )
-                }
-                _weatherData.value = weatherData
+                val weatherData =
+                    NetworkUtils.retryWithExponentialBackoff {
+                        apiService.getOneCallWeather(
+                            coordinates.first.toString(),
+                            coordinates.second.toString(),
+                        )
+                    }
+                weatherCache.value = weatherData
                 lastWeatherUpdateTime = currentTime
             } catch (e: Exception) {
                 throw Exception("Failed to refresh weather data: ${e.message}", e)

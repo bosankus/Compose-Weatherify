@@ -1,4 +1,4 @@
-package bose.ankush.commonui.sunriseui.components
+package bose.ankush.commonui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,26 +38,29 @@ fun WeatherDayCard(
     minTemperature: String,
     maxTemperature: String,
     weatherDescription: String? = null,
-    iconContent: @Composable () -> Unit
+    iconContent: @Composable () -> Unit,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-        )
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
         ) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 // Day name
                 Text(
@@ -66,16 +69,16 @@ fun WeatherDayCard(
                     fontWeight = FontWeight.Medium,
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
 
                 // Temperature range
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         // Min temperature
                         Text(
@@ -103,7 +106,7 @@ fun WeatherDayCard(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -112,7 +115,7 @@ fun WeatherDayCard(
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(48.dp),
                 ) {
                     iconContent()
                 }
@@ -120,4 +123,3 @@ fun WeatherDayCard(
         }
     }
 }
-

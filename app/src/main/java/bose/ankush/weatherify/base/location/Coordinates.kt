@@ -6,5 +6,5 @@ package bose.ankush.weatherify.base.location
  */
 data class Coordinates(
     val latitude: Double,
-    val longitude: Double
+    val longitude: Double,
 )

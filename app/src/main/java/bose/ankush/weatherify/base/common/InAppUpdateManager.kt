@@ -9,26 +9,24 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
 fun startInAppUpdate(activity: Activity) {
-
     val appUpdateManager = AppUpdateManagerFactory.create(activity)
 
     val appUpdateInfoTask = appUpdateManager.appUpdateInfo
 
     appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-            && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+            appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
         ) {
             try {
+                @Suppress("DEPRECATION")
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo,
                     AppUpdateType.IMMEDIATE,
                     activity,
-                    APP_UPDATE_REQ_CODE
+                    APP_UPDATE_REQ_CODE,
                 )
-
             } catch (exception: IntentSender.SendIntentException) {
             }
         }
     }
-
 }

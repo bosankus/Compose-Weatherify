@@ -39,7 +39,10 @@ interface WeatherStorage {
      * @param coordinates Pair of latitude and longitude
      * @param time Timestamp in milliseconds
      */
-    suspend fun saveLastWeatherUpdateTime(coordinates: Pair<Double, Double>, time: Long)
+    suspend fun saveLastWeatherUpdateTime(
+        coordinates: Pair<Double, Double>,
+        time: Long,
+    )
 
     /**
      * Save weather and air quality data to storage.
@@ -49,7 +52,10 @@ interface WeatherStorage {
      * @param weatherEntity The weather data to save
      * @param airQualityEntity The air quality data to save
      */
-    suspend fun saveWeatherData(weatherEntity: Any, airQualityEntity: Any)
+    suspend fun saveWeatherData(
+        weatherEntity: Any,
+        airQualityEntity: Any,
+    )
 
     /**
      * Delete all weather and air quality records and clear any cached metadata (e.g. timestamps).

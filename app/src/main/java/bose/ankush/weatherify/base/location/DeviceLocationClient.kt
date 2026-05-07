@@ -23,11 +23,12 @@ import javax.inject.Singleton
 import kotlin.coroutines.resume
 
 @Singleton
-class DeviceLocationClient @Inject constructor(
+class DeviceLocationClient
+@Inject
+constructor(
     private val context: Context,
-    private val client: FusedLocationProviderClient
+    private val client: FusedLocationProviderClient,
 ) : LocationClient {
-
     private fun checkLocationPermission() {
         // if user did not give location permission
         if (!context.hasLocationPermission()) {
@@ -49,37 +50,39 @@ class DeviceLocationClient @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    override fun getLocationUpdates(interval: Long): Flow<Coordinates> {
-        return callbackFlow {
+    override fun getLocationUpdates(interval: Long): Flow<Coordinates> =
+        callbackFlow {
             checkLocationPermission()
             checkGpsEnabled()
 
-            val request = LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                interval
-            ).apply {
-                setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-                setWaitForAccurateLocation(true)
-            }.build()
+            val request =
+                LocationRequest
+                    .Builder(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        interval,
+                    ).apply {
+                        setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+                        setWaitForAccurateLocation(true)
+                    }.build()
 
-            val locationCallback = object : LocationCallback() {
-                override fun onLocationResult(result: LocationResult) {
-                    super.onLocationResult(result)
-                    result.locations.lastOrNull()?.let { location ->
-                        launch { send(location) }
+            val locationCallback =
+                object : LocationCallback() {
+                    override fun onLocationResult(result: LocationResult) {
+                        super.onLocationResult(result)
+                        result.locations.lastOrNull()?.let { location ->
+                            launch { send(location) }
+                        }
                     }
                 }
-            }
 
             client.requestLocationUpdates(
                 request,
                 locationCallback,
-                Looper.getMainLooper()
+                Looper.getMainLooper(),
             )
 
             awaitClose { client.removeLocationUpdates(locationCallback) }
         }.map { loc -> Coordinates(loc.latitude, loc.longitude) }
-    }
 
     @SuppressLint("MissingPermission")
     override suspend fun getCurrentLocation(): Result<Coordinates> =
@@ -95,16 +98,19 @@ class DeviceLocationClient @Inject constructor(
             // Create a cancellation token source to allow cancellation of the location request
             val cts = CancellationTokenSource()
 
-            client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
+            client
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
                 .addOnSuccessListener { location ->
                     if (location != null) {
-                        continuation.resume(Result.success(Coordinates(location.latitude, location.longitude)))
+                        val coords = Coordinates(location.latitude, location.longitude)
+                        continuation.resume(Result.success(coords))
                     } else {
-                        continuation.resume(Result.failure(LocationClient.LocationException("Location is null")))
+                        val ex = LocationClient.LocationException("Location is null")
+                        continuation.resume(Result.failure(ex))
                     }
-                }
-                .addOnFailureListener { e ->
-                    continuation.resume(Result.failure(LocationClient.LocationException(e.message ?: "Unknown error")))
+                }.addOnFailureListener { e ->
+                    val ex = LocationClient.LocationException(e.message ?: "Unknown error")
+                    continuation.resume(Result.failure(ex))
                 }
 
             continuation.invokeOnCancellation {

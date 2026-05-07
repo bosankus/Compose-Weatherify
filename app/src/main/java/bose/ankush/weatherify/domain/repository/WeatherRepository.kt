@@ -10,12 +10,14 @@ Date: 05,May,2021
  **/
 
 interface WeatherRepository {
-
     fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality>
 
     fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherForecast?>
 
-    suspend fun refreshWeatherData(coordinates: Pair<Double, Double>, forceRefresh: Boolean = false)
+    suspend fun refreshWeatherData(
+        coordinates: Pair<Double, Double>,
+        forceRefresh: Boolean = false,
+    )
 
     suspend fun clearAllData()
 }

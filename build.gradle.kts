@@ -67,7 +67,11 @@ subprojects {
                     "indent_size" to "4",
                     "max_line_length" to "120",
                     // Allow common Android/KMP patterns without false positives
-                    "ktlint_function_naming_ignore_when_annotated_with" to "Composable"
+                    "ktlint_function_naming_ignore_when_annotated_with" to "Composable",
+                    // Project uses snake_case package segments (use_case, remote_config) — keep as-is
+                    "ktlint_standard_package-name" to "disabled",
+                    // Backing properties exposed via asStateFlow() functions rather than matching val — valid pattern
+                    "ktlint_standard_backing-property-naming" to "disabled"
                 )
             )
             trimTrailingWhitespace()

@@ -11,23 +11,21 @@ import platform.SystemConfiguration.SCNetworkReachabilityGetFlags
 import platform.SystemConfiguration.kSCNetworkReachabilityFlagsConnectionRequired
 import platform.SystemConfiguration.kSCNetworkReachabilityFlagsReachable
 
-/**
- * iOS implementation of NetworkConnectivity
- */
+@Suppress("unused")
 class IOSNetworkConnectivity : NetworkConnectivity {
-
     @OptIn(ExperimentalForeignApi::class)
     override fun isNetworkAvailable(): Boolean {
-        val reachability = SCNetworkReachabilityCreateWithName(
-            null,
-            "www.apple.com"
-        ) ?: return false
+        val reachability =
+            SCNetworkReachabilityCreateWithName(
+                null,
+                "www.apple.com",
+            ) ?: return false
 
         return memScoped {
             val flags = alloc<SCNetworkReachabilityFlagsVar>()
             if (SCNetworkReachabilityGetFlags(reachability, flags.ptr)) {
                 (flags.value and kSCNetworkReachabilityFlagsReachable) != 0u &&
-                (flags.value and kSCNetworkReachabilityFlagsConnectionRequired) == 0u
+                        (flags.value and kSCNetworkReachabilityFlagsConnectionRequired) == 0u
             } else {
                 false
             }

@@ -1,6 +1,8 @@
-package bose.ankush.commonui.sunriseui.components
+package bose.ankush.commonui.components
 
-enum class WeatherCondition(val description: String) {
+enum class WeatherCondition(
+    val description: String,
+) {
     // Group 2xx: Thunderstorm
     THUNDERSTORM_WITH_LIGHT_RAIN("thunderstorm with light rain"),
     THUNDERSTORM_WITH_RAIN("thunderstorm with rain"),
@@ -68,7 +70,8 @@ enum class WeatherCondition(val description: String) {
     FEW_CLOUDS("few clouds: 11-25%"),
     SCATTERED_CLOUDS("scattered clouds: 25-50%"),
     BROKEN_CLOUDS("broken clouds: 51-84%"),
-    OVERCAST_CLOUDS("overcast clouds: 85-100%");
+    OVERCAST_CLOUDS("overcast clouds: 85-100%"),
+    ;
 
     override fun toString(): String = description
 }

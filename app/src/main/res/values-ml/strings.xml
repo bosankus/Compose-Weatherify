@@ -108,4 +108,11 @@
     <string name="place_search_dialog_title">ഒരു സ്ഥാനം തിരയുക</string>
     <string name="place_search_hint">നഗരം അല്ലെങ്കിൽ വിലാസം ടൈപ്പ് ചെയ്യുക…</string>
     <string name="place_search_no_results">\'%1$s\'ക്കായി ഒരു സ്ഥാനവും കണ്ടെത്തിയില്ല</string>
+    <string name="set_as_default_dialog_title">കാലാവസ്ഥ സ്ഥാനമായി ഉപയോഗിക്കണോ?</string>
+    <string name="set_as_default_dialog_body">നിങ്ങളുടെ നിലവിലെ GPS സ്ഥാനത്തിന് പകരം %1$s-ന്റെ കാലാവസ്ഥ ഡാറ്റ കാണിക്കും.</string>
+    <string name="set_as_default_dialog_warning">ഇത് സജീവമായിരിക്കുമ്പോൾ നിങ്ങളുടെ ലൈവ് GPS സ്ഥാനം അപ്‌ഡേറ്റ് ആകില്ല.</string>
+    <string name="set_as_default_confirm_btn">ഡിഫോൾട്ടായി സജ്ജമാക്കുക</string>
+    <string name="location_override_chip_label">%1$s ഉപയോഗിക്കുന്നു</string>
+    <string name="location_override_reset_btn">GPS-ലേക്ക് റീസെറ്റ് ചെയ്യുക</string>
+    <string name="location_override_chip_content_desc">നിലവിൽ %1$s-ന്റെ കാലാവസ്ഥ കാണിക്കുന്നു. GPS-ലേക്ക് റീസെറ്റ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക.</string>
 </resources>

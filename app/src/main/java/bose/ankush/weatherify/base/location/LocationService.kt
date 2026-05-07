@@ -19,17 +19,18 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class LocationService : Service() {
-
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Inject
     lateinit var locationClient: LocationClient
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent?): IBinder? = null
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         when (intent?.action) {
             ACTION_START -> start()
             ACTION_STOP -> stop()
@@ -38,14 +39,15 @@ class LocationService : Service() {
     }
 
     private fun start() {
-        val notification = NotificationCompat.Builder(
-            this,
-            NOTIFICATION_CHANNEL_ID
-        )
-            .setContentTitle(NOTIFICATION_TITLE)
-            .setContentText("Location: null")
-            .setSmallIcon(R.drawable.ic_profile)
-            .setOngoing(true)
+        val notification =
+            NotificationCompat
+                .Builder(
+                    this,
+                    NOTIFICATION_CHANNEL_ID,
+                ).setContentTitle(NOTIFICATION_TITLE)
+                .setContentText("Location: null")
+                .setSmallIcon(R.drawable.ic_profile)
+                .setOngoing(true)
 
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -60,14 +62,13 @@ class LocationService : Service() {
 
                 notificationManager.notify(
                     NOTIFICATION_ID,
-                    updatedNotification.build()
+                    updatedNotification.build(),
                 )
-            }
-            .launchIn(serviceScope)
+            }.launchIn(serviceScope)
 
         startForeground(
             NOTIFICATION_ID,
-            notification.build()
+            notification.build(),
         )
     }
 

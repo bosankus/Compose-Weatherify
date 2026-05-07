@@ -15,7 +15,7 @@ interface LocationApiService {
     /** GET /saved-places — retrieve all saved locations for the current user. */
     suspend fun getSavedLocations(): ApiResponse<List<SavedLocation>>
 
-    /** DELETE /locations/{id} — remove a saved location by its id. */
+    /** DELETE /saved-places/{id} — remove a saved location by its id. */
     suspend fun deleteLocation(id: String): ApiResponse<Unit>
 
     /** POST /api/v1/places/search — search for place suggestions by query string. */

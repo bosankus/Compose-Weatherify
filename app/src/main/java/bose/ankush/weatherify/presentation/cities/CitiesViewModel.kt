@@ -17,10 +17,11 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
-class CitiesViewModel @Inject constructor(
-    getCityNames: GetCityNames
+class CitiesViewModel
+@Inject
+constructor(
+    getCityNames: GetCityNames,
 ) : ViewModel() {
-
     var searchText = MutableStateFlow("")
         private set
 
@@ -30,19 +31,22 @@ class CitiesViewModel @Inject constructor(
     private val cityNameList = MutableStateFlow(getCityNames())
 
     @OptIn(FlowPreview::class)
-    val cityName: StateFlow<List<CityName>> = searchText
-        .debounce(500L)
-        .onEach { isSearching.update { true } }
-        .combine(cityNameList) { text, city ->
-            if (text.isBlank()) city
-            else city.filter { it.doesMatchSearchQuery(text) }
-        }
-        .onEach { isSearching.update { false } }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            cityNameList.value
-        )
+    val cityName: StateFlow<List<CityName>> =
+        searchText
+            .debounce(500L)
+            .onEach { isSearching.update { true } }
+            .combine(cityNameList) { text, city ->
+                if (text.isBlank()) {
+                    city
+                } else {
+                    city.filter { it.doesMatchSearchQuery(text) }
+                }
+            }.onEach { isSearching.update { false } }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                cityNameList.value,
+            )
 
     fun onSearchTextChange(text: String) {
         searchText.value = text

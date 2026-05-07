@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LoginRequest(
     val email: String,
-    val password: String
+    val password: String,
 )
 
 /**
@@ -24,7 +24,7 @@ data class RegisterRequest(
     val osVersion: String? = null,
     val appVersion: String? = null,
     val registrationSource: String? = null,
-    val firebaseToken: String? = null
+    val firebaseToken: String? = null,
 )
 
 /**
@@ -32,7 +32,7 @@ data class RegisterRequest(
  */
 @Serializable
 data class RefreshTokenRequest(
-    val token: String
+    val token: String,
 )
 
 /**
@@ -47,7 +47,7 @@ data class AuthData(
     val isActive: Boolean = false,
     val isPremium: Boolean = false,
     val premiumExpiresAt: String? = null,
-    val errorCode: String? = null
+    val errorCode: String? = null,
 )
 
 /**
@@ -58,7 +58,7 @@ data class AuthResponse(
     val success: Boolean? = null,
     val status: Boolean = false,
     val message: String? = null,
-    val data: AuthData? = null
+    val data: AuthData? = null,
 ) {
     fun isSuccess(): Boolean = success ?: status
 }
@@ -68,11 +68,11 @@ data class LogoutErrorData(
     val errorType: String? = null,
     val errorMessage: String? = null,
     val errorClass: String? = null,
-    val endpoint: String? = null
+    val endpoint: String? = null,
 )
 
 @Serializable
 data class LogoutResponse(
     val message: String? = null,
-    val data: LogoutErrorData? = null
+    val data: LogoutErrorData? = null,
 )

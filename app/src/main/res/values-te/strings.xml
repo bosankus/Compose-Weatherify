@@ -108,4 +108,11 @@
     <string name="place_search_dialog_title">ఒక ప్రదేశం కోసం వెతకండి</string>
     <string name="place_search_hint">నగరం లేదా చిరునామా టైప్ చేయండి…</string>
     <string name="place_search_no_results">\'%1$s\'కు ఎటువంటి ప్రదేశాలు కనుగొనబడలేదు</string>
+    <string name="set_as_default_dialog_title">వాతావరణ ప్రదేశంగా ఉపయోగించాలా?</string>
+    <string name="set_as_default_dialog_body">మీ ప్రస్తుత GPS స్థానానికి బదులుగా %1$s వాతావరణ డేటా చూపబడుతుంది.</string>
+    <string name="set_as_default_dialog_warning">ఇది సక్రియంగా ఉన్నప్పుడు మీ నేరుగా GPS స్థానం నవీకరించబడదు.</string>
+    <string name="set_as_default_confirm_btn">డిఫాల్ట్‌గా సెట్ చేయండి</string>
+    <string name="location_override_chip_label">%1$s ఉపయోగిస్తోంది</string>
+    <string name="location_override_reset_btn">GPS కి రీసెట్ చేయండి</string>
+    <string name="location_override_chip_content_desc">ప్రస్తుతం %1$s వాతావరణం చూపబడుతోంది. GPS కి రీసెట్ చేయడానికి నొక్కండి.</string>
 </resources>

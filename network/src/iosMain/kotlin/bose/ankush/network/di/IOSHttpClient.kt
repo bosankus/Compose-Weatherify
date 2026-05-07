@@ -12,8 +12,8 @@ import kotlinx.serialization.json.Json
 /**
  * iOS implementation of createPlatformHttpClient
  */
-actual fun createPlatformHttpClient(json: Json): HttpClient {
-    return HttpClient(Darwin) {
+actual fun createPlatformHttpClient(json: Json): HttpClient =
+    HttpClient(Darwin) {
         engine {
             configureRequest {
                 setAllowsCellularAccess(true)
@@ -25,12 +25,12 @@ actual fun createPlatformHttpClient(json: Json): HttpClient {
             json(json)
         }
         install(Logging) {
-            logger = object : Logger {
-                override fun log(message: String) {
-                    println("Ktor iOS: $message")
+            logger =
+                object : Logger {
+                    override fun log(message: String) {
+                        println("Ktor iOS: $message")
+                    }
                 }
-            }
             level = LogLevel.INFO
         }
     }
-}

@@ -11,19 +11,28 @@ import javax.inject.Inject
 
 sealed class SettingsEvent {
     data object OpenPremiumSheet : SettingsEvent()
+
     data object ClosePremiumSheet : SettingsEvent()
+
     data object OpenLogoutDialog : SettingsEvent()
+
     data object CloseLogoutDialog : SettingsEvent()
+
     data object DismissPremiumToast : SettingsEvent()
-    data class OpenWebUrl(val url: String) : SettingsEvent()
+
+    data class OpenWebUrl(
+        val url: String,
+    ) : SettingsEvent()
+
     data object CloseWebView : SettingsEvent()
 }
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val serviceRepository: ServiceRepository
+class SettingsViewModel
+@Inject
+constructor(
+    private val serviceRepository: ServiceRepository,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(SettingsScreenState())
     val uiState: StateFlow<SettingsScreenState> = _uiState
 

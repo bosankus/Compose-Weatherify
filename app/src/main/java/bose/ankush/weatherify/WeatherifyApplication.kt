@@ -22,7 +22,6 @@ Date: 05,May,2021
 
 @HiltAndroidApp
 class WeatherifyApplication : WeatherifyApplicationCore() {
-
     @Inject
     lateinit var remoteConfigService: RemoteConfigService
 
@@ -48,7 +47,9 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
     }
 
     private fun subscribeToTopics() {
-        FirebaseMessaging.getInstance().subscribeToTopic("weather_alerts")
+        FirebaseMessaging
+            .getInstance()
+            .subscribeToTopic("weather_alerts")
             .addOnCompleteListener { task ->
                 if (!task.isSuccessful) {
                     Timber.e(task.exception, "Failed to subscribe to weather_alerts topic")
@@ -66,25 +67,37 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         } else {
-            Timber.plant(object : Timber.Tree() {
-                override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-                    // Only log WARN, ERROR, and WTF in release; avoid verbose/debug/info
-                    if (priority == android.util.Log.VERBOSE || priority == android.util.Log.DEBUG || priority == android.util.Log.INFO) return
-                    android.util.Log.println(priority, tag, message)
-                }
-            })
+            Timber.plant(
+                object : Timber.Tree() {
+                    override fun log(
+                        priority: Int,
+                        tag: String?,
+                        message: String,
+                        t: Throwable?,
+                    ) {
+                        // Only log WARN, ERROR, and WTF in release; avoid verbose/debug/info
+                        val isLowPriority =
+                            priority == android.util.Log.VERBOSE ||
+                                    priority == android.util.Log.DEBUG ||
+                                    priority == android.util.Log.INFO
+                        if (isLowPriority) return
+                        android.util.Log.println(priority, tag, message)
+                    }
+                },
+            )
         }
     }
 
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            NOTIFICATION_CHANNEL_ID,
-            NOTIFICATION_NAME,
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            description = "Channel for weather alerts and updates"
-            enableVibration(true)
-        }
+        val channel =
+            NotificationChannel(
+                NOTIFICATION_CHANNEL_ID,
+                NOTIFICATION_NAME,
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = "Channel for weather alerts and updates"
+                enableVibration(true)
+            }
 
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager

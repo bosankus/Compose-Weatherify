@@ -19,7 +19,10 @@ interface PremiumStore {
      * @param isPremium True if the user has an active premium subscription, false otherwise.
      * @param expiryMillis The expiration time of the premium subscription in milliseconds, or null if not applicable.
      */
-    suspend fun savePremiumStatus(isPremium: Boolean, expiryMillis: Long?)
+    suspend fun savePremiumStatus(
+        isPremium: Boolean,
+        expiryMillis: Long?,
+    )
 }
 
 /**
@@ -31,5 +34,5 @@ interface PremiumStore {
  */
 data class PremiumStatus(
     val isPremium: Boolean,
-    val expiryMillis: Long?
+    val expiryMillis: Long?,
 )

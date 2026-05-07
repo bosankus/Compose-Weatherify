@@ -8,22 +8,23 @@ import io.ktor.client.request.parameter
 
 class KtorServiceApiService(
     private val httpClient: HttpClient,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : ServiceApiService {
-
     override suspend fun getServices(
         page: Int,
         pageSize: Int,
-        search: String?
-    ): Result<ServiceListResponse> {
-        return try {
-            val response = httpClient.get("$baseUrl/services/public") {
-                parameter("page", page)
-                parameter("pageSize", pageSize)
-                if (!search.isNullOrBlank()) {
-                    parameter("search", search)
-                }
-            }.body<ServiceListResponse>()
+        search: String?,
+    ): Result<ServiceListResponse> =
+        try {
+            val response =
+                httpClient
+                    .get("$baseUrl/services/public") {
+                        parameter("page", page)
+                        parameter("pageSize", pageSize)
+                        if (!search.isNullOrBlank()) {
+                            parameter("search", search)
+                        }
+                    }.body<ServiceListResponse>()
 
             if (response.success) {
                 Result.success(response)
@@ -33,5 +34,4 @@ class KtorServiceApiService(
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
 }

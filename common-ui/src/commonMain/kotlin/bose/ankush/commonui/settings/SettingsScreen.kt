@@ -98,7 +98,7 @@ data class SettingsScreenStrings(
     val backButtonDesc: String,
     val arrowRightDesc: String,
     val premiumActivatedTitle: String,
-    val premiumActivatedMessage: String
+    val premiumActivatedMessage: String,
 )
 
 /**
@@ -109,7 +109,7 @@ data class SettingsScreenState(
     val showPremiumBottomSheet: Boolean = false,
     val showLogoutDialog: Boolean = false,
     val showPremiumActivationToast: Boolean = false,
-    val currentWebUrl: String? = null
+    val currentWebUrl: String? = null,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -136,7 +136,7 @@ fun SettingsScreen(
     onStateChange: (SettingsScreenState) -> Unit,
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
     toastAnchorState: ToastAnchorState? = null,
-    bottomBar: @Composable () -> Unit = {}
+    bottomBar: @Composable () -> Unit = {},
 ) {
     val previousPaymentStage = remember { mutableStateOf(paymentUiState.stage) }
 
@@ -146,7 +146,8 @@ fun SettingsScreen(
 
     LaunchedEffect(paymentUiState.stage) {
         when {
-            paymentUiState.stage == PaymentStage.CreatingOrder || paymentUiState.stage == PaymentStage.AwaitingPayment ->
+            paymentUiState.stage == PaymentStage.CreatingOrder ||
+                    paymentUiState.stage == PaymentStage.AwaitingPayment ->
                 onStateChange(uiState.copy(showPremiumBottomSheet = false))
 
             paymentUiState.stage == PaymentStage.Success &&
@@ -154,8 +155,8 @@ fun SettingsScreen(
                 onStateChange(
                     uiState.copy(
                         showPremiumActivationToast = true,
-                        showPremiumBottomSheet = false
-                    )
+                        showPremiumBottomSheet = false,
+                    ),
                 )
             }
 
@@ -192,7 +193,7 @@ fun SettingsScreen(
     if (uiState.currentWebUrl != null) {
         InAppWebView(
             url = uiState.currentWebUrl,
-            onClose = { onStateChange(uiState.copy(currentWebUrl = null)) }
+            onClose = { onStateChange(uiState.copy(currentWebUrl = null)) },
         )
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -205,21 +206,23 @@ fun SettingsScreen(
                             IconButton(onClick = onBackNavAction) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                    contentDescription = strings.backButtonDesc
+                                    contentDescription = strings.backButtonDesc,
                                 )
                             }
                         },
-                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            titleContentColor = MaterialTheme.colorScheme.onSurface
-                        )
+                        colors =
+                            TopAppBarDefaults.centerAlignedTopAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                titleContentColor = MaterialTheme.colorScheme.onSurface,
+                            ),
                     )
                 },
                 content = { innerPadding ->
                     LazyColumn(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .padding(horizontal = 16.dp)
+                        modifier =
+                            Modifier
+                                .padding(innerPadding)
+                                .padding(horizontal = 16.dp),
                     ) {
                         // Future enhancement: Add user profile section here
 
@@ -229,7 +232,7 @@ fun SettingsScreen(
                             PremiumCard(
                                 paymentUiState = paymentUiState,
                                 onClick = { onStateChange(uiState.copy(showPremiumBottomSheet = true)) },
-                                strings = strings
+                                strings = strings,
                             )
                         }
 
@@ -238,18 +241,19 @@ fun SettingsScreen(
                         item {
                             AnimatedVisibility(
                                 visibleState = settingsSectionState,
-                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                enter =
+                                    fadeIn(animationSpec = tween(durationMillis = 500)) +
                                         slideInVertically(
                                             animationSpec = tween(durationMillis = 500),
-                                            initialOffsetY = { it / 3 }
+                                            initialOffsetY = { it / 3 },
                                         ),
-                                exit = fadeOut()
+                                exit = fadeOut(),
                             ) {
                                 SettingsSection(
                                     shouldShowNotificationItem = shouldShowNotificationItem,
                                     onNotificationNavAction = onNotificationNavAction,
                                     onLanguageNavAction = { onLanguageNavAction(languageList) },
-                                    strings = strings
+                                    strings = strings,
                                 )
                             }
                         }
@@ -259,17 +263,18 @@ fun SettingsScreen(
                         item {
                             AnimatedVisibility(
                                 visibleState = legalSectionState,
-                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                enter =
+                                    fadeIn(animationSpec = tween(durationMillis = 500)) +
                                         slideInVertically(
                                             animationSpec = tween(durationMillis = 500),
-                                            initialOffsetY = { it / 3 }
+                                            initialOffsetY = { it / 3 },
                                         ),
-                                exit = fadeOut()
+                                exit = fadeOut(),
                             ) {
                                 LegalSection(
                                     versionName = versionName,
                                     onUrlClick = { url -> onStateChange(uiState.copy(currentWebUrl = url)) },
-                                    strings = strings
+                                    strings = strings,
                                 )
                             }
                         }
@@ -279,22 +284,23 @@ fun SettingsScreen(
                         item {
                             AnimatedVisibility(
                                 visibleState = logoutButtonState,
-                                enter = fadeIn(animationSpec = tween(durationMillis = 500)) +
+                                enter =
+                                    fadeIn(animationSpec = tween(durationMillis = 500)) +
                                         slideInVertically(
                                             animationSpec = tween(durationMillis = 500),
-                                            initialOffsetY = { it / 3 }
+                                            initialOffsetY = { it / 3 },
                                         ),
-                                exit = fadeOut()
+                                exit = fadeOut(),
                             ) {
                                 TextButton(
                                     onClick = { onStateChange(uiState.copy(showLogoutDialog = true)) },
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
                                 ) {
                                     Text(
                                         text = strings.logout,
                                         color = MaterialTheme.colorScheme.error,
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Medium
+                                        fontWeight = FontWeight.Medium,
                                     )
                                 }
                             }
@@ -313,7 +319,7 @@ fun SettingsScreen(
                             confirmButton = {
                                 TextButton(
                                     onClick = onLogout,
-                                    enabled = !isLoggingOut
+                                    enabled = !isLoggingOut,
                                 ) {
                                     Text(strings.confirm)
                                 }
@@ -321,27 +327,29 @@ fun SettingsScreen(
                             dismissButton = {
                                 TextButton(
                                     onClick = { onStateChange(uiState.copy(showLogoutDialog = false)) },
-                                    enabled = !isLoggingOut
+                                    enabled = !isLoggingOut,
                                 ) {
                                     Text(strings.cancel)
                                 }
-                            }
+                            },
                         )
                     }
 
                     if (uiState.showPremiumBottomSheet) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.5f))
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.5f)),
                         ) {
                             Spacer(
-                                modifier = Modifier
-                                    .fillMaxSize(0.2f)
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() }
-                                    ) { onStateChange(uiState.copy(showPremiumBottomSheet = false)) }
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize(0.2f)
+                                        .clickable(
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() },
+                                        ) { onStateChange(uiState.copy(showPremiumBottomSheet = false)) },
                             )
 
                             ServiceSubscriptionBottomSheet(
@@ -354,12 +362,12 @@ fun SettingsScreen(
                                     onStartPayment(tier.getAmountInPaise().toLong())
                                     onStateChange(uiState.copy(showPremiumBottomSheet = false))
                                 },
-                                modifier = Modifier.align(Alignment.BottomCenter)
+                                modifier = Modifier.align(Alignment.BottomCenter),
                             )
                         }
                     }
                 },
-                bottomBar = bottomBar
+                bottomBar = bottomBar,
             )
 
             NotificationToast(
@@ -369,7 +377,7 @@ fun SettingsScreen(
                 type = ToastType.SUCCESS,
                 isVisible = uiState.showPremiumActivationToast,
                 onDismiss = { onStateChange(uiState.copy(showPremiumActivationToast = false)) },
-                anchorState = toastAnchorState
+                anchorState = toastAnchorState,
             )
         } // end Box
     }
@@ -379,22 +387,24 @@ fun SettingsScreen(
 fun PremiumCard(
     paymentUiState: PaymentUiState,
     onClick: () -> Unit,
-    strings: SettingsScreenStrings
+    strings: SettingsScreenStrings,
 ) {
     val isPremiumActive =
         paymentUiState.isPremiumActivated || paymentUiState.stage == PaymentStage.Success
-    val cardColors = if (isPremiumActive) {
-        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-    } else {
-        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-    }
+    val cardColors =
+        if (isPremiumActive) {
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        } else {
+            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+        }
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(if (!isPremiumActive) Modifier.clickable(onClick = onClick) else Modifier),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .then(if (!isPremiumActive) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(16.dp),
-        colors = cardColors
+        colors = cardColors,
     ) {
         if (isPremiumActive) {
             SubscribedPremiumCard(paymentUiState, strings)
@@ -408,29 +418,32 @@ fun PremiumCard(
 fun UnsubscribedPremiumCard(
     paymentUiState: PaymentUiState,
     onClick: () -> Unit,
-    strings: SettingsScreenStrings
+    strings: SettingsScreenStrings,
 ) {
-    val loadingStages = remember {
-        listOf(
-            PaymentStage.CreatingOrder,
-            PaymentStage.AwaitingPayment,
-            PaymentStage.Verifying
-        )
-    }
+    val loadingStages =
+        remember {
+            listOf(
+                PaymentStage.CreatingOrder,
+                PaymentStage.AwaitingPayment,
+                PaymentStage.Verifying,
+            )
+        }
     val isLoading = paymentUiState.loading || paymentUiState.stage in loadingStages
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (isLoading) {
             LinearProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp),
-                color = MaterialTheme.colorScheme.tertiary
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(2.dp),
+                color = MaterialTheme.colorScheme.tertiary,
             )
             Spacer(modifier = Modifier.height(12.dp))
         }
@@ -438,31 +451,36 @@ fun UnsubscribedPremiumCard(
             imageVector = Icons.Outlined.WorkspacePremium,
             contentDescription = "Premium subscription icon",
             modifier = Modifier.size(56.dp),
-            tint = MaterialTheme.colorScheme.onTertiaryContainer
+            tint = MaterialTheme.colorScheme.onTertiaryContainer,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = if (isLoading) strings.processing else strings.getPremium,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onTertiaryContainer
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = if (isLoading) strings.processingDescription
-            else strings.unlockDescription,
+            text =
+                if (isLoading) {
+                    strings.processingDescription
+                } else {
+                    strings.unlockDescription
+                },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = onClick,
             enabled = !isLoading,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            )
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                ),
         ) {
             Text(if (isLoading) strings.processing else strings.upgradeNow)
         }
@@ -472,26 +490,27 @@ fun UnsubscribedPremiumCard(
 @Composable
 fun SubscribedPremiumCard(
     paymentUiState: PaymentUiState,
-    strings: SettingsScreenStrings
+    strings: SettingsScreenStrings,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             imageVector = Icons.Outlined.WorkspacePremium,
             contentDescription = "Premium subscription icon",
             modifier = Modifier.size(56.dp),
-            tint = MaterialTheme.colorScheme.onPrimaryContainer
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = strings.premiumActive,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
         )
         Spacer(modifier = Modifier.height(8.dp))
         val expiryTop = paymentUiState.expiryMillis
@@ -500,14 +519,14 @@ fun SubscribedPremiumCard(
             Text(
                 text = strings.premiumExpires.replace("%s", dateStr),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
             )
         } else {
             Text(
                 text = strings.premiumActiveStatus,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
         }
     }
@@ -518,28 +537,29 @@ fun SettingsSection(
     shouldShowNotificationItem: Boolean,
     onNotificationNavAction: () -> Unit,
     onLanguageNavAction: () -> Unit,
-    strings: SettingsScreenStrings
+    strings: SettingsScreenStrings,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .padding(vertical = 8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                .padding(vertical = 8.dp),
     ) {
         if (shouldShowNotificationItem) {
             SettingsItem(
                 icon = Icons.Outlined.Notifications,
                 title = strings.notificationsTitle,
                 onClick = onNotificationNavAction,
-                arrowRightDesc = strings.arrowRightDesc
+                arrowRightDesc = strings.arrowRightDesc,
             )
         }
         SettingsItem(
             icon = Icons.Outlined.Language,
             title = strings.languageTitle,
             onClick = onLanguageNavAction,
-            arrowRightDesc = strings.arrowRightDesc
+            arrowRightDesc = strings.arrowRightDesc,
         )
     }
 }
@@ -548,20 +568,21 @@ fun SettingsSection(
 fun LegalSection(
     versionName: String,
     onUrlClick: (String) -> Unit,
-    strings: SettingsScreenStrings
+    strings: SettingsScreenStrings,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .padding(vertical = 8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                .padding(vertical = 8.dp),
     ) {
         SettingsItem(
             icon = Icons.Outlined.PrivacyTip,
             title = strings.privacyPolicy,
             onClick = { onUrlClick("https://data.androidplay.in/wfy/privacy-policy") },
-            arrowRightDesc = strings.arrowRightDesc
+            arrowRightDesc = strings.arrowRightDesc,
         )
         SettingsItem(
             icon = Icons.Outlined.Gavel,
@@ -569,7 +590,7 @@ fun LegalSection(
             onClick = {
                 onUrlClick("https://data.androidplay.in/wfy/terms-and-conditions")
             },
-            arrowRightDesc = strings.arrowRightDesc
+            arrowRightDesc = strings.arrowRightDesc,
         )
         SettingsItem(
             icon = Icons.Outlined.Info,
@@ -578,10 +599,10 @@ fun LegalSection(
                 Text(
                     text = versionName,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
             },
-            arrowRightDesc = strings.arrowRightDesc
+            arrowRightDesc = strings.arrowRightDesc,
         )
     }
 }
@@ -592,25 +613,26 @@ fun SettingsItem(
     title: String,
     onClick: (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
-    arrowRightDesc: String = ""
+    arrowRightDesc: String = "",
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
                 modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
             )
             Spacer(modifier = Modifier.width(16.dp))
             Text(
@@ -620,7 +642,7 @@ fun SettingsItem(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
         }
         if (trailingContent != null) {
@@ -630,7 +652,7 @@ fun SettingsItem(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = arrowRightDesc,
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             )
         }
     }

@@ -5,9 +5,10 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-val paymentViewModelModule: Module = module {
-    viewModel { PaymentViewModel(get(), get(), get(), get()) }
-}
+val paymentViewModelModule: Module =
+    module {
+        viewModel { PaymentViewModel(get(), get(), get(), get()) }
+    }
 
 /**
  * All Koin modules required by the feature-payment module on Android.

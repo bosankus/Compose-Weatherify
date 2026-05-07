@@ -12,7 +12,6 @@ import java.util.Locale
  * Singleton class to provide utility values related to date and time throughout all the modules.
  */
 object DateTimeUtils {
-
     /**
      * Returns numbers of days between today and given time on argument
      */

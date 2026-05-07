@@ -5,7 +5,6 @@ import androidx.core.os.LocaleListCompat
 import java.util.Locale
 
 internal object LocaleHelper {
-
     fun String.getCountryFlag(): String {
         val countryCode = this.split("-").lastOrNull()?.uppercase(Locale.getDefault()) ?: return ""
 
@@ -19,14 +18,20 @@ internal object LocaleHelper {
     }
 
     fun String.getDisplayName(): String {
-        val locale = if (this.isBlank()) Locale.getDefault()
-        else Locale.forLanguageTag(this)
+        val locale =
+            if (this.isBlank()) {
+                Locale.getDefault()
+            } else {
+                Locale.forLanguageTag(this)
+            }
         return locale.getDisplayName(locale)
     }
 
     fun changeLanguageTo(languageCode: String): String {
         AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageCode))
-        return AppCompatDelegate.getApplicationLocales().toLanguageTags()
+        return AppCompatDelegate
+            .getApplicationLocales()
+            .toLanguageTags()
             .ifEmpty { getDefaultLanguage() }
     }
 

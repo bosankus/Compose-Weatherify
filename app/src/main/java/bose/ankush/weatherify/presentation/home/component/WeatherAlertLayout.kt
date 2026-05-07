@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.presentation.home.component
 
 import androidx.compose.runtime.Composable
-import bose.ankush.commonui.sunriseui.components.WeatherAlertCard
+import bose.ankush.commonui.components.WeatherAlertCard
 import bose.ankush.weatherify.domain.model.WeatherForecast
 
 /**
@@ -14,7 +14,7 @@ import bose.ankush.weatherify.domain.model.WeatherForecast
 @Composable
 fun WeatherAlertLayout(
     alerts: List<WeatherForecast.Alert?>?,
-    onReadMoreClick: (() -> Unit)? = null
+    onReadMoreClick: (() -> Unit)? = null,
 ) {
     // If the alerts list is null or empty, don't render anything
     if (alerts.isNullOrEmpty()) {
@@ -31,6 +31,6 @@ fun WeatherAlertLayout(
         startTime = firstAlert.start,
         endTime = firstAlert.end,
         source = firstAlert.sender_name,
-        onReadMoreClick = onReadMoreClick
+        onReadMoreClick = onReadMoreClick,
     )
 }

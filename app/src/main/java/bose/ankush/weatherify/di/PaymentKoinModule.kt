@@ -1,9 +1,9 @@
 package bose.ankush.weatherify.di
 
 import android.content.Context
+import bose.ankush.network.api.PaymentApiService
 import bose.ankush.network.common.AndroidNetworkConnectivity
 import bose.ankush.network.common.NetworkConnectivity
-import bose.ankush.network.api.PaymentApiService
 import bose.ankush.network.di.createPaymentApiService
 import bose.ankush.payment.domain.config.PaymentConfig
 import bose.ankush.payment.domain.store.PremiumStore
@@ -22,10 +22,11 @@ import org.koin.dsl.module
  * (i.e. after super.onCreate()), so [EntryPointAccessors] is safe to use here.
  */
 fun appPaymentKoinModule(context: Context): Module {
-    val bridge = EntryPointAccessors.fromApplication(
-        context,
-        PaymentKoinBridgeEntryPoint::class.java,
-    )
+    val bridge =
+        EntryPointAccessors.fromApplication(
+            context,
+            PaymentKoinBridgeEntryPoint::class.java,
+        )
     val tokenStorage = bridge.tokenStorage()
     val preferenceManager = bridge.preferenceManager()
     val appConfig = bridge.appConfig()

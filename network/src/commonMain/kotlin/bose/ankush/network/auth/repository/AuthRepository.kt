@@ -13,7 +13,10 @@ interface AuthRepository {
      * @param password User's password
      * @return Flow of AuthResponse
      */
-    suspend fun login(email: String, password: String): AuthResponse
+    suspend fun login(
+        email: String,
+        password: String,
+    ): AuthResponse
 
     /**
      * Register with email and password and additional device information
@@ -36,7 +39,7 @@ interface AuthRepository {
         osVersion: String? = null,
         appVersion: String? = null,
         registrationSource: String? = null,
-        firebaseToken: String? = null
+        firebaseToken: String? = null,
     ): AuthResponse
 
     /**

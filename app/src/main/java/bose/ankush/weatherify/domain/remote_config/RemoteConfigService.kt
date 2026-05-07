@@ -6,7 +6,6 @@ package bose.ankush.weatherify.domain.remote_config
  * allowing for easier testing and flexibility in implementation.
  */
 interface RemoteConfigService {
-
     /**
      * Initializes the remote configuration service.
      * This should be called early in the application lifecycle.
@@ -19,5 +18,8 @@ interface RemoteConfigService {
      * @param defaultValue The default value to return if the key is not found
      * @return The boolean value from remote configuration, or the default value if not found
      */
-    fun getBoolean(key: String, defaultValue: Boolean = false): Boolean
+    fun getBoolean(
+        key: String,
+        defaultValue: Boolean = false,
+    ): Boolean
 }

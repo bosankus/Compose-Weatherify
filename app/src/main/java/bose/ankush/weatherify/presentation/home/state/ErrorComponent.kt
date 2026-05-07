@@ -32,9 +32,10 @@ import bose.ankush.weatherify.R
 @Composable
 fun ErrorBackgroundAnimation() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
     )
 }
 
@@ -53,23 +54,23 @@ fun ShowError(
     msg: String?,
     buttonText: String = stringResource(id = R.string.retry_btn_txt),
     isLoading: Boolean = false,
-    buttonAction: () -> Unit
+    buttonAction: () -> Unit,
 ) {
     Box(
         modifier = modifier,
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(horizontal = 24.dp)
+            modifier = Modifier.padding(horizontal = 24.dp),
         ) {
             // Error icon
             Icon(
                 painter = painterResource(id = R.drawable.ic_error),
                 contentDescription = stringResource(id = R.string.error_icon_content),
                 modifier = Modifier.size(32.dp),
-                tint = MaterialTheme.colorScheme.error
+                tint = MaterialTheme.colorScheme.error,
             )
 
             Spacer(modifier = Modifier.padding(top = 16.dp))
@@ -80,7 +81,7 @@ fun ShowError(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
             )
 
             Spacer(modifier = Modifier.padding(top = 8.dp))
@@ -88,21 +89,22 @@ fun ShowError(
             // Retry button
             Button(
                 onClick = buttonAction,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                ),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError,
+                    ),
                 modifier = Modifier.padding(top = 16.dp),
-                enabled = !isLoading
+                enabled = !isLoading,
             ) {
                 if (isLoading) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
                             color = MaterialTheme.colorScheme.onError,
-                            strokeWidth = 2.dp
+                            strokeWidth = 2.dp,
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = buttonText)

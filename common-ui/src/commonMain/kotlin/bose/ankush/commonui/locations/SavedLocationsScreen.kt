@@ -5,12 +5,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,14 +22,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,49 +56,48 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.network.model.PlaceSuggestion
 import bose.ankush.network.model.SavedLocation
+import kotlin.math.round
 
 // ============ UI State Classes ============
 
-/**
- * State for the saved locations feature.
- */
+@Immutable
 data class SavedLocationsUiState(
     val isPremium: Boolean = false,
     val isLoading: Boolean = false,
     val locations: List<SavedLocation> = emptyList(),
     val error: String? = null,
-    val successMessage: String? = null
+    val successMessage: String? = null,
 )
 
-/**
- * State for the place search feature.
- */
+@Immutable
 data class PlaceSearchUiState(
     val searchQuery: String = "",
     val results: List<PlaceSuggestion> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
 )
 
 // ============ Strings ============
 
-/**
- * Localized strings for SavedLocationsScreen.
- * All with English defaults for KMP compatibility.
- */
 data class SavedLocationsStrings(
     val title: String = "Saved Locations",
     val premiumTitle: String = "Premium Feature",
-    val premiumDesc: String = "Save your favorite locations to access them quickly. Upgrade to premium to unlock this feature.",
+    val premiumDesc: String =
+        "Save your favorite locations to access them quickly. " +
+                "Upgrade to premium to unlock this feature.",
     val emptyText: String = "No saved locations yet. Add one to get started!",
     val searchHint: String = "Search for a place",
     val searchDialogTitle: String = "Add Location",
-    val noResults: String = "No results found for \"%s\"",
+    val noResults: (String) -> String = { "No results found for \"$it\"" },
     val deleteContentDesc: String = "Delete location",
     val addContentDesc: String = "Add location",
     val cancelBtn: String = "Cancel",
     val saveSuccessMsg: String = "Location saved successfully",
-    val deleteSuccessMsg: String = "Location deleted successfully"
+    val deleteSuccessMsg: String = "Location deleted successfully",
+    val setAsDefaultDialogTitle: String = "Use as weather location?",
+    val setAsDefaultDialogBody: (String) -> String = { "Weather data will show for $it instead of your current GPS position." },
+    val setAsDefaultDialogWarning: String = "Your live GPS location won't update while this is active.",
+    val setAsDefaultConfirmBtn: String = "Set as Default",
 )
 
 // ============ Main Screen ============
@@ -108,13 +111,26 @@ fun SavedLocationsScreen(
     onClearSearch: () -> Unit,
     onSaveLocation: (name: String, lat: Double, lon: Double) -> Unit,
     onDeleteLocation: (String) -> Unit,
+    onLocationSelected: (SavedLocation) -> Unit,
     onMessageShown: () -> Unit,
     strings: SavedLocationsStrings = SavedLocationsStrings(),
-    bottomBar: @Composable () -> Unit = {}
+    bottomBar: @Composable () -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val pendingLocation = remember { mutableStateOf<SavedLocation?>(null) }
 
-    // Show snackbar on success or error
+    pendingLocation.value?.let { location ->
+        SetAsDefaultLocationDialog(
+            locationName = location.name,
+            strings = strings,
+            onConfirm = {
+                onLocationSelected(location)
+                pendingLocation.value = null
+            },
+            onDismiss = { pendingLocation.value = null },
+        )
+    }
+
     LaunchedEffect(locationsState.successMessage, locationsState.error) {
         val message = locationsState.successMessage ?: locationsState.error
         if (message != null) {
@@ -129,9 +145,9 @@ fun SavedLocationsScreen(
                 title = {
                     Text(
                         text = strings.title,
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.headlineSmall,
                     )
-                }
+                },
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -142,22 +158,22 @@ fun SavedLocationsScreen(
                         onSaveLocation(
                             place.name,
                             place.latitude.toDouble(),
-                            place.longitude.toDouble()
+                            place.longitude.toDouble(),
                         )
                     },
                     searchState = searchState,
                     onQueryChanged = onQueryChanged,
                     onClearSearch = onClearSearch,
-                    strings = strings
+                    strings = strings,
                 )
             }
         },
-        bottomBar = bottomBar
+        bottomBar = bottomBar,
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
         ) {
             when {
                 !locationsState.isPremium -> PremiumGate(strings)
@@ -166,7 +182,8 @@ fun SavedLocationsScreen(
                 else -> LocationList(
                     locations = locationsState.locations,
                     onDelete = onDeleteLocation,
-                    strings = strings
+                    onLocationClick = { pendingLocation.value = it },
+                    strings = strings,
                 )
             }
         }
@@ -182,19 +199,19 @@ private fun PremiumGate(strings: SavedLocationsStrings) {
             .fillMaxSize()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = strings.premiumTitle,
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = strings.premiumDesc,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -203,7 +220,7 @@ private fun PremiumGate(strings: SavedLocationsStrings) {
 private fun ShowLoading(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         CircularProgressIndicator()
     }
@@ -213,14 +230,14 @@ private fun ShowLoading(modifier: Modifier = Modifier) {
 private fun EmptyLocations(strings: SavedLocationsStrings) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = strings.emptyText,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(32.dp)
+            modifier = Modifier.padding(32.dp),
         )
     }
 }
@@ -229,21 +246,23 @@ private fun EmptyLocations(strings: SavedLocationsStrings) {
 private fun LocationList(
     locations: List<SavedLocation>,
     onDelete: (String) -> Unit,
-    strings: SavedLocationsStrings
+    onLocationClick: (SavedLocation) -> Unit,
+    strings: SavedLocationsStrings,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            horizontal = 16.dp,
-            vertical = 12.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(locations, key = { it.id }) { location ->
+        items(
+            locations.distinctBy { it.id.ifEmpty { "${it.lat}_${it.lon}_${it.name}" } },
+            key = { it.id.ifEmpty { "${it.lat}_${it.lon}_${it.name}" } },
+        ) { location ->
             LocationCard(
                 location = location,
+                onClick = { onLocationClick(location) },
                 onDelete = { onDelete(location.id) },
-                strings = strings
+                strings = strings,
             )
         }
     }
@@ -252,37 +271,37 @@ private fun LocationList(
 @Composable
 private fun LocationCard(
     location: SavedLocation,
+    onClick: () -> Unit,
     onDelete: () -> Unit,
-    strings: SavedLocationsStrings
+    strings: SavedLocationsStrings,
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(88.dp),
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface,
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center
+                    .fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
             ) {
                 Text(
                     text = location.name,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -290,7 +309,7 @@ private fun LocationCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
             IconButton(onClick = onDelete) {
@@ -298,7 +317,7 @@ private fun LocationCard(
                     imageVector = Icons.Default.Delete,
                     contentDescription = strings.deleteContentDesc,
                     tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
                 )
             }
         }
@@ -306,9 +325,9 @@ private fun LocationCard(
 }
 
 private fun formatCoordinates(lat: Double, lon: Double): String {
-    val latFormatted = (lat * 10000).toInt() / 10000.0
-    val lonFormatted = (lon * 10000).toInt() / 10000.0
-    return "$latFormatted, $lonFormatted"
+    val latRounded = round(lat * 10000) / 10000.0
+    val lonRounded = round(lon * 10000) / 10000.0
+    return "$latRounded, $lonRounded"
 }
 
 @Composable
@@ -317,14 +336,14 @@ private fun AddLocationFab(
     searchState: PlaceSearchUiState,
     onQueryChanged: (String) -> Unit,
     onClearSearch: () -> Unit,
-    strings: SavedLocationsStrings
+    strings: SavedLocationsStrings,
 ) {
     val showDialog = remember { mutableStateOf(false) }
 
     FloatingActionButton(onClick = { showDialog.value = true }) {
         Icon(
             imageVector = Icons.Default.Add,
-            contentDescription = strings.addContentDesc
+            contentDescription = strings.addContentDesc,
         )
     }
 
@@ -338,7 +357,7 @@ private fun AddLocationFab(
             searchState = searchState,
             onQueryChanged = onQueryChanged,
             onClearSearch = onClearSearch,
-            strings = strings
+            strings = strings,
         )
     }
 }
@@ -350,7 +369,7 @@ private fun PlaceSearchDialog(
     searchState: PlaceSearchUiState,
     onQueryChanged: (String) -> Unit,
     onClearSearch: () -> Unit,
-    strings: SavedLocationsStrings
+    strings: SavedLocationsStrings,
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -359,32 +378,11 @@ private fun PlaceSearchDialog(
             onClearSearch()
             onDismiss()
         },
-        title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(strings.searchDialogTitle)
-                IconButton(
-                    onClick = {
-                        onClearSearch()
-                        onDismiss()
-                    },
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = strings.cancelBtn,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-        },
+        title = { Text(strings.searchDialogTitle) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 OutlinedTextField(
                     value = searchState.searchQuery,
@@ -393,7 +391,7 @@ private fun PlaceSearchDialog(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .focusRequester(focusRequester)
+                        .focusRequester(focusRequester),
                 )
 
                 AnimatedVisibility(
@@ -405,7 +403,7 @@ private fun PlaceSearchDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     }
@@ -422,35 +420,38 @@ private fun PlaceSearchDialog(
                                 .fillMaxWidth()
                                 .background(
                                     MaterialTheme.colorScheme.errorContainer,
-                                    shape = MaterialTheme.shapes.small
+                                    shape = MaterialTheme.shapes.small,
                                 )
-                                .padding(12.dp)
+                                .padding(12.dp),
                         ) {
                             Text(
                                 text = searchState.error,
                                 color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     }
                 }
 
                 AnimatedVisibility(
-                    visible = searchState.searchQuery.length >= 2 && searchState.results.isEmpty() && !searchState.isLoading && searchState.error == null,
+                    visible = searchState.searchQuery.length >= 2 &&
+                            searchState.results.isEmpty() &&
+                            !searchState.isLoading &&
+                            searchState.error == null,
                     enter = fadeIn(),
-                    exit = fadeOut()
+                    exit = fadeOut(),
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 12.dp),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = strings.noResults.replace("%s", searchState.searchQuery),
+                            text = strings.noResults(searchState.searchQuery),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
@@ -458,22 +459,22 @@ private fun PlaceSearchDialog(
                 AnimatedVisibility(
                     visible = searchState.results.isNotEmpty(),
                     enter = fadeIn(),
-                    exit = fadeOut()
+                    exit = fadeOut(),
                 ) {
                     LazyColumn(
                         modifier = Modifier.heightIn(max = 280.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         items(
                             searchState.results,
-                            key = { "${it.name}_${it.latitude}_${it.longitude}" }
+                            key = { "${it.name}_${it.latitude}_${it.longitude}" },
                         ) { place ->
                             PlaceSuggestionItem(
                                 place = place,
                                 onClick = {
                                     onClearSearch()
                                     onPlaceSelected(place)
-                                }
+                                },
                             )
                         }
                     }
@@ -488,10 +489,9 @@ private fun PlaceSearchDialog(
             }) {
                 Text(strings.cancelBtn)
             }
-        }
+        },
     )
 
-    // Request focus on dialog appearance
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
@@ -500,28 +500,24 @@ private fun PlaceSearchDialog(
 @Composable
 private fun PlaceSuggestionItem(
     place: PlaceSuggestion,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(
-                onClick = onClick,
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            )
+            .clickable(onClick = onClick)
             .background(
                 color = MaterialTheme.colorScheme.surface,
-                shape = MaterialTheme.shapes.small
+                shape = MaterialTheme.shapes.small,
             )
-            .padding(vertical = 12.dp, horizontal = 12.dp)
+            .padding(vertical = 12.dp, horizontal = 12.dp),
     ) {
         Text(
             text = place.name,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
@@ -531,7 +527,68 @@ private fun PlaceSuggestionItem(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+@Composable
+private fun SetAsDefaultLocationDialog(
+    locationName: String,
+    strings: SavedLocationsStrings,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Outlined.LocationOn,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        },
+        title = {
+            Text(
+                text = strings.setAsDefaultDialogTitle,
+                style = MaterialTheme.typography.titleLarge,
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = strings.setAsDefaultDialogBody(locationName),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                HorizontalDivider()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.tertiary,
+                    )
+                    Text(
+                        text = strings.setAsDefaultDialogWarning,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(strings.setAsDefaultConfirmBtn)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(strings.cancelBtn)
+            }
+        },
+    )
 }

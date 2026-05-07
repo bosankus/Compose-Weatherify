@@ -1,9 +1,5 @@
 package bose.ankush.storage.common
 
-/**
- * Constants used in the storage module
- */
-
-/*Room central db name*/
+/** Constants used in the storage module (Room DB names). */
 const val WEATHER_DATABASE_NAME = "central_weather_table"
 const val AQ_DATABASE_NAME = "central_aq_table"

@@ -14,8 +14,9 @@ import org.koin.dsl.module
  *
  * @see bose.ankush.payment.di — androidMain for Android ViewModel module.
  */
-val paymentDomainModule: Module = module {
-    single<PaymentRepository> { PaymentRepositoryImpl(get(), get()) }
-    factory { CreateOrderUseCase(get()) }
-    factory { VerifyPaymentUseCase(get()) }
-}
+val paymentDomainModule: Module =
+    module {
+        single<PaymentRepository> { PaymentRepositoryImpl(get(), get()) }
+        factory { CreateOrderUseCase(get()) }
+        factory { VerifyPaymentUseCase(get()) }
+    }

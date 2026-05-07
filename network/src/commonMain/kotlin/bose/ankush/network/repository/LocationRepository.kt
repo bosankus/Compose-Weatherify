@@ -9,7 +9,11 @@ import bose.ankush.network.model.SavedLocation
  */
 interface LocationRepository {
     /** Save a new favourite location. */
-    suspend fun saveLocation(name: String, lat: Double, lon: Double): Result<Unit>
+    suspend fun saveLocation(
+        name: String,
+        lat: Double,
+        lon: Double,
+    ): Result<Unit>
 
     /** Retrieve all saved locations for the current user. */
     suspend fun getSavedLocations(): Result<List<SavedLocation>>

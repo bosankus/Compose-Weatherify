@@ -114,4 +114,11 @@
     <string name="place_search_dialog_title">חפש מיקום</string>
     <string name="place_search_hint">הקלד עיר או כתובת…</string>
     <string name="place_search_no_results">לא נמצאו מיקומים עבור \'%1$s\'</string>
+    <string name="set_as_default_dialog_title">להשתמש כמיקום מזג האוויר?</string>
+    <string name="set_as_default_dialog_body">נתוני מזג האוויר יוצגו עבור %1$s במקום מיקום ה-GPS הנוכחי שלך.</string>
+    <string name="set_as_default_dialog_warning">מיקום ה-GPS החי שלך לא יתעדכן כל עוד זה פעיל.</string>
+    <string name="set_as_default_confirm_btn">הגדר כברירת מחדל</string>
+    <string name="location_override_chip_label">משתמש ב-%1$s</string>
+    <string name="location_override_reset_btn">אפס ל-GPS</string>
+    <string name="location_override_chip_content_desc">כרגע מוצג מזג האוויר עבור %1$s. הקש כדי לאפס ל-GPS.</string>
 </resources>

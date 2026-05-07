@@ -42,7 +42,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("debug")
             // Release signing config should be configured via gradle.properties or build command
@@ -72,7 +72,6 @@ android {
     }
 }
 
-
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
@@ -98,7 +97,6 @@ dependencies {
     implementation(Deps.composePermission)
     implementation(Deps.dataStore)
     implementation(Deps.splashScreen)
-
 
     // Compose
     implementation(platform(Deps.composeBom))
@@ -170,13 +168,12 @@ dependencies {
     implementation(KmmDeps.koinAndroidCompose)
 }
 
-
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_17)
         freeCompilerArgs.addAll(
             "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi"
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
         )
     }
 }

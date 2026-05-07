@@ -6,6 +6,6 @@ interface ServiceApiService {
     suspend fun getServices(
         page: Int = 1,
         pageSize: Int = 20,
-        search: String? = null
+        search: String? = null,
     ): Result<ServiceListResponse>
 }

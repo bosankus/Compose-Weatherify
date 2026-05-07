@@ -21,41 +21,37 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object StorageModule {
-
     @Provides
     @Singleton
     fun provideGson(): Gson = Gson()
+
     @Provides
     @Singleton
     fun provideJsonParser(gson: Gson): JsonParser = JsonParser(gson)
 
     @Provides
     @Singleton
-    fun provideWeatherDataModelConverters(jsonParser: JsonParser): WeatherDataModelConverters {
-        return WeatherDataModelConverters(jsonParser)
-    }
+    fun provideWeatherDataModelConverters(jsonParser: JsonParser): WeatherDataModelConverters =
+        WeatherDataModelConverters(jsonParser)
 
     @Provides
     @Singleton
     fun provideWeatherDatabase(
         @ApplicationContext context: Context,
-        converters: WeatherDataModelConverters
-    ): WeatherDatabase {
-        return Room.databaseBuilder(
-            context,
-            WeatherDatabase::class.java,
-            WEATHER_DATABASE_NAME
-        )
-            .addTypeConverter(converters)
+        converters: WeatherDataModelConverters,
+    ): WeatherDatabase =
+        Room
+            .databaseBuilder(
+                context,
+                WeatherDatabase::class.java,
+                WEATHER_DATABASE_NAME,
+            ).addTypeConverter(converters)
             .fallbackToDestructiveMigration(false)
             .build()
-    }
 
     @Provides
     @Singleton
-    fun provideWeatherStorage(
-        weatherDatabase: WeatherDatabase
-    ): WeatherStorage {
+    fun provideWeatherStorage(weatherDatabase: WeatherDatabase): WeatherStorage {
         // Storage module is responsible ONLY for database operations
         // Network synchronization is handled by WeatherRepository in the orchestration layer
         return WeatherStorageImpl(weatherDatabase)
@@ -64,10 +60,11 @@ object StorageModule {
     @Provides
     @Singleton
     fun provideTokenStorage(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
     ): TokenStorage {
         // SECURITY: Initialize Android context for platform-specific token storage
-        bose.ankush.storage.impl.setApplicationContext(context)
+        bose.ankush.storage.impl
+            .setApplicationContext(context)
         return EncryptedTokenStorageImpl()
     }
 }

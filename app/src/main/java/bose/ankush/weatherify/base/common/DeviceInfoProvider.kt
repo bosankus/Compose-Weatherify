@@ -9,11 +9,18 @@ package bose.ankush.weatherify.base.common
  */
 interface DeviceInfoProvider {
     fun getDeviceModel(): String
+
     fun getOperatingSystem(): String
+
     fun getOsVersion(): String
+
     fun getAppVersion(): String
+
     fun getRegistrationSource(): String
+
     fun getIpAddress(): String?
+
     fun getCurrentUtcTimestamp(): String
+
     suspend fun getFirebaseToken(): String?
 }

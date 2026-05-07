@@ -15,7 +15,6 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class WeatherifyMessagingService : FirebaseMessagingService() {
-
     @Inject
     lateinit var notificationHelper: NotificationHelper
 
@@ -33,14 +32,16 @@ class WeatherifyMessagingService : FirebaseMessagingService() {
         Timber.d("Message data payload: ${remoteMessage.data}")
 
         // Handle both notification and data messages
-        val title = remoteMessage.notification?.title
-            ?: remoteMessage.data["title"]
-            ?: getString(R.string.app_name)
+        val title =
+            remoteMessage.notification?.title
+                ?: remoteMessage.data["title"]
+                ?: getString(R.string.app_name)
 
-        val message = remoteMessage.notification?.body
-            ?: remoteMessage.data["message"]
-            ?: remoteMessage.data.values.firstOrNull()
-            ?: ""
+        val message =
+            remoteMessage.notification?.body
+                ?: remoteMessage.data["message"]
+                ?: remoteMessage.data.values.firstOrNull()
+                ?: ""
 
         // Handle data payload if needed
         val customData = remoteMessage.data.filterKeys { it != "title" && it != "message" }
@@ -56,28 +57,34 @@ class WeatherifyMessagingService : FirebaseMessagingService() {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun sendNotification(title: String, message: String) {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            // You can add extras here if needed
-            // putExtra("key", "value")
-        }
+    private fun sendNotification(
+        title: String,
+        message: String,
+    ) {
+        val intent =
+            Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                // You can add extras here if needed
+                // putExtra("key", "value")
+            }
 
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        val pendingIntent =
+            PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
 
-        val notificationBuilder = notificationHelper.getNotificationBuilder(
-            channelId = NotificationHelper.DEFAULT_CHANNEL_ID,
-            title = title,
-            message = message
-        )
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+        val notificationBuilder =
+            notificationHelper
+                .getNotificationBuilder(
+                    channelId = NotificationHelper.DEFAULT_CHANNEL_ID,
+                    title = title,
+                    message = message,
+                ).setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
 
         // Generate unique ID for each notification
         val notificationId = System.currentTimeMillis().toInt()

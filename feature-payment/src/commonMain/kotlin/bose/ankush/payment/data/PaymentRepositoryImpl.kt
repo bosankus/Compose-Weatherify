@@ -12,7 +12,6 @@ internal class PaymentRepositoryImpl(
     private val apiService: PaymentApiService,
     private val networkConnectivity: NetworkConnectivity,
 ) : PaymentRepository {
-
     override suspend fun createOrder(request: CreateOrderRequest): Result<CreateOrderResponse> {
         if (!networkConnectivity.isNetworkAvailable()) {
             return Result.failure(IllegalStateException("No internet connection"))

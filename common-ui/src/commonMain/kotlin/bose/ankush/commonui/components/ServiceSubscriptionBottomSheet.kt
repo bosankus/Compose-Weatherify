@@ -53,61 +53,62 @@ fun ServiceSubscriptionBottomSheet(
     onTierSelected: (PricingTier) -> Unit,
     onDismiss: () -> Unit,
     onSubscribe: (service: Service, tier: PricingTier) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-
     LaunchedEffect(Unit) {
         loadService()
     }
 
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.7f)
-            .background(MaterialTheme.colorScheme.surface)
-            .navigationBarsPadding()
-            .imePadding()
-            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.7f)
+                .background(MaterialTheme.colorScheme.surface)
+                .navigationBarsPadding()
+                .imePadding()
+                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
     ) {
         AnimatedVisibility(
             visible = uiState.isLoading,
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
         ) {
             ShimmerBottomSheetSkeleton(
-                modifier = Modifier.padding(bottom = 20.dp)
+                modifier = Modifier.padding(bottom = 20.dp),
             )
         }
 
         AnimatedVisibility(
             visible = !uiState.isLoading && uiState.error != null,
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
         ) {
             ErrorContent(
                 error = uiState.error ?: "Unknown error",
                 onDismiss = onDismiss,
-                onRetry = loadService
+                onRetry = loadService,
             )
         }
 
         AnimatedVisibility(
             visible = !uiState.isLoading && uiState.services.isNotEmpty() && uiState.error == null,
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-                    .verticalScroll(rememberScrollState())
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState()),
             ) {
                 CloseButton(onClose = onDismiss)
 
                 if (uiState.selectedService != null && uiState.selectedTier != null) {
                     PlanHeader(
                         service = uiState.selectedService,
-                        tier = uiState.selectedTier
+                        tier = uiState.selectedTier,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -115,13 +116,13 @@ fun ServiceSubscriptionBottomSheet(
                     ServiceSelector(
                         services = uiState.services,
                         selectedService = uiState.selectedService,
-                        onServiceSelected = onServiceSelected
+                        onServiceSelected = onServiceSelected,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     FeaturesSection(
-                        features = uiState.selectedService.features
+                        features = uiState.selectedService.features,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -129,7 +130,7 @@ fun ServiceSubscriptionBottomSheet(
                     TierSelector(
                         service = uiState.selectedService,
                         selectedTier = uiState.selectedTier,
-                        onTierSelected = onTierSelected
+                        onTierSelected = onTierSelected,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -138,20 +139,22 @@ fun ServiceSubscriptionBottomSheet(
                         onClick = {
                             onSubscribe(uiState.selectedService, uiState.selectedTier)
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .padding(horizontal = 24.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        shape = RoundedCornerShape(12.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .padding(horizontal = 24.dp),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                            ),
+                        shape = RoundedCornerShape(12.dp),
                     ) {
                         Text(
                             text = "Subscribe Now",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.White
+                            color = Color.White,
                         )
                     }
                 }
@@ -163,16 +166,17 @@ fun ServiceSubscriptionBottomSheet(
 @Composable
 private fun CloseButton(onClose: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.End
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.End,
     ) {
         IconButton(onClick = onClose, modifier = Modifier.size(40.dp)) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
@@ -181,19 +185,20 @@ private fun CloseButton(onClose: () -> Unit) {
 @Composable
 private fun PlanHeader(
     service: Service,
-    tier: PricingTier
+    tier: PricingTier,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = service.displayName,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -202,13 +207,13 @@ private fun PlanHeader(
             text = tier.getDisplayPrice(),
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
 
         Text(
             text = "for ${tier.getDisplayDuration()}",
             fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -217,34 +222,36 @@ private fun PlanHeader(
 private fun ServiceSelector(
     services: List<Service>,
     selectedService: Service,
-    onServiceSelected: (Service) -> Unit
+    onServiceSelected: (Service) -> Unit,
 ) {
     if (services.size <= 1) return
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
     ) {
         Text(
             text = "Select Plan",
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 12.dp),
         )
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             services.forEach { service ->
                 ServiceOptionCard(
                     service = service,
                     isSelected = service.id == selectedService.id,
-                    onClick = { onServiceSelected(service) }
+                    onClick = { onServiceSelected(service) },
                 )
             }
         }
@@ -255,29 +262,36 @@ private fun ServiceSelector(
 private fun ServiceOptionCard(
     service: Service,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                else MaterialTheme.colorScheme.surfaceVariant
-            )
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+                ).clickable(onClick = onClick)
+                .padding(12.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Text(
                 text = service.displayName.take(10),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurface
+                color =
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
             )
 
             if (isSelected) {
@@ -286,7 +300,7 @@ private fun ServiceOptionCard(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
                 )
             }
         }
@@ -296,33 +310,36 @@ private fun ServiceOptionCard(
 @Composable
 private fun FeaturesSection(features: List<Feature>) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
     ) {
         Text(
             text = "Features",
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = 8.dp),
         )
 
         features.take(8).forEach { feature ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
                     tint = Color(0xFF4CAF50),
-                    modifier = Modifier
-                        .size(16.dp)
-                        .padding(top = 1.dp)
+                    modifier =
+                        Modifier
+                            .size(16.dp)
+                            .padding(top = 1.dp),
                 )
 
                 Text(
@@ -330,7 +347,7 @@ private fun FeaturesSection(features: List<Feature>) {
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f),
-                    maxLines = 1
+                    maxLines = 1,
                 )
             }
         }
@@ -341,7 +358,7 @@ private fun FeaturesSection(features: List<Feature>) {
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
             )
         }
     }
@@ -351,33 +368,34 @@ private fun FeaturesSection(features: List<Feature>) {
 private fun TierSelector(
     service: Service,
     selectedTier: PricingTier,
-    onTierSelected: (PricingTier) -> Unit
+    onTierSelected: (PricingTier) -> Unit,
 ) {
     if (service.pricingTiers.size <= 1) return
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
     ) {
         Text(
             text = "Select Duration",
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 12.dp)
+            modifier = Modifier.padding(bottom = 12.dp),
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             service.pricingTiers.forEach { tier ->
                 TierOption(
                     tier = tier,
                     isSelected = tier.id == selectedTier.id,
                     onClick = { onTierSelected(tier) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
         }
@@ -389,28 +407,35 @@ private fun TierOption(
     tier: PricingTier,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                else MaterialTheme.colorScheme.surfaceVariant
-            )
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+                ).clickable(onClick = onClick)
+                .padding(12.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = tier.getDisplayPrice(),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurface
+                color =
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    },
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -418,7 +443,7 @@ private fun TierOption(
             Text(
                 text = tier.getDisplayDuration(),
                 fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -428,21 +453,22 @@ private fun TierOption(
 private fun ErrorContent(
     error: String,
     onDismiss: () -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(24.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Text(
             text = "Oops!",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.error
+            color = MaterialTheme.colorScheme.error,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -451,20 +477,22 @@ private fun ErrorContent(
             text = error,
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         Button(
             onClick = onRetry,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            ),
-            shape = RoundedCornerShape(8.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ),
+            shape = RoundedCornerShape(8.dp),
         ) {
             Text("Retry")
         }
@@ -473,9 +501,10 @@ private fun ErrorContent(
             text = "Cancel",
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .clickable { onDismiss() }
-                .padding(vertical = 8.dp)
+            modifier =
+                Modifier
+                    .clickable { onDismiss() }
+                    .padding(vertical = 8.dp),
         )
     }
 }

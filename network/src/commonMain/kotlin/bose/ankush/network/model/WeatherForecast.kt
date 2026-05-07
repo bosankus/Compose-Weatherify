@@ -1,6 +1,5 @@
 package bose.ankush.network.model
 
-
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -11,7 +10,7 @@ data class WeatherForecast(
     @SerialName("message")
     val message: String?,
     @SerialName("status")
-    val status: Boolean?
+    val status: Boolean?,
 ) {
     @Serializable
     data class Data(
@@ -26,7 +25,7 @@ data class WeatherForecast(
         @SerialName("airQuality")
         val airQuality: AirQuality.Data? = null,
         @SerialName("entitlements")
-        val entitlements: Entitlements? = null
+        val entitlements: Entitlements? = null,
     ) {
         @Serializable
         data class WeatherInfo(
@@ -37,7 +36,7 @@ data class WeatherForecast(
             @SerialName("id")
             val id: Int = 0,
             @SerialName("main")
-            val main: String = ""
+            val main: String = "",
         )
 
         @Serializable
@@ -74,7 +73,7 @@ data class WeatherForecast(
             @SerialName("windGust")
             val windGust: Double? = null,
             @SerialName("windSpeed")
-            val windSpeed: Double? = null
+            val windSpeed: Double? = null,
         )
 
         @Serializable
@@ -106,7 +105,7 @@ data class WeatherForecast(
             @SerialName("windGust")
             val windGust: Double? = null,
             @SerialName("windSpeed")
-            val windSpeed: Double? = null
+            val windSpeed: Double? = null,
         ) {
             @Serializable
             data class Temp(
@@ -121,7 +120,7 @@ data class WeatherForecast(
                 @SerialName("morn")
                 val morn: Double?,
                 @SerialName("night")
-                val night: Double?
+                val night: Double?,
             )
         }
 
@@ -138,7 +137,7 @@ data class WeatherForecast(
             @SerialName("temp")
             val temp: Double? = null,
             @SerialName("weather")
-            val weather: List<WeatherInfo?>? = null
+            val weather: List<WeatherInfo?>? = null,
         )
 
         @Serializable
@@ -147,7 +146,7 @@ data class WeatherForecast(
             val dailyIncluded: Boolean = false,
             val alertsIncluded: Boolean = false,
             val airQualityIncluded: Boolean = false,
-            val upgradeRequired: Boolean = true
+            val upgradeRequired: Boolean = true,
         )
     }
 }

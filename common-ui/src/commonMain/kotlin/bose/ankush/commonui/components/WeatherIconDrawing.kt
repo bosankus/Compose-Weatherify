@@ -1,8 +1,12 @@
-package bose.ankush.commonui.sunriseui.components
+@file:Suppress("ktlint:standard:max-line-length")
 
+package bose.ankush.commonui.components
+
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import bose.ankush.commonui.sunriseui.constants.WeatherIconConstants
+import bose.ankush.commonui.constants.WeatherIconConstants
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -16,7 +20,7 @@ fun DrawScope.drawSun(
     scale: Float = 1.0f,
     offsetX: Float = 0f,
     sunColor: Color,
-    sunGlowColor: Color
+    sunGlowColor: Color,
 ) {
     val centerX = size.width / 2 + offsetX
     val centerY = size.height / 2
@@ -28,14 +32,14 @@ fun DrawScope.drawSun(
     drawCircle(
         color = sunGlowColor,
         radius = glowRadius * WeatherIconConstants.SUN_GLOW_SCALE,
-        center = androidx.compose.ui.geometry.Offset(centerX, centerY)
+        center = Offset(centerX, centerY),
     )
 
     // Sun body with slight variation for more natural appearance
     drawCircle(
         color = sunColor,
         radius = radius * (1.0f + WeatherIconConstants.SUN_BODY_VARIATION * sin(animationProgress * PI * 2).toFloat()),
-        center = androidx.compose.ui.geometry.Offset(centerX, centerY)
+        center = Offset(centerX, centerY),
     )
 
     // More dynamic sun rays with varying lengths
@@ -60,9 +64,9 @@ fun DrawScope.drawSun(
 
         drawLine(
             color = sunColor.copy(alpha = 0.7f),
-            start = androidx.compose.ui.geometry.Offset(startX, startY),
-            end = androidx.compose.ui.geometry.Offset(endX, endY),
-            strokeWidth = strokeWidth
+            start = Offset(startX, startY),
+            end = Offset(endX, endY),
+            strokeWidth = strokeWidth,
         )
     }
 }
@@ -74,7 +78,7 @@ fun DrawScope.drawSun(
 fun DrawScope.drawClouds(
     animationProgress: Float,
     cloudiness: Float,
-    cloudColor: Color
+    cloudColor: Color,
 ) {
     val cloudCount = (2 + (cloudiness * 2).toInt()).coerceAtMost(4)
 
@@ -82,7 +86,9 @@ fun DrawScope.drawClouds(
         // Smoother cloud movement with varying speeds
         val speedFactor = 0.8f + (i % 3) * 0.1f
         val baseX =
-            size.width * (0.3f + (i * 0.15f) + animationProgress * WeatherIconConstants.CLOUD_MOVEMENT_SCALE * speedFactor) % size.width
+            size.width *
+                    (0.3f + (i * 0.15f) + animationProgress * WeatherIconConstants.CLOUD_MOVEMENT_SCALE * speedFactor) %
+                    size.width
         val baseY =
             size.height * (0.4f + (i % 2) * 0.1f + sin(animationProgress * PI * speedFactor) * 0.02f)
 
@@ -103,7 +109,7 @@ fun DrawScope.drawClouds(
             drawCircle(
                 color = cloudColor.copy(alpha = alpha),
                 radius = puffSize.toFloat(),
-                center = androidx.compose.ui.geometry.Offset(puffX, puffY.toFloat())
+                center = Offset(puffX, puffY.toFloat()),
             )
         }
     }
@@ -117,7 +123,7 @@ fun DrawScope.drawClouds(
 fun DrawScope.drawRain(
     animationProgress: Float,
     intensity: Float,
-    rainColor: Color
+    rainColor: Color,
 ) {
     // Increase drop count for heavier rain, with a higher maximum
     val baseDropCount = 8 + (intensity * 25).toInt()
@@ -177,9 +183,9 @@ fun DrawScope.drawRain(
         // Draw the raindrop with slant from wind
         drawLine(
             color = rainColor.copy(alpha = dropAlpha),
-            start = androidx.compose.ui.geometry.Offset(dropX.toFloat(), dropY),
-            end = androidx.compose.ui.geometry.Offset(endX.toFloat(), endY),
-            strokeWidth = dropThickness
+            start = Offset(dropX.toFloat(), dropY),
+            end = Offset(endX.toFloat(), endY),
+            strokeWidth = dropThickness,
         )
 
         // Add splash effect when drops hit the bottom
@@ -196,10 +202,11 @@ fun DrawScope.drawRain(
                 drawCircle(
                     color = rainColor.copy(alpha = splashAlpha),
                     radius = splashSize,
-                    center = androidx.compose.ui.geometry.Offset(
-                        endX.toFloat(),
-                        size.height * 0.98f
-                    )
+                    center =
+                        Offset(
+                            endX.toFloat(),
+                            size.height * 0.98f,
+                        ),
                 )
 
                 // For heavier rain, add a second splash ripple
@@ -212,10 +219,11 @@ fun DrawScope.drawRain(
                         drawCircle(
                             color = rainColor.copy(alpha = rippleAlpha),
                             radius = rippleSize,
-                            center = androidx.compose.ui.geometry.Offset(
-                                endX.toFloat(),
-                                size.height * 0.98f
-                            )
+                            center =
+                                Offset(
+                                    endX.toFloat(),
+                                    size.height * 0.98f,
+                                ),
                         )
                     }
                 }
@@ -231,7 +239,7 @@ fun DrawScope.drawRain(
 fun DrawScope.drawSnow(
     animationProgress: Float,
     intensity: Float,
-    snowColor: Color
+    snowColor: Color,
 ) {
     val flakeCount = (5 + (intensity * 15).toInt()).coerceAtMost(20)
 
@@ -249,9 +257,13 @@ fun DrawScope.drawSnow(
 
         // Draw snowflake (simple circle for now, could be enhanced to actual snowflake shape)
         drawCircle(
-            color = snowColor.copy(alpha = WeatherIconConstants.SNOW_BASE_ALPHA + 0.2f * sin((animationProgress * PI + i).toFloat())),
+            color =
+                snowColor.copy(
+                    alpha =
+                        WeatherIconConstants.SNOW_BASE_ALPHA + 0.2f * sin((animationProgress * PI + i).toFloat()),
+                ),
             radius = flakeSize,
-            center = androidx.compose.ui.geometry.Offset(flakeX.toFloat(), flakeY)
+            center = Offset(flakeX.toFloat(), flakeY),
         )
     }
 }
@@ -262,7 +274,7 @@ fun DrawScope.drawSnow(
  */
 fun DrawScope.drawThunder(
     animationProgress: Float,
-    thunderColor: Color
+    thunderColor: Color,
 ) {
     // Make thunder appear more gradually instead of abruptly
     val flashIntensity = sin(animationProgress * PI * 2).toFloat().coerceIn(0f, 1f)
@@ -272,26 +284,27 @@ fun DrawScope.drawThunder(
         val startY = size.height * 0.4f
 
         // Draw lightning bolt with varying intensity
-        val path = androidx.compose.ui.graphics.Path().apply {
-            moveTo(centerX, startY)
-            lineTo(centerX - size.width * 0.1f, startY + size.height * 0.15f)
-            lineTo(centerX, startY + size.height * 0.2f)
-            lineTo(centerX - size.width * 0.05f, startY + size.height * 0.4f)
-            lineTo(centerX + size.width * 0.1f, startY + size.height * 0.15f)
-            lineTo(centerX, startY + size.height * 0.1f)
-            close()
-        }
+        val path =
+            Path().apply {
+                moveTo(centerX, startY)
+                lineTo(centerX - size.width * 0.1f, startY + size.height * 0.15f)
+                lineTo(centerX, startY + size.height * 0.2f)
+                lineTo(centerX - size.width * 0.05f, startY + size.height * 0.4f)
+                lineTo(centerX + size.width * 0.1f, startY + size.height * 0.15f)
+                lineTo(centerX, startY + size.height * 0.1f)
+                close()
+            }
 
         drawPath(
             path = path,
-            color = thunderColor.copy(alpha = flashIntensity * WeatherIconConstants.THUNDER_FLASH_ALPHA)
+            color = thunderColor.copy(alpha = flashIntensity * WeatherIconConstants.THUNDER_FLASH_ALPHA),
         )
 
         // Add a glow effect around the lightning
         drawCircle(
             color = thunderColor.copy(alpha = flashIntensity * 0.3f),
             radius = size.width * 0.2f,
-            center = androidx.compose.ui.geometry.Offset(centerX, startY + size.height * 0.2f)
+            center = Offset(centerX, startY + size.height * 0.2f),
         )
     }
 }
@@ -302,7 +315,7 @@ fun DrawScope.drawThunder(
  */
 fun DrawScope.drawFog(
     animationProgress: Float,
-    fogColor: Color
+    fogColor: Color,
 ) {
     val layerCount = 6
 
@@ -321,9 +334,9 @@ fun DrawScope.drawFog(
         // Draw fog layer with rounded ends for more natural appearance
         drawLine(
             color = fogColor.copy(alpha = alpha),
-            start = androidx.compose.ui.geometry.Offset(layerOffset, layerY),
-            end = androidx.compose.ui.geometry.Offset(layerOffset + layerWidth, layerY),
-            strokeWidth = size.height * (0.02f + 0.01f * (i % 3) / 3f)
+            start = Offset(layerOffset, layerY),
+            end = Offset(layerOffset + layerWidth, layerY),
+            strokeWidth = size.height * (0.02f + 0.01f * (i % 3) / 3f),
         )
     }
 }

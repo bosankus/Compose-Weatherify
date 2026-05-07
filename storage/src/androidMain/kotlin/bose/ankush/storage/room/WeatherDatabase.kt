@@ -6,10 +6,9 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [WeatherEntity::class, AirQualityEntity::class, AuthToken::class],
     version = 3,
-    exportSchema = false
+    exportSchema = false,
 )
 abstract class WeatherDatabase : RoomDatabase() {
-
     abstract fun weatherDao(): WeatherDao
 
     abstract fun authTokenDao(): AuthTokenDao

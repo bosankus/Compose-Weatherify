@@ -14,13 +14,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RemoteConfigModule {
-
-    /**
-     * Binds FirebaseRemoteConfigService to RemoteConfigService interface
-     */
+    @Suppress("unused")
     @Binds
     @Singleton
-    abstract fun bindRemoteConfigService(
-        firebaseRemoteConfigService: FirebaseRemoteConfigService
-    ): RemoteConfigService
+    abstract fun bindRemoteConfigService(firebaseRemoteConfigService: FirebaseRemoteConfigService): RemoteConfigService
 }

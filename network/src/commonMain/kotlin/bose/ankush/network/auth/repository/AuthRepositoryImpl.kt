@@ -13,10 +13,12 @@ import kotlinx.coroutines.flow.Flow
  */
 class AuthRepositoryImpl(
     private val apiService: AuthApiService,
-    private val tokenStorage: TokenStorage
+    private val tokenStorage: TokenStorage,
 ) : AuthRepository {
-
-    override suspend fun login(email: String, password: String): AuthResponse {
+    override suspend fun login(
+        email: String,
+        password: String,
+    ): AuthResponse {
         val request = LoginRequest(email = email, password = password)
         val response = apiService.login(request)
 
@@ -38,19 +40,20 @@ class AuthRepositoryImpl(
         osVersion: String?,
         appVersion: String?,
         registrationSource: String?,
-        firebaseToken: String?
+        firebaseToken: String?,
     ): AuthResponse {
-        val request = RegisterRequest(
-            email = email,
-            password = password,
-            timestampOfRegistration = timestampOfRegistration,
-            deviceModel = deviceModel,
-            operatingSystem = operatingSystem,
-            osVersion = osVersion,
-            appVersion = appVersion,
-            registrationSource = registrationSource,
-            firebaseToken = firebaseToken
-        )
+        val request =
+            RegisterRequest(
+                email = email,
+                password = password,
+                timestampOfRegistration = timestampOfRegistration,
+                deviceModel = deviceModel,
+                operatingSystem = operatingSystem,
+                osVersion = osVersion,
+                appVersion = appVersion,
+                registrationSource = registrationSource,
+                firebaseToken = firebaseToken,
+            )
         val response = apiService.register(request)
 
         // Save token on successful registration
@@ -62,13 +65,9 @@ class AuthRepositoryImpl(
         return response
     }
 
-    override fun isLoggedIn(): Flow<Boolean> {
-        return tokenStorage.hasToken()
-    }
+    override fun isLoggedIn(): Flow<Boolean> = tokenStorage.hasToken()
 
-    override suspend fun getToken(): String? {
-        return tokenStorage.getToken()
-    }
+    override suspend fun getToken(): String? = tokenStorage.getToken()
 
     override suspend fun refreshToken(): AuthResponse? {
         val currentToken = tokenStorage.getToken() ?: return null
@@ -85,8 +84,8 @@ class AuthRepositoryImpl(
         return response
     }
 
-    override suspend fun logout(): Result<Unit> {
-        return try {
+    override suspend fun logout(): Result<Unit> =
+        try {
             val response = apiService.logout()
             val isSuccess = response.data == null
             if (isSuccess) {
@@ -94,15 +93,15 @@ class AuthRepositoryImpl(
                 Result.success(Unit)
             } else {
                 val errorMsg = response.data.errorMessage
-                val message = if (!errorMsg.isNullOrBlank()) {
-                    errorMsg
-                } else {
-                    response.message ?: "Logout failed"
-                }
+                val message =
+                    if (!errorMsg.isNullOrBlank()) {
+                        errorMsg
+                    } else {
+                        response.message ?: "Logout failed"
+                    }
                 Result.failure(Exception(message))
             }
         } catch (e: Exception) {
             Result.failure(e)
         }
-    }
 }

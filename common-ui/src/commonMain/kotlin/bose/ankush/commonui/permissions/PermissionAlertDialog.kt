@@ -46,6 +46,6 @@ fun PermissionAlertDialog(
                     Text(text = negativeButtonLabel)
                 }
             }
-        }
+        },
     )
 }

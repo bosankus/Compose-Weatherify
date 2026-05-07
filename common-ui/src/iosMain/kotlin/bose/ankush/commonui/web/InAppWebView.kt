@@ -80,15 +80,17 @@ actual fun InAppWebView(
     // Hold a strong reference to the delegate — WKWebView.navigationDelegate is weak in ObjC
     val delegate = remember { InAppWebViewDelegate() }
 
-    val webView = remember {
-        val config = WKWebViewConfiguration().apply {
-            // Non-persistent storage: equivalent to CookieManager.setAcceptCookie(false) on Android
-            websiteDataStore = WKWebsiteDataStore.nonPersistentDataStore()
+    val webView =
+        remember {
+            val config =
+                WKWebViewConfiguration().apply {
+                    // Non-persistent storage: equivalent to CookieManager.setAcceptCookie(false) on Android
+                    websiteDataStore = WKWebsiteDataStore.nonPersistentDataStore()
+                }
+            WKWebView(frame = CGRectZero.readValue(), configuration = config).apply {
+                navigationDelegate = delegate
+            }
         }
-        WKWebView(frame = CGRectZero.readValue(), configuration = config).apply {
-            navigationDelegate = delegate
-        }
-    }
 
     // Wire delegate callbacks to the latest captured state setters on each recomposition
     delegate.initialUrl = url
@@ -125,7 +127,7 @@ actual fun InAppWebView(
                     Text(
                         text = pageTitle.ifBlank { "Weatherify" },
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
                     )
                 },
                 navigationIcon = {
@@ -134,7 +136,7 @@ actual fun InAppWebView(
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Back",
                         )
                     }
                 },
@@ -142,21 +144,23 @@ actual fun InAppWebView(
                     IconButton(onClick = { webView.reload() }) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
-                            contentDescription = "Refresh page"
+                            contentDescription = "Refresh page",
                         )
                     }
                     IconButton(onClick = {
-                        val activityVC = UIActivityViewController(
-                            activityItems = listOf(currentUrl),
-                            applicationActivities = null
-                        )
+                        val activityVC =
+                            UIActivityViewController(
+                                activityItems = listOf(currentUrl),
+                                applicationActivities = null,
+                            )
                         @Suppress("DEPRECATION")
-                        UIApplication.sharedApplication.keyWindow?.rootViewController
+                        UIApplication.sharedApplication.keyWindow
+                            ?.rootViewController
                             ?.presentViewController(activityVC, animated = true, completion = null)
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.Share,
-                            contentDescription = "Share page"
+                            contentDescription = "Share page",
                         )
                     }
                     IconButton(onClick = {
@@ -167,49 +171,54 @@ actual fun InAppWebView(
                     }) {
                         Icon(
                             imageVector = Icons.Outlined.OpenInBrowser,
-                            contentDescription = "Open in browser"
+                            contentDescription = "Open in browser",
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
             )
-        }
+        },
     ) { paddingValues ->
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(paddingValues)
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(paddingValues),
         ) {
             if (isLoading) {
                 LinearProgressIndicator(
-                    modifier = Modifier
-                        .height(2.dp)
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .height(2.dp)
+                            .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
             ) {
                 UIKitView(
                     factory = { webView },
                     modifier = Modifier.fillMaxSize(),
-                    update = {}
+                    update = {},
                 )
 
                 // Loading overlay
                 if (isLoading) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)),
-                        contentAlignment = Alignment.Center
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.8f)),
+                        contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator()
                     }
@@ -218,37 +227,40 @@ actual fun InAppWebView(
                 // Error overlay
                 if (loadError) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f))
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f)),
                     ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.Center,
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.ErrorOutline,
                                 contentDescription = "Error",
-                                modifier = Modifier
-                                    .size(64.dp)
-                                    .padding(bottom = 16.dp),
-                                tint = MaterialTheme.colorScheme.error
+                                modifier =
+                                    Modifier
+                                        .size(64.dp)
+                                        .padding(bottom = 16.dp),
+                                tint = MaterialTheme.colorScheme.error,
                             )
                             Text(
                                 text = "Failed to load page",
                                 style = MaterialTheme.typography.headlineSmall,
                                 color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(bottom = 8.dp)
+                                modifier = Modifier.padding(bottom = 8.dp),
                             )
                             if (errorMessage.isNotBlank()) {
                                 Text(
                                     text = errorMessage,
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                                    modifier = Modifier.padding(bottom = 24.dp)
+                                    modifier = Modifier.padding(bottom = 24.dp),
                                 )
                             }
                             Button(
@@ -257,7 +269,7 @@ actual fun InAppWebView(
                                     errorMessage = ""
                                     isLoading = true
                                     webView.reload()
-                                }
+                                },
                             ) {
                                 Text("Retry")
                             }
@@ -285,7 +297,9 @@ actual fun InAppWebView(
  * URL whitelist enforcement: decidePolicyForNavigationAction validates navigation URLs
  * against the same trusted domain list used on Android (e.g., data.androidplay.in).
  */
-private class InAppWebViewDelegate : NSObject(), WKNavigationDelegateProtocol {
+private class InAppWebViewDelegate :
+    NSObject(),
+    WKNavigationDelegateProtocol {
     var onLoadStart: () -> Unit = {}
     var onLoadFinish: (WKWebView) -> Unit = {}
     var onLoadError: (String) -> Unit = {}
@@ -293,12 +307,18 @@ private class InAppWebViewDelegate : NSObject(), WKNavigationDelegateProtocol {
     var initialUrl: String = ""
 
     @ObjCSignatureOverride
-    override fun webView(webView: WKWebView, didStartProvisionalNavigation: WKNavigation?) {
+    override fun webView(
+        webView: WKWebView,
+        didStartProvisionalNavigation: WKNavigation?,
+    ) {
         onLoadStart()
     }
 
     @ObjCSignatureOverride
-    override fun webView(webView: WKWebView, didFinishNavigation: WKNavigation?) {
+    override fun webView(
+        webView: WKWebView,
+        didFinishNavigation: WKNavigation?,
+    ) {
         onLoadFinish(webView)
     }
 
@@ -306,7 +326,7 @@ private class InAppWebViewDelegate : NSObject(), WKNavigationDelegateProtocol {
     override fun webView(
         webView: WKWebView,
         didFailProvisionalNavigation: WKNavigation?,
-        withError: NSError
+        withError: NSError,
     ) {
         onLoadError(withError.localizedDescription)
     }
@@ -315,7 +335,7 @@ private class InAppWebViewDelegate : NSObject(), WKNavigationDelegateProtocol {
     override fun webView(
         webView: WKWebView,
         didFailNavigation: WKNavigation?,
-        withError: NSError
+        withError: NSError,
     ) {
         onLoadError(withError.localizedDescription)
     }
@@ -324,7 +344,7 @@ private class InAppWebViewDelegate : NSObject(), WKNavigationDelegateProtocol {
     override fun webView(
         webView: WKWebView,
         decidePolicyForNavigationAction: WKNavigationAction,
-        decisionHandler: (WKNavigationActionPolicy) -> Unit
+        decisionHandler: (WKNavigationActionPolicy) -> Unit,
     ) {
         val requestUrl = decidePolicyForNavigationAction.request.URL?.absoluteString ?: ""
 
@@ -347,9 +367,10 @@ private class InAppWebViewDelegate : NSObject(), WKNavigationDelegateProtocol {
     private fun isWhitelistedUrl(urlString: String): Boolean {
         val url = NSURL.URLWithString(urlString) ?: return false
         val host = url.host?.lowercase() ?: return false
-        val whitelistedDomains = setOf(
-            "data.androidplay.in",     // Terms, Privacy Policy
-        )
+        val whitelistedDomains =
+            setOf(
+                "data.androidplay.in", // Terms, Privacy Policy
+            )
         return whitelistedDomains.any { trustedDomain ->
             host == trustedDomain || host.endsWith(".$trustedDomain")
         }

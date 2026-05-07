@@ -116,6 +116,13 @@
     <string name="saved_locations_icon_content">Saved locations</string>
     <string name="add_icon_content">Add new location</string>
     <string name="delete_icon_content">Delete location</string>
+    <string name="set_as_default_dialog_title">Use as weather location?</string>
+    <string name="set_as_default_dialog_body">Weather data will show for %1$s instead of your current GPS position.</string>
+    <string name="set_as_default_dialog_warning">Your live GPS location won\'t update while this is active.</string>
+    <string name="set_as_default_confirm_btn">Set as Default</string>
+    <string name="location_override_chip_label">Using %1$s</string>
+    <string name="location_override_reset_btn">Reset to GPS</string>
+    <string name="location_override_chip_content_desc">Currently showing weather for %1$s. Tap to reset to GPS.</string>
 
     <!--Place Search Dialog-->
     <string name="place_search_dialog_title">Search for a Place</string>

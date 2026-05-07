@@ -11,5 +11,5 @@ data class AuthToken(
     @PrimaryKey
     val id: Int = 1, // We only need one token, so use a fixed ID
     val token: String,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
 )

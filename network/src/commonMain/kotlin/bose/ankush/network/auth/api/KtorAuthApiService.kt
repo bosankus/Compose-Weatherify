@@ -18,39 +18,37 @@ import io.ktor.http.contentType
  */
 class KtorAuthApiService(
     private val httpClient: HttpClient,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : AuthApiService {
-
-    override suspend fun login(request: LoginRequest): AuthResponse {
-        return NetworkUtils.retryWithExponentialBackoff {
-            httpClient.post("$baseUrl/login") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
+    override suspend fun login(request: LoginRequest): AuthResponse =
+        NetworkUtils.retryWithExponentialBackoff {
+            httpClient
+                .post("$baseUrl/login") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
         }
-    }
 
-    override suspend fun register(request: RegisterRequest): AuthResponse {
-        return NetworkUtils.retryWithExponentialBackoff {
-            httpClient.post("$baseUrl/register") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
+    override suspend fun register(request: RegisterRequest): AuthResponse =
+        NetworkUtils.retryWithExponentialBackoff {
+            httpClient
+                .post("$baseUrl/register") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
         }
-    }
 
-    override suspend fun refreshToken(request: RefreshTokenRequest): AuthResponse {
-        return NetworkUtils.retryWithExponentialBackoff {
-            httpClient.post("$baseUrl/refresh-token") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
+    override suspend fun refreshToken(request: RefreshTokenRequest): AuthResponse =
+        NetworkUtils.retryWithExponentialBackoff {
+            httpClient
+                .post("$baseUrl/refresh-token") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
         }
-    }
 
-    override suspend fun logout(): LogoutResponse {
-        return NetworkUtils.retryWithExponentialBackoff {
+    override suspend fun logout(): LogoutResponse =
+        NetworkUtils.retryWithExponentialBackoff {
             httpClient.post("$baseUrl/logout").body()
         }
-    }
 }

@@ -20,7 +20,7 @@ object NetworkUtils {
         maxRetries: Int = NetworkConstants.MAX_RETRIES,
         initialDelayMillis: Long = NetworkConstants.INITIAL_BACKOFF_DELAY,
         maxDelayMillis: Long = NetworkConstants.MAX_BACKOFF_DELAY,
-        block: suspend () -> T
+        block: suspend () -> T,
     ): T {
         var currentDelay = initialDelayMillis
         var lastException: Exception? = null
@@ -50,7 +50,7 @@ object NetworkUtils {
         throw NetworkException(
             NetworkException.UNKNOWN_ERROR,
             "Retry failed after $maxRetries attempts",
-            lastException
+            lastException,
         )
     }
 }

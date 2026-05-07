@@ -7,12 +7,13 @@ import kotlinx.coroutines.flow.Flow
  * Uses [Coordinates] instead of android.location.Location to enable KMP compatibility.
  */
 interface LocationClient {
-
     fun getLocationUpdates(interval: Long): Flow<Coordinates>
 
     suspend fun getCurrentLocation(): Result<Coordinates>
 
     fun hasLocationPermission(): Boolean
 
-    class LocationException(message: String) : Exception(message)
+    class LocationException(
+        message: String,
+    ) : Exception(message)
 }

@@ -15,8 +15,9 @@ import javax.inject.Singleton
  * This class handles all interactions with Firebase Remote Config.
  */
 @Singleton
-class FirebaseRemoteConfigService @Inject constructor() : RemoteConfigService {
-
+class FirebaseRemoteConfigService
+@Inject
+constructor() : RemoteConfigService {
     private val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
     private val tag = "${FirebaseRemoteConfigService::class.simpleName} ->"
 
@@ -25,9 +26,10 @@ class FirebaseRemoteConfigService @Inject constructor() : RemoteConfigService {
      * Sets default values from the XML resource file.
      */
     override fun initialize() {
-        val configSettings = remoteConfigSettings {
-            minimumFetchIntervalInSeconds = DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS
-        }
+        val configSettings =
+            remoteConfigSettings {
+                minimumFetchIntervalInSeconds = DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS
+            }
 
         remoteConfig.apply {
             setConfigSettingsAsync(configSettings)
@@ -43,14 +45,16 @@ class FirebaseRemoteConfigService @Inject constructor() : RemoteConfigService {
      * @param defaultValue The default value to return if the key is not found
      * @return The boolean value from Firebase Remote Config, or the default value if not found
      */
-    override fun getBoolean(key: String, defaultValue: Boolean): Boolean {
-        return try {
+    override fun getBoolean(
+        key: String,
+        defaultValue: Boolean,
+    ): Boolean =
+        try {
             remoteConfig.getBoolean(key)
         } catch (e: Exception) {
             Timber.tag(tag).e(e, "Error getting boolean value for key: $key")
             defaultValue
         }
-    }
 
     companion object {
         private const val DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS = 3600L // 1 hour

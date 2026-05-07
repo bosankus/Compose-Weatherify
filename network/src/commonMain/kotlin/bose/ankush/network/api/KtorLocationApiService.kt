@@ -19,27 +19,24 @@ import io.ktor.http.contentType
  */
 class KtorLocationApiService(
     private val httpClient: HttpClient,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : LocationApiService {
+    override suspend fun saveLocation(request: SaveLocationRequest): ApiResponse<Unit> =
+        httpClient
+            .post("$baseUrl/save-location") {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.body()
 
-    override suspend fun saveLocation(request: SaveLocationRequest): ApiResponse<Unit> {
-        return httpClient.post("$baseUrl/save-location") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.body()
-    }
+    override suspend fun getSavedLocations(): ApiResponse<List<SavedLocation>> =
+        httpClient.get("$baseUrl/saved-places").body()
 
-    override suspend fun getSavedLocations(): ApiResponse<List<SavedLocation>> {
-        return httpClient.get("$baseUrl/saved-places").body()
-    }
+    override suspend fun deleteLocation(id: String): ApiResponse<Unit> =
+        httpClient.delete("$baseUrl/saved-places/$id").body()
 
-    override suspend fun deleteLocation(id: String): ApiResponse<Unit> {
-        return httpClient.delete("$baseUrl/locations/$id").body()
-    }
-
-    override suspend fun searchPlaces(query: String): ApiResponse<List<PlaceSuggestion>> {
-        return httpClient.get("$baseUrl/search-place") {
-            parameter("q", query)
-        }.body()
-    }
+    override suspend fun searchPlaces(query: String): ApiResponse<List<PlaceSuggestion>> =
+        httpClient
+            .get("$baseUrl/search-place") {
+                parameter("q", query)
+            }.body()
 }

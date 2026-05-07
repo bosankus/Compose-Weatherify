@@ -17,13 +17,12 @@ data class ServiceSubscriptionUiState(
     val selectedService: Service? = null,
     val selectedTier: PricingTier? = null,
     val error: String? = null,
-    val message: String? = null
+    val message: String? = null,
 )
 
 class ServiceSubscriptionViewModel(
-    private val repository: ServiceRepository
+    private val repository: ServiceRepository,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(ServiceSubscriptionUiState())
     val uiState: StateFlow<ServiceSubscriptionUiState> = _uiState.asStateFlow()
 
@@ -38,8 +37,10 @@ class ServiceSubscriptionViewModel(
                             isLoading = false,
                             services = services.filter { service -> service.isAvailable },
                             selectedService = services.firstOrNull { service -> service.isAvailable },
-                            selectedTier = services.firstOrNull { service -> service.isAvailable }
-                                ?.getRecommendedTier()
+                            selectedTier =
+                                services
+                                    .firstOrNull { service -> service.isAvailable }
+                                    ?.getRecommendedTier(),
                         )
                     }
                 },
@@ -48,16 +49,16 @@ class ServiceSubscriptionViewModel(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = userMessage
+                            error = userMessage,
                         )
                     }
-                }
+                },
             )
         }
     }
 
-    private fun getUserFriendlyErrorMessage(error: Throwable): String {
-        return when {
+    private fun getUserFriendlyErrorMessage(error: Throwable): String =
+        when {
             error.message?.contains("Illegal input", ignoreCase = true) == true ->
                 "Unable to load subscription plans. Please try again."
 
@@ -72,13 +73,12 @@ class ServiceSubscriptionViewModel(
 
             else -> "Unable to load subscription plans. Please try again."
         }
-    }
 
     fun selectService(service: Service) {
         _uiState.update {
             it.copy(
                 selectedService = service,
-                selectedTier = service.getRecommendedTier()
+                selectedTier = service.getRecommendedTier(),
             )
         }
     }

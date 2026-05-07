@@ -10,9 +10,8 @@ import bose.ankush.network.model.FeedbackResponse
  */
 class FeedbackRepositoryImpl(
     private val apiService: FeedbackApiService,
-    private val networkConnectivity: NetworkConnectivity
+    private val networkConnectivity: NetworkConnectivity,
 ) : FeedbackRepository {
-
     override suspend fun submitFeedback(request: FeedbackRequest): Result<FeedbackResponse> {
         if (!networkConnectivity.isNetworkAvailable()) {
             return Result.failure(IllegalStateException("No internet connection"))

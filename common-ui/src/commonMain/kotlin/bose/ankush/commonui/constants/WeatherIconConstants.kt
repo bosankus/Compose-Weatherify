@@ -1,4 +1,4 @@
-package bose.ankush.commonui.sunriseui.constants
+package bose.ankush.commonui.constants
 
 /**
  * Constants for weather icon drawing
@@ -7,7 +7,7 @@ object WeatherIconConstants {
     // Animation constants
     const val SUN_ANIMATION_DURATION = 2500
     const val CLOUD_ANIMATION_DURATION = 4000
-    const val RAIN_ANIMATION_DURATION = 3500  // Increased for more natural rain movement
+    const val RAIN_ANIMATION_DURATION = 3500 // Increased for more natural rain movement
     const val SNOW_ANIMATION_DURATION = 3000
     const val THUNDER_ANIMATION_DURATION = 3000
 

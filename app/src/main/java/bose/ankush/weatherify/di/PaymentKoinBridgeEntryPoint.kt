@@ -15,6 +15,8 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 interface PaymentKoinBridgeEntryPoint {
     fun tokenStorage(): TokenStorage
+
     fun preferenceManager(): PreferenceManager
+
     fun appConfig(): AppConfig
 }

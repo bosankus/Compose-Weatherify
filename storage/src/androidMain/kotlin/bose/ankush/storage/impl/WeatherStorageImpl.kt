@@ -20,9 +20,8 @@ import kotlinx.coroutines.withContext
  * by the orchestration layer (WeatherRepository in app module).
  */
 class WeatherStorageImpl(
-    private val weatherDatabase: WeatherDatabase
+    private val weatherDatabase: WeatherDatabase,
 ) : WeatherStorage {
-
     // In-memory per-location timestamp map. Keyed by "lat_lon" string.
     // Reset on process restart intentionally — fresh data should be fetched after a cold start.
     private val locationTimestamps = mutableMapOf<String, Long>()
@@ -30,23 +29,26 @@ class WeatherStorageImpl(
     private fun locationKey(coordinates: Pair<Double, Double>) =
         "${coordinates.first}_${coordinates.second}"
 
-    override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<Any?> {
-        return weatherDatabase.weatherDao().getWeather()
-    }
+    override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<Any?> =
+        weatherDatabase.weatherDao().getWeather()
 
-    override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<Any?> {
-        return weatherDatabase.weatherDao().getAirQuality()
-    }
-
+    override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<Any?> =
+        weatherDatabase.weatherDao().getAirQuality()
 
     override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long =
         locationTimestamps[locationKey(coordinates)] ?: 0L
 
-    override suspend fun saveLastWeatherUpdateTime(coordinates: Pair<Double, Double>, time: Long) {
+    override suspend fun saveLastWeatherUpdateTime(
+        coordinates: Pair<Double, Double>,
+        time: Long,
+    ) {
         locationTimestamps[locationKey(coordinates)] = time
     }
 
-    override suspend fun saveWeatherData(weatherEntity: Any, airQualityEntity: Any) {
+    override suspend fun saveWeatherData(
+        weatherEntity: Any,
+        airQualityEntity: Any,
+    ) {
         withContext(Dispatchers.IO) {
             if (weatherEntity is WeatherEntity && airQualityEntity is AirQualityEntity) {
                 weatherDatabase.weatherDao().refreshWeather(weatherEntity, airQualityEntity)

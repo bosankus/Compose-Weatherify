@@ -1,158 +1,111 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package bose.ankush.storage.impl
 
 import bose.ankush.storage.api.TokenStorage
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCObjectVar
+import kotlinx.cinterop.alloc
+import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.ptr
+import kotlinx.cinterop.value
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import platform.Foundation.CFBridgingRelease
-import platform.Foundation.CFBridgingRetain
-import platform.Foundation.CFDictionary
-import platform.Foundation.CFMutableDictionary
-import platform.Foundation.CFTypeRef
 import platform.Foundation.NSData
+import platform.Foundation.NSMutableDictionary
+import platform.Foundation.NSString
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.create
+import platform.Foundation.dataUsingEncoding
 import platform.Security.SecItemAdd
 import platform.Security.SecItemCopyMatching
 import platform.Security.SecItemDelete
+import platform.Security.kSecAttrAccessible
 import platform.Security.kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+import platform.Security.kSecAttrAccount
+import platform.Security.kSecAttrService
 import platform.Security.kSecClass
 import platform.Security.kSecClassGenericPassword
+import platform.Security.kSecMatchLimit
 import platform.Security.kSecMatchLimitOne
 import platform.Security.kSecReturnData
 import platform.Security.kSecValueData
-import platform.darwin.noErr
 
 /**
  * SECURITY: Encrypted token storage using iOS Keychain with Secure Enclave support.
  *
- * This implementation uses the native iOS Keychain to store authentication tokens securely.
- * - Tokens are encrypted by the OS and protected by the Secure Enclave when available
- * - Hardware-backed encryption via Secure Enclave (A7+ devices)
- * - Automatic OS-managed key rotation
- * - Protection via device lock screen
- * - Complies with OWASP guidelines for credential storage
- *
- * Keychain items are stored with kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
- * ensuring tokens are only accessible when the device is unlocked and not synced to iCloud.
+ * Tokens are encrypted by the OS, hardware-backed via Secure Enclave (A7+), protected
+ * by device lock, and stored with kSecAttrAccessibleWhenUnlockedThisDeviceOnly so they
+ * are never synced to iCloud.
  */
+@OptIn(ExperimentalForeignApi::class)
 actual class EncryptedTokenStorageImpl : TokenStorage {
-
-    private val _hasToken = MutableStateFlow(false)
+    private val hasTokenState = MutableStateFlow(false)
 
     init {
-        _hasToken.value = retrieveTokenFromKeychain() != null
+        hasTokenState.value = retrieveTokenFromKeychain() != null
     }
 
     actual override suspend fun saveToken(token: String) {
-        val data = token.encodeToByteArray().toNSData()
+        val tokenData = NSString.create(string = token).dataUsingEncoding(NSUTF8StringEncoding)
+            ?: throw Exception("Failed to encode token to NSData")
 
-        // First try to delete any existing token
         deleteTokenFromKeychain()
 
-        // Create Keychain query dictionary for adding new item
-        val query = CFMutableDictionary.create()
-        setKeychainQueryDefaults(query)
+        val query = buildBaseQuery()
+        query.setObject(tokenData, forKey = kSecValueData as Any)
 
-        // Set the token data
-        CFMutableDictionary.setValueAtKey(
-            query,
-            CFBridgingRetain(data),
-            kSecValueData
-        )
-
-        // Add to Keychain
-        val status = SecItemAdd(query as CFDictionary, null)
-        if (status == noErr) {
-            _hasToken.value = true
+        val status = SecItemAdd(query, null)
+        if (status == 0) {
+            hasTokenState.value = true
         } else {
             throw Exception("Failed to save token to Keychain: error code $status")
         }
     }
 
-    actual override suspend fun getToken(): String? {
-        return retrieveTokenFromKeychain()
-    }
+    actual override suspend fun getToken(): String? = retrieveTokenFromKeychain()
 
-    actual override fun hasToken(): Flow<Boolean> = _hasToken.asStateFlow()
+    actual override fun hasToken(): Flow<Boolean> = hasTokenState.asStateFlow()
 
     actual override suspend fun clearToken() {
         deleteTokenFromKeychain()
-        _hasToken.value = false
+        hasTokenState.value = false
     }
 
     private fun retrieveTokenFromKeychain(): String? {
-        val query = CFMutableDictionary.create()
-        setKeychainQueryDefaults(query)
+        val query = buildBaseQuery()
+        query.setObject(true, forKey = kSecReturnData as Any)
+        query.setObject(kSecMatchLimitOne, forKey = kSecMatchLimit as Any)
 
-        // Set return data flag and match limit
-        CFMutableDictionary.setValueAtKey(
-            query,
-            CFBridgingRetain(true),
-            kSecReturnData
-        )
-        CFMutableDictionary.setValueAtKey(
-            query,
-            CFBridgingRetain(kSecMatchLimitOne),
-            platform.Security.kSecMatchLimit
-        )
-
-        // Create result reference
-        val resultRef = mutableListOf<CFTypeRef?>()
-
-        val status = SecItemCopyMatching(query as CFDictionary, resultRef as MutableList<CFTypeRef?>)
-
-        return if (status == noErr && resultRef.isNotEmpty()) {
-            val data = CFBridgingRelease(resultRef[0]) as? NSData
-            data?.let { nsData ->
-                val bytes = ByteArray(nsData.length.toInt())
-                nsData.getBytes(bytes.refTo(0), nsData.length)
-                bytes.decodeToString()
+        return memScoped {
+            val resultRef = alloc<ObjCObjectVar<Any?>>()
+            val status = SecItemCopyMatching(query, resultRef.ptr)
+            if (status == 0) {
+                val nsData = resultRef.value as? NSData
+                nsData?.let {
+                    NSString.create(data = it, encoding = NSUTF8StringEncoding)?.toString()
+                }
+            } else {
+                null
             }
-        } else {
-            null
         }
     }
 
     private fun deleteTokenFromKeychain() {
-        val query = CFMutableDictionary.create()
-        setKeychainQueryDefaults(query)
-
-        val status = SecItemDelete(query as CFDictionary)
-        // Ignore not found errors (errSecItemNotFound = -25300)
-        if (status != noErr && status != -25300) {
+        val query = buildBaseQuery()
+        val status = SecItemDelete(query)
+        // errSecItemNotFound (-25300) is acceptable — nothing to delete
+        if (status != 0 && status != -25300) {
             throw Exception("Failed to delete token from Keychain: error code $status")
         }
     }
 
-    private fun setKeychainQueryDefaults(query: CFMutableDictionary) {
-        // Set item class to generic password
-        CFMutableDictionary.setValueAtKey(
-            query,
-            CFBridgingRetain(kSecClassGenericPassword),
-            kSecClass
-        )
-
-        // Set service and account identifiers
-        CFMutableDictionary.setValueAtKey(
-            query,
-            CFBridgingRetain(SERVICE_ID),
-            platform.Security.kSecAttrService
-        )
-        CFMutableDictionary.setValueAtKey(
-            query,
-            CFBridgingRetain(ACCOUNT_ID),
-            platform.Security.kSecAttrAccount
-        )
-
-        // Set accessibility level: accessible only when device is unlocked, not synced
-        CFMutableDictionary.setValueAtKey(
-            query,
-            CFBridgingRetain(kSecAttrAccessibleWhenUnlockedThisDeviceOnly),
-            platform.Security.kSecAttrAccessible
-        )
-    }
-
-    private fun ByteArray.toNSData(): NSData {
-        return NSData(bytes = this.refTo(0), length = this.size.toULong())
+    private fun buildBaseQuery(): NSMutableDictionary = NSMutableDictionary().apply {
+        setObject(kSecClassGenericPassword, forKey = kSecClass as Any)
+        setObject(SERVICE_ID, forKey = kSecAttrService as Any)
+        setObject(ACCOUNT_ID, forKey = kSecAttrAccount as Any)
+        setObject(kSecAttrAccessibleWhenUnlockedThisDeviceOnly, forKey = kSecAttrAccessible as Any)
     }
 
     companion object {

@@ -15,6 +15,6 @@ interface WeatherApiService {
      */
     suspend fun getOneCallWeather(
         latitude: String,
-        longitude: String
+        longitude: String,
     ): WeatherForecast
 }

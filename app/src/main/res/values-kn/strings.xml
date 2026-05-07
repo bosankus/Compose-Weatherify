@@ -108,4 +108,11 @@
     <string name="place_search_dialog_title">ಸ್ಥಳವನ್ನು ಹುಡುಕಿ</string>
     <string name="place_search_hint">ಪಟ್ಟಣ ಅಥವಾ ವಿಳಾಸ ಟೈಪ್ ಮಾಡಿ…</string>
     <string name="place_search_no_results">\'%1$s\'ಗೆ ಯಾವುದೇ ಸ್ಥಳಗಳು ಕಂಡುಬಂದಿಲ್ಲ</string>
+    <string name="set_as_default_dialog_title">ಹವಾಮಾನ ಸ್ಥಳವಾಗಿ ಬಳಸುವಿರಾ?</string>
+    <string name="set_as_default_dialog_body">ನಿಮ್ಮ ಪ್ರಸ್ತುತ GPS ಸ್ಥಳದ ಬದಲಿಗೆ %1$s ಗಾಗಿ ಹವಾಮಾನ ಡೇಟಾ ತೋರಿಸಲಾಗುತ್ತದೆ.</string>
+    <string name="set_as_default_dialog_warning">ಇದು ಸಕ್ರಿಯವಾಗಿರುವಾಗ ನಿಮ್ಮ ಲೈವ್ GPS ಸ್ಥಳ ಅಪ್‌ಡೇಟ್ ಆಗುವುದಿಲ್ಲ.</string>
+    <string name="set_as_default_confirm_btn">ಡಿಫಾಲ್ಟ್ ಆಗಿ ಹೊಂದಿಸಿ</string>
+    <string name="location_override_chip_label">%1$s ಬಳಸಲಾಗುತ್ತಿದೆ</string>
+    <string name="location_override_reset_btn">GPS ಗೆ ರೀಸೆಟ್ ಮಾಡಿ</string>
+    <string name="location_override_chip_content_desc">ಪ್ರಸ್ತುತ %1$s ಗಾಗಿ ಹವಾಮಾನ ತೋರಿಸಲಾಗುತ್ತಿದೆ. GPS ಗೆ ರೀಸೆಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ.</string>
 </resources>

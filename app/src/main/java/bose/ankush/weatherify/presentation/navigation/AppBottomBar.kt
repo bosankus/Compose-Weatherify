@@ -38,15 +38,16 @@ import bose.ankush.weatherify.R
 fun AppBottomBar(
     isVisible: MutableState<Boolean>,
     navController: NavController,
-    toastAnchorState: ToastAnchorState? = null
+    toastAnchorState: ToastAnchorState? = null,
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    val screenItems = listOf(
-        Screen.HomeNestedNav,
-        Screen.SavedLocationsNestedNav,
-        Screen.ProfileNestedNav
-    )
+    val screenItems =
+        listOf(
+            Screen.HomeNestedNav,
+            Screen.SavedLocationsNestedNav,
+            Screen.ProfileNestedNav,
+        )
 
     AnimatedVisibility(
         modifier = if (toastAnchorState != null) Modifier.toastAnchor(toastAnchorState) else Modifier,
@@ -56,43 +57,47 @@ fun AppBottomBar(
     ) {
         // Enhanced Glassmorphic Navigation Bar
         NavigationBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                .height(64.dp)
-                .shadow(
-                    elevation = 6.dp,
-                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-                    spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                )
-                .background(
-                    MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp).copy(alpha = 0.8f)
-                )
-                .border(
-                    width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-                ),
-            containerColor = Color.Transparent // Make the container transparent to show our custom background
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                    .height(64.dp)
+                    .shadow(
+                        elevation = 6.dp,
+                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    )
+                    .background(
+                        MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp).copy(alpha = 0.8f),
+                    )
+                    .border(
+                        width = 0.5.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                    ),
+            containerColor = Color.Transparent, // Make the container transparent to show our custom background
         ) {
             screenItems.forEachIndexed { _, screen ->
                 NavigationBarItem(
                     icon = {
                         when (screen.resourceId) {
-                            R.string.home_nested_nav -> Icon(
-                                painter = painterResource(id = R.drawable.ic_home),
-                                contentDescription = stringResource(id = screen.resourceId)
-                            )
+                            R.string.home_nested_nav ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_home),
+                                    contentDescription = stringResource(id = screen.resourceId),
+                                )
 
-                            R.string.saved_locations_nested_nav -> Icon(
-                                imageVector = Icons.Outlined.BookmarkBorder,
-                                contentDescription = stringResource(id = R.string.saved_locations_icon_content)
-                            )
+                            R.string.saved_locations_nested_nav ->
+                                Icon(
+                                    imageVector = Icons.Outlined.BookmarkBorder,
+                                    contentDescription = stringResource(id = R.string.saved_locations_icon_content),
+                                )
 
-                            R.string.profile_nested_nav -> Icon(
-                                painter = painterResource(id = R.drawable.ic_profile),
-                                contentDescription = stringResource(id = screen.resourceId)
-                            )
+                            R.string.profile_nested_nav ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_profile),
+                                    contentDescription = stringResource(id = screen.resourceId),
+                                )
                         }
                     },
                     selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
@@ -105,11 +110,12 @@ fun AppBottomBar(
                             restoreState = true
                         }
                     },
-                    colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+                    colors =
+                        NavigationBarItemDefaults.colors(
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        ),
                 )
             }
         }

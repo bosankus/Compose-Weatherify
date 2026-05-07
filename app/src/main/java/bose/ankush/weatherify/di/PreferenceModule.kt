@@ -14,13 +14,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class PreferenceModule {
-
-    /**
-     * Binds PreferenceManagerImpl to PreferenceManager interface
-     */
+    @Suppress("unused")
     @Binds
     @Singleton
-    abstract fun bindPreferenceManager(
-        preferenceManagerImpl: PreferenceManagerImpl
-    ): PreferenceManager
+    abstract fun bindPreferenceManager(preferenceManagerImpl: PreferenceManagerImpl): PreferenceManager
 }

@@ -23,13 +23,13 @@ import kotlinx.coroutines.withContext
  * - Complies with OWASP guidelines for credential storage
  */
 actual class EncryptedTokenStorageImpl : TokenStorage {
-
     private val context: Context by lazy {
         getApplicationContext()
     }
 
     private val masterKey: MasterKey by lazy {
-        MasterKey.Builder(context)
+        MasterKey
+            .Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
     }
@@ -40,7 +40,7 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
             PREFS_NAME,
             masterKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
         )
     }
 
@@ -57,11 +57,10 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
         }
     }
 
-    actual override suspend fun getToken(): String? {
-        return withContext(Dispatchers.IO) {
+    actual override suspend fun getToken(): String? =
+        withContext(Dispatchers.IO) {
             encryptedSharedPreferences.getString(TOKEN_KEY, null)
         }
-    }
 
     actual override fun hasToken(): Flow<Boolean> = _hasToken.asStateFlow()
 
@@ -86,8 +85,7 @@ fun setApplicationContext(context: Context) {
     appContext = context
 }
 
-private fun getApplicationContext(): Context {
-    return appContext ?: throw IllegalStateException(
-        "Application context not initialized. Call setApplicationContext() in your Application.onCreate()"
+private fun getApplicationContext(): Context =
+    appContext ?: throw IllegalStateException(
+        "Application context not initialized. Call setApplicationContext() in your Application.onCreate()",
     )
-}

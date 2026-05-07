@@ -14,7 +14,7 @@ data class CreateOrderRequest(
     val receipt: String? = null,
     @SerialName("partial_payment") val partialPayment: Boolean? = null,
     @SerialName("first_payment_min_amount") val firstPaymentMinAmount: Long? = null,
-    val notes: Map<String, String>? = null
+    val notes: Map<String, String>? = null,
 )
 
 @Serializable
@@ -24,14 +24,14 @@ data class CreateOrderData(
     val currency: String,
     val receipt: String? = null,
     val status: String? = null,
-    val createdAt: Long? = null
+    val createdAt: Long? = null,
 )
 
 @Serializable
 data class CreateOrderResponse(
     val message: String? = null,
     val data: JsonElement? = null,
-    val status: JsonElement? = null
+    val status: JsonElement? = null,
 ) {
     /**
      * Safely extract CreateOrderData when the backend returns the expected object in `data`.
@@ -39,15 +39,17 @@ data class CreateOrderResponse(
      */
     fun extractData(): CreateOrderData? {
         val obj = data as? JsonObject ?: return null
-        val orderId = obj["orderId"]?.jsonPrimitive?.contentOrNull
-            ?: obj["order_id"]?.jsonPrimitive?.contentOrNull ?: ""
+        val orderId =
+            obj["orderId"]?.jsonPrimitive?.contentOrNull
+                ?: obj["order_id"]?.jsonPrimitive?.contentOrNull ?: ""
         val amountStr = obj["amount"]?.jsonPrimitive?.content
         val amount = amountStr?.toLongOrNull() ?: 0L
         val currency = obj["currency"]?.jsonPrimitive?.contentOrNull ?: ""
         val receipt = obj["receipt"]?.jsonPrimitive?.contentOrNull
         val statusStr = obj["status"]?.jsonPrimitive?.contentOrNull
-        val createdAt = obj["createdAt"]?.jsonPrimitive?.content?.toLongOrNull()
-            ?: obj["created_at"]?.jsonPrimitive?.content?.toLongOrNull()
+        val createdAt =
+            obj["createdAt"]?.jsonPrimitive?.content?.toLongOrNull()
+                ?: obj["created_at"]?.jsonPrimitive?.content?.toLongOrNull()
         return if (orderId.isNotBlank() && amount > 0 && currency.isNotBlank()) {
             CreateOrderData(
                 orderId = orderId,
@@ -55,9 +57,11 @@ data class CreateOrderResponse(
                 currency = currency,
                 receipt = receipt,
                 status = statusStr,
-                createdAt = createdAt
+                createdAt = createdAt,
             )
-        } else null
+        } else {
+            null
+        }
     }
 }
 
@@ -65,17 +69,17 @@ data class CreateOrderResponse(
 data class VerifyPaymentRequest(
     @SerialName("razorpay_order_id") val razorpayOrderId: String,
     @SerialName("razorpay_payment_id") val razorpayPaymentId: String,
-    @SerialName("razorpay_signature") val razorpaySignature: String
+    @SerialName("razorpay_signature") val razorpaySignature: String,
 )
 
 @Serializable
 data class VerifyPaymentData(
-    val verified: Boolean = false
+    val verified: Boolean = false,
 )
 
 @Serializable
 data class VerifyPaymentResponse(
     @SerialName("status") val success: Boolean = false,
     val message: String? = null,
-    val data: VerifyPaymentData? = null
+    val data: VerifyPaymentData? = null,
 )

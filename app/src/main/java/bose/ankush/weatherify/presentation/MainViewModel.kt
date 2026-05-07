@@ -69,7 +69,9 @@ import javax.inject.Inject
  */
 @OptIn(FlowPreview::class)
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class MainViewModel
+@Inject
+constructor(
     private val refreshWeatherReport: RefreshWeatherReport,
     private val getWeatherReport: GetWeatherReport,
     private val getAirQuality: GetAirQuality,
@@ -85,7 +87,6 @@ class MainViewModel @Inject constructor(
     loggerFactory: LoggerFactory,
     private val deviceInfoProvider: DeviceInfoProvider,
 ) : ViewModel() {
-
     private val logger = loggerFactory.create("${MainViewModel::class.simpleName} ->")
 
     // Permission dialog queue for UI
@@ -103,7 +104,8 @@ class MainViewModel @Inject constructor(
     val showNotificationCardItem = _showNotificationCardItem.asStateFlow()
 
     private val _isNotificationPermissionPermanentlyDeclined = MutableStateFlow(false)
-    val isNotificationPermissionPermanentlyDeclined = _isNotificationPermissionPermanentlyDeclined.asStateFlow()
+    val isNotificationPermissionPermanentlyDeclined =
+        _isNotificationPermissionPermanentlyDeclined.asStateFlow()
 
     // Auth state flows
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
@@ -130,13 +132,18 @@ class MainViewModel @Inject constructor(
     private var dataLoadingJob: Job? = null
 
     // Exception handler for data fetch
-    private val dataFetchExceptionHandler = CoroutineExceptionHandler { _, e ->
-        if (e !is CancellationException) {
-            val error = if (e is Exception) errorResponseFromException(e)
-            else UiText.StringResource(resId = R.string.general_error_txt)
-            _uiState.update { UIState(error = error) }
+    private val dataFetchExceptionHandler =
+        CoroutineExceptionHandler { _, e ->
+            if (e !is CancellationException) {
+                val error =
+                    if (e is Exception) {
+                        errorResponseFromException(e)
+                    } else {
+                        UiText.StringResource(resId = R.string.general_error_txt)
+                    }
+                _uiState.update { UIState(error = error) }
+            }
         }
-    }
 
     init {
         logger.d("MainViewModel initialized")
@@ -158,7 +165,8 @@ class MainViewModel @Inject constructor(
         // Reactively refresh weather data when premium tier changes (activation or expiry).
         // drop(1) skips the initial emission so we only react to actual changes.
         viewModelScope.launch {
-            preferenceManager.getUserPreferencesFlow()
+            preferenceManager
+                .getUserPreferencesFlow()
                 .map { it.isPremium }
                 .distinctUntilChanged()
                 .drop(1)
@@ -180,11 +188,12 @@ class MainViewModel @Inject constructor(
         // Load saved locations and premium status on init
         viewModelScope.launch(dispatchers.io) {
             preferenceManager.getUserPreferencesFlow().collect { prefs ->
-                val premiumActive = isPremiumActive(
-                    prefs.premiumExpiry?.let { millis ->
-                        Instant.fromEpochMilliseconds(millis).toString()
-                    }
-                )
+                val premiumActive =
+                    isPremiumActive(
+                        prefs.premiumExpiry?.let { millis ->
+                            Instant.fromEpochMilliseconds(millis).toString()
+                        },
+                    )
                 val wasPremium = _savedLocationsState.value.isPremium
                 _savedLocationsState.update { it.copy(isPremium = premiumActive) }
                 if (premiumActive && !wasPremium) loadSavedLocations()
@@ -220,7 +229,10 @@ class MainViewModel @Inject constructor(
     }
 
     /** Handle permission result, fetch location if granted. */
-    fun onPermissionResult(permission: String, isGranted: Boolean) {
+    fun onPermissionResult(
+        permission: String,
+        isGranted: Boolean,
+    ) {
         logger.d("Permission result - permission: $permission, granted: $isGranted")
         if (isGranted) {
             logger.d("Permission granted, fetching location")
@@ -240,18 +252,19 @@ class MainViewModel @Inject constructor(
     /** Show/hide notification banner based on remote config. */
     fun updateShowNotificationBannerState(launchState: Boolean) {
         notificationBannerJob?.cancel()
-        notificationBannerJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            try {
-                val enabled = remoteConfigService.getBoolean(ENABLE_NOTIFICATION)
-                _showNotificationCardItem.update { enabled && launchState }
-                logger.d("Notification feature is ${if (enabled) "enabled" else "disabled"}")
-            } catch (_: CancellationException) {
-                throw CancellationException()
-            } catch (e: Exception) {
-                logger.e("Error updating notification banner state", e)
-                _uiState.update { it.copy(error = errorResponseFromException(e)) }
+        notificationBannerJob =
+            viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+                try {
+                    val enabled = remoteConfigService.getBoolean(ENABLE_NOTIFICATION)
+                    _showNotificationCardItem.update { enabled && launchState }
+                    logger.d("Notification feature is ${if (enabled) "enabled" else "disabled"}")
+                } catch (_: CancellationException) {
+                    throw CancellationException()
+                } catch (e: Exception) {
+                    logger.e("Error updating notification banner state", e)
+                    _uiState.update { it.copy(error = errorResponseFromException(e)) }
+                }
             }
-        }
     }
 
     /** Update whether notification permission is permanently declined. */
@@ -260,46 +273,61 @@ class MainViewModel @Inject constructor(
         _isNotificationPermissionPermanentlyDeclined.update { isPermanentlyDeclined }
     }
 
-    /** Fetch and save user location, then load initial data. */
+    /** Fetch and save user location, then load initial data. Skips GPS when override is active. */
     fun fetchAndSaveLocationCoordinates() {
         logger.d("Starting location fetch")
         _uiState.update { UIState(isLoading = true) }
         locationJob?.cancel()
-        locationJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            try {
-                locationClient.getCurrentLocation().fold(
-                    onSuccess = { loc ->
-                        logger.i("Location fetched successfully - lat: ${loc.latitude}, lon: ${loc.longitude}")
-                        preferenceManager.saveLocationPreferences(loc.latitude to loc.longitude)
-                        logger.d("Location preferences saved")
-                        performInitialDataLoading()
-                    },
-                    onFailure = { e ->
-                        logger.e("Location fetch failed", e)
-                        val isGpsDisabled = e is LocationClient.LocationException &&
-                                e.message?.contains("GPS is disabled", ignoreCase = true) == true
-                        val error = if (isGpsDisabled)
-                            UiText.StringResource(resId = R.string.gps_disabled_error_txt)
-                        else if (e is Exception) errorResponseFromException(e)
-                        else UiText.StringResource(resId = R.string.general_error_txt)
-                        _uiState.update {
-                            it.copy(
-                                isLoading = false,
-                                error = error,
-                                isGpsDisabled = isGpsDisabled
-                            )
-                        }
+        locationJob =
+            viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+                val prefs = preferenceManager.getUserPreferencesFlow().first()
+                if (prefs.isLocationOverridden) {
+                    logger.d("Location override active — skipping GPS, using saved location")
+                    performInitialDataLoading()
+                    return@launch
+                }
+                try {
+                    locationClient.getCurrentLocation().fold(
+                        onSuccess = { loc ->
+                            logger.i("Location fetched successfully - lat: ${loc.latitude}, lon: ${loc.longitude}")
+                            preferenceManager.saveLocationPreferences(loc.latitude to loc.longitude)
+                            logger.d("Location preferences saved")
+                            performInitialDataLoading()
+                        },
+                        onFailure = { e ->
+                            logger.e("Location fetch failed", e)
+                            val isGpsDisabled =
+                                e is LocationClient.LocationException &&
+                                        e.message?.contains(
+                                            "GPS is disabled",
+                                            ignoreCase = true
+                                        ) == true
+                            val error =
+                                if (isGpsDisabled) {
+                                    UiText.StringResource(resId = R.string.gps_disabled_error_txt)
+                                } else if (e is Exception) {
+                                    errorResponseFromException(e)
+                                } else {
+                                    UiText.StringResource(resId = R.string.general_error_txt)
+                                }
+                            _uiState.update {
+                                it.copy(
+                                    isLoading = false,
+                                    error = error,
+                                    isGpsDisabled = isGpsDisabled,
+                                )
+                            }
+                        },
+                    )
+                } catch (_: CancellationException) {
+                    logger.d("Location fetch cancelled")
+                } catch (e: Exception) {
+                    logger.e("Error fetching location coordinates", e)
+                    _uiState.update {
+                        it.copy(isLoading = false, error = errorResponseFromException(e))
                     }
-                )
-            } catch (_: CancellationException) {
-                logger.d("Location fetch cancelled")
-            } catch (e: Exception) {
-                logger.e("Error fetching location coordinates", e)
-                _uiState.update {
-                    it.copy(isLoading = false, error = errorResponseFromException(e))
                 }
             }
-        }
     }
 
     /** Refresh weather data without clearing the existing UI (pull-to-refresh). */
@@ -307,105 +335,148 @@ class MainViewModel @Inject constructor(
         logger.d("Starting pull-to-refresh")
         _uiState.update { it.copy(isRefreshing = true) }
         locationJob?.cancel()
-        locationJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            try {
-                locationClient.getCurrentLocation().fold(
-                    onSuccess = { loc ->
-                        logger.i("Location fetched for refresh - lat: ${loc.latitude}, lon: ${loc.longitude}")
-                        preferenceManager.saveLocationPreferences(loc.latitude to loc.longitude)
-                        performInitialDataLoading(forceRefresh = true)
-                    },
-                    onFailure = { e ->
-                        logger.e("Location fetch failed during refresh", e)
-                        val isGpsDisabled = e is LocationClient.LocationException &&
-                                e.message?.contains("GPS is disabled", ignoreCase = true) == true
-                        val error = if (isGpsDisabled)
-                            UiText.StringResource(resId = R.string.gps_disabled_error_txt)
-                        else if (e is Exception) errorResponseFromException(e)
-                        else UiText.StringResource(resId = R.string.general_error_txt)
-                        _uiState.update {
-                            it.copy(isRefreshing = false, error = error, isGpsDisabled = isGpsDisabled)
-                        }
+        locationJob =
+            viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+                val prefs = preferenceManager.getUserPreferencesFlow().first()
+                if (prefs.isLocationOverridden) {
+                    logger.d("Location override active — refreshing with saved location")
+                    performInitialDataLoading(forceRefresh = true)
+                    return@launch
+                }
+                try {
+                    locationClient.getCurrentLocation().fold(
+                        onSuccess = { loc ->
+                            logger.i("Location fetched for refresh - lat: ${loc.latitude}, lon: ${loc.longitude}")
+                            preferenceManager.saveLocationPreferences(loc.latitude to loc.longitude)
+                            performInitialDataLoading(forceRefresh = true)
+                        },
+                        onFailure = { e ->
+                            logger.e("Location fetch failed during refresh", e)
+                            val isGpsDisabled =
+                                e is LocationClient.LocationException &&
+                                        e.message?.contains(
+                                            "GPS is disabled",
+                                            ignoreCase = true
+                                        ) == true
+                            val error =
+                                if (isGpsDisabled) {
+                                    UiText.StringResource(resId = R.string.gps_disabled_error_txt)
+                                } else if (e is Exception) {
+                                    errorResponseFromException(e)
+                                } else {
+                                    UiText.StringResource(resId = R.string.general_error_txt)
+                                }
+                            _uiState.update {
+                                it.copy(
+                                    isRefreshing = false,
+                                    error = error,
+                                    isGpsDisabled = isGpsDisabled
+                                )
+                            }
+                        },
+                    )
+                } catch (_: CancellationException) {
+                    logger.d("Pull-to-refresh cancelled")
+                } catch (e: Exception) {
+                    logger.e("Error during pull-to-refresh", e)
+                    _uiState.update {
+                        it.copy(isRefreshing = false, error = errorResponseFromException(e))
                     }
-                )
-            } catch (_: CancellationException) {
-                logger.d("Pull-to-refresh cancelled")
-            } catch (e: Exception) {
-                logger.e("Error during pull-to-refresh", e)
-                _uiState.update {
-                    it.copy(isRefreshing = false, error = errorResponseFromException(e))
                 }
             }
-        }
     }
 
-    /** Load weather and air quality data for UI. */
+    /** Load weather and air quality data for UI. Uses override coordinates when active. */
     private fun performInitialDataLoading(forceRefresh: Boolean = false) {
         logger.d("Starting initial data loading (forceRefresh=$forceRefresh)")
         dataLoadingJob?.cancel()
-        dataLoadingJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            try {
-                val prefs = preferenceManager.getUserPreferencesFlow().first()
-                val lat = prefs.latitude
-                val lon = prefs.longitude
+        dataLoadingJob =
+            viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+                try {
+                    val prefs = preferenceManager.getUserPreferencesFlow().first()
+                    val isOverridden = prefs.isLocationOverridden &&
+                            prefs.overrideLat != null && prefs.overrideLon != null
+                    val lat = if (isOverridden) prefs.overrideLat else prefs.latitude
+                    val lon = if (isOverridden) prefs.overrideLon else prefs.longitude
+                    val overrideName = if (isOverridden) prefs.overrideLocationName else null
 
-                if (lat != null && lon != null) {
-                    val location = lat to lon
-                    logger.d("Loading data for location - lat: $lat, lon: $lon")
-
-                    refreshWeatherReport(location, forceRefresh)
-                    logger.v("Refreshed weather report cache")
-
-                    getAirQuality(location.first, location.second)
-                        .combine(getWeatherReport(location)) { air, weather ->
-                            logger.d("Data loaded successfully")
-                            UIState(
+                    if (lat != null && lon != null) {
+                        fetchWeatherData(lat, lon, isOverridden, overrideName, forceRefresh)
+                    } else {
+                        logger.w("Location coordinates not found in preferences")
+                        _uiState.update {
+                            it.copy(
                                 isLoading = false,
-                                userLocation = location,
-                                weatherData = weather,
-                                airQualityData = air,
-                                error = null
+                                isRefreshing = false,
+                                error = UiText.StringResource(R.string.default_coordinates_txt),
                             )
                         }
-                        .flowOn(dispatchers.io)
-                        .catch { e ->
-                            if (e is CancellationException) throw e
-                            logger.e("Error loading weather data", e)
-                            val error = if (e is Exception) errorResponseFromException(e)
-                            else UiText.StringResource(resId = R.string.general_error_txt)
-                            _uiState.update {
-                                it.copy(isLoading = false, isRefreshing = false, error = error)
-                            }
-                        }
-                        .collectLatest { state -> _uiState.value = state }
-                } else {
-                    logger.w("Location coordinates not found in preferences")
+                    }
+                } catch (_: CancellationException) {
+                    logger.d("Initial data loading cancelled")
+                } catch (e: Exception) {
+                    logger.e("Error in initial data loading", e)
                     _uiState.update {
                         it.copy(
                             isLoading = false,
                             isRefreshing = false,
-                            error = UiText.StringResource(R.string.default_coordinates_txt)
+                            error = errorResponseFromException(e)
                         )
                     }
                 }
-            } catch (_: CancellationException) {
-                logger.d("Initial data loading cancelled")
-            } catch (e: Exception) {
-                logger.e("Error in initial data loading", e)
-                _uiState.update {
-                    it.copy(isLoading = false, isRefreshing = false, error = errorResponseFromException(e))
-                }
             }
-        }
+    }
+
+    /** Fetches weather + air quality for the given coordinates and updates [_uiState]. */
+    private suspend fun fetchWeatherData(
+        lat: Double,
+        lon: Double,
+        isOverridden: Boolean,
+        overrideName: String?,
+        forceRefresh: Boolean,
+    ) {
+        val location = lat to lon
+        logger.d("Loading data for location - lat: $lat, lon: $lon, overridden: $isOverridden")
+
+        refreshWeatherReport(location, forceRefresh)
+        logger.v("Refreshed weather report cache")
+
+        getAirQuality(location.first, location.second)
+            .combine(getWeatherReport(location)) { air, weather ->
+                logger.d("Data loaded successfully")
+                UIState(
+                    isLoading = false,
+                    userLocation = location,
+                    weatherData = weather,
+                    airQualityData = air,
+                    error = null,
+                    isLocationOverridden = isOverridden,
+                    activeLocationName = overrideName,
+                )
+            }.flowOn(dispatchers.io)
+            .catch { e ->
+                if (e is CancellationException) throw e
+                logger.e("Error loading weather data", e)
+                val error =
+                    if (e is Exception) errorResponseFromException(e)
+                    else UiText.StringResource(resId = R.string.general_error_txt)
+                _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
+            }.collectLatest { state -> _uiState.value = state }
     }
 
     /** Login with email and password. */
-    fun login(email: String, password: String) = launchAuth("Login", email) {
+    fun login(
+        email: String,
+        password: String,
+    ) = launchAuth("Login", email) {
         authRepository.login(email, password)
     }
 
     /** Register with email and password. */
-    fun register(email: String, password: String) = launchAuth("Registration", email) {
+    fun register(
+        email: String,
+        password: String,
+    ) = launchAuth("Registration", email) {
         authRepository.register(
             email = email,
             password = password,
@@ -415,14 +486,14 @@ class MainViewModel @Inject constructor(
             osVersion = deviceInfoProvider.getOsVersion(),
             appVersion = deviceInfoProvider.getAppVersion(),
             registrationSource = deviceInfoProvider.getRegistrationSource(),
-            firebaseToken = deviceInfoProvider.getFirebaseToken()
+            firebaseToken = deviceInfoProvider.getFirebaseToken(),
         )
     }
 
     private fun launchAuth(
         actionName: String,
         email: String,
-        block: suspend () -> AuthResponse
+        block: suspend () -> AuthResponse,
     ) = viewModelScope.launch(dispatchers.io) {
         logger.d("$actionName attempt for email: $email")
         _authState.value = AuthState.Loading
@@ -431,76 +502,91 @@ class MainViewModel @Inject constructor(
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             logger.e("$actionName failed for email: $email", e)
-            _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "$actionName failed"))
+            _authState.value =
+                AuthState.Error(UiText.DynamicText(e.message ?: "$actionName failed"))
         }
     }
 
     /** Logout user. */
-    fun logout() = viewModelScope.launch(dispatchers.io) {
-        logger.d("Logout initiated")
-        _authState.value = AuthState.LogoutLoading
-        authRepository.logout().fold(
-            onSuccess = {
-                logger.i("Logout successful")
-                weatherRepository.clearAllData()
-                preferenceManager.clearAll()
-                _authState.value = AuthState.LoggedOut
-            },
-            onFailure = { e ->
-                logger.e("Logout failed", e)
-                _authState.value = AuthState.Error(UiText.DynamicText(e.message ?: "Logout failed"))
-            }
-        )
-    }
+    fun logout() =
+        viewModelScope.launch(dispatchers.io) {
+            logger.d("Logout initiated")
+            _authState.value = AuthState.LogoutLoading
+            authRepository.logout().fold(
+                onSuccess = {
+                    logger.i("Logout successful")
+                    weatherRepository.clearAllData()
+                    preferenceManager.clearAll()
+                    _authState.value = AuthState.LoggedOut
+                },
+                onFailure = { e ->
+                    logger.e("Logout failed", e)
+                    _authState.value =
+                        AuthState.Error(UiText.DynamicText(e.message ?: "Logout failed"))
+                },
+            )
+        }
 
-    private suspend fun silentTokenRefresh() = withContext(dispatchers.io) {
-        logger.d("Starting silent token refresh")
-        when (val result = tokenManager.refreshToken()) {
-            is TokenResult.Valid -> logger.i("Token refreshed successfully")
-            is TokenResult.NoToken -> {
-                tokenManager.forceLogout()
-                emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
-            }
-            is TokenResult.InvalidToken -> {
-                tokenManager.forceLogout()
-                emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
-            }
-            is TokenResult.Error -> {
-                logger.e("Silent token refresh error", result.exception)
-                emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+    private suspend fun silentTokenRefresh() =
+        withContext(dispatchers.io) {
+            logger.d("Starting silent token refresh")
+            when (val result = tokenManager.refreshToken()) {
+                is TokenResult.Valid -> logger.i("Token refreshed successfully")
+                is TokenResult.NoToken -> {
+                    tokenManager.forceLogout()
+                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+                }
+
+                is TokenResult.InvalidToken -> {
+                    tokenManager.forceLogout()
+                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+                }
+
+                is TokenResult.Error -> {
+                    logger.e("Silent token refresh error", result.exception)
+                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+                }
             }
         }
-    }
 
     /** Called on every app foreground to sync token and premium status with the server. */
-    fun refreshTokenOnForeground() = viewModelScope.launch(dispatchers.io) {
-        try {
-            val response = authRepository.refreshToken() ?: return@launch
-            if (response.isSuccess()) {
-                val expiryMillis = response.data?.premiumExpiresAt?.let { parseIsoToMillis(it) }
-                val active = isPremiumActive(response.data?.premiumExpiresAt)
-                preferenceManager.savePremiumStatus(isPremium = active, expiryMillis = expiryMillis)
-            } else {
-                // 400 Bad Request — token is invalid, force logout
-                tokenManager.forceLogout()
-                emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+    fun refreshTokenOnForeground() =
+        viewModelScope.launch(dispatchers.io) {
+            try {
+                val response = authRepository.refreshToken() ?: return@launch
+                if (response.isSuccess()) {
+                    val expiryMillis = response.data?.premiumExpiresAt?.let { parseIsoToMillis(it) }
+                    val active = isPremiumActive(response.data?.premiumExpiresAt)
+                    preferenceManager.savePremiumStatus(
+                        isPremium = active,
+                        expiryMillis = expiryMillis
+                    )
+                } else {
+                    // 400 Bad Request — token is invalid, force logout
+                    tokenManager.forceLogout()
+                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
+                }
+            } catch (_: CancellationException) {
+                // ignore
+            } catch (e: Exception) {
+                logger.e("Foreground token refresh error", e)
             }
-        } catch (_: CancellationException) {
-            // ignore
-        } catch (e: Exception) {
-            logger.e("Foreground token refresh error", e)
         }
-    }
 
     private fun handleAuthResponse(response: AuthResponse) {
-        val data = response.data
-            ?.takeIf { response.isSuccess() && it.token.isNotBlank() }
-            ?: run {
-                logger.w("Authentication failed - success: ${response.isSuccess()}")
-                _authState.value =
-                    AuthState.Error(UiText.DynamicText(response.message ?: "Authentication failed"))
-                return
-            }
+        val data =
+            response.data
+                ?.takeIf { response.isSuccess() && it.token.isNotBlank() }
+                ?: run {
+                    logger.w("Authentication failed - success: ${response.isSuccess()}")
+                    _authState.value =
+                        AuthState.Error(
+                            UiText.DynamicText(
+                                response.message ?: "Authentication failed"
+                            )
+                        )
+                    return
+                }
 
         logger.i("Authentication successful")
 
@@ -518,8 +604,9 @@ class MainViewModel @Inject constructor(
         // Save premium status to preferences so PaymentViewModel observes the update reactively.
         viewModelScope.launch(dispatchers.io) {
             logger.i("User is premium, saving premium status")
-            val millis = expiryMillis
-                ?: (Clock.System.now().toEpochMilliseconds() + 365L * 24 * 60 * 60 * 1000)
+            val millis =
+                expiryMillis
+                    ?: (Clock.System.now().toEpochMilliseconds() + 365L * 24 * 60 * 60 * 1000)
             preferenceManager.savePremiumStatus(isPremium = true, expiryMillis = millis)
             withContext(dispatchers.main) {
                 _authState.value = AuthState.Success
@@ -527,11 +614,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun parseIsoToMillis(isoDate: String): Long? = try {
-        Instant.parse(isoDate).toEpochMilliseconds()
-    } catch (_: Exception) {
-        null
-    }
+    private fun parseIsoToMillis(isoDate: String): Long? =
+        try {
+            Instant.parse(isoDate).toEpochMilliseconds()
+        } catch (_: Exception) {
+            null
+        }
 
     /** Reset authentication state. */
     fun resetAuthState() {
@@ -550,7 +638,7 @@ class MainViewModel @Inject constructor(
                     _savedLocationsState.update {
                         it.copy(
                             isLoading = false,
-                            locations = locations
+                            locations = locations,
                         )
                     }
                 },
@@ -559,17 +647,21 @@ class MainViewModel @Inject constructor(
                         _savedLocationsState.update {
                             it.copy(
                                 isLoading = false,
-                                error = e.message ?: "Failed to load saved locations."
+                                error = "Unable to load saved locations. Please try again later.",
                             )
                         }
                     }
-                }
+                },
             )
         }
     }
 
     /** Save a new location. */
-    fun saveLocation(name: String, lat: Double, lon: Double) {
+    fun saveLocation(
+        name: String,
+        lat: Double,
+        lon: Double,
+    ) {
         viewModelScope.launch(dispatchers.io) {
             _savedLocationsState.update { it.copy(isLoading = true, error = null) }
             savedLocationsUseCase.saveLocation(name, lat, lon).fold(
@@ -577,7 +669,7 @@ class MainViewModel @Inject constructor(
                     _savedLocationsState.update {
                         it.copy(
                             isLoading = false,
-                            successMessage = "Location saved successfully"
+                            successMessage = "Location saved successfully",
                         )
                     }
                     loadSavedLocations()
@@ -587,11 +679,11 @@ class MainViewModel @Inject constructor(
                         _savedLocationsState.update {
                             it.copy(
                                 isLoading = false,
-                                error = e.message ?: "Failed to save location."
+                                error = "Unable to save location. Please try again later.",
                             )
                         }
                     }
-                }
+                },
             )
         }
     }
@@ -605,7 +697,7 @@ class MainViewModel @Inject constructor(
                     _savedLocationsState.update {
                         it.copy(
                             isLoading = false,
-                            successMessage = "Location deleted successfully"
+                            successMessage = "Location deleted successfully",
                         )
                     }
                     loadSavedLocations()
@@ -615,11 +707,11 @@ class MainViewModel @Inject constructor(
                         _savedLocationsState.update {
                             it.copy(
                                 isLoading = false,
-                                error = e.message ?: "Failed to delete location."
+                                error = "Unable to delete location. Please try again later.",
                             )
                         }
                     }
-                }
+                },
             )
         }
     }
@@ -644,6 +736,47 @@ class MainViewModel @Inject constructor(
         _savedLocationsState.update { it.copy(error = null, successMessage = null) }
     }
 
+    /** Pin a saved location as the default weather source and reload weather data. */
+    fun setDefaultLocation(lat: Double, lon: Double, name: String) {
+        _uiState.update { UIState(isLoading = true) }
+        dataLoadingJob?.cancel()
+        dataLoadingJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+            try {
+                logger.i("Setting default location override: $name ($lat, $lon)")
+                preferenceManager.saveLocationOverride(lat, lon, name)
+                // Use coordinates directly — avoids DataStore re-read race condition
+                fetchWeatherData(
+                    lat,
+                    lon,
+                    isOverridden = true,
+                    overrideName = name,
+                    forceRefresh = true
+                )
+            } catch (_: CancellationException) {
+                logger.d("setDefaultLocation cancelled")
+            } catch (e: Exception) {
+                logger.e("Error setting default location", e)
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = errorResponseFromException(e)
+                    )
+                }
+            }
+        }
+    }
+
+    /** Clear the pinned location override and revert to live GPS. */
+    fun clearLocationOverride() {
+        viewModelScope.launch(dispatchers.io) {
+            logger.i("Clearing location override — reverting to GPS")
+            preferenceManager.clearLocationOverride()
+            withContext(dispatchers.main) {
+                fetchAndSaveLocationCoordinates()
+            }
+        }
+    }
+
     /** Fetch place suggestions for given query. */
     private suspend fun fetchPlaceSuggestions(query: String) {
         _placeSearchState.update { it.copy(isLoading = true, error = null) }
@@ -656,11 +789,11 @@ class MainViewModel @Inject constructor(
                     _placeSearchState.update {
                         it.copy(
                             isLoading = false,
-                            error = "Unable to fetch places. Please try again."
+                            error = "Unable to fetch places. Please try again.",
                         )
                     }
                 }
-            }
+            },
         )
     }
 
@@ -676,9 +809,16 @@ class MainViewModel @Inject constructor(
 /** Authentication state. */
 sealed class AuthState {
     object Initial : AuthState()
+
     object Loading : AuthState()
+
     object LogoutLoading : AuthState()
+
     object Success : AuthState()
+
     object LoggedOut : AuthState()
-    data class Error(val message: UiText) : AuthState()
+
+    data class Error(
+        val message: UiText,
+    ) : AuthState()
 }

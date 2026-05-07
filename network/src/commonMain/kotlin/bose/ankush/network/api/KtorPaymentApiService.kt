@@ -17,24 +17,23 @@ import io.ktor.http.contentType
  */
 class KtorPaymentApiService(
     private val httpClient: HttpClient,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : PaymentApiService {
-
-    override suspend fun createOrder(request: CreateOrderRequest): CreateOrderResponse {
-        return NetworkUtils.retryWithExponentialBackoff {
-            httpClient.post("$baseUrl/create-order") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
+    override suspend fun createOrder(request: CreateOrderRequest): CreateOrderResponse =
+        NetworkUtils.retryWithExponentialBackoff {
+            httpClient
+                .post("$baseUrl/create-order") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
         }
-    }
 
-    override suspend fun verifyPayment(request: VerifyPaymentRequest): VerifyPaymentResponse {
-        return NetworkUtils.retryWithExponentialBackoff {
-            httpClient.post("$baseUrl/store-payment") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-            }.body()
+    override suspend fun verifyPayment(request: VerifyPaymentRequest): VerifyPaymentResponse =
+        NetworkUtils.retryWithExponentialBackoff {
+            httpClient
+                .post("$baseUrl/store-payment") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                }.body()
         }
-    }
 }

@@ -67,8 +67,9 @@ import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
-
+class MainActivity :
+    AppCompatActivity(),
+    PaymentResultWithDataListener {
     private val viewModel: MainViewModel by viewModels()
 
     // Koin-managed: owns payment state and Razorpay flow
@@ -102,7 +103,7 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                 SideEffect {
                     systemUiController.setStatusBarColor(
                         color = Color.Transparent,
-                        darkIcons = useDarkIcons
+                        darkIcons = useDarkIcons,
                     )
                 }
 
@@ -118,7 +119,7 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                 fun showToast(
                     message: String,
                     title: String = "Error",
-                    type: ToastType = ToastType.ERROR
+                    type: ToastType = ToastType.ERROR,
                 ) {
                     toastMessage = message
                     toastTitle = title
@@ -146,11 +147,12 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                     bose.ankush.network.auth.events.AuthEventBus.events.collect { event ->
                         if (event is bose.ankush.network.auth.events.AuthEvent.Unauthorized) {
                             showToast(
-                                message = event.message.ifBlank {
-                                    "You need to log in again to continue using the app for security purposes."
-                                },
+                                message =
+                                    event.message.ifBlank {
+                                        "You need to log in again to continue using the app for security purposes."
+                                    },
                                 title = "Session Expired",
-                                type = ToastType.WARNING
+                                type = ToastType.WARNING,
                             )
                         }
                     }
@@ -163,22 +165,24 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                             Checkout.preload(applicationContext)
                             razorpayCheckout = Checkout()
                             razorpayCheckout?.setKeyID(params.keyId)
-                            val options = JSONObject().apply {
-                                put("name", params.name)
-                                put("description", params.description)
-                                put("order_id", params.orderId)
-                                put("currency", params.currency)
-                                put("amount", params.amount)
-                                val prefill = JSONObject().apply {
-                                    params.email?.let { put("email", it) }
-                                    params.contact?.let { put("contact", it) }
+                            val options =
+                                JSONObject().apply {
+                                    put("name", params.name)
+                                    put("description", params.description)
+                                    put("order_id", params.orderId)
+                                    put("currency", params.currency)
+                                    put("amount", params.amount)
+                                    val prefill =
+                                        JSONObject().apply {
+                                            params.email?.let { put("email", it) }
+                                            params.contact?.let { put("contact", it) }
+                                        }
+                                    put("prefill", prefill)
                                 }
-                                put("prefill", prefill)
-                            }
                             razorpayCheckout?.open(this@MainActivity, options)
                         } catch (e: Exception) {
                             paymentViewModel.onPaymentFailed(
-                                e.message ?: "Unable to open payment checkout"
+                                e.message ?: "Unable to open payment checkout",
                             )
                             Checkout.clearUserData(context)
                             razorpayCheckout = null
@@ -188,16 +192,19 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
 
                 // Main content
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal))
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                            .windowInsetsPadding(
+                                WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
+                            ),
                 ) {
                     when {
                         !isAuthInitialized -> {
                             Box(
                                 modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center,
                             ) { CircularProgressIndicator() }
                         }
                         isLoggedIn -> {
@@ -229,7 +236,7 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                             if (currentWebUrl != null) {
                                 InAppWebView(
                                     url = currentWebUrl!!,
-                                    onClose = { currentWebUrl = null }
+                                    onClose = { currentWebUrl = null },
                                 )
                             } else {
                                 // Only show login screen if not logged in and auth is initialized
@@ -237,17 +244,17 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                                     onLoginClick = { email, password ->
                                         viewModel.login(
                                             email,
-                                            password
+                                            password,
                                         )
                                     },
                                     onRegisterClick = { email, password ->
                                         viewModel.register(
                                             email,
-                                            password
+                                            password,
                                         )
                                     },
                                     onWebUrlClick = { url -> currentWebUrl = url },
-                                    isLoading = authState is AuthState.Loading
+                                    isLoading = authState is AuthState.Loading,
                                 )
                             }
                         }
@@ -259,7 +266,7 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                         type = toastType,
                         isVisible = toastVisible,
                         onDismiss = { toastVisible = false },
-                        anchorState = toastAnchorState
+                        anchorState = toastAnchorState,
                     )
                 }
             }
@@ -279,18 +286,20 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                     PERMISSIONS_TO_REQUEST.forEach { permission ->
                         viewModel.onPermissionResult(
                             permission = permission,
-                            isGranted = permissionMap[permission] == true
+                            isGranted = permissionMap[permission] == true,
                         )
                     }
-                })
+                },
+            )
 
         permissionQueue.reversed().forEach { permission ->
             val isPermanentlyDeclined = !shouldShowRequestPermissionRationale(permission)
-            val textProvider = when (permission) {
-                Manifest.permission.ACCESS_FINE_LOCATION -> FineLocationPermissionTextProvider()
-                Manifest.permission.ACCESS_COARSE_LOCATION -> CoarseLocationPermissionTextProvider()
-                else -> return@forEach
-            }
+            val textProvider =
+                when (permission) {
+                    Manifest.permission.ACCESS_FINE_LOCATION -> FineLocationPermissionTextProvider()
+                    Manifest.permission.ACCESS_COARSE_LOCATION -> CoarseLocationPermissionTextProvider()
+                    else -> return@forEach
+                }
 
             // Consumer owns back-press: exit the app when permanently declined
             BackHandler(enabled = isPermanentlyDeclined) { finish() }
@@ -298,14 +307,15 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
             PermissionAlertDialog(
                 descriptionText = textProvider.getDescription(isPermanentlyDeclined),
                 isPermanentlyDeclined = isPermanentlyDeclined,
-                onPositiveAction = if (isPermanentlyDeclined) {
-                    { context.openAppSystemSettings() }
-                } else {
-                    {
-                        viewModel.dismissDialog()
-                        locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
-                    }
-                },
+                onPositiveAction =
+                    if (isPermanentlyDeclined) {
+                        { context.openAppSystemSettings() }
+                    } else {
+                        {
+                            viewModel.dismissDialog()
+                            locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
+                        }
+                    },
                 onNegativeAction = { finish() },
                 positiveButtonLabel = if (isPermanentlyDeclined) "Grant Permission" else "OK",
                 negativeButtonLabel = "Exit",
@@ -340,19 +350,20 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
                 onResult = { isGranted ->
                     viewModel.updateShowNotificationBannerState(!isGranted)
                     if (isGranted) {
-                        Toast.makeText(
-                            context,
-                            "Notification permission granted",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast
+                            .makeText(
+                                context,
+                                "Notification permission granted",
+                                Toast.LENGTH_SHORT,
+                            ).show()
                     } else {
                         val isPermanentlyDeclined =
                             !shouldShowRequestPermissionRationale(ACCESS_NOTIFICATION)
                         viewModel.updateNotificationPermissionPermanentlyDeclined(
-                            isPermanentlyDeclined
+                            isPermanentlyDeclined,
                         )
                     }
-                }
+                },
             )
         LaunchedEffect(Unit) {
             notificationPermissionResultLauncher.launch(ACCESS_NOTIFICATION)
@@ -364,16 +375,18 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
         startInAppUpdate(this)
         viewModel.refreshTokenOnForeground()
         // If user granted a permission via system Settings and returned, clear it from the queue
-        val granted = viewModel.permissionDialogQueue.filter { permission ->
-            checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        }
+        val granted =
+            viewModel.permissionDialogQueue.filter { permission ->
+                checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            }
         if (granted.isNotEmpty()) {
             viewModel.removeGrantedPermissions(granted)
         }
         // If GPS was disabled and user returned from location settings, retry location fetch
         if (viewModel.uiState.value.isGpsDisabled && locationClient.hasLocationPermission()) {
             val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-            val isLocationAvailable = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+            val isLocationAvailable =
+                locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                     locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
             if (isLocationAvailable) {
                 viewModel.fetchAndSaveLocationCoordinates()
@@ -384,7 +397,10 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
     /**
      * Razorpay payment success callback — delegates to [PaymentViewModel].
      */
-    override fun onPaymentSuccess(razorpayPaymentID: String?, paymentData: PaymentData?) {
+    override fun onPaymentSuccess(
+        razorpayPaymentID: String?,
+        paymentData: PaymentData?,
+    ) {
         val orderId = paymentData?.orderId.orEmpty()
         val paymentId = paymentData?.paymentId ?: razorpayPaymentID.orEmpty()
         val signature = paymentData?.signature.orEmpty()
@@ -399,7 +415,11 @@ class MainActivity : AppCompatActivity(), PaymentResultWithDataListener {
     /**
      * Razorpay payment error callback — delegates to [PaymentViewModel].
      */
-    override fun onPaymentError(code: Int, response: String?, paymentData: PaymentData?) {
+    override fun onPaymentError(
+        code: Int,
+        response: String?,
+        paymentData: PaymentData?,
+    ) {
         val message = response ?: "Payment failed with code $code"
         paymentViewModel.onPaymentFailed(message)
         razorpayCheckout = null

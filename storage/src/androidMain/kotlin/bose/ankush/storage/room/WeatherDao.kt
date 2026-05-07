@@ -11,9 +11,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WeatherDao {
-
     @Transaction
-    fun refreshWeather(weather: WeatherEntity, airQuality: AirQualityEntity) {
+    fun refreshWeather(
+        weather: WeatherEntity,
+        airQuality: AirQualityEntity,
+    ) {
         deleteAllWeatherDetails()
         deleteAllAirQualityDetails()
         insertWeather(weather)

@@ -108,4 +108,11 @@
     <string name="place_search_dialog_title">ஒரு இடத்திற்கு தேடுக</string>
     <string name="place_search_hint">நகரம் அல்லது முகவரி உள்ளிடவும்…</string>
     <string name="place_search_no_results">\'%1$s\'க்கு இடங்கள் கிடைக்கவில்லை</string>
+    <string name="set_as_default_dialog_title">வானிலை இடமாக பயன்படுத்தவா?</string>
+    <string name="set_as_default_dialog_body">உங்கள் தற்போதைய GPS நிலைக்கு பதிலாக %1$s-ன் வானிலை தரவு காட்டப்படும்.</string>
+    <string name="set_as_default_dialog_warning">இது செயல்பாட்டில் இருக்கும்போது உங்கள் நேரடி GPS இடம் புதுப்பிக்கப்படாது.</string>
+    <string name="set_as_default_confirm_btn">இயல்புநிலையாக அமைக்கவும்</string>
+    <string name="location_override_chip_label">%1$s பயன்படுத்தப்படுகிறது</string>
+    <string name="location_override_reset_btn">GPS-க்கு மீட்டமைக்கவும்</string>
+    <string name="location_override_chip_content_desc">தற்போது %1$s-ன் வானிலை காட்டப்படுகிறது. GPS-க்கு மீட்டமைக்க தட்டவும்.</string>
 </resources>

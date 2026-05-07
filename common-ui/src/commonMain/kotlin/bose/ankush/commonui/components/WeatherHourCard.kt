@@ -1,4 +1,4 @@
-package bose.ankush.commonui.sunriseui.components
+package bose.ankush.commonui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,24 +39,25 @@ fun WeatherHourCard(
     weatherDescription: String? = null,
     isSelected: Boolean = false,
     onClick: () -> Unit = {},
-    iconContent: @Composable () -> Unit
+    iconContent: @Composable () -> Unit,
 ) {
     // Pre-calculate background colors
     val selectedBackground = MaterialTheme.colorScheme.primaryContainer
     val unselectedBackground = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
 
     Box(
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
-            .background(if (isSelected) selectedBackground else unselectedBackground)
-            .padding(horizontal = 10.dp, vertical = 20.dp)
+        modifier =
+            Modifier
+                .padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .clickable(onClick = onClick)
+                .background(if (isSelected) selectedBackground else unselectedBackground)
+                .padding(horizontal = 10.dp, vertical = 20.dp),
     ) {
         Column(
             modifier = Modifier.width(IntrinsicSize.Max),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Time
             Text(
@@ -76,7 +77,7 @@ fun WeatherHourCard(
                 style = MaterialTheme.typography.bodyMedium,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(top = 16.dp)
+                modifier = Modifier.padding(top = 16.dp),
             )
 
             // Weather description (if available)
@@ -87,10 +88,9 @@ fun WeatherHourCard(
                     overflow = TextOverflow.Ellipsis,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.alpha(0.6f),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
         }
     }
 }
-

@@ -26,7 +26,6 @@ class PaymentViewModel(
     private val premiumStore: PremiumStore,
     private val paymentConfig: PaymentConfig,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(PaymentUiState())
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
 
@@ -57,7 +56,10 @@ class PaymentViewModel(
         }
     }
 
-    fun startPayment(amountPaise: Long = 10_000L, currency: String = "INR") {
+    fun startPayment(
+        amountPaise: Long = 10_000L,
+        currency: String = "INR",
+    ) {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(loading = true, message = "Creating order...", stage = PaymentStage.CreatingOrder)
@@ -72,7 +74,7 @@ class PaymentViewModel(
                     receipt = receipt,
                     partialPayment = true,
                     firstPaymentMinAmount = 500L,
-                )
+                ),
             ).fold(
                 onSuccess = { response ->
                     val data = response.extractData()
@@ -114,7 +116,7 @@ class PaymentViewModel(
                                     currency = data.currency,
                                     name = "Weatherify Subscription",
                                     description = "Premium Plan",
-                                )
+                                ),
                             )
                             _uiState.update {
                                 it.copy(
@@ -130,12 +132,16 @@ class PaymentViewModel(
                     _uiState.update {
                         it.copy(loading = false, message = friendlyErrorMessage(e), stage = PaymentStage.Failure)
                     }
-                }
+                },
             )
         }
     }
 
-    fun verifyPayment(orderId: String, paymentId: String, signature: String) {
+    fun verifyPayment(
+        orderId: String,
+        paymentId: String,
+        signature: String,
+    ) {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(loading = true, message = "Verifying payment...", stage = PaymentStage.Verifying)
@@ -146,7 +152,7 @@ class PaymentViewModel(
                     razorpayOrderId = orderId,
                     razorpayPaymentId = paymentId,
                     razorpaySignature = signature,
-                )
+                ),
             ).fold(
                 onSuccess = { resp ->
                     if (!resp.success) {
@@ -159,7 +165,11 @@ class PaymentViewModel(
                         }
                         return@fold
                     }
-                    val expiryMillis = Clock.System.now().plus(30.days).toEpochMilliseconds()
+                    val expiryMillis =
+                        Clock.System
+                            .now()
+                            .plus(30.days)
+                            .toEpochMilliseconds()
                     premiumStore.savePremiumStatus(isPremium = true, expiryMillis = expiryMillis)
                     // _uiState auto-updates via observePremiumStatus() collecting the new value
                     _uiState.update {
@@ -170,7 +180,7 @@ class PaymentViewModel(
                     _uiState.update {
                         it.copy(loading = false, message = friendlyErrorMessage(e), stage = PaymentStage.Failure)
                     }
-                }
+                },
             )
         }
     }

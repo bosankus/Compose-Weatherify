@@ -44,13 +44,14 @@ expect fun createPlatformHttpClient(json: Json): HttpClient
  */
 @Suppress("unused")
 fun createBasicHttpClient(): HttpClient {
-    val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        prettyPrint = false
-        encodeDefaults = true
-        coerceInputValues = true
-    }
+    val json =
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            prettyPrint = false
+            encodeDefaults = true
+            coerceInputValues = true
+        }
     val client = createPlatformHttpClient(json)
     return client.config {
         install(ContentNegotiation) {
@@ -67,10 +68,8 @@ fun createBasicHttpClient(): HttpClient {
  */
 fun createTokenManager(
     tokenStorage: TokenStorage,
-    authRepository: AuthRepository
-): TokenManager {
-    return TokenManager(tokenStorage, authRepository)
-}
+    authRepository: AuthRepository,
+): TokenManager = TokenManager(tokenStorage, authRepository)
 
 /**
  * Factory function to create a WeatherRepository instance
@@ -84,7 +83,7 @@ fun createTokenManager(
 fun createWeatherRepository(
     networkConnectivity: NetworkConnectivity,
     tokenStorage: TokenStorage,
-    baseUrl: String = NetworkConstants.WEATHER_BASE_URL
+    baseUrl: String = NetworkConstants.WEATHER_BASE_URL,
 ): WeatherRepository {
     // Create AuthRepository first (needed for TokenManager)
     val authRepository = createAuthRepository(tokenStorage, baseUrl)
@@ -118,13 +117,14 @@ fun createPaymentApiService(
  * @return An HttpClient configured with authentication and token refresh
  */
 fun createAuthenticatedHttpClient(tokenManager: TokenManager): HttpClient {
-    val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        prettyPrint = false
-        encodeDefaults = true
-        coerceInputValues = true
-    }
+    val json =
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            prettyPrint = false
+            encodeDefaults = true
+            coerceInputValues = true
+        }
 
     // Create a platform-specific HttpClient with authentication configuration
     val client = createPlatformHttpClient(json)
@@ -153,13 +153,14 @@ fun createAuthenticatedHttpClient(tokenManager: TokenManager): HttpClient {
  * @return An HttpClient configured with authentication (no token refresh)
  */
 fun createAuthenticatedHttpClient(tokenStorage: TokenStorage): HttpClient {
-    val json = Json {
-        ignoreUnknownKeys = true
-        isLenient = true
-        prettyPrint = false
-        encodeDefaults = true
-        coerceInputValues = true
-    }
+    val json =
+        Json {
+            ignoreUnknownKeys = true
+            isLenient = true
+            prettyPrint = false
+            encodeDefaults = true
+            coerceInputValues = true
+        }
 
     // Create a platform-specific HttpClient with authentication configuration
     val client = createPlatformHttpClient(json)
@@ -187,7 +188,7 @@ fun createAuthenticatedHttpClient(tokenStorage: TokenStorage): HttpClient {
  */
 fun createAuthRepository(
     tokenStorage: TokenStorage,
-    baseUrl: String = NetworkConstants.WEATHER_BASE_URL
+    baseUrl: String = NetworkConstants.WEATHER_BASE_URL,
 ): AuthRepository {
     // Use the legacy HttpClient for AuthRepository to avoid circular dependency
     val httpClient = createAuthenticatedHttpClient(tokenStorage)
@@ -195,14 +196,13 @@ fun createAuthRepository(
     return AuthRepositoryImpl(apiService, tokenStorage)
 }
 
-
 /**
  * Factory function to create a LocationRepository instance.
  * Uses an authenticated HTTP client so all requests carry a valid JWT.
  */
 fun createLocationRepository(
     tokenStorage: TokenStorage,
-    baseUrl: String = NetworkConstants.WEATHER_BASE_URL
+    baseUrl: String = NetworkConstants.WEATHER_BASE_URL,
 ): LocationRepository {
     val authRepository = createAuthRepository(tokenStorage, baseUrl)
     val tokenManager = createTokenManager(tokenStorage, authRepository)
@@ -217,7 +217,7 @@ fun createLocationRepository(
 fun createFeedbackRepository(
     networkConnectivity: NetworkConnectivity,
     tokenStorage: TokenStorage,
-    baseUrl: String = NetworkConstants.WEATHER_BASE_URL
+    baseUrl: String = NetworkConstants.WEATHER_BASE_URL,
 ): FeedbackRepository {
     val authRepository = createAuthRepository(tokenStorage, baseUrl)
     val tokenManager = createTokenManager(tokenStorage, authRepository)
@@ -230,9 +230,7 @@ fun createFeedbackRepository(
  * Factory function to create a ServiceRepository instance.
  * Uses a basic HTTP client; the /services/public endpoint requires NO authentication.
  */
-fun createServiceRepository(
-    baseUrl: String = NetworkConstants.WEATHER_BASE_URL
-): ServiceRepository {
+fun createServiceRepository(baseUrl: String = NetworkConstants.WEATHER_BASE_URL): ServiceRepository {
     val httpClient = createBasicHttpClient()
     val apiService: ServiceApiService = KtorServiceApiService(httpClient, baseUrl)
     return ServiceRepositoryImpl(apiService)

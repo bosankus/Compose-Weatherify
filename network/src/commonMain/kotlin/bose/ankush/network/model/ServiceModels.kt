@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 data class ServiceListResponse(
     val success: Boolean = true,
     val message: String = "",
-    val data: ServiceListData
+    val data: ServiceListData,
 )
 
 @Serializable
@@ -17,7 +17,7 @@ data class ServiceListData(
     val services: List<ServiceDto> = emptyList(),
     val totalCount: Long = 0,
     val page: Int = 1,
-    val pageSize: Int = 20
+    val pageSize: Int = 20,
 )
 
 @Serializable
@@ -36,7 +36,7 @@ data class ServiceDto(
     val lowestPrice: Int = 0,
     val currency: String = "INR",
     val createdAt: String = "",
-    val updatedAt: String = ""
+    val updatedAt: String = "",
 )
 
 @Serializable
@@ -48,7 +48,7 @@ data class PricingTierDto(
     val durationType: String,
     val isDefault: Boolean = false,
     val isFeatured: Boolean = false,
-    val displayOrder: Int = 0
+    val displayOrder: Int = 0,
 )
 
 @Serializable
@@ -56,14 +56,14 @@ data class FeatureDto(
     val id: String,
     val description: String,
     val isHighlighted: Boolean = false,
-    val displayOrder: Int = 0
+    val displayOrder: Int = 0,
 )
 
 @Serializable
 data class ServiceLimitDto(
     val value: Long,
     val type: String,
-    val unit: String
+    val unit: String,
 )
 
 // ============ Domain Models ============
@@ -83,7 +83,7 @@ data class Service(
     val lowestPrice: Int = 0,
     val currency: String = "INR",
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
 ) {
     val isAvailable: Boolean
         get() = status == ServiceStatus.ACTIVE && isWithinAvailabilityWindow()
@@ -114,42 +114,48 @@ data class PricingTier(
     val durationType: DurationType,
     val isDefault: Boolean = false,
     val isFeatured: Boolean = false,
-    val displayOrder: Int = 0
+    val displayOrder: Int = 0,
 ) {
     fun getDisplayPrice(): String = "₹$amount"
 
     fun getAmountInPaise(): Int = amount * 100
 
-    fun getDisplayDuration(): String = when (durationType) {
-        DurationType.DAYS -> if (duration == 1) "1 day" else "$duration days"
-        DurationType.MONTHS -> if (duration == 1) "1 month" else "$duration months"
-        DurationType.YEARS -> if (duration == 1) "1 year" else "$duration years"
-    }
+    fun getDisplayDuration(): String =
+        when (durationType) {
+            DurationType.DAYS -> if (duration == 1) "1 day" else "$duration days"
+            DurationType.MONTHS -> if (duration == 1) "1 month" else "$duration months"
+            DurationType.YEARS -> if (duration == 1) "1 year" else "$duration years"
+        }
 }
 
 data class Feature(
     val id: String,
     val description: String,
     val isHighlighted: Boolean = false,
-    val displayOrder: Int = 0
+    val displayOrder: Int = 0,
 )
 
 data class ServiceLimit(
     val value: Long,
     val type: LimitType,
-    val unit: String
+    val unit: String,
 )
 
 enum class ServiceStatus {
-    ACTIVE, INACTIVE, ARCHIVED
+    ACTIVE,
+    INACTIVE,
+    ARCHIVED,
 }
 
 enum class DurationType {
-    DAYS, MONTHS, YEARS
+    DAYS,
+    MONTHS,
+    YEARS,
 }
 
 enum class LimitType {
-    HARD, SOFT
+    HARD,
+    SOFT,
 }
 
 // ============ Extension Functions ============
@@ -162,11 +168,12 @@ fun ServiceDto.toDomain(): Service =
         description = description,
         pricingTiers = pricingTiers.map { it.toDomain() },
         features = features.map { it.toDomain() }.sortedBy { it.displayOrder },
-        status = try {
-            ServiceStatus.valueOf(status.uppercase())
-        } catch (_: Exception) {
-            ServiceStatus.ACTIVE
-        },
+        status =
+            try {
+                ServiceStatus.valueOf(status.uppercase())
+            } catch (_: Exception) {
+                ServiceStatus.ACTIVE
+            },
         limits = limits.mapValues { it.value.toDomain() },
         availabilityStart = availabilityStart,
         availabilityEnd = availabilityEnd,
@@ -174,7 +181,7 @@ fun ServiceDto.toDomain(): Service =
         lowestPrice = lowestPrice,
         currency = currency,
         createdAt = createdAt,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
     )
 
 fun PricingTierDto.toDomain(): PricingTier =
@@ -183,14 +190,15 @@ fun PricingTierDto.toDomain(): PricingTier =
         amount = amount,
         currency = currency,
         duration = duration,
-        durationType = try {
-            DurationType.valueOf(durationType.uppercase())
-        } catch (_: Exception) {
-            DurationType.MONTHS
-        },
+        durationType =
+            try {
+                DurationType.valueOf(durationType.uppercase())
+            } catch (_: Exception) {
+                DurationType.MONTHS
+            },
         isDefault = isDefault,
         isFeatured = isFeatured,
-        displayOrder = displayOrder
+        displayOrder = displayOrder,
     )
 
 fun FeatureDto.toDomain(): Feature =
@@ -198,22 +206,23 @@ fun FeatureDto.toDomain(): Feature =
         id = id,
         description = description,
         isHighlighted = isHighlighted,
-        displayOrder = displayOrder
+        displayOrder = displayOrder,
     )
 
 fun ServiceLimitDto.toDomain(): ServiceLimit =
     ServiceLimit(
         value = value,
-        type = try {
-            LimitType.valueOf(type.uppercase())
-        } catch (_: Exception) {
-            LimitType.HARD
-        },
-        unit = unit
+        type =
+            try {
+                LimitType.valueOf(type.uppercase())
+            } catch (_: Exception) {
+                LimitType.HARD
+            },
+        unit = unit,
     )
 
-fun parseIsoDate(dateString: String): Long? {
-    return try {
+fun parseIsoDate(dateString: String): Long? =
+    try {
         // Simple ISO 8601 parser for basic format (YYYY-MM-DDTHH:mm:ssZ)
         dateString.replace("Z", "+00:00").let { _ ->
             // This is a simplified parser. For production, use proper date library
@@ -223,4 +232,3 @@ fun parseIsoDate(dateString: String): Long? {
     } catch (_: Exception) {
         null
     }
-}

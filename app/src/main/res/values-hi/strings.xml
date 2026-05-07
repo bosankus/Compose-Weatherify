@@ -115,4 +115,11 @@
     <string name="place_search_dialog_title">किसी स्थान को खोजें</string>
     <string name="place_search_hint">शहर या पता टाइप करें…</string>
     <string name="place_search_no_results">\'%1$s\' के लिए कोई स्थान नहीं मिला</string>
+    <string name="set_as_default_dialog_title">मौसम स्थान के रूप में उपयोग करें?</string>
+    <string name="set_as_default_dialog_body">आपकी वर्तमान GPS स्थिति के बजाय %1$s का मौसम डेटा दिखाया जाएगा।</string>
+    <string name="set_as_default_dialog_warning">इस दौरान आपकी लाइव GPS स्थान अपडेट नहीं होगी।</string>
+    <string name="set_as_default_confirm_btn">डिफ़ॉल्ट के रूप में सेट करें</string>
+    <string name="location_override_chip_label">%1$s का उपयोग हो रहा है</string>
+    <string name="location_override_reset_btn">GPS पर रीसेट करें</string>
+    <string name="location_override_chip_content_desc">वर्तमान में %1$s का मौसम दिखाया जा रहा है। GPS पर रीसेट करने के लिए टैप करें।</string>
 </resources>

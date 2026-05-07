@@ -35,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -49,7 +48,9 @@ enum class ToastType { SUCCESS, WARNING, ERROR }
  * [NotificationToast] can automatically position itself above it.
  */
 @Stable
-class ToastAnchorState internal constructor(private val density: Float) {
+class ToastAnchorState internal constructor(
+    private val density: Float,
+) {
     var anchorHeight: Dp by mutableStateOf(0.dp)
         internal set
 
@@ -99,51 +100,61 @@ fun NotificationToast(
         }
     }
 
-    val (backgroundColor, icon, iconColor) = when (type) {
-        ToastType.SUCCESS -> Triple(
-            MaterialTheme.colorScheme.primaryContainer,
-            Icons.Filled.CheckCircle,
-            MaterialTheme.colorScheme.primary
-        )
-        ToastType.WARNING -> Triple(
-            MaterialTheme.colorScheme.tertiaryContainer,
-            Icons.Filled.Warning,
-            MaterialTheme.colorScheme.tertiary
-        )
-        ToastType.ERROR -> Triple(
-            MaterialTheme.colorScheme.errorContainer,
-            Icons.Filled.Close,
-            MaterialTheme.colorScheme.error
-        )
-    }
+    val (backgroundColor, icon, iconColor) =
+        when (type) {
+            ToastType.SUCCESS ->
+                Triple(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    Icons.Filled.CheckCircle,
+                    MaterialTheme.colorScheme.primary,
+                )
+
+            ToastType.WARNING ->
+                Triple(
+                    MaterialTheme.colorScheme.tertiaryContainer,
+                    Icons.Filled.Warning,
+                    MaterialTheme.colorScheme.tertiary,
+                )
+
+            ToastType.ERROR ->
+                Triple(
+                    MaterialTheme.colorScheme.errorContainer,
+                    Icons.Filled.Close,
+                    MaterialTheme.colorScheme.error,
+                )
+        }
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(bottom = 16.dp + (anchorState?.anchorHeight ?: bottomOffset)),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(bottom = 16.dp + (anchorState?.anchorHeight ?: bottomOffset)),
         contentAlignment = Alignment.BottomCenter,
     ) {
         AnimatedVisibility(
             visible = isVisible,
-            enter = fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing)) +
-                slideInVertically(
-                    animationSpec = tween(300, easing = FastOutSlowInEasing),
-                    initialOffsetY = { it },
-                ),
-            exit = fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing)) +
-                slideOutVertically(
-                    animationSpec = tween(300, easing = FastOutSlowInEasing),
-                    targetOffsetY = { it },
-                ),
+            enter =
+                fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing)) +
+                        slideInVertically(
+                            animationSpec = tween(300, easing = FastOutSlowInEasing),
+                            initialOffsetY = { it },
+                        ),
+            exit =
+                fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing)) +
+                        slideOutVertically(
+                            animationSpec = tween(300, easing = FastOutSlowInEasing),
+                            targetOffsetY = { it },
+                        ),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(backgroundColor)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(backgroundColor)
+                        .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(

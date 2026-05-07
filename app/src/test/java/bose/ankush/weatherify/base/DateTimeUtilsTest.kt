@@ -13,7 +13,6 @@ import java.util.Calendar
 import java.util.TimeZone
 
 class DateTimeUtilsTest {
-
     private val now = 1669873946L // 1st December 2022 (UTC)
     private lateinit var originalTimeZone: TimeZone
 

@@ -109,4 +109,11 @@
     <string name="place_search_dialog_title">কোনো স্থান খুঁজুন</string>
     <string name="place_search_hint">শহর বা ঠিকানা টাইপ করুন…</string>
     <string name="place_search_no_results">\'%1$s\'এর জন্য কোনো স্থান পাওয়া যায়নি</string>
+    <string name="set_as_default_dialog_title">আবহাওয়ার অবস্থান হিসেবে ব্যবহার করবেন?</string>
+    <string name="set_as_default_dialog_body">আপনার বর্তমান GPS অবস্থানের পরিবর্তে %1$s-এর জন্য আবহাওয়া তথ্য দেখাবে।</string>
+    <string name="set_as_default_dialog_warning">এটি সক্রিয় থাকা অবস্থায় আপনার লাইভ GPS অবস্থান আপডেট হবে না।</string>
+    <string name="set_as_default_confirm_btn">ডিফল্ট হিসেবে সেট করুন</string>
+    <string name="location_override_chip_label">%1$s ব্যবহার করা হচ্ছে</string>
+    <string name="location_override_reset_btn">GPS-এ রিসেট করুন</string>
+    <string name="location_override_chip_content_desc">বর্তমানে %1$s-এর আবহাওয়া দেখানো হচ্ছে। GPS-এ রিসেট করতে ট্যাপ করুন।</string>
 </resources>

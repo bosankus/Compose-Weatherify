@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 class AppDispatcher : DispatcherProvider {
-
     override val main: CoroutineDispatcher
         get() = Dispatchers.Main
 

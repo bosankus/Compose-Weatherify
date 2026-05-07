@@ -31,7 +31,7 @@ data class WeatherForecast(
         val uvi: Double?,
         val weather: List<WeatherCondition?>? = listOf(),
         val wind_gust: Double?,
-        val wind_speed: Double?
+        val wind_speed: Double?,
     )
 
     data class Daily(
@@ -48,7 +48,7 @@ data class WeatherForecast(
         val uvi: Double?,
         val weather: List<WeatherCondition?>? = listOf(),
         val wind_gust: Double?,
-        val wind_speed: Double?
+        val wind_speed: Double?,
     ) {
         data class Temp(
             val day: Double?,
@@ -56,7 +56,7 @@ data class WeatherForecast(
             val max: Double?,
             val min: Double?,
             val morn: Double?,
-            val night: Double?
+            val night: Double?,
         )
     }
 
@@ -77,5 +77,5 @@ data class WeatherCondition(
     val description: String = "",
     val icon: String = "",
     val id: Int,
-    val main: String = ""
+    val main: String = "",
 )

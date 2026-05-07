@@ -9,15 +9,18 @@ import kotlinx.coroutines.flow.SharedFlow
  * The app layer can observe these to react (e.g., navigate to Login on 401).
  */
 sealed class AuthEvent {
-    data class Unauthorized(val message: String) : AuthEvent()
+    data class Unauthorized(
+        val message: String,
+    ) : AuthEvent()
 }
 
 object AuthEventBus {
-    private val _events = MutableSharedFlow<AuthEvent>(
-        replay = 1,
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
+    private val _events =
+        MutableSharedFlow<AuthEvent>(
+            replay = 1,
+            extraBufferCapacity = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
     val events: SharedFlow<AuthEvent> = _events
 
     /** Suspends only if buffer == capacity after dropping oldest. */

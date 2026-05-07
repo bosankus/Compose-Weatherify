@@ -5,13 +5,16 @@ import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.domain.repository.CityRepository
 import javax.inject.Inject
 
-class GetCityNames @Inject constructor(
-    private val repository: CityRepository
+class GetCityNames
+@Inject
+constructor(
+    private val repository: CityRepository,
 ) {
-    operator fun invoke(): List<CityName> = try {
-        val cityNames = repository.getCityNames().map { it.toCityName() }
-        cityNames.ifEmpty { emptyList() }
-    } catch (e: Exception) {
-        emptyList()
-    }
+    operator fun invoke(): List<CityName> =
+        try {
+            val cityNames = repository.getCityNames().map { it.toCityName() }
+            cityNames.ifEmpty { emptyList() }
+        } catch (_: Exception) {
+            emptyList()
+        }
 }

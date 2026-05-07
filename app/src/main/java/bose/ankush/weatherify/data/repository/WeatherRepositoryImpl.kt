@@ -27,12 +27,13 @@ import bose.ankush.network.repository.WeatherRepository as NetworkWeatherReposit
  * - Save to local storage (WeatherStorage)
  * - Provide domain models to UI layer (via mappers)
  */
-class WeatherRepositoryImpl @Inject constructor(
+class WeatherRepositoryImpl
+@Inject
+constructor(
     private val networkRepository: NetworkWeatherRepository,
     private val weatherStorage: WeatherStorage,
-    private val dispatcher: DispatcherProvider
+    private val dispatcher: DispatcherProvider,
 ) : WeatherRepository {
-
     override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality> =
         weatherStorage.getAirQualityReport(coordinates).map { entity ->
             (entity as? AirQualityEntity)?.let { AirQualityMapper.mapToDomain(it) } ?: AirQuality()
@@ -50,7 +51,10 @@ class WeatherRepositoryImpl @Inject constructor(
      * Air quality is now embedded in the /weather response and may be null for free-tier users.
      * In that case an empty AirQualityEntity is stored to satisfy the storage contract.
      */
-    override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>, forceRefresh: Boolean) {
+    override suspend fun refreshWeatherData(
+        coordinates: Pair<Double, Double>,
+        forceRefresh: Boolean,
+    ) {
         withContext(dispatcher.io) {
             val lastUpdateTime = weatherStorage.getLastWeatherUpdateTime(coordinates)
             val currentTime = System.currentTimeMillis()
@@ -66,16 +70,16 @@ class WeatherRepositoryImpl @Inject constructor(
                     val weatherEntity =
                         NetworkToStorageMapper.mapWeatherToStorageEntity(weatherData)
                     // Air quality is inside data.airQuality; null for free tier → stores defaults
-                    val airQualityEntity = NetworkToStorageMapper.mapAirQualityToStorageEntity(
-                        weatherData.data?.airQuality
-                    )
+                    val airQualityEntity =
+                        NetworkToStorageMapper.mapAirQualityToStorageEntity(
+                            weatherData.data?.airQuality,
+                        )
                     weatherStorage.saveWeatherData(weatherEntity, airQualityEntity)
                     weatherStorage.saveLastWeatherUpdateTime(coordinates, currentTime)
                 }
             }
         }
     }
-
 
     override suspend fun clearAllData() {
         withContext(dispatcher.io) {

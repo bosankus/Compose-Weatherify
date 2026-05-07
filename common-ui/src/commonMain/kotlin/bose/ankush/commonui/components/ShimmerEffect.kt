@@ -28,39 +28,45 @@ fun ShimmerEffect(
     height: Dp = 12.dp,
     cornerRadius: Dp = 4.dp,
     baseColor: Color = Color.LightGray.copy(alpha = 0.3f),
-    highlightColor: Color = Color.White.copy(alpha = 0.8f)
+    highlightColor: Color = Color.White.copy(alpha = 0.8f),
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
-    val shimmerX = infiniteTransition.animateFloat(
-        initialValue = -1000f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween(
-                durationMillis = 1200,
-                easing = LinearEasing
-            )
-        ),
-        label = "shimmer_x"
-    )
+    val shimmerX =
+        infiniteTransition.animateFloat(
+            initialValue = -1000f,
+            targetValue = 1000f,
+            animationSpec =
+                infiniteRepeatable(
+                    animation =
+                        androidx.compose.animation.core.tween(
+                            durationMillis = 1200,
+                            easing = LinearEasing,
+                        ),
+                ),
+            label = "shimmer_x",
+        )
 
-    val shimmerBrush = Brush.linearGradient(
-        colors = listOf(
-            baseColor,
-            highlightColor,
-            baseColor
-        ),
-        start = Offset(shimmerX.value - 200f, 0f),
-        end = Offset(shimmerX.value + 200f, 0f)
-    )
+    val shimmerBrush =
+        Brush.linearGradient(
+            colors =
+                listOf(
+                    baseColor,
+                    highlightColor,
+                    baseColor,
+                ),
+            start = Offset(shimmerX.value - 200f, 0f),
+            end = Offset(shimmerX.value + 200f, 0f),
+        )
 
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height)
-            .background(
-                brush = shimmerBrush,
-                shape = RoundedCornerShape(cornerRadius)
-            )
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(height)
+                .background(
+                    brush = shimmerBrush,
+                    shape = RoundedCornerShape(cornerRadius),
+                ),
     )
 }
 
@@ -71,12 +77,13 @@ fun ShimmerEffect(
 fun ShimmerBottomSheetSkeleton(
     modifier: Modifier = Modifier,
     baseColor: Color = Color.LightGray.copy(alpha = 0.3f),
-    highlightColor: Color = Color.White.copy(alpha = 0.8f)
+    highlightColor: Color = Color.White.copy(alpha = 0.8f),
 ) {
     androidx.compose.foundation.layout.Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         // Header
         ShimmerEffect(
@@ -84,9 +91,10 @@ fun ShimmerBottomSheetSkeleton(
             cornerRadius = 6.dp,
             baseColor = baseColor,
             highlightColor = highlightColor,
-            modifier = Modifier
-                .fillMaxWidth(0.6f)
-                .padding(bottom = 16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.6f)
+                    .padding(bottom = 16.dp),
         )
 
         // Description lines
@@ -96,9 +104,10 @@ fun ShimmerBottomSheetSkeleton(
                 cornerRadius = 4.dp,
                 baseColor = baseColor,
                 highlightColor = highlightColor,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
             )
         }
 
@@ -107,9 +116,10 @@ fun ShimmerBottomSheetSkeleton(
             cornerRadius = 4.dp,
             baseColor = baseColor,
             highlightColor = highlightColor,
-            modifier = Modifier
-                .fillMaxWidth(0.7f)
-                .padding(bottom = 16.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.7f)
+                    .padding(bottom = 16.dp),
         )
 
         // Features section
@@ -118,9 +128,10 @@ fun ShimmerBottomSheetSkeleton(
             cornerRadius = 4.dp,
             baseColor = baseColor,
             highlightColor = highlightColor,
-            modifier = Modifier
-                .fillMaxWidth(0.3f)
-                .padding(bottom = 12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.3f)
+                    .padding(bottom = 12.dp),
         )
 
         repeat(3) {
@@ -129,9 +140,10 @@ fun ShimmerBottomSheetSkeleton(
                 cornerRadius = 4.dp,
                 baseColor = baseColor,
                 highlightColor = highlightColor,
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .padding(bottom = 10.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(bottom = 10.dp),
             )
         }
 
@@ -141,9 +153,10 @@ fun ShimmerBottomSheetSkeleton(
             cornerRadius = 6.dp,
             baseColor = baseColor,
             highlightColor = highlightColor,
-            modifier = Modifier
-                .fillMaxWidth(0.4f)
-                .padding(top = 16.dp, bottom = 12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.4f)
+                    .padding(top = 16.dp, bottom = 12.dp),
         )
 
         ShimmerEffect(
@@ -151,9 +164,10 @@ fun ShimmerBottomSheetSkeleton(
             cornerRadius = 4.dp,
             baseColor = baseColor,
             highlightColor = highlightColor,
-            modifier = Modifier
-                .fillMaxWidth(0.5f)
-                .padding(bottom = 20.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth(0.5f)
+                    .padding(bottom = 20.dp),
         )
 
         // Button
@@ -162,7 +176,7 @@ fun ShimmerBottomSheetSkeleton(
             cornerRadius = 8.dp,
             baseColor = baseColor,
             highlightColor = highlightColor,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

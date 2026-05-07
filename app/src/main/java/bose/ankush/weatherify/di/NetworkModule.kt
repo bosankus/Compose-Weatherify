@@ -31,17 +31,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
     /**
      * Provides NetworkConnectivity implementation
      */
     @Provides
     @Singleton
     fun provideNetworkConnectivity(
-        @ApplicationContext context: Context
-    ): NetworkConnectivity {
-        return AndroidNetworkConnectivity(context)
-    }
+        @ApplicationContext context: Context,
+    ): NetworkConnectivity = AndroidNetworkConnectivity(context)
 
     /**
      * Provides WeatherRepository implementation from the network module
@@ -51,21 +48,16 @@ object NetworkModule {
     @Singleton
     fun provideWeatherRepository(
         networkConnectivity: NetworkConnectivity,
-        tokenStorage: TokenStorage
-    ): WeatherRepository {
-        return createWeatherRepository(networkConnectivity, tokenStorage)
-    }
+        tokenStorage: TokenStorage,
+    ): WeatherRepository = createWeatherRepository(networkConnectivity, tokenStorage)
 
     /**
      * Provides AuthRepository implementation from the network module
      */
     @Provides
     @Singleton
-    fun provideAuthRepository(
-        tokenStorage: TokenStorage
-    ): AuthRepository {
-        return createAuthRepository(tokenStorage)
-    }
+    fun provideAuthRepository(tokenStorage: TokenStorage): AuthRepository =
+        createAuthRepository(tokenStorage)
 
     /**
      * Provides TokenManager singleton for use in ViewModels.
@@ -75,10 +67,8 @@ object NetworkModule {
     @Singleton
     fun provideTokenManager(
         tokenStorage: TokenStorage,
-        authRepository: AuthRepository
-    ): TokenManager {
-        return createTokenManager(tokenStorage, authRepository)
-    }
+        authRepository: AuthRepository,
+    ): TokenManager = createTokenManager(tokenStorage, authRepository)
 
     /**
      * Provides FeedbackRepository implementation from the network module
@@ -87,21 +77,16 @@ object NetworkModule {
     @Singleton
     fun provideFeedbackRepository(
         networkConnectivity: NetworkConnectivity,
-        tokenStorage: TokenStorage
-    ): FeedbackRepository {
-        return createFeedbackRepository(networkConnectivity, tokenStorage)
-    }
+        tokenStorage: TokenStorage,
+    ): FeedbackRepository = createFeedbackRepository(networkConnectivity, tokenStorage)
 
     /**
      * Provides LocationRepository for saved favourite locations (premium feature).
      */
     @Provides
     @Singleton
-    fun provideLocationRepository(
-        tokenStorage: TokenStorage
-    ): LocationRepository {
-        return createLocationRepository(tokenStorage)
-    }
+    fun provideLocationRepository(tokenStorage: TokenStorage): LocationRepository =
+        createLocationRepository(tokenStorage)
 
     /**
      * Provides ServiceRepository for premium service subscriptions.
@@ -109,29 +94,21 @@ object NetworkModule {
      */
     @Provides
     @Singleton
-    fun provideServiceRepository(): ServiceRepository {
-        return createServiceRepository()
-    }
+    fun provideServiceRepository(): ServiceRepository = createServiceRepository()
 
     /**
      * Provides SearchPlacesUseCase for searching places.
      */
     @Provides
     @Singleton
-    fun provideSearchPlacesUseCase(
-        repository: LocationRepository
-    ): SearchPlacesUseCase {
-        return SearchPlacesUseCase(repository)
-    }
+    fun provideSearchPlacesUseCase(repository: LocationRepository): SearchPlacesUseCase =
+        SearchPlacesUseCase(repository)
 
     /**
      * Provides SavedLocationsUseCase for managing saved locations.
      */
     @Provides
     @Singleton
-    fun provideSavedLocationsUseCase(
-        repository: LocationRepository
-    ): SavedLocationsUseCase {
-        return SavedLocationsUseCase(repository)
-    }
+    fun provideSavedLocationsUseCase(repository: LocationRepository): SavedLocationsUseCase =
+        SavedLocationsUseCase(repository)
 }
