@@ -5,9 +5,6 @@ import bose.ankush.network.model.PlaceSuggestion
 import bose.ankush.network.model.SaveLocationRequest
 import bose.ankush.network.model.SavedLocation
 
-/**
- * Implementation of LocationRepository.
- */
 class LocationRepositoryImpl(
     private val apiService: LocationApiService,
 ) : LocationRepository {

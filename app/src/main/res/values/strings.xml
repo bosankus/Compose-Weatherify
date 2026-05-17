@@ -99,6 +99,14 @@
     <string name="notification_permission_message">Enable notifications for weather alerts</string>
     <string name="enable_notification_btn">Enable</string>
 
+    <!--Language Screen-->
+    <string name="language_lib_screen_header">Choose language</string>
+    <string name="language_back_content_description">Go back</string>
+    <string name="language_screen_title">Select Your Language</string>
+    <string name="language_screen_subtitle">Choose your preferred language for a personalized experience</string>
+    <string name="language_selected">%s selected</string>
+    <string name="language_navigate_back">Navigate back</string>
+
     <!--Saved Locations (Premium Feature)-->
     <string name="saved_locations_screen">Saved Locations</string>
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>

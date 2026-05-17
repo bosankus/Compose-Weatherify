@@ -72,10 +72,6 @@ import bose.ankush.payment.presentation.PaymentStage
 import bose.ankush.payment.presentation.PaymentUiState
 import kotlinx.coroutines.delay
 
-/**
- * Holds localized strings for SettingsScreen.
- * Allows the KMP composable to accept platform-specific localized resources.
- */
 data class SettingsScreenStrings(
     val profileTitle: String,
     val logout: String,
@@ -101,10 +97,6 @@ data class SettingsScreenStrings(
     val premiumActivatedMessage: String,
 )
 
-/**
- * Holds UI state for SettingsScreen.
- * Managed by parent ViewModel, not created within the screen.
- */
 data class SettingsScreenState(
     val showPremiumBottomSheet: Boolean = false,
     val showLogoutDialog: Boolean = false,
@@ -224,8 +216,6 @@ fun SettingsScreen(
                                 .padding(innerPadding)
                                 .padding(horizontal = 16.dp),
                     ) {
-                        // Future enhancement: Add user profile section here
-
                         item { Spacer(modifier = Modifier.height(24.dp)) }
 
                         item {
@@ -379,7 +369,7 @@ fun SettingsScreen(
                 onDismiss = { onStateChange(uiState.copy(showPremiumActivationToast = false)) },
                 anchorState = toastAnchorState,
             )
-        } // end Box
+        }
     }
 }
 
@@ -517,7 +507,7 @@ fun SubscribedPremiumCard(
         if (expiryTop != null) {
             val dateStr = remember(expiryTop) { formatDate(expiryTop) }
             Text(
-                text = strings.premiumExpires.replace("%s", dateStr),
+                text = strings.premiumExpires.replace("%1\$s", dateStr),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
             )

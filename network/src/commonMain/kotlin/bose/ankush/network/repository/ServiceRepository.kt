@@ -1,5 +1,6 @@
 package bose.ankush.network.repository
 
+import bose.ankush.network.api.ServiceApiService
 import bose.ankush.network.model.Service
 import bose.ankush.network.model.toDomain
 
@@ -12,7 +13,7 @@ interface ServiceRepository {
 }
 
 class ServiceRepositoryImpl(
-    private val api: bose.ankush.network.api.ServiceApiService,
+    private val api: ServiceApiService,
 ) : ServiceRepository {
     override suspend fun getServices(
         page: Int,
@@ -40,8 +41,6 @@ class ServiceRepositoryImpl(
         tag: String,
         error: Throwable,
     ) {
-        // Log to Firebase or your analytics service
-        // FirebaseCrashlytics.getInstance().recordException(error)
         println("$tag: ${error.message}")
     }
 }

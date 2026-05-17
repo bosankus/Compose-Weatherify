@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="lib_screen_header">భాష ఎంచుకోండి</string>
-    <string name="back_content_description">వెనుకకు వెళ్ళు</string>
-    <string name="language_screen_title">మీ భాష ఎంచుకోండి</string>
-    <string name="language_screen_subtitle">వ్యక్తిగత అనుభవం కోసం మీకు ఇష్టమైన భాషను ఎంచుకోండి</string>
-    <string name="language_selected">%s ఎంచుకోబడింది</string>
-    <string name="navigate_back">వెనుకకు నావిగేట్ చేయండి</string>
-</resources>

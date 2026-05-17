@@ -29,10 +29,8 @@ class PaymentViewModel(
     private val _uiState = MutableStateFlow(PaymentUiState())
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
 
-    /**
-     * One-shot events to trigger the platform-specific checkout UI (e.g. Razorpay on Android).
-     * Consumed by the Activity/UI layer; never observed from the ViewModel itself.
-     */
+    // One-shot events to trigger the platform-specific checkout UI (e.g. Razorpay on Android).
+    // Consumed by the Activity/UI layer; never observed from the ViewModel itself.
     private val _checkoutParams = Channel<CheckoutParams>(Channel.BUFFERED)
     val checkoutParams: Flow<CheckoutParams> = _checkoutParams.receiveAsFlow()
 

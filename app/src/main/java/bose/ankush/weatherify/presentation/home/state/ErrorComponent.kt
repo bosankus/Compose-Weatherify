@@ -26,9 +26,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.weatherify.R
 
-/**
- * Creates a simple background for the error screen
- */
 @Composable
 fun ErrorBackgroundAnimation() {
     Box(
@@ -39,15 +36,6 @@ fun ErrorBackgroundAnimation() {
     )
 }
 
-/**
- * Displays an error message with a retry button
- *
- * @param modifier Modifier for the container
- * @param msg Error message to display
- * @param buttonText Text for the retry button
- * @param isLoading Whether the retry operation is in progress
- * @param buttonAction Action to perform when the retry button is clicked
- */
 @Composable
 fun ShowError(
     modifier: Modifier,
@@ -65,7 +53,6 @@ fun ShowError(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.padding(horizontal = 24.dp),
         ) {
-            // Error icon
             Icon(
                 painter = painterResource(id = R.drawable.ic_error),
                 contentDescription = stringResource(id = R.string.error_icon_content),
@@ -75,7 +62,6 @@ fun ShowError(
 
             Spacer(modifier = Modifier.padding(top = 16.dp))
 
-            // Main error message
             Text(
                 text = msg ?: stringResource(id = R.string.general_error_txt),
                 style = MaterialTheme.typography.titleMedium,
@@ -86,7 +72,6 @@ fun ShowError(
 
             Spacer(modifier = Modifier.padding(top = 8.dp))
 
-            // Retry button
             Button(
                 onClick = buttonAction,
                 colors =

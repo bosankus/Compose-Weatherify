@@ -14,9 +14,6 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
-/**
- * Ktor implementation of LocationApiService.
- */
 class KtorLocationApiService(
     private val httpClient: HttpClient,
     private val baseUrl: String,

@@ -8,17 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
-/**
- * Implementation of WeatherStorage that uses Room database for persistence.
- *
- * This class is responsible ONLY for:
- * - Reading weather data from the local database
- * - Reading air quality data from the local database
- * - Saving weather data to the database (called by orchestration layer)
- *
- * Data synchronization (fetch from network, map, save to DB) is handled
- * by the orchestration layer (WeatherRepository in app module).
- */
 class WeatherStorageImpl(
     private val weatherDatabase: WeatherDatabase,
 ) : WeatherStorage {

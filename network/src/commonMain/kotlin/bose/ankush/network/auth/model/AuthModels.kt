@@ -2,18 +2,12 @@ package bose.ankush.network.auth.model
 
 import kotlinx.serialization.Serializable
 
-/**
- * Request model for login operation
- */
 @Serializable
 data class LoginRequest(
     val email: String,
     val password: String,
 )
 
-/**
- * Request model for register operation
- */
 @Serializable
 data class RegisterRequest(
     val email: String,
@@ -27,9 +21,6 @@ data class RegisterRequest(
     val firebaseToken: String? = null,
 )
 
-/**
- * Request model for token refresh operation
- */
 @Serializable
 data class RefreshTokenRequest(
     val token: String,
@@ -50,9 +41,6 @@ data class AuthData(
     val errorCode: String? = null,
 )
 
-/**
- * Response model for authentication operations
- */
 @Serializable
 data class AuthResponse(
     val success: Boolean? = null,

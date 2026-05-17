@@ -4,11 +4,6 @@ import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.domain.model.WeatherForecast
 import kotlinx.coroutines.flow.Flow
 
-/**Created by
-Author: Ankush Bose
-Date: 05,May,2021
- **/
-
 interface WeatherRepository {
     fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality>
 

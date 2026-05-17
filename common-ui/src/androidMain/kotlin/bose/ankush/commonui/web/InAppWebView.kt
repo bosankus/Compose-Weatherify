@@ -57,7 +57,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
 
-/** Android actual: security-hardened WebView wrapped in AndroidView. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun InAppWebView(
@@ -74,7 +73,6 @@ actual fun InAppWebView(
     var isInitialLoad by remember { mutableStateOf(true) }
     val currentUrl = remember { mutableStateOf(url) }
 
-    // Keep a single WebView instance across recompositions
     val webView =
         remember(context) {
             WebView(context).apply {
@@ -141,8 +139,8 @@ actual fun InAppWebView(
                             context.startActivity(
                                 Intent(
                                     Intent.ACTION_VIEW,
-                                    currentUrl.value.toUri()
-                                )
+                                    currentUrl.value.toUri(),
+                                ),
                             )
                         } catch (_: ActivityNotFoundException) {
                             // No browser available
@@ -219,7 +217,6 @@ actual fun InAppWebView(
                     },
                 )
 
-                // Loading overlay during initial page load
                 if (isInitialLoad && progress < 100) {
                     Box(
                         modifier =
@@ -232,7 +229,6 @@ actual fun InAppWebView(
                     }
                 }
 
-                // Error overlay when page fails to load
                 if (loadError) {
                     Box(
                         modifier =
@@ -288,7 +284,6 @@ actual fun InAppWebView(
         }
     }
 
-    // Clean up WebView resources when composable leaves composition
     DisposableEffect(Unit) {
         onDispose {
             try {
@@ -359,7 +354,6 @@ private fun configureWebView(
                 error: WebResourceError?,
             ) {
                 super.onReceivedError(view, request, error)
-                // Only report errors for main-frame loads, ignore subresource failures
                 if (request?.isForMainFrame == true) {
                     val errorDesc = error?.description?.toString() ?: "Unknown error"
                     onError("Failed to load: $errorDesc")
@@ -372,7 +366,6 @@ private fun configureWebView(
                 errorResponse: android.webkit.WebResourceResponse?,
             ) {
                 super.onReceivedHttpError(view, request, errorResponse)
-                // Only report errors for main-frame loads, ignore subresource failures
                 if (request?.isForMainFrame == true) {
                     val statusCode = errorResponse?.statusCode ?: 0
                     val reason = errorResponse?.reasonPhrase ?: "Unknown error"
@@ -430,7 +423,6 @@ private fun handleUrl(
             if (isWhitelistedUrl(uri)) {
                 webView?.loadUrl(uri.toString())
             } else {
-                // Reject URLs from untrusted domains
                 Log.w("InAppWebView", "Blocked untrusted URL: $uri")
             }
         }
@@ -441,19 +433,14 @@ private fun handleUrl(
             onExternalIntent(Intent(Intent.ACTION_VIEW, uri))
         }
     }
-    // Always return true to indicate we handled the URL loading
     return true
 }
 
-/**
- * Validate URL against whitelist of trusted domains.
- * Only allows loading content from whitelisted legal document hosts.
- */
 private fun isWhitelistedUrl(uri: Uri): Boolean {
     val host = uri.host?.lowercase() ?: return false
     val whitelistedDomains =
         setOf(
-            "data.androidplay.in", // Terms, Privacy Policy
+            "data.androidplay.in",
         )
     return whitelistedDomains.any { trustedDomain ->
         host == trustedDomain || host.endsWith(".$trustedDomain")

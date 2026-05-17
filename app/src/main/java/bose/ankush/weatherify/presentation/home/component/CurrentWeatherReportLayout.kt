@@ -75,25 +75,20 @@ internal fun CurrentWeatherReportLayout(
                     .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Location and date
             LocationAndDateHeader(currentWeather, userLocation)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Current weather visualization
             CurrentWeatherVisualization(currentWeather)
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Weather metrics
             WeatherMetricsGrid(currentWeather)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sunrise and sunset info
             SunriseSunsetInfo(currentWeather)
 
-            // Weather summary
             summary?.let { summaryText ->
                 if (summaryText.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -141,14 +136,11 @@ private fun LocationAndDateHeader(
     userLocation: Pair<Double, Double>? = null,
 ) {
     val context = LocalContext.current
-    // Use remember to avoid recreating the state on each recomposition
     var locationName by remember(userLocation) { mutableStateOf("Current Location") }
 
-    // Move Geocoder operation to LaunchedEffect but with IO dispatcher to avoid blocking UI
     LaunchedEffect(userLocation) {
         if (userLocation != null) {
             try {
-                // Use IO dispatcher for background processing
                 val result =
                     withContext(Dispatchers.IO) {
                         val geocoder = Geocoder(context, Locale.getDefault())
@@ -174,16 +166,13 @@ private fun LocationAndDateHeader(
                             "Current Location"
                         }
                     }
-                // Update state only once after background processing is complete
                 locationName = result
-            } catch (e: Exception) {
-                // If geocoding fails, keep the default "Current Location"
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Timber.e(e, "Geocoding failed; using default location label")
             }
         }
     }
 
-    // Pre-calculate the formatted date to avoid doing it during composition
     val formattedDate =
         remember(currentWeather.dt) {
             DateTimeUtils.getFormattedDateTimeFromEpoch(currentWeather.dt)
@@ -192,7 +181,6 @@ private fun LocationAndDateHeader(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Display the location name
         Text(
             text = locationName,
             style = MaterialTheme.typography.titleMedium,
@@ -213,7 +201,6 @@ private fun LocationAndDateHeader(
 
 @Composable
 private fun CurrentWeatherVisualization(currentWeather: WeatherForecast.Current) {
-    // Cache the first weather condition to avoid multiple get(0) calls and potential crashes
     val firstWeather = currentWeather.weather?.firstOrNull()
     val weatherDescription =
         (firstWeather?.description ?: stringResource(id = R.string.not_available))
@@ -225,7 +212,6 @@ private fun CurrentWeatherVisualization(currentWeather: WeatherForecast.Current)
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Temperature display
         Column(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.weight(1f),
@@ -254,7 +240,6 @@ private fun CurrentWeatherVisualization(currentWeather: WeatherForecast.Current)
             }
         }
 
-        // Weather icon and description
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.weight(1f),
@@ -290,7 +275,6 @@ private fun CurrentWeatherVisualization(currentWeather: WeatherForecast.Current)
 
 @Composable
 private fun WeatherMetricsGrid(weatherData: WeatherForecast.Current) {
-    // First row metrics
     val firstRowMetrics =
         listOf(
             WeatherMetric(
@@ -310,7 +294,6 @@ private fun WeatherMetricsGrid(weatherData: WeatherForecast.Current) {
             ),
         )
 
-    // Second row metrics
     val secondRowMetrics =
         mutableListOf(
             WeatherMetric(
@@ -325,7 +308,6 @@ private fun WeatherMetricsGrid(weatherData: WeatherForecast.Current) {
             ),
         )
 
-    // Add wind gust if available
     if (weatherData.wind_gust != null) {
         secondRowMetrics.add(
             WeatherMetric(
@@ -336,7 +318,6 @@ private fun WeatherMetricsGrid(weatherData: WeatherForecast.Current) {
         )
     }
 
-    // Display the metrics rows
     MetricsRow(metrics = firstRowMetrics)
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -403,7 +384,6 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Sunrise
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.weight(1f),
@@ -418,16 +398,14 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
                     text =
                         formatTimeWithAmPm(
                             weatherData.sunrise,
-                            true,
+                            true, // Force AM for sunrise
                         ),
-                    // Force AM for sunrise
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
             }
 
-            // Divider
             Box(
                 modifier =
                     Modifier
@@ -436,7 +414,6 @@ private fun SunriseSunsetInfo(weatherData: WeatherForecast.Current) {
                         .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)),
             )
 
-            // Sunset
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.weight(1f),
@@ -468,12 +445,9 @@ private fun formatTimeWithAmPm(
 ): String {
     if (timestamp == null) return "N/A"
 
-    // Use remember to cache the formatted time based on the timestamp and isSunrise flag
     return remember(timestamp, isSunrise) {
         val date = Date(timestamp * 1000)
         val timeWithoutAmPm = hourMinuteFormatter.format(date)
-
-        // Force AM for sunrise, PM for sunset
         if (isSunrise) {
             "$timeWithoutAmPm AM"
         } else {
@@ -482,7 +456,6 @@ private fun formatTimeWithAmPm(
     }
 }
 
-// Data class to hold weather metric information
 private data class WeatherMetric(
     val icon: Int,
     val value: String,
@@ -507,7 +480,6 @@ private fun MetricsRow(
             )
         }
 
-        // Add empty space if needed
         if (fillEmptySpace && metrics.size < 3) {
             repeat(3 - metrics.size) {
                 Spacer(modifier = Modifier.weight(1f))

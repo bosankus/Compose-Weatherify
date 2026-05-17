@@ -3,9 +3,6 @@ package bose.ankush.storage.room
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * Room entity for storing authentication token
- */
 @Entity(tableName = "auth_tokens")
 data class AuthToken(
     @PrimaryKey

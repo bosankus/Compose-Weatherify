@@ -10,6 +10,7 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.github.ben-manes.versions")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -89,7 +90,11 @@ dependencies {
     implementation(Deps.appCompat)
     implementation(Deps.androidMaterial)
     implementation(Deps.viewModelCompose)
-    implementation(Deps.navigationCompose)
+
+    // Navigation 3
+    implementation(Deps.navigation3Runtime)
+    implementation(Deps.navigation3Ui)
+    implementation(Deps.lifecycleViewmodelNavigation3)
     implementation(Deps.inAppUpdate)
     implementation(Deps.inAppUpdateKtx)
     implementation(Deps.googlePlayLocation)
@@ -154,7 +159,6 @@ dependencies {
 
     // Miscellaneous
     implementation(Deps.timber)
-    // Removed Lottie dependency as per requirements
     implementation(Deps.coilCompose)
 
     // Memory leak

@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import bose.ankush.commonui.components.SunriseSunsetCombinedAnimation
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.permissions.PermissionAlertDialog
@@ -58,24 +57,33 @@ import bose.ankush.weatherify.presentation.home.state.ErrorBackgroundAnimation
 import bose.ankush.weatherify.presentation.home.state.ShowError
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
+import bose.ankush.weatherify.presentation.navigation.AppNavigator
 import kotlinx.coroutines.delay
+
+private const val ANIMATION_INITIAL_DELAY_MS = 100L
+private const val ANIMATION_STAGGER_DELAY_MS = 150L
+
+data class NotificationCardState(
+    val isVisible: Boolean = false,
+    val isPermanentlyDeclined: Boolean = false,
+    val onEnableClick: () -> Unit = {},
+    val onDismissClick: () -> Unit = {},
+)
 
 @Composable
 fun HomeScreen(
     viewModel: MainViewModel,
-    navController: NavController,
+    navigator: AppNavigator,
     toastAnchorState: ToastAnchorState? = null,
 ) {
-    val context: Context = LocalContext.current
-    val uiState: UIState = viewModel.uiState.collectAsState().value
+    val context = LocalContext.current
+    val uiState = viewModel.uiState.collectAsState().value
     val showNotificationCard = viewModel.showNotificationCardItem.collectAsState().value
     val isNotificationPermissionPermanentlyDeclined =
         viewModel.isNotificationPermissionPermanentlyDeclined.collectAsState().value
 
-    // reacting as per response state change
     when {
         !uiState.error?.asString(context).isNullOrEmpty() -> {
-            // Screen error handler
             HandleScreenError(
                 context = context,
                 errorText = uiState.error,
@@ -89,27 +97,26 @@ fun HomeScreen(
             ?.weather
             ?.isNotEmpty() == true ||
                 uiState.airQualityData != null -> {
-            // Show data on UI
             ShowUIContainer(
                 uiState = uiState,
-                navController = navController,
+                navigator = navigator,
                 toastAnchorState = toastAnchorState,
-                showNotificationCard = showNotificationCard,
-                isNotificationPermissionPermanentlyDeclined = isNotificationPermissionPermanentlyDeclined,
-                onEnableNotificationClick = { viewModel.updateNotificationPermission(true) },
-                onDismissNotificationClick = { viewModel.updateShowNotificationBannerState(false) },
+                notificationCardState = NotificationCardState(
+                    isVisible = showNotificationCard,
+                    isPermanentlyDeclined = isNotificationPermissionPermanentlyDeclined,
+                    onEnableClick = { viewModel.updateNotificationPermission(true) },
+                    onDismissClick = { viewModel.updateShowNotificationBannerState(false) },
+                ),
                 onRefresh = { viewModel.refreshWeatherData() },
                 onResetLocationOverride = { viewModel.clearLocationOverride() },
             )
         }
 
         else -> {
-            // Show loading
             HandleScreenLoading()
         }
     }
 
-    // Handle back button press to exit app
     BackHandler {
         (context as? Activity)?.finish()
     }
@@ -158,12 +165,9 @@ fun HandleScreenError(
 @Composable
 private fun ShowUIContainer(
     uiState: UIState,
-    navController: NavController,
+    navigator: AppNavigator,
     toastAnchorState: ToastAnchorState? = null,
-    showNotificationCard: Boolean = false,
-    isNotificationPermissionPermanentlyDeclined: Boolean = false,
-    onEnableNotificationClick: () -> Unit = {},
-    onDismissNotificationClick: () -> Unit = {},
+    notificationCardState: NotificationCardState = NotificationCardState(),
     onRefresh: () -> Unit = {},
     onResetLocationOverride: () -> Unit = {},
 ) {
@@ -172,7 +176,6 @@ private fun ShowUIContainer(
 
     val pullToRefreshState = rememberPullToRefreshState()
 
-    // Create transition states for animations
     val currentWeatherTransitionState = remember { MutableTransitionState(false) }
     val alertsTransitionState = remember { MutableTransitionState(false) }
     val airQualityTransitionState = remember { MutableTransitionState(false) }
@@ -181,32 +184,29 @@ private fun ShowUIContainer(
 
     // Start animations with staggered delays when data is loaded
     LaunchedEffect(weatherReports, airQualityReports) {
-        // Reset states first
         currentWeatherTransitionState.targetState = false
         alertsTransitionState.targetState = false
         airQualityTransitionState.targetState = false
         hourlyForecastTransitionState.targetState = false
         dailyForecastTransitionState.targetState = false
 
-        // Start animations with staggered delays
-        delay(100) // Small initial delay
+        delay(ANIMATION_INITIAL_DELAY_MS)
         currentWeatherTransitionState.targetState = true
 
-        delay(150) // Delay for alerts (prioritize showing alerts early)
+        delay(ANIMATION_STAGGER_DELAY_MS)
         alertsTransitionState.targetState = true
 
-        delay(150) // Delay for air quality
+        delay(ANIMATION_STAGGER_DELAY_MS)
         airQualityTransitionState.targetState = true
 
-        delay(150) // Delay for hourly forecast
+        delay(ANIMATION_STAGGER_DELAY_MS)
         hourlyForecastTransitionState.targetState = true
 
-        delay(150) // Delay for daily forecast
+        delay(ANIMATION_STAGGER_DELAY_MS)
         dailyForecastTransitionState.targetState = true
     }
 
     Box {
-        // Add the SunriseSunsetCombinedAnimation as a full-screen background
         weatherReports?.current?.let { currentWeather ->
             SunriseSunsetCombinedAnimation(
                 sunriseTimestamp = currentWeather.sunrise,
@@ -215,19 +215,19 @@ private fun ShowUIContainer(
             )
         }
 
-        if (showNotificationCard) {
+        if (notificationCardState.isVisible) {
             PermissionAlertDialog(
                 descriptionText = stringResource(R.string.notification_permission_message),
-                isPermanentlyDeclined = isNotificationPermissionPermanentlyDeclined,
-                onPositiveAction = onEnableNotificationClick,
-                onNegativeAction = onDismissNotificationClick,
+                isPermanentlyDeclined = notificationCardState.isPermanentlyDeclined,
+                onPositiveAction = notificationCardState.onEnableClick,
+                onNegativeAction = notificationCardState.onDismissClick,
                 positiveButtonLabel = stringResource(R.string.enable_notification_btn),
                 negativeButtonLabel = stringResource(R.string.cancel_btn_txt),
             )
         }
 
         Scaffold(
-            containerColor = Color.Transparent, // Make the scaffold background transparent
+            containerColor = Color.Transparent,
             content = { innerPadding ->
                 PullToRefreshBox(
                     isRefreshing = uiState.isRefreshing,
@@ -239,10 +239,8 @@ private fun ShowUIContainer(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = innerPadding,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        // Add state key to prevent unnecessary recompositions
                         state = rememberLazyListState(),
                     ) {
-                        // Show override chip when a saved location is pinned
                         if (uiState.isLocationOverridden && uiState.activeLocationName != null) {
                             item(key = "location_override_chip") {
                                 Box(
@@ -282,7 +280,6 @@ private fun ShowUIContainer(
                             }
                         }
 
-                        // Show current weather report - prioritize loading this first
                         item(key = "current_weather") {
                             weatherReports?.current?.let {
                                 AnimatedVisibility(
@@ -304,7 +301,6 @@ private fun ShowUIContainer(
                             }
                         }
 
-                        // Show weather alerts if available
                         item(key = "weather_alerts") {
                             weatherReports?.alerts?.let { alerts ->
                                 AnimatedVisibility(
@@ -322,7 +318,6 @@ private fun ShowUIContainer(
                             }
                         }
 
-                        // Show brief air quality report
                         item(key = "air_quality") {
                             airQualityReports?.takeIf { it.aqi > 0 }?.let { aq ->
                                 AnimatedVisibility(
@@ -340,7 +335,6 @@ private fun ShowUIContainer(
                             }
                         }
 
-                        // Show hourly weather forecast report
                         item(key = "hourly_forecast") {
                             weatherReports?.hourly?.let {
                                 AnimatedVisibility(
@@ -358,7 +352,6 @@ private fun ShowUIContainer(
                             }
                         }
 
-                        // Show next 8 day's weather forecast report
                         item(key = "daily_forecast") {
                             weatherReports?.daily?.let { list ->
                                 AnimatedVisibility(
@@ -376,12 +369,12 @@ private fun ShowUIContainer(
                             }
                         }
                     }
-                } // end PullToRefreshBox
+                }
             },
             bottomBar = {
                 AppBottomBar(
                     isVisible = rememberSaveable { mutableStateOf(true) },
-                    navController = navController,
+                    navigator = navigator,
                     toastAnchorState = toastAnchorState,
                 )
             },

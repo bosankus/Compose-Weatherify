@@ -30,14 +30,12 @@ constructor(
     private val client: FusedLocationProviderClient,
 ) : LocationClient {
     private fun checkLocationPermission() {
-        // if user did not give location permission
         if (!context.hasLocationPermission()) {
             throw LocationClient.LocationException("Location permission is not given.")
         }
     }
 
     private fun checkGpsEnabled(): Pair<Boolean, Boolean> {
-        // if device's GPS or network is disabled
         val locationManager =
             context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -95,7 +93,6 @@ constructor(
                 return@suspendCancellableCoroutine
             }
 
-            // Create a cancellation token source to allow cancellation of the location request
             val cts = CancellationTokenSource()
 
             client
@@ -113,10 +110,7 @@ constructor(
                     continuation.resume(Result.failure(ex))
                 }
 
-            continuation.invokeOnCancellation {
-                // Cancel the Play Services location request when the coroutine is cancelled
-                cts.cancel()
-            }
+            continuation.invokeOnCancellation { cts.cancel() }
         }
 
     override fun hasLocationPermission(): Boolean = context.hasLocationPermission()

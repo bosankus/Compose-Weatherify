@@ -17,16 +17,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 
-/**
- * Domain-layer repository that orchestrates between network and storage modules.
- *
- * Responsibilities:
- * - Fetch unified weather data from network (single /weather call)
- * - Extract both weather and air quality from the unified response
- * - Map network models to storage entities
- * - Save to local storage (WeatherStorage)
- * - Provide domain models to UI layer (via mappers)
- */
 class WeatherRepositoryImpl
 @Inject
 constructor(
@@ -61,7 +51,6 @@ constructor(
             val isDataStale = forceRefresh || (currentTime - lastUpdateTime) > ONE_HOUR_IN_MILLIS
 
             if (isDataStale) {
-                // Single unified API call — includes air quality for premium users
                 networkRepository.refreshWeatherData(coordinates)
 
                 val weatherData = networkRepository.getWeatherReport(coordinates).firstOrNull()
@@ -69,7 +58,6 @@ constructor(
                 if (weatherData != null) {
                     val weatherEntity =
                         NetworkToStorageMapper.mapWeatherToStorageEntity(weatherData)
-                    // Air quality is inside data.airQuality; null for free tier → stores defaults
                     val airQualityEntity =
                         NetworkToStorageMapper.mapAirQualityToStorageEntity(
                             weatherData.data?.airQuality,

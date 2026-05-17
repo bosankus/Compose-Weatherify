@@ -39,6 +39,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import bose.ankush.commonui.auth.LoginScreen
 import bose.ankush.commonui.components.NotificationToast
+import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.permissions.PermissionAlertDialog
@@ -47,6 +48,7 @@ import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
+import bose.ankush.weatherify.base.common.LUMINANCE_THRESHOLD
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
 import bose.ankush.weatherify.base.location.LocationClient
@@ -84,198 +86,222 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(window, false)
         startInAppUpdate(this)
-
         setContent {
             WeatherifyTheme {
-                val context = LocalContext.current
-                val isLoggedIn by viewModel.isLoggedIn.collectAsState()
-                val authState by viewModel.authState.collectAsState()
-                val isAuthInitialized by viewModel.isAuthInitialized.collectAsState()
+                AppContent()
+            }
+        }
+    }
 
-                // Set status bar color and icon color based on background
-                @Suppress("DEPRECATION")
-                val systemUiController = rememberSystemUiController()
-                val bgColor = MaterialTheme.colorScheme.background
-                val useDarkIcons = bgColor.luminance() > 0.5f
-                SideEffect {
-                    systemUiController.setStatusBarColor(
-                        color = Color.Transparent,
-                        darkIcons = useDarkIcons,
-                    )
+    @Composable
+    private fun AppContent() {
+        val context = LocalContext.current
+        val isLoggedIn by viewModel.isLoggedIn.collectAsState()
+        val authState by viewModel.authState.collectAsState()
+        val isAuthInitialized by viewModel.isAuthInitialized.collectAsState()
+        val toastAnchorState = rememberToastAnchorState()
+        var toastVisible by remember { mutableStateOf(false) }
+        var toastMessage by remember { mutableStateOf("") }
+        var toastTitle by remember { mutableStateOf("") }
+        var toastType by remember { mutableStateOf(ToastType.ERROR) }
+
+        fun showToast(message: String, title: String = "Error", type: ToastType = ToastType.ERROR) {
+            toastMessage = message
+            toastTitle = title
+            toastType = type
+            toastVisible = true
+        }
+
+        SetupSystemUi()
+        ObserveAuthState(authState = authState, context = context, onShowToast = ::showToast)
+        ObserveAuthEventBus(onShowToast = ::showToast)
+        ObservePaymentCheckout(context = context)
+
+        AppScreen(
+            isAuthInitialized = isAuthInitialized,
+            isLoggedIn = isLoggedIn,
+            authState = authState,
+            toastAnchorState = toastAnchorState,
+            toastState = ToastDisplayState(
+                visible = toastVisible,
+                message = toastMessage,
+                title = toastTitle,
+                type = toastType,
+                onDismiss = { toastVisible = false },
+            ),
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    @Composable
+    private fun SetupSystemUi() {
+        val systemUiController = rememberSystemUiController()
+        val bgColor = MaterialTheme.colorScheme.background
+        val useDarkIcons = bgColor.luminance() > LUMINANCE_THRESHOLD
+        SideEffect {
+            systemUiController.setStatusBarColor(
+                color = Color.Transparent,
+                darkIcons = useDarkIcons,
+            )
+        }
+    }
+
+    @Composable
+    private fun ObserveAuthState(
+        authState: AuthState,
+        context: Context,
+        onShowToast: (String, String, ToastType) -> Unit,
+    ) {
+        LaunchedEffect(authState) {
+            when (authState) {
+                is AuthState.Error -> {
+                    onShowToast(authState.message.asString(context), "Error", ToastType.ERROR)
+                    viewModel.resetAuthState()
                 }
 
-                // Toast anchor state — auto-measures bottom bar height
-                val toastAnchorState = rememberToastAnchorState()
-
-                // NotificationToast state
-                var toastVisible by remember { mutableStateOf(false) }
-                var toastMessage by remember { mutableStateOf("") }
-                var toastTitle by remember { mutableStateOf("") }
-                var toastType by remember { mutableStateOf(ToastType.ERROR) }
-
-                fun showToast(
-                    message: String,
-                    title: String = "Error",
-                    type: ToastType = ToastType.ERROR,
-                ) {
-                    toastMessage = message
-                    toastTitle = title
-                    toastType = type
-                    toastVisible = true
+                is AuthState.Success -> {
+                    onShowToast("Authentication successful", "Success", ToastType.SUCCESS)
+                    viewModel.resetAuthState()
                 }
 
-                // Handle authentication state changes
-                LaunchedEffect(authState) {
-                    when (authState) {
-                        is AuthState.Error -> {
-                            showToast((authState as AuthState.Error).message.asString(this@MainActivity))
-                            viewModel.resetAuthState()
-                        }
-                        is AuthState.Success -> {
-                            showToast("Authentication successful", "Success", ToastType.SUCCESS)
-                            viewModel.resetAuthState()
-                        }
-                        else -> Unit
-                    }
-                }
+                else -> Unit
+            }
+        }
+    }
 
-                // Listen for Unauthorized events
-                LaunchedEffect(Unit) {
-                    bose.ankush.network.auth.events.AuthEventBus.events.collect { event ->
-                        if (event is bose.ankush.network.auth.events.AuthEvent.Unauthorized) {
-                            showToast(
-                                message =
-                                    event.message.ifBlank {
-                                        "You need to log in again to continue using the app for security purposes."
-                                    },
-                                title = "Session Expired",
-                                type = ToastType.WARNING,
-                            )
-                        }
-                    }
-                }
-
-                // Collect checkout params from PaymentViewModel and launch Razorpay
-                LaunchedEffect(Unit) {
-                    paymentViewModel.checkoutParams.collect { params ->
-                        try {
-                            Checkout.preload(applicationContext)
-                            razorpayCheckout = Checkout()
-                            razorpayCheckout?.setKeyID(params.keyId)
-                            val options =
-                                JSONObject().apply {
-                                    put("name", params.name)
-                                    put("description", params.description)
-                                    put("order_id", params.orderId)
-                                    put("currency", params.currency)
-                                    put("amount", params.amount)
-                                    val prefill =
-                                        JSONObject().apply {
-                                            params.email?.let { put("email", it) }
-                                            params.contact?.let { put("contact", it) }
-                                        }
-                                    put("prefill", prefill)
-                                }
-                            razorpayCheckout?.open(this@MainActivity, options)
-                        } catch (e: Exception) {
-                            paymentViewModel.onPaymentFailed(
-                                e.message ?: "Unable to open payment checkout",
-                            )
-                            Checkout.clearUserData(context)
-                            razorpayCheckout = null
-                        }
-                    }
-                }
-
-                // Main content
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background)
-                            .windowInsetsPadding(
-                                WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
-                            ),
-                ) {
-                    when {
-                        !isAuthInitialized -> {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center,
-                            ) { CircularProgressIndicator() }
-                        }
-                        isLoggedIn -> {
-                            // Only fetch location once after login, not on every recomposition
-                            val launchNotificationPermissionState =
-                                viewModel.launchNotificationPermission.collectAsState()
-                            LaunchedEffect(isLoggedIn) {
-                                if (locationClient.hasLocationPermission()) {
-                                    viewModel.fetchAndSaveLocationCoordinates()
-                                }
-                            }
-                            // If location permission is missing, request it on first launch
-                            if (!locationClient.hasLocationPermission()) {
-                                RequestLocationPermission(context)
-                            }
-                            if (launchNotificationPermissionState.value) {
-                                RequestNotificationPermission(context)
-                            }
-                            LaunchedEffect(launchNotificationPermissionState.value) {
-                                viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
-                            }
-                            AppNavigation(viewModel, paymentViewModel, toastAnchorState)
-                        }
-                        else -> {
-                            // State for web view
-                            var currentWebUrl by remember { mutableStateOf<String?>(null) }
-
-                            // Show web view if a URL is selected
-                            if (currentWebUrl != null) {
-                                InAppWebView(
-                                    url = currentWebUrl!!,
-                                    onClose = { currentWebUrl = null },
-                                )
-                            } else {
-                                // Only show login screen if not logged in and auth is initialized
-                                LoginScreen(
-                                    onLoginClick = { email, password ->
-                                        viewModel.login(
-                                            email,
-                                            password,
-                                        )
-                                    },
-                                    onRegisterClick = { email, password ->
-                                        viewModel.register(
-                                            email,
-                                            password,
-                                        )
-                                    },
-                                    onWebUrlClick = { url -> currentWebUrl = url },
-                                    isLoading = authState is AuthState.Loading,
-                                )
-                            }
-                        }
-                    }
-                    NotificationToast(
-                        modifier = Modifier.align(Alignment.BottomCenter),
-                        message = toastMessage,
-                        title = toastTitle,
-                        type = toastType,
-                        isVisible = toastVisible,
-                        onDismiss = { toastVisible = false },
-                        anchorState = toastAnchorState,
+    @Composable
+    private fun ObserveAuthEventBus(onShowToast: (String, String, ToastType) -> Unit) {
+        LaunchedEffect(Unit) {
+            bose.ankush.network.auth.events.AuthEventBus.events.collect { event ->
+                if (event is bose.ankush.network.auth.events.AuthEvent.Unauthorized) {
+                    onShowToast(
+                        event.message.ifBlank {
+                            "You need to log in again to continue using the app for security purposes."
+                        },
+                        "Session Expired",
+                        ToastType.WARNING,
                     )
                 }
             }
         }
     }
 
-    /**
-     * Request location permissions using Compose dialog and launcher.
-     */
+    @Composable
+    private fun ObservePaymentCheckout(context: Context) {
+        LaunchedEffect(Unit) {
+            paymentViewModel.checkoutParams.collect { params ->
+                try {
+                    Checkout.preload(applicationContext)
+                    razorpayCheckout = Checkout()
+                    razorpayCheckout?.setKeyID(params.keyId)
+                    val options =
+                        JSONObject().apply {
+                            put("name", params.name)
+                            put("description", params.description)
+                            put("order_id", params.orderId)
+                            put("currency", params.currency)
+                            put("amount", params.amount)
+                            val prefill =
+                                JSONObject().apply {
+                                    params.email?.let { put("email", it) }
+                                    params.contact?.let { put("contact", it) }
+                                }
+                            put("prefill", prefill)
+                        }
+                    razorpayCheckout?.open(this@MainActivity, options)
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    paymentViewModel.onPaymentFailed(
+                        e.message ?: "Unable to open payment checkout",
+                    )
+                    Checkout.clearUserData(context)
+                    razorpayCheckout = null
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun AppScreen(
+        isAuthInitialized: Boolean,
+        isLoggedIn: Boolean,
+        authState: AuthState,
+        toastAnchorState: ToastAnchorState,
+        toastState: ToastDisplayState,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.background)
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
+                    ),
+        ) {
+            when {
+                !isAuthInitialized -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) { CircularProgressIndicator() }
+                }
+
+                isLoggedIn -> AuthorizedContent(toastAnchorState = toastAnchorState)
+                else -> UnauthorizedContent(authState = authState)
+            }
+            NotificationToast(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                message = toastState.message,
+                title = toastState.title,
+                type = toastState.type,
+                isVisible = toastState.visible,
+                onDismiss = toastState.onDismiss,
+                anchorState = toastAnchorState,
+            )
+        }
+    }
+
+    @Composable
+    private fun AuthorizedContent(toastAnchorState: ToastAnchorState) {
+        val context = LocalContext.current
+        val launchNotificationPermissionState =
+            viewModel.launchNotificationPermission.collectAsState()
+        LaunchedEffect(true) {
+            if (locationClient.hasLocationPermission()) {
+                viewModel.fetchAndSaveLocationCoordinates()
+            }
+        }
+        if (!locationClient.hasLocationPermission()) {
+            RequestLocationPermission(context)
+        }
+        if (launchNotificationPermissionState.value) {
+            RequestNotificationPermission(context)
+        }
+        LaunchedEffect(launchNotificationPermissionState.value) {
+            viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
+        }
+        AppNavigation(viewModel, paymentViewModel, toastAnchorState)
+    }
+
+    @Composable
+    private fun UnauthorizedContent(authState: AuthState) {
+        var currentWebUrl by remember { mutableStateOf<String?>(null) }
+        if (currentWebUrl != null) {
+            InAppWebView(
+                url = currentWebUrl!!,
+                onClose = { currentWebUrl = null },
+            )
+        } else {
+            LoginScreen(
+                onLoginClick = { email, password -> viewModel.login(email, password) },
+                onRegisterClick = { email, password -> viewModel.register(email, password) },
+                onWebUrlClick = { url -> currentWebUrl = url },
+                isLoading = authState is AuthState.Loading,
+            )
+        }
+    }
+
     @Composable
     fun RequestLocationPermission(context: Context) {
         val permissionQueue = viewModel.permissionDialogQueue
@@ -339,9 +365,6 @@ class MainActivity :
         }
     }
 
-    /**
-     * Request notification permission using Compose launcher.
-     */
     @Composable
     fun RequestNotificationPermission(context: Context) {
         val notificationPermissionResultLauncher =
@@ -430,3 +453,11 @@ class MainActivity :
         razorpayCheckout = null
     }
 }
+
+private class ToastDisplayState(
+    val visible: Boolean,
+    val message: String,
+    val title: String,
+    val type: ToastType,
+    val onDismiss: () -> Unit,
+)

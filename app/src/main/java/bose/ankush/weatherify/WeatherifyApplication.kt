@@ -15,11 +15,6 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 import javax.inject.Inject
 
-/**Created by
-Author: Ankush Bose
-Date: 05,May,2021
- **/
-
 @HiltAndroidApp
 class WeatherifyApplication : WeatherifyApplicationCore() {
     @Inject
@@ -75,7 +70,6 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
                         message: String,
                         t: Throwable?,
                     ) {
-                        // Only log WARN, ERROR, and WTF in release; avoid verbose/debug/info
                         val isLowPriority =
                             priority == android.util.Log.VERBOSE ||
                                     priority == android.util.Log.DEBUG ||

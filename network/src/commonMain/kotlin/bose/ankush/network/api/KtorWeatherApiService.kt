@@ -6,9 +6,6 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
-/**
- * Ktor implementation of WeatherApiService
- */
 class KtorWeatherApiService(
     private val httpClient: HttpClient,
     private val baseUrl: String,

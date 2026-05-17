@@ -32,16 +32,9 @@ fun appPaymentKoinModule(context: Context): Module {
     val appConfig = bridge.appConfig()
 
     return module {
-        // NetworkConnectivity: stateless — safe to create a fresh instance for Koin
         single<NetworkConnectivity> { AndroidNetworkConnectivity(androidContext()) }
-
-        // PaymentApiService: uses authenticated HTTP client from the network module
         single<PaymentApiService> { createPaymentApiService(tokenStorage) }
-
-        // PremiumStore: wraps the Hilt-managed PreferenceManager singleton
         single<PremiumStore> { PreferenceManagerPremiumStore(preferenceManager) }
-
-        // PaymentConfig: wraps the Hilt-managed AppConfig singleton
         single<PaymentConfig> { AppConfigPaymentConfig(appConfig) }
     }
 }

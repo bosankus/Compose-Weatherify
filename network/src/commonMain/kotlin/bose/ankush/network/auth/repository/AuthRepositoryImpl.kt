@@ -8,9 +8,6 @@ import bose.ankush.network.auth.model.RegisterRequest
 import bose.ankush.storage.api.TokenStorage
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Implementation of AuthRepository
- */
 class AuthRepositoryImpl(
     private val apiService: AuthApiService,
     private val tokenStorage: TokenStorage,
@@ -21,8 +18,6 @@ class AuthRepositoryImpl(
     ): AuthResponse {
         val request = LoginRequest(email = email, password = password)
         val response = apiService.login(request)
-
-        // Save token on successful login
         val token = response.data?.token
         if (response.isSuccess() && !token.isNullOrBlank()) {
             tokenStorage.saveToken(token)
@@ -55,8 +50,6 @@ class AuthRepositoryImpl(
                 firebaseToken = firebaseToken,
             )
         val response = apiService.register(request)
-
-        // Save token on successful registration
         val token = response.data?.token
         if (response.isSuccess() && !token.isNullOrBlank()) {
             tokenStorage.saveToken(token)
@@ -74,8 +67,6 @@ class AuthRepositoryImpl(
 
         val request = RefreshTokenRequest(token = currentToken)
         val response = apiService.refreshToken(request)
-
-        // Save new token on successful refresh
         val token = response.data?.token
         if (response.isSuccess() && !token.isNullOrBlank()) {
             tokenStorage.saveToken(token)

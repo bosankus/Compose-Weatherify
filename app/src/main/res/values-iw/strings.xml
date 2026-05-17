@@ -121,4 +121,10 @@
     <string name="location_override_chip_label">משתמש ב-%1$s</string>
     <string name="location_override_reset_btn">אפס ל-GPS</string>
     <string name="location_override_chip_content_desc">כרגע מוצג מזג האוויר עבור %1$s. הקש כדי לאפס ל-GPS.</string>
+    <string name="language_lib_screen_header">בחר שפה</string>
+    <string name="language_back_content_description">תחזור</string>
+    <string name="language_screen_title">בחר את השפה שלך</string>
+    <string name="language_screen_subtitle">בחר את השפה המועדפת עליך לחוויה מותאמת אישית</string>
+    <string name="language_selected">%s נבחר</string>
+    <string name="language_navigate_back">נווט לאחור</string>
 </resources>

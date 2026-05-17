@@ -1,0 +1,56 @@
+naming:
+  FunctionNaming:
+    # Compose functions are conventionally PascalCase
+    ignoreAnnotated:
+      - 'Composable'
+      - 'Preview'
+  PackageNaming:
+    # Allow snake_case segments (e.g. use_case, remote_config, get_weather_reports)
+    packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9_]*)*'
+  ConstructorParameterNaming:
+    # Broaden to cover snake_case API/JSON model parameters
+    parameterPattern: '[a-z][A-Za-z0-9_]*'
+
+complexity:
+  LongMethod:
+    # Raise ceiling for long Composable layout functions
+    threshold: 80
+    ignoreAnnotated:
+      - 'Composable'
+  LongParameterList:
+    # Hilt-injected constructors are intentionally large
+    constructorThreshold: 15
+    ignoreAnnotated:
+      - 'HiltViewModel'
+      - 'Inject'
+  LargeClass:
+    # MainViewModel is an architectural seam; split is tracked separately
+    threshold: 900
+  TooManyFunctions:
+    thresholdInClasses: 30
+    thresholdInObjects: 20
+    thresholdInFiles: 20
+
+style:
+  MagicNumber:
+    # UI layout constants in Composables are self-documenting in context
+    ignoreAnnotated:
+      - 'Composable'
+      - 'Preview'
+    # Standard calendar/time integers are universally understood
+    ignoreNumbers:
+      - '-1'
+      - '0'
+      - '1'
+      - '2'
+      - '3'
+      - '4'
+      - '5'
+      - '6'
+      - '7'
+      - '100'
+      - '400'
+      - '1000'
+      - '5000'
+  ForbiddenComment:
+    active: false

@@ -10,7 +10,6 @@ import bose.ankush.network.auth.events.AuthEventBus.emit
 import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.auth.token.TokenManager
-import bose.ankush.network.auth.token.TokenResult
 import bose.ankush.network.auth.utils.isPremiumActive
 import bose.ankush.network.domain.SavedLocationsUseCase
 import bose.ankush.network.domain.SearchPlacesUseCase
@@ -68,6 +67,7 @@ import javax.inject.Inject
  * [UiText.StringResource] usages below with the new type.
  */
 @OptIn(FlowPreview::class)
+@Suppress("TooGenericExceptionCaught")
 @HiltViewModel
 class MainViewModel
 @Inject
@@ -89,11 +89,9 @@ constructor(
 ) : ViewModel() {
     private val logger = loggerFactory.create("${MainViewModel::class.simpleName} ->")
 
-    // Permission dialog queue for UI
     var permissionDialogQueue = mutableStateListOf<String>()
         private set
 
-    // UI state flows
     private val _uiState = MutableStateFlow(UIState(isLoading = true))
     val uiState = _uiState.asStateFlow()
 
@@ -107,7 +105,6 @@ constructor(
     val isNotificationPermissionPermanentlyDeclined =
         _isNotificationPermissionPermanentlyDeclined.asStateFlow()
 
-    // Auth state flows
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
@@ -117,7 +114,6 @@ constructor(
     private val _isAuthInitialized = MutableStateFlow(false)
     val isAuthInitialized: StateFlow<Boolean> = _isAuthInitialized.asStateFlow()
 
-    // Location state flows
     private val _savedLocationsState = MutableStateFlow(SavedLocationsUiState())
     val savedLocationsState: StateFlow<SavedLocationsUiState> = _savedLocationsState.asStateFlow()
 
@@ -126,12 +122,10 @@ constructor(
 
     private val _queryFlow = MutableStateFlow("")
 
-    // Coroutine jobs
     private var notificationBannerJob: Job? = null
     private var locationJob: Job? = null
     private var dataLoadingJob: Job? = null
 
-    // Exception handler for data fetch
     private val dataFetchExceptionHandler =
         CoroutineExceptionHandler { _, e ->
             if (e !is CancellationException) {
@@ -154,7 +148,6 @@ constructor(
                 _isLoggedIn.value = loggedIn
                 logger.d("Auth state changed - isLoggedIn: $loggedIn")
                 if (!initialized) {
-                    if (loggedIn) silentTokenRefresh()
                     _isAuthInitialized.value = true
                     initialized = true
                     logger.d("Auth initialization completed")
@@ -176,16 +169,14 @@ constructor(
                 }
         }
 
-        // Setup debounced place search
         viewModelScope.launch(dispatchers.io) {
             _queryFlow
                 .debounce(400L)
-                .filter { it.length >= 2 }
+                .filter { it.length >= MIN_QUERY_LENGTH }
                 .distinctUntilChanged()
                 .collect { query -> fetchPlaceSuggestions(query) }
         }
 
-        // Load saved locations and premium status on init
         viewModelScope.launch(dispatchers.io) {
             preferenceManager.getUserPreferencesFlow().collect { prefs ->
                 val premiumActive =
@@ -201,7 +192,6 @@ constructor(
         }
     }
 
-    /** Remove first permission dialog from queue. */
     fun dismissDialog() {
         if (permissionDialogQueue.isNotEmpty()) {
             val dismissed = permissionDialogQueue.removeAt(0)
@@ -228,7 +218,6 @@ constructor(
         }
     }
 
-    /** Handle permission result, fetch location if granted. */
     fun onPermissionResult(
         permission: String,
         isGranted: Boolean,
@@ -243,13 +232,11 @@ constructor(
         }
     }
 
-    /** Show/hide notification permission dialog. */
     fun updateNotificationPermission(launchState: Boolean) {
         logger.d("Updating notification permission dialog - show: $launchState")
         _launchNotificationPermission.update { launchState }
     }
 
-    /** Show/hide notification banner based on remote config. */
     fun updateShowNotificationBannerState(launchState: Boolean) {
         notificationBannerJob?.cancel()
         notificationBannerJob =
@@ -267,7 +254,6 @@ constructor(
             }
     }
 
-    /** Update whether notification permission is permanently declined. */
     fun updateNotificationPermissionPermanentlyDeclined(isPermanentlyDeclined: Boolean) {
         logger.d("Notification permission permanently declined: $isPermanentlyDeclined")
         _isNotificationPermissionPermanentlyDeclined.update { isPermanentlyDeclined }
@@ -330,7 +316,6 @@ constructor(
             }
     }
 
-    /** Refresh weather data without clearing the existing UI (pull-to-refresh). */
     fun refreshWeatherData() {
         logger.d("Starting pull-to-refresh")
         _uiState.update { it.copy(isRefreshing = true) }
@@ -386,7 +371,6 @@ constructor(
             }
     }
 
-    /** Load weather and air quality data for UI. Uses override coordinates when active. */
     private fun performInitialDataLoading(forceRefresh: Boolean = false) {
         logger.d("Starting initial data loading (forceRefresh=$forceRefresh)")
         dataLoadingJob?.cancel()
@@ -427,7 +411,6 @@ constructor(
             }
     }
 
-    /** Fetches weather + air quality for the given coordinates and updates [_uiState]. */
     private suspend fun fetchWeatherData(
         lat: Double,
         lon: Double,
@@ -464,7 +447,6 @@ constructor(
             }.collectLatest { state -> _uiState.value = state }
     }
 
-    /** Login with email and password. */
     fun login(
         email: String,
         password: String,
@@ -472,7 +454,6 @@ constructor(
         authRepository.login(email, password)
     }
 
-    /** Register with email and password. */
     fun register(
         email: String,
         password: String,
@@ -499,15 +480,15 @@ constructor(
         _authState.value = AuthState.Loading
         try {
             handleAuthResponse(block())
+        } catch (_: CancellationException) {
+            throw CancellationException()
         } catch (e: Exception) {
-            if (e is CancellationException) throw e
             logger.e("$actionName failed for email: $email", e)
             _authState.value =
                 AuthState.Error(UiText.DynamicText(e.message ?: "$actionName failed"))
         }
     }
 
-    /** Logout user. */
     fun logout() =
         viewModelScope.launch(dispatchers.io) {
             logger.d("Logout initiated")
@@ -525,28 +506,6 @@ constructor(
                         AuthState.Error(UiText.DynamicText(e.message ?: "Logout failed"))
                 },
             )
-        }
-
-    private suspend fun silentTokenRefresh() =
-        withContext(dispatchers.io) {
-            logger.d("Starting silent token refresh")
-            when (val result = tokenManager.refreshToken()) {
-                is TokenResult.Valid -> logger.i("Token refreshed successfully")
-                is TokenResult.NoToken -> {
-                    tokenManager.forceLogout()
-                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
-                }
-
-                is TokenResult.InvalidToken -> {
-                    tokenManager.forceLogout()
-                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
-                }
-
-                is TokenResult.Error -> {
-                    logger.e("Silent token refresh error", result.exception)
-                    emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
-                }
-            }
         }
 
     /** Called on every app foreground to sync token and premium status with the server. */
@@ -606,7 +565,7 @@ constructor(
             logger.i("User is premium, saving premium status")
             val millis =
                 expiryMillis
-                    ?: (Clock.System.now().toEpochMilliseconds() + 365L * 24 * 60 * 60 * 1000)
+                    ?: (Clock.System.now().toEpochMilliseconds() + ONE_YEAR_MILLIS)
             preferenceManager.savePremiumStatus(isPremium = true, expiryMillis = millis)
             withContext(dispatchers.main) {
                 _authState.value = AuthState.Success
@@ -621,15 +580,11 @@ constructor(
             null
         }
 
-    /** Reset authentication state. */
     fun resetAuthState() {
         logger.d("Auth state reset to Initial")
         _authState.value = AuthState.Initial
     }
 
-    // ============ Location Management ============
-
-    /** Load saved locations for the current user. */
     fun loadSavedLocations() {
         viewModelScope.launch(dispatchers.io) {
             _savedLocationsState.update { it.copy(isLoading = true, error = null) }
@@ -656,7 +611,6 @@ constructor(
         }
     }
 
-    /** Save a new location. */
     fun saveLocation(
         name: String,
         lat: Double,
@@ -688,7 +642,6 @@ constructor(
         }
     }
 
-    /** Delete a saved location by ID. */
     fun deleteLocation(id: String) {
         viewModelScope.launch(dispatchers.io) {
             _savedLocationsState.update { it.copy(isLoading = true, error = null) }
@@ -716,7 +669,6 @@ constructor(
         }
     }
 
-    /** Update place search query. */
     fun onPlaceSearchQueryChanged(query: String) {
         _placeSearchState.update { it.copy(searchQuery = query, error = null) }
         _queryFlow.value = query
@@ -725,13 +677,11 @@ constructor(
         }
     }
 
-    /** Clear place search results. */
     fun clearPlaceSearch() {
         _placeSearchState.value = PlaceSearchUiState()
         _queryFlow.value = ""
     }
 
-    /** Clear location success/error messages. */
     fun clearLocationMessage() {
         _savedLocationsState.update { it.copy(error = null, successMessage = null) }
     }
@@ -777,7 +727,6 @@ constructor(
         }
     }
 
-    /** Fetch place suggestions for given query. */
     private suspend fun fetchPlaceSuggestions(query: String) {
         _placeSearchState.update { it.copy(isLoading = true, error = null) }
         searchPlacesUseCase(query).fold(
@@ -806,7 +755,9 @@ constructor(
     }
 }
 
-/** Authentication state. */
+private const val ONE_YEAR_MILLIS = 365L * 24 * 60 * 60 * 1000
+private const val MIN_QUERY_LENGTH = 2
+
 sealed class AuthState {
     object Initial : AuthState()
 

@@ -25,25 +25,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Module for providing network-related dependencies
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    /**
-     * Provides NetworkConnectivity implementation
-     */
     @Provides
     @Singleton
     fun provideNetworkConnectivity(
         @ApplicationContext context: Context,
     ): NetworkConnectivity = AndroidNetworkConnectivity(context)
 
-    /**
-     * Provides WeatherRepository implementation from the network module
-     * Uses TokenStorage for JWT authentication in API requests
-     */
     @Provides
     @Singleton
     fun provideWeatherRepository(
@@ -51,18 +41,11 @@ object NetworkModule {
         tokenStorage: TokenStorage,
     ): WeatherRepository = createWeatherRepository(networkConnectivity, tokenStorage)
 
-    /**
-     * Provides AuthRepository implementation from the network module
-     */
     @Provides
     @Singleton
     fun provideAuthRepository(tokenStorage: TokenStorage): AuthRepository =
         createAuthRepository(tokenStorage)
 
-    /**
-     * Provides TokenManager singleton for use in ViewModels.
-     * Shares the same AuthRepository singleton used elsewhere in the app.
-     */
     @Provides
     @Singleton
     fun provideTokenManager(
@@ -70,9 +53,6 @@ object NetworkModule {
         authRepository: AuthRepository,
     ): TokenManager = createTokenManager(tokenStorage, authRepository)
 
-    /**
-     * Provides FeedbackRepository implementation from the network module
-     */
     @Provides
     @Singleton
     fun provideFeedbackRepository(
@@ -80,33 +60,20 @@ object NetworkModule {
         tokenStorage: TokenStorage,
     ): FeedbackRepository = createFeedbackRepository(networkConnectivity, tokenStorage)
 
-    /**
-     * Provides LocationRepository for saved favourite locations (premium feature).
-     */
     @Provides
     @Singleton
     fun provideLocationRepository(tokenStorage: TokenStorage): LocationRepository =
         createLocationRepository(tokenStorage)
 
-    /**
-     * Provides ServiceRepository for premium service subscriptions.
-     * Uses basic HTTP client; /services/public endpoint requires no authentication.
-     */
     @Provides
     @Singleton
     fun provideServiceRepository(): ServiceRepository = createServiceRepository()
 
-    /**
-     * Provides SearchPlacesUseCase for searching places.
-     */
     @Provides
     @Singleton
     fun provideSearchPlacesUseCase(repository: LocationRepository): SearchPlacesUseCase =
         SearchPlacesUseCase(repository)
 
-    /**
-     * Provides SavedLocationsUseCase for managing saved locations.
-     */
     @Provides
     @Singleton
     fun provideSavedLocationsUseCase(repository: LocationRepository): SavedLocationsUseCase =

@@ -69,14 +69,10 @@ internal fun HourlyWeatherForecastReportLayout(hourlyWeatherForecasts: List<Weat
                             .fillMaxWidth()
                             .padding(20.dp),
                 ) {
-                    FutureForecastListItem(hourlyWeatherForecasts) {
-                        // Item click action will be implemented in future
-                    }
+                    FutureForecastListItem(hourlyWeatherForecasts) {}
                 }
             }
         }
-    } else {
-        // Return empty content when no data is available
     }
 }
 
@@ -87,22 +83,18 @@ private fun FutureForecastListItem(
 ) {
     var selectedItem by remember { mutableStateOf(0) }
 
-    // Limit the number of items to display for better performance
-    val limitedForecast =
-        remember(weatherForecast) {
-            weatherForecast.take(24) // Show only 24 hours
-        }
+    val limitedForecast = remember(weatherForecast) { weatherForecast.take(24) }
 
     LazyRow(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(start = 8.dp, end = 8.dp, top = 16.dp),
-        state = rememberLazyListState(), // Add state to prevent unnecessary recompositions
+        state = rememberLazyListState(),
     ) {
         items(
             items = limitedForecast,
-            key = { item -> item?.dt ?: 0 }, // Use unique key for each item
+            key = { item -> item?.dt ?: 0 },
         ) { item ->
             val index = limitedForecast.indexOf(item)
             val isSelected = selectedItem == index

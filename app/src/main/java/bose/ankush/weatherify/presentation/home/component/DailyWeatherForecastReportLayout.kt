@@ -18,10 +18,6 @@ import bose.ankush.weatherify.base.DateTimeUtils.dayName
 import bose.ankush.weatherify.base.common.Extension.toCelsius
 import bose.ankush.weatherify.domain.model.WeatherForecast
 
-/**
- * This composable is responsible for showing daily weather forecast section on HomeScreen.
- * It displays a heading and a list of daily forecasts.
- */
 @Composable
 internal fun DailyWeatherForecastReportLayout(list: List<WeatherForecast.Daily?>) {
     if (list.isNotEmpty()) {
@@ -51,11 +47,6 @@ internal fun DailyWeatherForecastReportLayout(list: List<WeatherForecast.Daily?>
     }
 }
 
-/**
- * This composable is responsible for showing a single daily weather forecast item.
- * Shows the forecast for a specific day including day name, temperature range, and weather icon.
- * Uses the WeatherDayCard from the sunriseui module.
- */
 @Composable
 internal fun DailyWeatherForecastItem(
     list: List<WeatherForecast.Daily?>,

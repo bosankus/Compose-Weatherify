@@ -6,6 +6,7 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import timber.log.Timber
 
 @ExperimentalCoroutinesApi
 fun startInAppUpdate(activity: Activity) {
@@ -26,6 +27,7 @@ fun startInAppUpdate(activity: Activity) {
                     APP_UPDATE_REQ_CODE,
                 )
             } catch (exception: IntentSender.SendIntentException) {
+                Timber.w(exception, "Failed to launch in-app update flow")
             }
         }
     }

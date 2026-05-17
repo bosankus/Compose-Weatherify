@@ -39,7 +39,7 @@ fun ScreenTopAppBar(
                 modifier =
                     Modifier
                         .clip(CircleShape)
-                        .clickable { navIconAction.invoke() }
+                        .clickable { navIconAction() }
                         .padding(all = 3.dp),
             )
         },

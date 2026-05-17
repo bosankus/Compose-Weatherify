@@ -11,16 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
 /**
- * SECURITY: Encrypted token storage using EncryptedSharedPreferences with Android Keystore
- *
- * This implementation uses androidx.security:security-crypto to encrypt tokens at rest
- * using the Android Keystore system. Tokens are encrypted/decrypted transparently.
- *
- * Benefits:
- * - Tokens encrypted with AES-256-GCM
- * - Keys managed by Android Keystore (hardware-backed on supported devices)
- * - Protection against database extraction attacks
- * - Complies with OWASP guidelines for credential storage
+ * SECURITY: Tokens encrypted at rest using AES-256-GCM via Android Keystore
+ * (hardware-backed on supported devices). Complies with OWASP credential storage guidelines.
  */
 actual class EncryptedTokenStorageImpl : TokenStorage {
     private val context: Context by lazy {

@@ -4,17 +4,23 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import java.util.Locale
 
+private const val REGIONAL_INDICATOR_SYMBOL_LETTER_A = 0x1F1E6
+private const val ASCII_UPPERCASE_A = 0x41
+
 internal object LocaleHelper {
     fun String.getCountryFlag(): String {
-        val countryCode = this.split("-").lastOrNull()?.uppercase(Locale.getDefault()) ?: return ""
-
-        if (countryCode.length != 2) return "\uD83C\uDF3F"
-
-        val flagOffset = 0x1F1E6
-        val asciiOffset = 0x41
-        val firstChar = countryCode[0].code - asciiOffset + flagOffset
-        val secondChar = countryCode[1].code - asciiOffset + flagOffset
-        return String(Character.toChars(firstChar)) + String(Character.toChars(secondChar))
+        val countryCode =
+            split("-").lastOrNull()?.uppercase(Locale.getDefault())
+                ?: return ""
+        return if (countryCode.length == 2) {
+            val firstChar =
+                countryCode[0].code - ASCII_UPPERCASE_A + REGIONAL_INDICATOR_SYMBOL_LETTER_A
+            val secondChar =
+                countryCode[1].code - ASCII_UPPERCASE_A + REGIONAL_INDICATOR_SYMBOL_LETTER_A
+            String(Character.toChars(firstChar)) + String(Character.toChars(secondChar))
+        } else {
+            "🌿"
+        }
     }
 
     fun String.getDisplayName(): String {

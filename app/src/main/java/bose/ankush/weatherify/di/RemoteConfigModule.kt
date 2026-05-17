@@ -8,9 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Module for providing remote configuration related dependencies
- */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RemoteConfigModule {

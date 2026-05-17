@@ -46,14 +46,14 @@
     <string name="confirm_btn_txt">নিশ্চিত করুন</string>
     <string name="cancel_btn_txt">বাতিল করুন</string>
     <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-    <string name="premium_get_txt">Get Premium</string>
-    <string name="premium_processing_txt">Processing…</string>
-    <string name="premium_processing_desc_txt">Please wait while we activate your premium subscription.</string>
-    <string name="premium_unlock_desc_txt">Unlock all features and enjoy an ad-free experience.</string>
-    <string name="premium_upgrade_btn_txt">Upgrade Now</string>
-    <string name="premium_active_txt">You are a Premium User</string>
-    <string name="premium_expires_txt">Expires %1$s</string>
-    <string name="premium_active_status_txt">Active</string>
+    <string name="premium_get_txt">প্রিমিয়াম পান</string>
+    <string name="premium_processing_txt">প্রক্রিয়া চলছে…</string>
+    <string name="premium_processing_desc_txt">আপনার প্রিমিয়াম সাবস্ক্রিপশন সক্রিয় করার সময় অনুগ্রহ করে অপেক্ষা করুন।</string>
+    <string name="premium_unlock_desc_txt">সমস্ত ফিচার আনলক করুন এবং বিজ্ঞাপন-মুক্ত অভিজ্ঞতা উপভোগ করুন।</string>
+    <string name="premium_upgrade_btn_txt">এখনই আপগ্রেড করুন</string>
+    <string name="premium_active_txt">আপনি একজন প্রিমিয়াম ব্যবহারকারী</string>
+    <string name="premium_expires_txt">%1$s-এ মেয়াদ শেষ</string>
+    <string name="premium_active_status_txt">সক্রিয়</string>
     <string name="settings_notifications_txt">বিজ্ঞপ্তি</string>
     <string name="settings_language_txt">ভাষা</string>
     <string name="legal_privacy_policy_txt">গোপনীয়তা নীতি</string>
@@ -116,4 +116,10 @@
     <string name="location_override_chip_label">%1$s ব্যবহার করা হচ্ছে</string>
     <string name="location_override_reset_btn">GPS-এ রিসেট করুন</string>
     <string name="location_override_chip_content_desc">বর্তমানে %1$s-এর আবহাওয়া দেখানো হচ্ছে। GPS-এ রিসেট করতে ট্যাপ করুন।</string>
+    <string name="language_lib_screen_header">ভাষা বেছে নিন</string>
+    <string name="language_back_content_description">ফিরে যান</string>
+    <string name="language_screen_title">আপনার ভাষা বেছে নিন</string>
+    <string name="language_screen_subtitle">ব্যক্তিগতকৃত অভিজ্ঞতার জন্য আপনার পছন্দের ভাষা বেছে নিন</string>
+    <string name="language_selected">%s নির্বাচিত</string>
+    <string name="language_navigate_back">পিছনে নেভিগেট করুন</string>
 </resources>

@@ -3,8 +3,6 @@ package bose.ankush.network.model
 import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 
-// ============ DTO Models (Serializable) ============
-
 @Serializable
 data class ServiceListResponse(
     val success: Boolean = true,
@@ -65,8 +63,6 @@ data class ServiceLimitDto(
     val type: String,
     val unit: String,
 )
-
-// ============ Domain Models ============
 
 data class Service(
     val id: String,
@@ -158,8 +154,6 @@ enum class LimitType {
     SOFT,
 }
 
-// ============ Extension Functions ============
-
 fun ServiceDto.toDomain(): Service =
     Service(
         id = id,
@@ -223,10 +217,7 @@ fun ServiceLimitDto.toDomain(): ServiceLimit =
 
 fun parseIsoDate(dateString: String): Long? =
     try {
-        // Simple ISO 8601 parser for basic format (YYYY-MM-DDTHH:mm:ssZ)
         dateString.replace("Z", "+00:00").let { _ ->
-            // This is a simplified parser. For production, use proper date library
-            // For now, return current time as fallback
             Clock.System.now().toEpochMilliseconds()
         }
     } catch (_: Exception) {

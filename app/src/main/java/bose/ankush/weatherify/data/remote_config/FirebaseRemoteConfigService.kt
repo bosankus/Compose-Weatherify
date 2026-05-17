@@ -10,10 +10,6 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Firebase implementation of the RemoteConfigService interface.
- * This class handles all interactions with Firebase Remote Config.
- */
 @Singleton
 class FirebaseRemoteConfigService
 @Inject
@@ -21,10 +17,6 @@ constructor() : RemoteConfigService {
     private val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
     private val tag = "${FirebaseRemoteConfigService::class.simpleName} ->"
 
-    /**
-     * Initializes the Firebase Remote Config with default settings.
-     * Sets default values from the XML resource file.
-     */
     override fun initialize() {
         val configSettings =
             remoteConfigSettings {
@@ -39,12 +31,7 @@ constructor() : RemoteConfigService {
         Timber.tag(tag).d("Firebase Remote Config initialized")
     }
 
-    /**
-     * Gets a boolean value from Firebase Remote Config.
-     * @param key The key for the configuration value
-     * @param defaultValue The default value to return if the key is not found
-     * @return The boolean value from Firebase Remote Config, or the default value if not found
-     */
+    @Suppress("TooGenericExceptionCaught")
     override fun getBoolean(
         key: String,
         defaultValue: Boolean,
@@ -57,6 +44,6 @@ constructor() : RemoteConfigService {
         }
 
     companion object {
-        private const val DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS = 3600L // 1 hour
+        private const val DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS = 3600L
     }
 }

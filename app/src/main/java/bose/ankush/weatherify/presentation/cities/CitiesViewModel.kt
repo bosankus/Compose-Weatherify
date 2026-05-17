@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
+private const val SEARCH_DEBOUNCE_MS = 500L
+
 @HiltViewModel
 class CitiesViewModel
 @Inject
@@ -33,7 +35,7 @@ constructor(
     @OptIn(FlowPreview::class)
     val cityName: StateFlow<List<CityName>> =
         searchText
-            .debounce(500L)
+            .debounce(SEARCH_DEBOUNCE_MS)
             .onEach { isSearching.update { true } }
             .combine(cityNameList) { text, city ->
                 if (text.isBlank()) {
@@ -44,7 +46,7 @@ constructor(
             }.onEach { isSearching.update { false } }
             .stateIn(
                 viewModelScope,
-                SharingStarted.WhileSubscribed(5000),
+                SharingStarted.WhileSubscribed(5_000),
                 cityNameList.value,
             )
 

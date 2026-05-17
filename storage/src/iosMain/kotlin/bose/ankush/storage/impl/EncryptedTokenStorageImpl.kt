@@ -48,8 +48,9 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
     }
 
     actual override suspend fun saveToken(token: String) {
-        val tokenData = NSString.create(string = token).dataUsingEncoding(NSUTF8StringEncoding)
-            ?: throw Exception("Failed to encode token to NSData")
+        val tokenData =
+            NSString.create(string = token).dataUsingEncoding(NSUTF8StringEncoding)
+                ?: throw Exception("Failed to encode token to NSData")
 
         deleteTokenFromKeychain()
 
@@ -101,12 +102,16 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
         }
     }
 
-    private fun buildBaseQuery(): NSMutableDictionary = NSMutableDictionary().apply {
-        setObject(kSecClassGenericPassword, forKey = kSecClass as Any)
-        setObject(SERVICE_ID, forKey = kSecAttrService as Any)
-        setObject(ACCOUNT_ID, forKey = kSecAttrAccount as Any)
-        setObject(kSecAttrAccessibleWhenUnlockedThisDeviceOnly, forKey = kSecAttrAccessible as Any)
-    }
+    private fun buildBaseQuery(): NSMutableDictionary =
+        NSMutableDictionary().apply {
+            setObject(kSecClassGenericPassword, forKey = kSecClass as Any)
+            setObject(SERVICE_ID, forKey = kSecAttrService as Any)
+            setObject(ACCOUNT_ID, forKey = kSecAttrAccount as Any)
+            setObject(
+                kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+                forKey = kSecAttrAccessible as Any
+            )
+        }
 
     companion object {
         private const val SERVICE_ID = "com.weatherify.auth"

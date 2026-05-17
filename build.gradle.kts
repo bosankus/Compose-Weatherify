@@ -94,6 +94,7 @@ subprojects {
         ignoreFailures = true
         autoCorrect = false
         parallel = true
+        config.setFrom(files("$rootDir/config/detekt.yml"))
     }
 
     // Applies to both `detekt` and `detektAutoCorrect` tasks
@@ -114,6 +115,7 @@ subprojects {
         group = "verification"
         autoCorrect = true
         buildUponDefaultConfig = true
+        config.setFrom(rootProject.files("config/detekt.yml"))
         ignoreFailures = true
         parallel = true
         setSource(files("src"))

@@ -18,7 +18,10 @@ import kotlinx.serialization.json.jsonPrimitive
 private object ObjectIdAsStringSerializer : KSerializer<String> {
     override val descriptor = PrimitiveSerialDescriptor("ObjectId", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: String) = encoder.encodeString(value)
+    override fun serialize(
+        encoder: Encoder,
+        value: String,
+    ) = encoder.encodeString(value)
 
     override fun deserialize(decoder: Decoder): String {
         val jsonDecoder = decoder as? JsonDecoder ?: return decoder.decodeString()

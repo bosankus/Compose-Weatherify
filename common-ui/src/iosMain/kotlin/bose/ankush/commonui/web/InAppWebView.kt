@@ -58,11 +58,6 @@ import platform.WebKit.WKWebViewConfiguration
 import platform.WebKit.WKWebsiteDataStore
 import platform.darwin.NSObject
 
-/**
- * iOS actual: WKWebView wrapped in UIKitView.
- * Non-persistent website data store (no cookie/cache persistence).
- * Back navigation via top-bar icon (iOS swipe-back gesture also supported natively).
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 actual fun InAppWebView(
@@ -92,7 +87,6 @@ actual fun InAppWebView(
             }
         }
 
-    // Wire delegate callbacks to the latest captured state setters on each recomposition
     delegate.initialUrl = url
     delegate.onLoadStart = {
         isLoading = true
@@ -113,7 +107,6 @@ actual fun InAppWebView(
         onClose()
     }
 
-    // Load (or reload) the URL whenever it changes
     LaunchedEffect(url) {
         NSURL.URLWithString(url)?.let { nsUrl ->
             webView.loadRequest(NSURLRequest.requestWithURL(nsUrl))
@@ -211,7 +204,6 @@ actual fun InAppWebView(
                     update = {},
                 )
 
-                // Loading overlay
                 if (isLoading) {
                     Box(
                         modifier =
@@ -224,7 +216,6 @@ actual fun InAppWebView(
                     }
                 }
 
-                // Error overlay
                 if (loadError) {
                     Box(
                         modifier =
@@ -280,7 +271,6 @@ actual fun InAppWebView(
         }
     }
 
-    // Release WKWebView resources when the composable leaves composition
     DisposableEffect(Unit) {
         onDispose {
             webView.stopLoading()
@@ -348,17 +338,14 @@ private class InAppWebViewDelegate :
     ) {
         val requestUrl = decidePolicyForNavigationAction.request.URL?.absoluteString ?: ""
 
-        // Allow initial URL load
         if (requestUrl == initialUrl) {
             decisionHandler(WKNavigationActionPolicy.WKNavigationActionPolicyAllow)
             return
         }
 
-        // Validate subsequent navigation against whitelist
         if (isWhitelistedUrl(requestUrl)) {
             decisionHandler(WKNavigationActionPolicy.WKNavigationActionPolicyAllow)
         } else {
-            // Block navigation from untrusted domains
             decisionHandler(WKNavigationActionPolicy.WKNavigationActionPolicyCancel)
             onNavigationBlocked()
         }
@@ -369,7 +356,7 @@ private class InAppWebViewDelegate :
         val host = url.host?.lowercase() ?: return false
         val whitelistedDomains =
             setOf(
-                "data.androidplay.in", // Terms, Privacy Policy
+                "data.androidplay.in",
             )
         return whitelistedDomains.any { trustedDomain ->
             host == trustedDomain || host.endsWith(".$trustedDomain")

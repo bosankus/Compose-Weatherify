@@ -22,9 +22,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import bose.ankush.commonui.constants.WeatherIconConstants
 
-/**
- * Holds color values for weather icons that adapt to light/dark theme.
- */
 class WeatherIconColors(
     val sunColor: Color,
     val sunGlowColor: Color,
@@ -35,17 +32,13 @@ class WeatherIconColors(
     val fogColor: Color,
 ) {
     companion object {
-        /**
-         * Creates theme-aware colors for weather icons.
-         */
         @Composable
         fun default(isDarkTheme: Boolean = isSystemInDarkTheme()): WeatherIconColors {
-            // Use a try-catch to handle cases where MaterialTheme is not available
             val sunColor =
                 try {
                     if (isDarkTheme) Color(0xFFFFD700) else Color(0xFFFF9800)
                 } catch (_: Exception) {
-                    Color(0xFFFF9800) // Default fallback
+                    Color(0xFFFF9800)
                 }
 
             val sunGlowColor =
@@ -56,7 +49,7 @@ class WeatherIconColors(
                         Color(0xFFFF9800).copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA)
                     }
                 } catch (_: Exception) {
-                    Color(0xFFFF9800).copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA) // Default fallback
+                    Color(0xFFFF9800).copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA)
                 }
 
             return WeatherIconColors(
@@ -79,34 +72,22 @@ class WeatherIconColors(
     }
 }
 
-/**
- * A composable that displays an animated weather icon based on the weather description.
- * Maps the description to the appropriate WeatherCondition and renders the corresponding animation.
- * Optimized for performance and supports dark mode.
- *
- * @param weatherDescription The description of the weather condition
- * @param modifier Modifier to be applied to the icon
- * @param colors Theme-aware colors for the weather icons
- */
 @Composable
 fun AnimatedWeatherIcon(
     weatherDescription: String?,
     modifier: Modifier = Modifier.size(48.dp),
     colors: WeatherIconColors = WeatherIconColors.default(),
 ) {
-    // Map the weather description to a WeatherCondition
     val weatherCondition =
         remember(weatherDescription) {
             mapToWeatherCondition(weatherDescription)
         }
 
-    // Create a content description for accessibility
     val contentDesc =
         remember(weatherCondition) {
             "Weather icon: ${weatherCondition.description}"
         }
 
-    // Determine which animations are needed based on weather condition
     val needsSunAnimation =
         remember(weatherCondition) {
             weatherCondition == WeatherCondition.CLEAR_SKY ||
@@ -162,7 +143,6 @@ fun AnimatedWeatherIcon(
                     )
         }
 
-    // Animation specs - define once to use as keys in LaunchedEffect
     val sunAnimSpec =
         remember {
             infiniteRepeatable<Float>(
@@ -223,14 +203,12 @@ fun AnimatedWeatherIcon(
             )
         }
 
-    // Animation states - only initialize what's needed
     val sunGlow = remember { Animatable(0f) }
     val cloudDrift = remember { Animatable(0f) }
     val rainDrop = remember { Animatable(0f) }
     val snowFall = remember { Animatable(0f) }
     val thunderFlash = remember { Animatable(0f) }
 
-    // Start animations only if needed, with proper keys to restart when specs change
     if (needsSunAnimation) {
         LaunchedEffect(weatherCondition, sunAnimSpec) {
             sunGlow.animateTo(
@@ -285,7 +263,6 @@ fun AnimatedWeatherIcon(
     ) {
         Canvas(modifier = Modifier.matchParentSize()) {
             when {
-                // Clear sky
                 weatherCondition == WeatherCondition.CLEAR_SKY -> {
                     drawSun(
                         animationProgress = sunGlow.value,
@@ -294,7 +271,6 @@ fun AnimatedWeatherIcon(
                     )
                 }
 
-                // Clouds
                 weatherCondition in
                         listOf(
                             WeatherCondition.FEW_CLOUDS,
@@ -329,7 +305,6 @@ fun AnimatedWeatherIcon(
                     )
                 }
 
-                // Rain
                 weatherCondition.description.contains("rain") &&
                         !weatherCondition.description.contains(
                             "thunderstorm",
@@ -357,7 +332,6 @@ fun AnimatedWeatherIcon(
                     )
                 }
 
-                // Snow
                 weatherCondition.description.contains("snow") ||
                         weatherCondition.description.contains(
                             "sleet",
@@ -382,7 +356,6 @@ fun AnimatedWeatherIcon(
                     )
                 }
 
-                // Thunderstorm
                 weatherCondition.description.contains("thunderstorm") -> {
                     drawClouds(
                         animationProgress = cloudDrift.value,
@@ -400,7 +373,6 @@ fun AnimatedWeatherIcon(
                     )
                 }
 
-                // Drizzle
                 weatherCondition.description.contains("drizzle") -> {
                     drawClouds(
                         animationProgress = cloudDrift.value,
@@ -414,7 +386,6 @@ fun AnimatedWeatherIcon(
                     )
                 }
 
-                // Atmosphere (mist, fog, etc.)
                 weatherCondition in
                         listOf(
                             WeatherCondition.MIST,
@@ -435,7 +406,6 @@ fun AnimatedWeatherIcon(
                     )
                 }
 
-                // Default fallback
                 else -> {
                     drawSun(
                         animationProgress = sunGlow.value,

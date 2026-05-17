@@ -23,15 +23,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.component.ScreenTopAppBar
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
-import bose.ankush.weatherify.presentation.navigation.Screen
+import bose.ankush.weatherify.presentation.navigation.AppNavigator
 
 @Composable
-fun CitiesListScreen(navController: NavController) {
+fun CitiesListScreen(navigator: AppNavigator) {
     Box(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -39,14 +38,14 @@ fun CitiesListScreen(navController: NavController) {
             topBar = {
                 ScreenTopAppBar(
                     headlineId = R.string.select_city,
-                    navIconAction = { navController.popBackStack() },
+                    navIconAction = { navigator.goBack() },
                 )
             },
             content = { innerPadding ->
                 Column(
                     modifier = Modifier.padding(innerPadding),
                 ) {
-                    CityNameSearchBarWithList(navController)
+                    CityNameSearchBarWithList(navigator)
                 }
             },
         )
@@ -54,49 +53,45 @@ fun CitiesListScreen(navController: NavController) {
 }
 
 @Composable
-private fun CityNameSearchBarWithList(navController: NavController) {
+private fun CityNameSearchBarWithList(navigator: AppNavigator) {
     val viewModels: CitiesViewModel = hiltViewModel()
     val searchText by viewModels.searchText.collectAsState()
     val isSearching by viewModels.isSearching.collectAsState()
     val cityName by viewModels.cityName.collectAsState()
 
     Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
     ) {
         TextField(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp)),
             value = searchText,
             onValueChange = viewModels::onSearchTextChange,
             placeholder = { Text(text = stringResource(id = R.string.select_city) + "...") },
-            colors =
-                TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                ),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
         )
         Spacer(modifier = Modifier.height(10.dp))
         if (isSearching) {
             ShowLoading(modifier = Modifier.fillMaxSize())
         } else {
             LazyColumn(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
             ) {
                 items(cityName.size) {
-                    CityListItem(cityNameList = cityName, position = it) { _, name ->
-                        navController.navigate(Screen.HomeScreen.withArgs(name))
+                    CityListItem(cityNameList = cityName, position = it) { _, _ ->
+                        navigator.goBack()
                     }
                 }
             }

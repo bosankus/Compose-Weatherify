@@ -8,9 +8,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Module for providing preference-related dependencies
- */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class PreferenceModule {

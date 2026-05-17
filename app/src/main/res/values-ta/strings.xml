@@ -115,4 +115,10 @@
     <string name="location_override_chip_label">%1$s பயன்படுத்தப்படுகிறது</string>
     <string name="location_override_reset_btn">GPS-க்கு மீட்டமைக்கவும்</string>
     <string name="location_override_chip_content_desc">தற்போது %1$s-ன் வானிலை காட்டப்படுகிறது. GPS-க்கு மீட்டமைக்க தட்டவும்.</string>
+    <string name="language_lib_screen_header">மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="language_back_content_description">திரும்பி செல்லவும்</string>
+    <string name="language_screen_title">உங்கள் மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="language_screen_subtitle">தனிப்பயனாக்கப்பட்ட அனுபவத்திற்கு உங்களுக்கு விருப்பமான மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="language_selected">%s தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="language_navigate_back">பின்னால் செல்லவும்</string>
 </resources>

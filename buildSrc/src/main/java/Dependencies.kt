@@ -13,7 +13,6 @@ object Deps {
     val appCompat by lazy { "androidx.appcompat:appcompat:${Versions.appCompat}" }
     val androidMaterial by lazy { "com.google.android.material:material:${Versions.androidMaterial}" }
     val viewModelCompose by lazy { "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle}" }
-    val navigationCompose by lazy { "androidx.navigation:navigation-compose:${Versions.navigation}" }
     val inAppUpdate by lazy { "com.google.android.play:app-update:${Versions.googlePlayCore}" }
     val inAppUpdateKtx by lazy { "com.google.android.play:app-update-ktx:${Versions.googlePlayCore}" }
     val googlePlayLocation by lazy { "com.google.android.gms:play-services-location:${Versions.googlePlayLocation}" }
@@ -77,6 +76,11 @@ object Deps {
     val hiltDaggerAndroidCompiler by lazy { "com.google.dagger:hilt-android-compiler:${Versions.hilt}" }
     val hiltNavigationCompose by lazy { "androidx.hilt:hilt-navigation-compose:${Versions.hiltCompose}" }
     val hiltAndroidXCompiler by lazy { "androidx.hilt:hilt-compiler:${Versions.hiltCompose}" }
+
+    // Navigation 3
+    val navigation3Runtime by lazy { "androidx.navigation3:navigation3-runtime:${Versions.nav3}" }
+    val navigation3Ui by lazy { "androidx.navigation3:navigation3-ui:${Versions.nav3}" }
+    val lifecycleViewmodelNavigation3 by lazy { "androidx.lifecycle:lifecycle-viewmodel-navigation3:${Versions.lifecycleViewmodelNav3}" }
 
     // Miscellaneous
     val timber by lazy { "com.jakewharton.timber:timber:${Versions.timber}" }

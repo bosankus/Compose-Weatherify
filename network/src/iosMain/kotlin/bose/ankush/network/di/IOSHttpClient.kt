@@ -9,9 +9,6 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-/**
- * iOS implementation of createPlatformHttpClient
- */
 actual fun createPlatformHttpClient(json: Json): HttpClient =
     HttpClient(Darwin) {
         engine {
@@ -21,7 +18,6 @@ actual fun createPlatformHttpClient(json: Json): HttpClient =
             }
         }
         install(ContentNegotiation) {
-            // Register standard JSON handling; handle other content types per request if required.
             json(json)
         }
         install(Logging) {

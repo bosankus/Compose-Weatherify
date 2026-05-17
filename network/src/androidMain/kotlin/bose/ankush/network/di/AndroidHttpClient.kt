@@ -10,9 +10,6 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-/**
- * Android implementation of createPlatformHttpClient
- */
 actual fun createPlatformHttpClient(json: Json): HttpClient =
     HttpClient(Android) {
         engine {
@@ -20,8 +17,6 @@ actual fun createPlatformHttpClient(json: Json): HttpClient =
             socketTimeout = 60_000
         }
         install(ContentNegotiation) {
-            // Register standard JSON handling once; other content types should be handled
-            // explicitly per request if needed.
             json(json)
         }
         install(Logging) {

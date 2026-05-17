@@ -7,9 +7,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 
-/**
- * Handles JWT token lifecycle including validation and refresh.
- */
 class TokenManager(
     private val tokenStorage: TokenStorage,
     private val authRepository: AuthRepository,
@@ -17,9 +14,6 @@ class TokenManager(
     private val refreshMutex = Mutex()
     private var lastRefreshTime: Long = 0
 
-    /**
-     * Refreshes the token if possible.
-     */
     suspend fun refreshToken(currentTime: Long = Clock.System.now().epochSeconds): TokenResult =
         refreshMutex.withLock {
             lastRefreshTime = currentTime
@@ -49,17 +43,11 @@ class TokenManager(
      */
     suspend fun getStoredToken(): String? = tokenStorage.getToken()
 
-    /**
-     * Handles 401 Unauthorized by forcing a token refresh.
-     */
     suspend fun handleUnauthorized(): TokenResult {
         lastRefreshTime = 0
         return refreshToken()
     }
 
-    /**
-     * Forces logout by clearing any stored token.
-     */
     suspend fun forceLogout(): TokenResult =
         try {
             tokenStorage.clearToken()

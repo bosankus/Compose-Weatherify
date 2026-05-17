@@ -5,13 +5,7 @@ import bose.ankush.weatherify.domain.model.WeatherCondition
 import bose.ankush.weatherify.domain.model.WeatherForecast
 import bose.ankush.storage.room.Weather as StorageWeather
 
-/**
- * Mapper class to convert between WeatherEntity (data layer) and WeatherForecast (domain layer)
- */
 object WeatherMapper {
-    /**
-     * Maps a Storage Weather entity to a WeatherCondition domain model
-     */
     private fun mapStorageWeatherToDomain(weather: StorageWeather): WeatherCondition =
         WeatherCondition(
             description = weather.description ?: "",
@@ -20,102 +14,89 @@ object WeatherMapper {
             main = weather.main ?: "",
         )
 
-    /**
-     * Maps a Storage WeatherEntity to a WeatherForecast domain model
-     */
+    private fun mapWeather(list: List<StorageWeather?>?) =
+        list?.map { it?.let { w -> mapStorageWeatherToDomain(w) } }
+
+    private fun mapAlerts(alerts: List<WeatherEntity.Alert?>?) =
+        alerts?.map { alert ->
+            alert?.let {
+                WeatherForecast.Alert(
+                    description = it.description,
+                    end = it.end,
+                    event = it.event,
+                    sender_name = it.sender_name,
+                    start = it.start,
+                )
+            }
+        }
+
+    private fun mapCurrent(current: WeatherEntity.Current?) =
+        current?.let {
+            WeatherForecast.Current(
+                clouds = it.clouds,
+                dt = it.dt,
+                feels_like = it.feels_like,
+                humidity = it.humidity,
+                pressure = it.pressure,
+                sunrise = it.sunrise,
+                sunset = it.sunset,
+                temp = it.temp,
+                uvi = it.uvi,
+                weather = mapWeather(it.weather),
+                wind_gust = it.wind_gust,
+                wind_speed = it.wind_speed,
+            )
+        }
+
+    private fun mapDaily(daily: List<WeatherEntity.Daily?>?) =
+        daily?.map { item ->
+            item?.let {
+                WeatherForecast.Daily(
+                    clouds = it.clouds,
+                    dew_point = it.dew_point,
+                    dt = it.dt,
+                    humidity = it.humidity,
+                    pressure = it.pressure,
+                    rain = it.rain,
+                    summary = it.summary,
+                    sunrise = it.sunrise,
+                    sunset = it.sunset,
+                    temp = it.temp?.let { t ->
+                        WeatherForecast.Daily.Temp(
+                            day = t.day, eve = t.eve, max = t.max,
+                            min = t.min, morn = t.morn, night = t.night,
+                        )
+                    },
+                    uvi = it.uvi,
+                    weather = mapWeather(it.weather),
+                    wind_gust = it.wind_gust,
+                    wind_speed = it.wind_speed,
+                )
+            }
+        }
+
+    private fun mapHourly(hourly: List<WeatherEntity.Hourly?>?) =
+        hourly?.map { item ->
+            item?.let {
+                WeatherForecast.Hourly(
+                    clouds = it.clouds,
+                    dt = it.dt,
+                    feels_like = it.feels_like,
+                    humidity = it.humidity,
+                    temp = it.temp,
+                    weather = mapWeather(it.weather),
+                )
+            }
+        }
+
     fun mapToDomain(entity: WeatherEntity?): WeatherForecast? {
         if (entity == null) return null
-
         return WeatherForecast(
             id = entity.id,
-            alerts =
-                entity.alerts?.map { alert ->
-                    alert?.let {
-                        WeatherForecast.Alert(
-                            description = it.description,
-                            end = it.end,
-                            event = it.event,
-                            sender_name = it.sender_name,
-                            start = it.start,
-                        )
-                    }
-                },
-            current =
-                entity.current?.let { current ->
-                    WeatherForecast.Current(
-                        clouds = current.clouds,
-                        dt = current.dt,
-                        feels_like = current.feels_like,
-                        humidity = current.humidity,
-                        pressure = current.pressure,
-                        sunrise = current.sunrise,
-                        sunset = current.sunset,
-                        temp = current.temp,
-                        uvi = current.uvi,
-                        weather =
-                            current.weather?.map { weather ->
-                                weather?.let {
-                                    mapStorageWeatherToDomain(it)
-                                }
-                            },
-                        wind_gust = current.wind_gust,
-                        wind_speed = current.wind_speed,
-                    )
-                },
-            daily =
-                entity.daily?.map { daily ->
-                    daily?.let {
-                        WeatherForecast.Daily(
-                            clouds = it.clouds,
-                            dew_point = it.dew_point,
-                            dt = it.dt,
-                            humidity = it.humidity,
-                            pressure = it.pressure,
-                            rain = it.rain,
-                            summary = it.summary,
-                            sunrise = it.sunrise,
-                            sunset = it.sunset,
-                            temp =
-                                it.temp?.let { temp ->
-                                    WeatherForecast.Daily.Temp(
-                                        day = temp.day,
-                                        eve = temp.eve,
-                                        max = temp.max,
-                                        min = temp.min,
-                                        morn = temp.morn,
-                                        night = temp.night,
-                                    )
-                                },
-                            uvi = it.uvi,
-                            weather =
-                                it.weather?.map { weather ->
-                                    weather?.let {
-                                        mapStorageWeatherToDomain(it)
-                                    }
-                                },
-                            wind_gust = it.wind_gust,
-                            wind_speed = it.wind_speed,
-                        )
-                    }
-                },
-            hourly =
-                entity.hourly?.map { hourly ->
-                    hourly?.let {
-                        WeatherForecast.Hourly(
-                            clouds = it.clouds,
-                            dt = it.dt,
-                            feels_like = it.feels_like,
-                            humidity = it.humidity,
-                            temp = it.temp,
-                            weather =
-                                it.weather?.map { weather ->
-                                    weather?.let {
-                                        mapStorageWeatherToDomain(it)
-                                    }
-                                },
-                        )
-                    }
-                },
+            alerts = mapAlerts(entity.alerts),
+            current = mapCurrent(entity.current),
+            daily = mapDaily(entity.daily),
+            hourly = mapHourly(entity.hourly),
             lastUpdated = entity.lastUpdated,
         )
     }

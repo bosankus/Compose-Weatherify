@@ -51,18 +51,14 @@ object StorageModule {
 
     @Provides
     @Singleton
-    fun provideWeatherStorage(weatherDatabase: WeatherDatabase): WeatherStorage {
-        // Storage module is responsible ONLY for database operations
-        // Network synchronization is handled by WeatherRepository in the orchestration layer
-        return WeatherStorageImpl(weatherDatabase)
-    }
+    fun provideWeatherStorage(weatherDatabase: WeatherDatabase): WeatherStorage =
+        WeatherStorageImpl(weatherDatabase)
 
     @Provides
     @Singleton
     fun provideTokenStorage(
         @ApplicationContext context: Context,
     ): TokenStorage {
-        // SECURITY: Initialize Android context for platform-specific token storage
         bose.ankush.storage.impl
             .setApplicationContext(context)
         return EncryptedTokenStorageImpl()

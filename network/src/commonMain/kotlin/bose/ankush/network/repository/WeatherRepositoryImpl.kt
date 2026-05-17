@@ -13,10 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
-/**
- * Implementation of WeatherRepository. Provides an in-memory cache for the unified weather
- * response, which now includes air quality and entitlements from a single /weather call.
- */
 class WeatherRepositoryImpl(
     private val apiService: WeatherApiService,
     private val networkConnectivity: NetworkConnectivity,

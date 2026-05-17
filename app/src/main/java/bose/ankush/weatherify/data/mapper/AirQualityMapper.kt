@@ -3,13 +3,7 @@ package bose.ankush.weatherify.data.mapper
 import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.storage.room.AirQualityEntity as StorageAirQualityEntity
 
-/**
- * Mapper class to convert between AirQualityEntity (data layer) and AirQuality (domain layer)
- */
 object AirQualityMapper {
-    /**
-     * Maps a storage AirQualityEntity to an AirQuality domain model
-     */
     fun mapToDomain(entity: StorageAirQualityEntity): AirQuality =
         AirQuality(
             id = entity.id,

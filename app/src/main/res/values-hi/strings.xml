@@ -122,4 +122,10 @@
     <string name="location_override_chip_label">%1$s का उपयोग हो रहा है</string>
     <string name="location_override_reset_btn">GPS पर रीसेट करें</string>
     <string name="location_override_chip_content_desc">वर्तमान में %1$s का मौसम दिखाया जा रहा है। GPS पर रीसेट करने के लिए टैप करें।</string>
+    <string name="language_lib_screen_header">भाषा चुनें</string>
+    <string name="language_back_content_description">वापस जाओ</string>
+    <string name="language_screen_title">अपनी भाषा चुनें</string>
+    <string name="language_screen_subtitle">व्यक्तिगत अनुभव के लिए अपनी पसंदीदा भाषा चुनें</string>
+    <string name="language_selected">%s चयनित</string>
+    <string name="language_navigate_back">वापस जाएं</string>
 </resources>

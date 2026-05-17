@@ -115,4 +115,10 @@
     <string name="location_override_chip_label">%1$s ఉపయోగిస్తోంది</string>
     <string name="location_override_reset_btn">GPS కి రీసెట్ చేయండి</string>
     <string name="location_override_chip_content_desc">ప్రస్తుతం %1$s వాతావరణం చూపబడుతోంది. GPS కి రీసెట్ చేయడానికి నొక్కండి.</string>
+    <string name="language_lib_screen_header">భాష ఎంచుకోండి</string>
+    <string name="language_back_content_description">వెనుకకు వెళ్ళు</string>
+    <string name="language_screen_title">మీ భాష ఎంచుకోండి</string>
+    <string name="language_screen_subtitle">వ్యక్తిగత అనుభవం కోసం మీకు ఇష్టమైన భాషను ఎంచుకోండి</string>
+    <string name="language_selected">%s ఎంచుకోబడింది</string>
+    <string name="language_navigate_back">వెనుకకు నావిగేట్ చేయండి</string>
 </resources>

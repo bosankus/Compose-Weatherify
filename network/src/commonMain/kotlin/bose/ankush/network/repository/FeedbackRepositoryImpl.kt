@@ -5,9 +5,6 @@ import bose.ankush.network.common.NetworkConnectivity
 import bose.ankush.network.model.FeedbackRequest
 import bose.ankush.network.model.FeedbackResponse
 
-/**
- * Implementation of FeedbackRepository
- */
 class FeedbackRepositoryImpl(
     private val apiService: FeedbackApiService,
     private val networkConnectivity: NetworkConnectivity,

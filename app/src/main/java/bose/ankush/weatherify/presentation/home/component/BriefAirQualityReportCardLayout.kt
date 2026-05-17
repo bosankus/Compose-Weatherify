@@ -39,6 +39,37 @@ import bose.ankush.weatherify.base.common.AirQualityIndexAnalyser.getAQIAnalysed
 import bose.ankush.weatherify.base.common.AirQualityIndexAnalyser.getFormattedAQI
 import bose.ankush.weatherify.domain.model.AirQuality
 
+// OWM AQI scale (1–6) to EPA AQI scale (0–500) mapping
+private const val OWM_AQI_GOOD = 1
+private const val OWM_AQI_FAIR = 2
+private const val OWM_AQI_MODERATE = 3
+private const val OWM_AQI_POOR = 4
+private const val OWM_AQI_VERY_POOR = 5
+private const val OWM_AQI_EXTREME = 6
+private const val EPA_AQI_GOOD_MID = 25
+private const val EPA_AQI_MODERATE_MID = 75
+private const val EPA_AQI_UNHEALTHY_SENSITIVE_MID = 125
+private const val EPA_AQI_UNHEALTHY_MID = 175
+private const val EPA_AQI_VERY_UNHEALTHY_MID = 250
+private const val EPA_AQI_HAZARDOUS_MID = 425
+private const val EPA_AQI_MIN = 0
+private const val EPA_AQI_MAX = 500
+
+// EPA AQI color range thresholds
+private const val EPA_GOOD_MAX = 50
+private const val EPA_MODERATE_MAX = 100
+private const val EPA_UNHEALTHY_SENSITIVE_MAX = 150
+private const val EPA_UNHEALTHY_MAX = 200
+private const val EPA_VERY_UNHEALTHY_MAX = 300
+
+// AQI colors (ARGB hex)
+private const val COLOR_AQI_GOOD = 0xFF4CAF50L
+private const val COLOR_AQI_MODERATE = 0xFFFFEB3BL
+private const val COLOR_AQI_UNHEALTHY_SENSITIVE = 0xFFFF9800L
+private const val COLOR_AQI_UNHEALTHY = 0xFFE53935L
+private const val COLOR_AQI_VERY_UNHEALTHY = 0xFF9C27B0L
+private const val COLOR_AQI_HAZARDOUS = 0xFF7E0023L
+
 private data class AqiUiState(
     val statusText: String,
     val qualityColor: Color,
@@ -58,10 +89,6 @@ private fun rememberAqiUiState(aqi: Int): AqiUiState =
         )
     }
 
-/**
- * This composable is response to show air quality card on HomeScreen.
- * Shows what is the current air quality based return value of [getAQIAnalysedText]
- */
 @SuppressLint("MissingPermission")
 @Composable
 internal fun BriefAirQualityReportCardLayout(airQuality: AirQuality) {
@@ -234,32 +261,28 @@ fun ExpandedPollutantsDetails(airQuality: AirQuality) {
  */
 private fun convertOwmAqiToEpa(owmAqi: Int): Int =
     when (owmAqi) {
-        1 -> 25 // Good
-        2 -> 75 // Fair -> Moderate
-        3 -> 125 // Moderate -> Unhealthy for Sensitive Groups
-        4 -> 175 // Poor -> Unhealthy
-        5 -> 250 // Very Poor -> Very Unhealthy
-        6 -> 425 // Extreme -> Hazardous
-        else -> owmAqi.coerceIn(0, 500) // Fallback for invalid values
+        OWM_AQI_GOOD -> EPA_AQI_GOOD_MID
+        OWM_AQI_FAIR -> EPA_AQI_MODERATE_MID
+        OWM_AQI_MODERATE -> EPA_AQI_UNHEALTHY_SENSITIVE_MID
+        OWM_AQI_POOR -> EPA_AQI_UNHEALTHY_MID
+        OWM_AQI_VERY_POOR -> EPA_AQI_VERY_UNHEALTHY_MID
+        OWM_AQI_EXTREME -> EPA_AQI_HAZARDOUS_MID
+        else -> owmAqi.coerceIn(EPA_AQI_MIN, EPA_AQI_MAX)
     }
 
-/**
- * Returns a color based on the air quality index value
- * Not a composable function since it doesn't use any composable functions
- */
 private fun getAirQualityColor(aqi: Int): Color =
     when (aqi) {
-        in 0..50 -> Color(0xFF4CAF50) // Good - Green
-        in 51..100 -> Color(0xFFFFEB3B) // Moderate - Yellow
-        in 101..150 -> Color(0xFFFF9800) // Unhealthy for sensitive groups - Orange
-        in 151..200 -> Color(0xFFE53935) // Unhealthy - Red
-        in 201..300 -> Color(0xFF9C27B0) // Very Unhealthy - Purple
-        else -> Color(0xFF7E0023) // Hazardous - Dark Red
+        in EPA_AQI_MIN..EPA_GOOD_MAX -> Color(COLOR_AQI_GOOD)
+        in (EPA_GOOD_MAX + 1)..EPA_MODERATE_MAX -> Color(COLOR_AQI_MODERATE)
+        in (EPA_MODERATE_MAX + 1)..EPA_UNHEALTHY_SENSITIVE_MAX -> Color(
+            COLOR_AQI_UNHEALTHY_SENSITIVE
+        )
+
+        in (EPA_UNHEALTHY_SENSITIVE_MAX + 1)..EPA_UNHEALTHY_MAX -> Color(COLOR_AQI_UNHEALTHY)
+        in (EPA_UNHEALTHY_MAX + 1)..EPA_VERY_UNHEALTHY_MAX -> Color(COLOR_AQI_VERY_UNHEALTHY)
+        else -> Color(COLOR_AQI_HAZARDOUS)
     }
 
-/**
- * Displays a single pollutant item with name and value
- */
 @Composable
 private fun PollutantItem(
     name: String,
@@ -279,7 +302,7 @@ private fun PollutantItem(
         )
         Text(
             text = name,
-            style = MaterialTheme.typography.bodySmall, // smaller for de-emphasis
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

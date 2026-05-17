@@ -22,16 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-/**
- * A composable that displays weather information for a specific day.
- * This component is designed to be flexible and reusable across different platforms.
- *
- * @param dayName The name of the day (e.g., "Monday", "Tuesday")
- * @param minTemperature The minimum temperature for the day
- * @param maxTemperature The maximum temperature for the day
- * @param weatherDescription Optional description of the weather conditions
- * @param iconContent Composable content for the weather icon
- */
 @Composable
 fun WeatherDayCard(
     dayName: String,
@@ -62,7 +52,6 @@ fun WeatherDayCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                // Day name
                 Text(
                     text = dayName,
                     style = MaterialTheme.typography.titleMedium,
@@ -72,7 +61,6 @@ fun WeatherDayCard(
                     modifier = Modifier.weight(1f),
                 )
 
-                // Temperature range
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.weight(1f),
@@ -80,7 +68,6 @@ fun WeatherDayCard(
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        // Min temperature
                         Text(
                             text = minTemperature,
                             style = MaterialTheme.typography.bodyLarge,
@@ -90,7 +77,6 @@ fun WeatherDayCard(
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // Max temperature
                         Text(
                             text = maxTemperature,
                             style = MaterialTheme.typography.bodyLarge,
@@ -99,7 +85,6 @@ fun WeatherDayCard(
                         )
                     }
 
-                    // Optional: Add weather description if available
                     weatherDescription?.let { description ->
                         Text(
                             text = description,
@@ -111,7 +96,6 @@ fun WeatherDayCard(
                     }
                 }
 
-                // Weather icon
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = MaterialTheme.colorScheme.surfaceVariant,

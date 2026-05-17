@@ -16,12 +16,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 
-/**
- * Helper function to configure a HttpClient with authentication
- *
- * @param tokenManager The manager for JWT tokens
- * @return A configured HttpClient with authentication headers and token refresh
- */
 fun HttpClientConfig<*>.configureAuth(tokenManager: TokenManager) {
     install(
         createClientPlugin("AuthTokenPlugin") {

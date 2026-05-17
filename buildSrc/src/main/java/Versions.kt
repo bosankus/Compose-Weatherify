@@ -9,7 +9,6 @@ object Versions {
 
     // Plugins
     const val buildGradle = "8.12.0"
-    const val navigation = "2.7.7"
     const val secretPlugin = "2.0.1"
     const val benManes = "0.52.0"
     const val spotlessVersion = "6.25.0"
@@ -64,6 +63,10 @@ object Versions {
     // Dependency Injection
     const val hilt = "2.58"
     const val hiltCompose = "1.2.0"
+
+    // Navigation 3
+    const val nav3 = "1.0.0"
+    const val lifecycleViewmodelNav3 = "2.10.0-rc01"
 
     // Miscellaneous
     const val timber = "5.0.1"

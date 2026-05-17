@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package bose.ankush.language.presentation
 
 import androidx.compose.animation.AnimatedVisibility
@@ -49,7 +51,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.EmojiSupportMatch
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -64,19 +65,26 @@ import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
 import bose.ankush.language.util.LocaleHelper.getDisplayName
 import kotlinx.coroutines.delay
 
+private const val ITEM_STAGGER_DELAY_MS = 100L
+
+data class LanguageScreenStrings(
+    val screenTitle: String,
+    val screenSubtitle: String,
+    val navigateBack: String,
+    val languageSelected: (String) -> String,
+)
+
 @Composable
 fun LanguageScreen(
     languages: Array<String>,
+    strings: LanguageScreenStrings,
     navAction: () -> Unit,
 ) {
-    // Create a transition state for the screen animation
     val screenTransitionState = remember { MutableTransitionState(false) }
-    // Remember the navigation action to prevent recompositions
     val rememberedNavAction = remember { navAction }
     // Hoist the changedLanguage state to prevent recreation in ShowUI
     val changedLanguage = remember { mutableStateOf(getDefaultLanguage()) }
 
-    // Start the animation when the screen is first displayed
     LaunchedEffect(Unit) {
         screenTransitionState.targetState = true
     }
@@ -85,7 +93,7 @@ fun LanguageScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         Scaffold(
-            topBar = { ScreenHeader(rememberedNavAction) },
+            topBar = { ScreenHeader(strings.navigateBack, rememberedNavAction) },
             content = { innerPadding ->
                 AnimatedVisibility(
                     visibleState = screenTransitionState,
@@ -98,14 +106,14 @@ fun LanguageScreen(
                     exit = fadeOut(),
                 ) {
                     Column(modifier = Modifier.padding(innerPadding)) {
-                        // Header text with animation
-                        LanguageScreenHeader()
+                        LanguageScreenHeader(strings.screenTitle, strings.screenSubtitle)
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         ShowUI(
                             languages = languages,
                             changedLanguage = changedLanguage,
+                            languageSelectedLabel = strings.languageSelected,
                         )
                     }
                 }
@@ -115,7 +123,10 @@ fun LanguageScreen(
 }
 
 @Composable
-private fun LanguageScreenHeader() {
+private fun LanguageScreenHeader(
+    title: String,
+    subtitle: String,
+) {
     Column(
         modifier =
             Modifier
@@ -123,7 +134,7 @@ private fun LanguageScreenHeader() {
                 .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
-            text = stringResource(R.string.language_screen_title),
+            text = title,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
@@ -132,7 +143,7 @@ private fun LanguageScreenHeader() {
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = stringResource(R.string.language_screen_subtitle),
+            text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
         )
@@ -141,11 +152,12 @@ private fun LanguageScreenHeader() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScreenHeader(navAction: () -> Unit) {
-    // Create a transition state for the header animation
+private fun ScreenHeader(
+    navigateBackDesc: String,
+    navAction: () -> Unit,
+) {
     val headerTransitionState = remember { MutableTransitionState(false) }
 
-    // Start the animation when the component is first displayed
     LaunchedEffect(Unit) {
         headerTransitionState.targetState = true
     }
@@ -161,7 +173,7 @@ private fun ScreenHeader(navAction: () -> Unit) {
         exit = fadeOut(),
     ) {
         TopAppBar(
-            title = { /* Empty title, we'll use our custom title below */ },
+            title = { },
             navigationIcon = {
                 Surface(
                     shape = CircleShape,
@@ -176,7 +188,7 @@ private fun ScreenHeader(navAction: () -> Unit) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_back),
                         tint = MaterialTheme.colorScheme.onSurface,
-                        contentDescription = stringResource(R.string.navigate_back),
+                        contentDescription = navigateBackDesc,
                         modifier = Modifier.padding(8.dp),
                     )
                 }
@@ -194,6 +206,7 @@ private fun ScreenHeader(navAction: () -> Unit) {
 private fun ShowUI(
     languages: Array<String>,
     changedLanguage: androidx.compose.runtime.MutableState<String>,
+    languageSelectedLabel: (String) -> String,
 ) {
     val listState = rememberLazyListState()
 
@@ -212,6 +225,7 @@ private fun ShowUI(
                 language = language,
                 index = index,
                 isSelected = changedLanguage.value == language,
+                languageSelectedLabel = languageSelectedLabel,
                 onLanguageSelected =
                     remember(language) {
                         {
@@ -228,9 +242,9 @@ private fun LanguageItem(
     language: String,
     index: Int,
     isSelected: Boolean,
+    languageSelectedLabel: (String) -> String,
     onLanguageSelected: () -> Unit,
 ) {
-    // Create animation for selection
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.02f else 1f,
         animationSpec =
@@ -242,11 +256,10 @@ private fun LanguageItem(
         label = "selection_scale",
     )
 
-    // Create a staggered animation for items
     val itemTransitionState = remember { MutableTransitionState(false) }
 
     LaunchedEffect(Unit) {
-        delay(100L * index) // Staggered delay based on item position
+        delay(ITEM_STAGGER_DELAY_MS * index)
         itemTransitionState.targetState = true
     }
 
@@ -298,7 +311,6 @@ private fun LanguageItem(
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    // Language name
                     Text(
                         text = language.getDisplayName(),
                         style = MaterialTheme.typography.bodyLarge,
@@ -313,7 +325,7 @@ private fun LanguageItem(
                 }
 
                 if (isSelected) {
-                    SelectionCheckmark(language)
+                    SelectionCheckmark(language, languageSelectedLabel)
                 }
             }
         }
@@ -322,7 +334,6 @@ private fun LanguageItem(
 
 @Composable
 private fun LanguageFlag(language: String) {
-    // Flag in a circle
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.background,
@@ -345,7 +356,10 @@ private fun LanguageFlag(language: String) {
 }
 
 @Composable
-private fun SelectionCheckmark(language: String) {
+private fun SelectionCheckmark(
+    language: String,
+    languageSelectedLabel: (String) -> String,
+) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.primary,
@@ -354,7 +368,7 @@ private fun SelectionCheckmark(language: String) {
         Icon(
             imageVector = Icons.Filled.Check,
             tint = MaterialTheme.colorScheme.onPrimary,
-            contentDescription = stringResource(R.string.language_selected, language),
+            contentDescription = languageSelectedLabel(language),
             modifier = Modifier.padding(6.dp),
         )
     }

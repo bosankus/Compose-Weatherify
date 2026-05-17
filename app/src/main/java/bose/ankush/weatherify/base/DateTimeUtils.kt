@@ -8,13 +8,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-/**
- * Singleton class to provide utility values related to date and time throughout all the modules.
- */
 object DateTimeUtils {
-    /**
-     * Returns numbers of days between today and given time on argument
-     */
     fun getDayWiseDifferenceFromToday(day: Long): Int {
         val todayDate = getTodayDateInCalenderFormat()
         val givenDate = Date(day * 1000)
@@ -25,10 +19,6 @@ object DateTimeUtils {
         return givenDateNumber - todayDateNumber
     }
 
-    /**
-     * Returns name of the day from given epoch. Epoch to be provided in Integer format
-     * via argument
-     */
     fun Long.dayName(): String {
         val calendar = Calendar.getInstance()
         calendar.time = Date(this * 1000)
@@ -44,9 +34,6 @@ object DateTimeUtils {
         }
     }
 
-    /**
-     * Returns current date in Calender type
-     */
     fun getTodayDateInCalenderFormat(): Calendar {
         val todayDate = Date(System.currentTimeMillis())
         val calendarForToday = Calendar.getInstance()

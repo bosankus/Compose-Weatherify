@@ -115,4 +115,10 @@
     <string name="location_override_chip_label">%1$s ഉപയോഗിക്കുന്നു</string>
     <string name="location_override_reset_btn">GPS-ലേക്ക് റീസെറ്റ് ചെയ്യുക</string>
     <string name="location_override_chip_content_desc">നിലവിൽ %1$s-ന്റെ കാലാവസ്ഥ കാണിക്കുന്നു. GPS-ലേക്ക് റീസെറ്റ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക.</string>
+    <string name="language_lib_screen_header">ഭാഷ തിരഞ്ഞെടുക്കുക</string>
+    <string name="language_back_content_description">തിരികെ പോകുക</string>
+    <string name="language_screen_title">നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക</string>
+    <string name="language_screen_subtitle">വ്യക്തിഗത അനുഭവത്തിനായി നിങ്ങൾ ഇഷ്ടപ്പെടുന്ന ഭാഷ തിരഞ്ഞെടുക്കുക</string>
+    <string name="language_selected">%s തിരഞ്ഞെടുത്തു</string>
+    <string name="language_navigate_back">പിറകോട്ട് നാവിഗേറ്റ് ചെയ്യുക</string>
 </resources>

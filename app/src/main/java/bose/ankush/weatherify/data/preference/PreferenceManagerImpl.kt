@@ -14,9 +14,6 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Implementation of PreferenceManager that uses DataStore
- */
 @Singleton
 class PreferenceManagerImpl
 @Inject

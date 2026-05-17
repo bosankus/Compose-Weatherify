@@ -23,12 +23,9 @@ fun WeatherifyTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    // Cache dynamic color check to avoid recalculating it
     val dynamicColor = isDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val context = LocalContext.current
 
-    // Cache the color scheme calculation to avoid recalculating it on each recomposition
-    // Only recalculate when darkTheme or dynamicColor changes
     val colors =
         remember(darkTheme, dynamicColor) {
             when {

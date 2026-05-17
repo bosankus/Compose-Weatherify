@@ -1,5 +1,6 @@
 package bose.ankush.commonui.auth
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -55,17 +56,6 @@ import androidx.compose.ui.unit.dp
 // Multiplatform-safe email regex (replaces android.util.Patterns)
 private val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
-/**
- * Login Screen composable that displays a login form with email and password fields,
- * login/register toggle, and terms & conditions link.
- *
- * CMP-compatible: works on Android and iOS via Compose Multiplatform.
- *
- * @param onLoginClick Callback when the login button is clicked
- * @param onRegisterClick Callback when the register button is clicked
- * @param onWebUrlClick Callback when a web URL (terms/privacy) link is clicked
- * @param isLoading Whether the screen is in loading state
- */
 @Composable
 fun LoginScreen(
     onLoginClick: (email: String, password: String) -> Unit,
@@ -130,7 +120,6 @@ fun LoginScreen(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState()),
         ) {
-            // Header
             Column(
                 modifier =
                     Modifier
@@ -167,7 +156,7 @@ fun LoginScreen(
                     animationSpec =
                         tween(
                             durationMillis = 300,
-                            easing = androidx.compose.animation.core.FastOutSlowInEasing,
+                            easing = FastOutSlowInEasing,
                         ),
                     label = "subtitleScale",
                 )
@@ -193,7 +182,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Form
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -309,7 +297,6 @@ fun LoginScreen(
                     }
                 }
 
-                // Footer
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,

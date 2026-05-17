@@ -58,8 +58,6 @@ import bose.ankush.network.model.PlaceSuggestion
 import bose.ankush.network.model.SavedLocation
 import kotlin.math.round
 
-// ============ UI State Classes ============
-
 @Immutable
 data class SavedLocationsUiState(
     val isPremium: Boolean = false,
@@ -77,8 +75,6 @@ data class PlaceSearchUiState(
     val error: String? = null,
 )
 
-// ============ Strings ============
-
 data class SavedLocationsStrings(
     val title: String = "Saved Locations",
     val premiumTitle: String = "Premium Feature",
@@ -95,12 +91,12 @@ data class SavedLocationsStrings(
     val saveSuccessMsg: String = "Location saved successfully",
     val deleteSuccessMsg: String = "Location deleted successfully",
     val setAsDefaultDialogTitle: String = "Use as weather location?",
-    val setAsDefaultDialogBody: (String) -> String = { "Weather data will show for $it instead of your current GPS position." },
+    val setAsDefaultDialogBody: (
+        String,
+    ) -> String = { "Weather data will show for $it instead of your current GPS position." },
     val setAsDefaultDialogWarning: String = "Your live GPS location won't update while this is active.",
     val setAsDefaultConfirmBtn: String = "Set as Default",
 )
-
-// ============ Main Screen ============
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -171,33 +167,34 @@ fun SavedLocationsScreen(
         bottomBar = bottomBar,
     ) { innerPadding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
         ) {
             when {
                 !locationsState.isPremium -> PremiumGate(strings)
                 locationsState.isLoading && locationsState.locations.isEmpty() -> ShowLoading()
                 locationsState.locations.isEmpty() -> EmptyLocations(strings)
-                else -> LocationList(
-                    locations = locationsState.locations,
-                    onDelete = onDeleteLocation,
-                    onLocationClick = { pendingLocation.value = it },
-                    strings = strings,
-                )
+                else ->
+                    LocationList(
+                        locations = locationsState.locations,
+                        onDelete = onDeleteLocation,
+                        onLocationClick = { pendingLocation.value = it },
+                        strings = strings,
+                    )
             }
         }
     }
 }
 
-// ============ Composable Components ============
-
 @Composable
 private fun PremiumGate(strings: SavedLocationsStrings) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -278,22 +275,25 @@ private fun LocationCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
@@ -324,7 +324,10 @@ private fun LocationCard(
     }
 }
 
-private fun formatCoordinates(lat: Double, lon: Double): String {
+private fun formatCoordinates(
+    lat: Double,
+    lon: Double,
+): String {
     val latRounded = round(lat * 10000) / 10000.0
     val lonRounded = round(lon * 10000) / 10000.0
     return "$latRounded, $lonRounded"
@@ -389,20 +392,22 @@ private fun PlaceSearchDialog(
                     onValueChange = onQueryChanged,
                     placeholder = { Text(strings.searchHint) },
                     singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
                 )
 
                 AnimatedVisibility(
                     visible = searchState.isLoading,
                     enter = fadeIn(),
-                    exit = fadeOut()
+                    exit = fadeOut(),
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -412,17 +417,17 @@ private fun PlaceSearchDialog(
                 AnimatedVisibility(
                     visible = searchState.error != null,
                     enter = fadeIn(),
-                    exit = fadeOut()
+                    exit = fadeOut(),
                 ) {
                     if (searchState.error != null) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    MaterialTheme.colorScheme.errorContainer,
-                                    shape = MaterialTheme.shapes.small,
-                                )
-                                .padding(12.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(
+                                        MaterialTheme.colorScheme.errorContainer,
+                                        shape = MaterialTheme.shapes.small,
+                                    ).padding(12.dp),
                         ) {
                             Text(
                                 text = searchState.error,
@@ -434,7 +439,8 @@ private fun PlaceSearchDialog(
                 }
 
                 AnimatedVisibility(
-                    visible = searchState.searchQuery.length >= 2 &&
+                    visible =
+                        searchState.searchQuery.length >= 2 &&
                             searchState.results.isEmpty() &&
                             !searchState.isLoading &&
                             searchState.error == null,
@@ -442,9 +448,10 @@ private fun PlaceSearchDialog(
                     exit = fadeOut(),
                 ) {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -503,14 +510,14 @@ private fun PlaceSuggestionItem(
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = MaterialTheme.shapes.small,
-            )
-            .padding(vertical = 12.dp, horizontal = 12.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = MaterialTheme.shapes.small,
+                ).padding(vertical = 12.dp, horizontal = 12.dp),
     ) {
         Text(
             text = place.name,
@@ -521,9 +528,10 @@ private fun PlaceSuggestionItem(
         )
         Spacer(modifier = Modifier.height(2.dp))
         Text(
-            text = listOfNotNull(place.city, place.state, place.country)
-                .filter { it.isNotEmpty() }
-                .joinToString(", "),
+            text =
+                listOfNotNull(place.city, place.state, place.country)
+                    .filter { it.isNotEmpty() }
+                    .joinToString(", "),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,

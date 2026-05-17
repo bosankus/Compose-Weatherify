@@ -6,6 +6,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,10 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * KMP-compatible shimmer effect for loading states.
- * Works seamlessly on Android and iOS.
- */
 @Composable
 fun ShimmerEffect(
     modifier: Modifier = Modifier,
@@ -70,22 +67,18 @@ fun ShimmerEffect(
     )
 }
 
-/**
- * Shimmer loading skeleton for bottom sheet content
- */
 @Composable
 fun ShimmerBottomSheetSkeleton(
     modifier: Modifier = Modifier,
     baseColor: Color = Color.LightGray.copy(alpha = 0.3f),
     highlightColor: Color = Color.White.copy(alpha = 0.8f),
 ) {
-    androidx.compose.foundation.layout.Column(
+    Column(
         modifier =
             modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        // Header
         ShimmerEffect(
             height = 28.dp,
             cornerRadius = 6.dp,
@@ -97,7 +90,6 @@ fun ShimmerBottomSheetSkeleton(
                     .padding(bottom = 16.dp),
         )
 
-        // Description lines
         repeat(2) {
             ShimmerEffect(
                 height = 14.dp,
@@ -122,7 +114,6 @@ fun ShimmerBottomSheetSkeleton(
                     .padding(bottom = 16.dp),
         )
 
-        // Features section
         ShimmerEffect(
             height = 18.dp,
             cornerRadius = 4.dp,
@@ -147,7 +138,6 @@ fun ShimmerBottomSheetSkeleton(
             )
         }
 
-        // Pricing section
         ShimmerEffect(
             height = 20.dp,
             cornerRadius = 6.dp,
@@ -170,7 +160,6 @@ fun ShimmerBottomSheetSkeleton(
                     .padding(bottom = 20.dp),
         )
 
-        // Button
         ShimmerEffect(
             height = 48.dp,
             cornerRadius = 8.dp,

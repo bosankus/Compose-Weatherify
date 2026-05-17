@@ -35,8 +35,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     lint {
@@ -45,7 +47,7 @@ android {
 }
 
 composeCompiler {
-    enableStrongSkippingMode = true
+    featureFlags.add(org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag.StrongSkipping)
 }
 
 dependencies {
@@ -66,5 +68,4 @@ dependencies {
     implementation(Deps.composeUi)
     implementation(Deps.composeMaterial1)
     implementation(Deps.composeMaterial3)
-    implementation(Deps.navigationCompose)
 }

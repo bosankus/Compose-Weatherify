@@ -1,8 +1,7 @@
+@file:Suppress("ConstructorParameterNaming")
+
 package bose.ankush.weatherify.domain.model
 
-/**
- * Domain model for weather forecast data
- */
 data class WeatherForecast(
     val id: Long,
     val alerts: List<Alert?>? = listOf(),
@@ -70,9 +69,6 @@ data class WeatherForecast(
     )
 }
 
-/**
- * Domain model for weather condition
- */
 data class WeatherCondition(
     val description: String = "",
     val icon: String = "",

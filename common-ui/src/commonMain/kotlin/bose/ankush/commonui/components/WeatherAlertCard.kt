@@ -46,10 +46,6 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-/**
- * A composable that displays weather alert information.
- * Shows a summarized alert by default and can be expanded to show more details.
- */
 @Composable
 fun WeatherAlertCard(
     title: String?,
@@ -60,20 +56,16 @@ fun WeatherAlertCard(
     onReadMoreClick: (() -> Unit)? = null,
     initiallyExpanded: Boolean = false,
 ) {
-    // Skip rendering if essential data is missing
     if (title.isNullOrEmpty() || description.isNullOrEmpty()) return
 
-    // State and calculated values
     var isExpanded by remember { mutableStateOf(initiallyExpanded) }
 
-    // Define colors
     val primaryColor = MaterialTheme.colorScheme.error
     val textColor = MaterialTheme.colorScheme.onErrorContainer
     val accentColor = primaryColor.copy(alpha = 0.8f)
     val surfaceColor = textColor.copy(alpha = 0.07f)
     val subtleTextColor = textColor.copy(alpha = 0.7f)
 
-    // Create colors object
     val colors =
         AlertCardColors(
             primaryColor = primaryColor,
@@ -83,7 +75,6 @@ fun WeatherAlertCard(
             subtleTextColor = subtleTextColor,
         )
 
-    // Format timestamps
     val formattedStartTime =
         remember(startTime) {
             startTime?.let { formatTimestamp(it) } ?: "Unknown"
@@ -93,13 +84,11 @@ fun WeatherAlertCard(
             endTime?.let { formatTimestamp(it) } ?: "Unknown"
         }
 
-    // Create short description
     val shortDescription =
         remember(description) {
             if (description.length > 100) description.take(100) + "..." else description
         }
 
-    // Animation spec for content size changes
     val contentSizeAnimSpec =
         spring<IntSize>(
             dampingRatio = Spring.DampingRatioLowBouncy,
@@ -122,14 +111,12 @@ fun WeatherAlertCard(
                     .padding(20.dp),
             horizontalAlignment = Alignment.Start,
         ) {
-            // Header section with icon, title and timestamp
             AlertHeader(
                 title = title,
                 timestamp = formattedStartTime,
                 colors = colors,
             )
 
-            // Report section with expandable description
             AlertReportSection(
                 description = description,
                 shortDescription = shortDescription,
@@ -154,7 +141,6 @@ fun WeatherAlertCard(
                             shrinkVertically(tween(250)),
             ) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
-                    // Source information
                     AlertInfoSection(
                         title = "Source",
                         content = source ?: "Unknown",
@@ -163,7 +149,6 @@ fun WeatherAlertCard(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Validity information
                     AlertInfoSection(
                         title = "Valid Until",
                         content = formattedEndTime,
@@ -175,16 +160,12 @@ fun WeatherAlertCard(
     }
 }
 
-/**
- * Header section of the alert card with icon, title and timestamp
- */
 @Composable
 private fun AlertHeader(
     title: String?,
     timestamp: String,
     colors: AlertCardColors,
 ) {
-    // Alert Icon
     Icon(
         imageVector = Icons.Filled.Warning,
         contentDescription = "Weather Alert Icon",
@@ -195,7 +176,6 @@ private fun AlertHeader(
                 .padding(bottom = 12.dp),
     )
 
-    // Title
     Text(
         text = title ?: "Weather Alert",
         style = MaterialTheme.typography.titleMedium,
@@ -204,7 +184,6 @@ private fun AlertHeader(
         modifier = Modifier.padding(bottom = 4.dp),
     )
 
-    // Timestamp
     Text(
         text = "Issued: $timestamp",
         style = MaterialTheme.typography.bodySmall,
@@ -213,9 +192,6 @@ private fun AlertHeader(
     )
 }
 
-/**
- * Report section with expandable description and read more/less button
- */
 @Composable
 private fun AlertReportSection(
     description: String,
@@ -230,7 +206,6 @@ private fun AlertReportSection(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Report label
             Text(
                 text = "Report",
                 style = MaterialTheme.typography.labelMedium,
@@ -239,7 +214,6 @@ private fun AlertReportSection(
                 modifier = Modifier.padding(bottom = 8.dp),
             )
 
-            // Description text
             Text(
                 text = if (isExpanded) description else shortDescription,
                 style = MaterialTheme.typography.bodyMedium,
@@ -253,7 +227,6 @@ private fun AlertReportSection(
                     },
             )
 
-            // Read more/less button
             val readMoreText = if (isExpanded) "Read less" else "Read more"
             val buttonAlpha by animateFloatAsState(
                 targetValue = 1f,
@@ -288,9 +261,6 @@ private fun AlertReportSection(
     }
 }
 
-/**
- * Reusable section for displaying information with a title and content
- */
 @Composable
 private fun AlertInfoSection(
     title: String,
@@ -321,9 +291,6 @@ private fun AlertInfoSection(
     }
 }
 
-/**
- * Data class to hold color values for the alert card
- */
 private data class AlertCardColors(
     val primaryColor: Color,
     val textColor: Color,
@@ -332,9 +299,6 @@ private data class AlertCardColors(
     val subtleTextColor: Color,
 )
 
-/**
- * Formats a timestamp into a readable date and time string.
- */
 private fun formatTimestamp(timestamp: Long): String {
     val instant = Instant.fromEpochSeconds(timestamp)
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())

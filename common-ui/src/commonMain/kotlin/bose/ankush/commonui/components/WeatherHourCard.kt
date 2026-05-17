@@ -21,17 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-/**
- * A composable that displays weather information for a specific hour.
- * This component is designed to be flexible and reusable across different platforms.
- *
- * @param time The formatted time (e.g., "12:00 PM")
- * @param temperature The temperature value with unit
- * @param weatherDescription Optional description of the weather conditions
- * @param isSelected Whether this hour card is currently selected
- * @param onClick Callback for when the card is clicked
- * @param iconContent Composable content for the weather icon
- */
 @Composable
 fun WeatherHourCard(
     time: String,
@@ -41,7 +30,6 @@ fun WeatherHourCard(
     onClick: () -> Unit = {},
     iconContent: @Composable () -> Unit,
 ) {
-    // Pre-calculate background colors
     val selectedBackground = MaterialTheme.colorScheme.primaryContainer
     val unselectedBackground = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
 
@@ -59,7 +47,6 @@ fun WeatherHourCard(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Time
             Text(
                 text = time,
                 style = MaterialTheme.typography.bodySmall,
@@ -68,10 +55,8 @@ fun WeatherHourCard(
                 modifier = Modifier.alpha(0.6f),
             )
 
-            // Weather icon
             iconContent()
 
-            // Temperature
             Text(
                 text = temperature,
                 style = MaterialTheme.typography.bodyMedium,
@@ -80,7 +65,6 @@ fun WeatherHourCard(
                 modifier = Modifier.padding(top = 16.dp),
             )
 
-            // Weather description (if available)
             weatherDescription?.let { description ->
                 Text(
                     text = description,

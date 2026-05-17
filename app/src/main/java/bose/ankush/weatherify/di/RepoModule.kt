@@ -17,11 +17,6 @@ import bose.ankush.network.repository.WeatherRepository as NetworkWeatherReposit
 @Module
 @InstallIn(SingletonComponent::class)
 object RepoModule {
-    /**
-     * Provides the domain-layer WeatherRepository that orchestrates network and storage.
-     *
-     * This is the single source of truth for weather data operations in the app.
-     */
     @Singleton
     @Provides
     fun provideWeatherRepository(
