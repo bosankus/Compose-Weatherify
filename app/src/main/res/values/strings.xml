@@ -42,8 +42,7 @@
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">weather condition icon</string>
-    <string name="weather_icon_content_a">weather condition icon from distance</string>
-    <string name="weather_icon_content_b">weather condition icon from india</string>
+    <string name="weather_icon_content_c">Huge capacity condition icon from india</string>
     <string name="language_icon_content">Language icon</string>
     <string name="menu_icon_content">Menu icon</string>
     <string name="wind_icon_content">Wind icon</string>
