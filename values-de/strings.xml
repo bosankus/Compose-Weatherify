@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="splash_screen">Startbildschirm</string>
+    <string name="home_screen">Startseite</string>
+    <string name="aq_screen">Luftqualität</string>
+    <string name="city_screen">Städte</string>
+    <string name="account_screen">Profil</string>
+    <string name="settings_screen">Einstellungen</string>
+    <string name="home_nested_nav">Startseite_verschachtelte_Navigation</string>
+    <string name="retry_btn_txt">Wiederholen</string>
+    <string name="air_quality">Luftqualität</string>
+    <string name="go_back">Zurück</string>
+</resources>

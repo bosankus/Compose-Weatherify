@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_screen">Impostazioni</string>
+    <string name="retry_btn_txt">Riprova</string>
+    <string name="hourly_forecast_heading_txt">Previsioni orarie</string>
+    <string name="daily_forecast_heading_txt">Previsioni giornaliere</string>
+    <string name="got_it">Ricevuto</string>
+    <string name="unauthorised_access_txt">Accesso non autorizzato!</string>
+</resources>
