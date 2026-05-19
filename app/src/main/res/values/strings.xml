@@ -29,7 +29,7 @@
     <string name="default_city" translatable="false">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>
-    <string name="dummy_welcome_txt">Debasmita is beautiful and cute, and she is going to get married in next March 2027</string>
+    <string name="dummy_welcome_txt">Debasmita is beautiful and cute, and she is going to get married in next March 2027 with Ankush</string>
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">Unauthorised access!</string>
