@@ -42,7 +42,7 @@
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">weather condition icon</string>
-    <string name="weather_icon_content_c">New Fun task needs to be created for weather details</string>
+    <string name="weather_icon_content_c">Important Fun task needs to be created for weather details</string>
     <string name="language_icon_content">Language icon</string>
     <string name="menu_icon_content">Menu icon</string>
     <string name="wind_icon_content">Wind icon</string>
