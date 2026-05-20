@@ -29,7 +29,7 @@
     <string name="default_city" translatable="false">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>
-    <string name="dummy_welcome_txt">Debasmita is beautiful and cute, and she is going to get married in next March 2027 with Ankush</string>
+    <string name="dummy_welcome_txt">Debasmita is beautiful and cute.</string>
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">Unauthorised access!</string>
@@ -43,7 +43,7 @@
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">weather condition icon</string>
-    <string name="weather_icon_content_c">Important Fun task needs to be created for weather details</string>
+    <string name="weather_icon_content_c">Important task needs to be created for weather details</string>
     <string name="language_icon_content">Language icon</string>
     <string name="menu_icon_content">Menu icon</string>
     <string name="wind_icon_content">Wind icon</string>
