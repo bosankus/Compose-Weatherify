@@ -44,7 +44,7 @@ kotlin {
                 implementation(Deps.room)
                 implementation(Deps.roomKtx)
                 // Gson for JSON serialization
-                implementation("com.google.code.gson:gson:2.10.1")
+                implementation("com.google.code.gson:gson:2.14.0")
                 // Network module dependency
                 implementation(project(":network"))
                 // Dagger/Hilt dependencies
