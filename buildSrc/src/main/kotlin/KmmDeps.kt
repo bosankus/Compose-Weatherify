@@ -5,7 +5,7 @@ object KmmVersions {
     const val kotlinxSerialization = "1.6.0"
     const val kotlinxCoroutines = "1.7.3"
     const val koin = "3.5.6"
-    const val kotlinxDateTime = "0.4.1"
+    const val kotlinxDateTime = "0.8.0-0.6.x-compat"
 }
 
 object KmmDeps {
