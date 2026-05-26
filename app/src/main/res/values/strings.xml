@@ -41,9 +41,8 @@
     <string name="empty_list">No details found. Try after sometime.</string>
 
     <!--Content Descriptions-->
-    <string name="weather_icon_content">weather condition icon</string>
-    <string name="weather_icon_content_c">Highest important task needs to be created in the atmosphere or jupiter planet.</string>
-    <string name="language_icon_content">Language icon</string>
+    <string name="weather_icon_content">weather condition icon to click please</string>
+    <string name="language_icon_content">Language icon to click please</string>
     <string name="menu_icon_content">Menu icon</string>
     <string name="wind_icon_content">Wind icon</string>
     <string name="humidity_icon_content">Humidity icon</string>
