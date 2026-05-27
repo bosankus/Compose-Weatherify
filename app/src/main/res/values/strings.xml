@@ -33,7 +33,7 @@
     <!--Error Texts-->
     <string name="unauthorised_access_txt">Unauthorised access in our region!</string>
     <string name="city_error_txt">City not found!</string>
-    <string name="server_error_txt">Umm… Looks like server issue!</string>
+    <string name="server_error_txt">Umm… Looks like server broke entirely and you are blocked!</string>
     <string name="no_internet_txt">Umm… Please check internet connectivity!</string>
     <string name="general_error_txt">Oops!..Something really went wrong. Please retry!</string>
     <string name="default_coordinates_txt">Location coordinates not yet updated.</string>
