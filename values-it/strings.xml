@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_icon_content">Tocca l'icona della lingua</string>
+    <string name="menu_icon_content">Tocca l'icona del menu</string>
+    <string name="wind_icon_content">Tocca l'icona del vento</string>
+</resources>
