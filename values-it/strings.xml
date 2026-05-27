@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="server_error_txt">Ops... sembra che il server si sia rotto completamente e tu sia bloccato!</string>
+</resources>
