@@ -31,7 +31,7 @@
     <string name="got_it">Got it</string>
 
     <!--Error Texts-->
-    <string name="unauthorised_access_txt">Unauthorised access in our region and country!</string>
+    <string name="unauthorised_access_txt">Unauthorised access, Please login!</string>
     <string name="city_error_txt">City not found!</string>
     <string name="server_error_txt">Umm… Looks like server broke entirely and you are blocked!</string>
     <string name="no_internet_txt">Umm… Please check internet connectivity!</string>
