@@ -39,6 +39,7 @@
     <string name="default_coordinates_txt">Location coordinates yet to updated.</string>
     <string name="empty_city_list_error_txt">Oh no! No cities found.</string>
     <string name="empty_list">No details found. Try after sometime.</string>
+    <string name="empty_list_new">hey man what's going on?</string>
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">weather condition</string>
