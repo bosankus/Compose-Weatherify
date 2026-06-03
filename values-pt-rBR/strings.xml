@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="splash_screen">Tela de abertura</string>
+    <string name="home_screen">Início</string>
+    <string name="aq_screen">Qualidade do ar</string>
+    <string name="city_screen">Cidades</string>
+    <string name="account_screen">Perfil</string>
+    <string name="settings_screen">Configurações</string>
+    <string name="retry_btn_txt">Tentar novamente</string>
+    <string name="hourly_forecast_heading_txt">Previsões horárias</string>
+    <string name="daily_forecast_heading_txt">Previsões diárias</string>
+    <string name="speed">%1$s km/h</string>
+    <string name="feels_like">sensação térmica de %1$s°C</string>
+    <string name="select_city">Selecionar cidade</string>
+    <string name="air_quality">Qualidade do ar</string>
+    <string name="go_back">Voltar</string>
+    <string name="got_it">Entendi</string>
+    <string name="unauthorised_access_txt">Acesso não autorizado, por favor faça login!</string>
+    <string name="city_error_txt">Cidade não encontrada!</string>
+    <string name="server_error_txt">Hmm… parece que nosso servidor não respondeu!</string>
+    <string name="no_internet_txt">Hmm… Por favor, verifique a conexão com a internet!</string>
+    <string name="general_error_txt">Ops!.. Algo deu muito errado. Por favor, tente novamente!</string>
+    <string name="default_coordinates_txt">Coordenadas de localização ainda não atualizadas.</string>
+    <string name="empty_city_list_error_txt">Ah não! Nenhuma cidade encontrada.</string>
+    <string name="empty_list">Nenhum detalhe encontrado. Tente novamente após 2 anos.</string>
+    <string name="weather_icon_content">condição climática</string>
+    <string name="language_icon_content">Ícone de idioma</string>
+    <string name="menu_icon_content">Ícone de menu</string>
+    <string name="wind_icon_content">Ícone de vento</string>
+    <string name="humidity_icon_content">Ícone de umidade</string>
+    <string name="error_icon_content">Ícone de erro</string>
+    <string name="close_icon_content">Ícone de fechar</string>
+</resources>
