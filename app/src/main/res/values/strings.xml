@@ -32,16 +32,16 @@
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">Unauthorised access, Please login!</string>
-    <string name="city_error_txt">Ahh...City not found!</string>
-    <string name="server_error_txt">Umm… seems like our server made a mistake, check back again after sometime!</string>
+    <string name="city_error_txt">City not found!</string>
+    <string name="server_error_txt">Umm… seems like our server made a mistake, please try again!</string>
     <string name="no_internet_txt">Umm… Please check internet connectivity!</string>
     <string name="general_error_txt">Oops!..Something really went wrong. Please retry!</string>
-    <string name="default_coordinates_txt">Location coordinates not yet updated.</string>
-    <string name="empty_city_list_error_txt">Oh no! No cities found at this moment. Check back later.</string>
+    <string name="default_coordinates_txt">Location coordinates yet to updated.</string>
+    <string name="empty_city_list_error_txt">Oh no! No cities found.</string>
     <string name="empty_list">No details found. Try after sometime.</string>
 
     <!--Content Descriptions-->
-    <string name="weather_icon_content">weather condition at our location is:</string>
+    <string name="weather_icon_content">weather condition</string>
     <string name="language_icon_content">Language icon</string>
     <string name="menu_icon_content">Menu icon</string>
     <string name="wind_icon_content">Wind icon</string>
