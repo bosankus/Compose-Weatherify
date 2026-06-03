@@ -1,33 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+        
     <string name="splash_screen">หน้าเริ่มต้น</string>
+        
     <string name="home_screen">หน้าหลัก</string>
+        
     <string name="aq_screen">คุณภาพอากาศ</string>
+        
     <string name="city_screen">เมือง</string>
+        
     <string name="account_screen">โปรไฟล์</string>
+        
     <string name="settings_screen">การตั้งค่า</string>
+        
     <string name="retry_btn_txt">ลองใหม่</string>
+        
     <string name="hourly_forecast_heading_txt">พยากรณ์รายชั่วโมง</string>
+        
     <string name="daily_forecast_heading_txt">พยากรณ์รายวัน</string>
+        
     <string name="speed">%1$s กม./ชม.</string>
+        
     <string name="feels_like">รู้สึกเหมือน %1$s°C</string>
+        
     <string name="select_city">เลือกเมือง</string>
+        
     <string name="air_quality">คุณภาพอากาศ</string>
+        
     <string name="go_back">ย้อนกลับ</string>
+        
     <string name="got_it">ตกลง</string>
+        
     <string name="unauthorised_access_txt">ไม่ได้รับอนุญาต โปรดเข้าสู่ระบบ!</string>
+        
     <string name="city_error_txt">ไม่พบเมือง!</string>
+        
     <string name="server_error_txt">เซิร์ฟเวอร์ไม่ตอบสนอง!</string>
+        
     <string name="no_internet_txt">โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต!</string>
+        
     <string name="general_error_txt">เกิดข้อผิดพลาดบางอย่าง โปรดลองใหม่อีกครั้ง!</string>
+        
     <string name="default_coordinates_txt">ยังไม่ได้อัปเดตพิกัดตำแหน่ง</string>
+        
     <string name="empty_city_list_error_txt">ไม่พบรายชื่อเมือง</string>
+        
     <string name="empty_list">ไม่พบรายละเอียด โปรดลองใหม่อีกครั้งหลังจาก 2 ปี</string>
+        
     <string name="weather_icon_content">สภาพอากาศ</string>
+        
     <string name="language_icon_content">ไอคอนภาษา</string>
+        
     <string name="menu_icon_content">ไอคอนเมนู</string>
+        
     <string name="wind_icon_content">ไอคอนลม</string>
+        
     <string name="humidity_icon_content">ไอคอนความชื้น</string>
+        
     <string name="error_icon_content">ไอคอนข้อผิดพลาด</string>
+        
     <string name="close_icon_content">ไอคอนปิด</string>
+    
+    <string name="home_nested_nav">home_nested_nav</string>
+    <string name="profile_nested_nav">profile_nested_nav</string>
 </resources>
