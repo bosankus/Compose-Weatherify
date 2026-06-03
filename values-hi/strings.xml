@@ -1,65 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-        
+            
+    
     <string name="splash_screen">स्प्लैश</string>
-        
+            
+    
     <string name="home_screen">होम</string>
-        
+            
+    
     <string name="aq_screen">वायु गुणवत्ता</string>
-        
+            
+    
     <string name="city_screen">शहर</string>
-        
+            
+    
     <string name="account_screen">प्रोफ़ाइल</string>
-        
+            
+    
     <string name="settings_screen">सेटिंग्स</string>
-        
+            
+    
     <string name="retry_btn_txt">पुनः प्रयास करें</string>
-        
+            
+    
     <string name="hourly_forecast_heading_txt">प्रति घंटा पूर्वानुमान</string>
-        
+            
+    
     <string name="daily_forecast_heading_txt">दैनिक पूर्वानुमान</string>
-        
+            
+    
     <string name="speed">%1$sकिमी/घंटा</string>
-        
+            
+    
     <string name="feels_like">ऐसा महसूस होता है %1$s°C</string>
-        
+            
+    
     <string name="select_city">शहर चुनें</string>
-        
+            
+    
     <string name="air_quality">वायु गुणवत्ता</string>
-        
+            
+    
     <string name="go_back">वापस जाएं</string>
-        
+            
+    
     <string name="got_it">समझ गया</string>
-        
+            
+    
     <string name="unauthorised_access_txt">अनधिकृत पहुंच, कृपया लॉगिन करें!</string>
-        
+            
+    
     <string name="city_error_txt">शहर नहीं मिला!</string>
-        
+            
+    
     <string name="server_error_txt">उम्म... ऐसा लगता है कि हमारे सर्वर ने प्रतिक्रिया नहीं दी!</string>
-        
+            
+    
     <string name="no_internet_txt">उम्म... कृपया इंटरनेट कनेक्टिविटी की जांच करें!</string>
-        
+            
+    
     <string name="general_error_txt">ओह!.. कुछ वास्तव में गलत हो गया। कृपया पुनः प्रयास करें!</string>
-        
+            
+    
     <string name="default_coordinates_txt">स्थान निर्देशांक अभी तक अपडेट नहीं किए गए हैं।</string>
-        
+            
+    
     <string name="empty_city_list_error_txt">ओह नहीं! कोई शहर नहीं मिला।</string>
-        
+            
+    
     <string name="empty_list">कोई विवरण नहीं मिला। 2 वर्ष बाद पुनः प्रयास करें।</string>
-        
+            
+    
     <string name="weather_icon_content">मौसम की स्थिति</string>
-        
+            
+    
     <string name="language_icon_content">भाषा आइकन</string>
-        
+            
+    
     <string name="menu_icon_content">मेनू आइकन</string>
-        
+            
+    
     <string name="wind_icon_content">हवा का आइकन</string>
-        
+            
+    
     <string name="humidity_icon_content">आर्द्रता आइकन</string>
-        
+            
+    
     <string name="error_icon_content">त्रुटि आइकन</string>
-        
+            
+    
     <string name="close_icon_content">बंद करें आइकन</string>
+        
     
     <string name="home_nested_nav">home_nested_nav</string>
+    
+    <string name="profile_nested_nav">profile_nested_nav</string>
 </resources>
