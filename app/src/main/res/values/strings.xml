@@ -38,7 +38,7 @@
     <string name="general_error_txt">Oops!..Something really went wrong. Please retry!</string>
     <string name="default_coordinates_txt">Location coordinates yet to updated.</string>
     <string name="empty_city_list_error_txt">Oh no! No cities found.</string>
-    <string name="empty_list">No details found. Try after sometime.</string>
+    <string name="empty_list">No details found. Try after 1 year.</string>
     <string name="something_new">This is tiny text which will make India too innovative</string>
 
     <!--Content Descriptions-->
