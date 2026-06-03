@@ -1,113 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-                
+                    
+    
     
     
     <string name="splash_screen">스플래시</string>
-                
+                    
+    
     
     
     <string name="city_screen">도시</string>
-                
+                    
+    
     
     
     <string name="account_screen">프로필</string>
-                
+                    
+    
     
     
     <string name="retry_btn_txt">재시도</string>
-                
+                    
+    
     
     
     <string name="hourly_forecast_heading_txt">시간별 예보</string>
-                
+                    
+    
     
     
     <string name="daily_forecast_heading_txt">일일 예보</string>
-                
+                    
+    
     
     
     <string name="speed">%1$skm/h</string>
-                
+                    
+    
     
     
     <string name="feels_like">체감 온도 %1$s°C</string>
-                
+                    
+    
     
     
     <string name="select_city">도시 선택</string>
-                
+                    
+    
     
     
     <string name="go_back">뒤로 가기</string>
-                
+                    
+    
     
     
     <string name="got_it">확인했습니다</string>
-                
+                    
+    
     
     
     <string name="unauthorised_access_txt">승인되지 않은 접근입니다. 로그인해 주세요!</string>
-                
+                    
+    
     
     
     <string name="city_error_txt">도시를 찾을 수 없습니다!</string>
-                
+                    
+    
     
     
     <string name="server_error_txt">서버가 응답하지 않습니다!</string>
-                
+                    
+    
     
     
     <string name="no_internet_txt">인터넷 연결을 확인해 주세요!</string>
-                
+                    
+    
     
     
     <string name="general_error_txt">오류가 발생했습니다. 다시 시도해 주세요!</string>
-                
+                    
+    
     
     
     <string name="default_coordinates_txt">위치 좌표가 아직 업데이트되지 않았습니다.</string>
-                
+                    
+    
     
     
     <string name="empty_city_list_error_txt">도시를 찾을 수 없습니다.</string>
-                
+                    
+    
     
     
     <string name="empty_list">세부 정보를 찾을 수 없습니다. 2년 후에 다시 시도해 주세요.</string>
-                
+                    
+    
     
     
     <string name="language_icon_content">언어 아이콘</string>
-                
+                    
+    
     
     
     <string name="menu_icon_content">메뉴 아이콘</string>
-                
+                    
+    
     
     
     <string name="wind_icon_content">바람 아이콘</string>
-                
+                    
+    
     
     
     <string name="humidity_icon_content">습도 아이콘</string>
-                
+                    
+    
     
     
     <string name="error_icon_content">오류 아이콘</string>
-                
+                    
+    
     
     
     <string name="close_icon_content">닫기 아이콘</string>
-            
+                
+    
     
     
     <string name="home_screen">홈</string>
-        
+            
+    
     
     <string name="weather_icon_content">날씨 상태</string>
+        
     
     <string name="home_nested_nav">home_nested_nav</string>
+        
     <string name="profile_nested_nav">profile_nested_nav</string>
+    
+    <string name="aq_screen">대기질</string>
+    <string name="settings_screen">설정</string>
 </resources>
