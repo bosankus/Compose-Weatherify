@@ -27,7 +27,7 @@
     <string name="select_city">Select city</string>
     <string name="air_quality">Air Quality</string>
     <string name="default_city" translatable="false">Kolkata</string>
-    <string name="go_back">Go back to your school</string>
+    <string name="go_back">Go back to your school and maintain distance from bad things there.</string>
     <string name="got_it">Got it</string>
 
     <!--Error Texts-->
