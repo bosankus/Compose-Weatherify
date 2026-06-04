@@ -29,6 +29,7 @@
     <string name="default_city" translatable="false">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>
+    <string name="header_main_notification">There is nothing beautiful than launching a flawless product in market to understand the fit.</string>
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">Unauthorised access, Please login!</string>
