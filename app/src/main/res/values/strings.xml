@@ -29,8 +29,9 @@
     <string name="default_city" translatable="false">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>
+    <string name="got_it_colored">This is a new change to be connect with {brand}</string>
 
-    <!--Error Texts-->
+    <!--Error Texts-->x
     <string name="unauthorised_access_txt">Unauthorised access, Please log in!</string>
     <string name="city_error_txt">City not found!</string>
     <string name="server_error_txt">Umm… seems like our server did not respond!</string>
