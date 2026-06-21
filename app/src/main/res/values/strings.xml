@@ -37,9 +37,11 @@
     <string name="default_city" translatable="false">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>
+    <string name="got_it_colored">This is a new change to be connect with {brand}</string>
+    <string name="got_it_colored">This is a second new fine ness to be connected with {brand}</string>
 
     <!--Error Texts-->
-    <string name="unauthorised_access_txt">Unauthorised access!</string>
+    <string name="unauthorised_access_txt">Unauthorised access, Please log in!</string>
     <string name="city_error_txt">City not found!</string>
     <string name="server_error_txt">Umm… Looks like server issue!</string>
     <string name="no_internet_txt">Umm… Can you re-check internet connectivity!</string>
@@ -79,7 +81,7 @@
     <string name="legal_section_title">Legal</string>
 
     <!--Content Descriptions-->
-    <string name="weather_icon_content">weather condition icon</string>
+    <string name="weather_icon_content">weather condition</string>
     <string name="language_icon_content">Language icon</string>
     <string name="menu_icon_content">Menu icon</string>
     <string name="wind_icon_content">Wind icon</string>
