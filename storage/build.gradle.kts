@@ -1,14 +1,18 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
-    kotlin("plugin.serialization")
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
-    androidTarget {
+    android {
+        namespace = "bose.ankush.storage"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -31,10 +35,10 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(KmmDeps.kotlinxCoroutinesCore)
-                implementation(KmmDeps.koinCore)
-                implementation(KmmDeps.kotlinxDateTime)
-                implementation(KmmDeps.kotlinxSerialization)
+                implementation(libs.kotlinx.coroutines.core)
+                implementation(libs.koin.core)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {
@@ -47,19 +51,17 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 // Room dependencies
-                implementation(Deps.room)
-                implementation(Deps.roomKtx)
+                implementation(libs.androidx.room.runtime)
+                implementation(libs.androidx.room.ktx)
                 // Security: Encrypted token storage
-                implementation(Deps.securityCrypto)
+                implementation(libs.androidx.security.crypto)
                 // Gson for JSON serialization
-                implementation(Deps.gson)
+                implementation(libs.gson)
                 // Note: Network dependency removed to avoid circular dependency
                 // WeatherDataFetcher is injected via DI from app module
             }
         }
 
-        @Suppress("UNUSED_VARIABLE")
-        val androidUnitTest by getting
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
@@ -85,21 +87,6 @@ kotlin {
     }
 }
 
-android {
-    namespace = "bose.ankush.storage"
-    compileSdk = ConfigData.compileSdkVersion
-
-    defaultConfig {
-        minSdk = ConfigData.minSdkVersion
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
 ksp {
     arg("room.schemaLocation", "$projectDir/schemas")
 }
@@ -107,5 +94,5 @@ ksp {
 // KSP configuration for Room annotation processing (Hilt moved to app module)
 dependencies {
     // Room annotation processor
-    add("kspAndroid", Deps.roomCompiler)
+    add("kspAndroid", libs.androidx.room.compiler)
 }

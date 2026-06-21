@@ -1,11 +1,13 @@
 package bose.ankush.storage.api
 
+import bose.ankush.storage.model.AirQualityData
+import bose.ankush.storage.model.WeatherData
 import kotlinx.coroutines.flow.Flow
 
 interface WeatherStorage {
-    fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<Any?>
+    fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherData?>
 
-    fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<Any?>
+    fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQualityData?>
 
     suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long
 
@@ -15,8 +17,8 @@ interface WeatherStorage {
     )
 
     suspend fun saveWeatherData(
-        weatherEntity: Any,
-        airQualityEntity: Any,
+        weatherData: WeatherData,
+        airQualityData: AirQualityData,
     )
 
     suspend fun clearAllData()

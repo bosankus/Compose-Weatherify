@@ -49,9 +49,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Main ViewModel for Weatherify.
@@ -142,7 +143,7 @@ constructor(
     init {
         logger.d("MainViewModel initialized")
 
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.io) {
             var initialized = false
             authRepository.isLoggedIn().collectLatest { loggedIn ->
                 _isLoggedIn.value = loggedIn
@@ -157,7 +158,7 @@ constructor(
 
         // Reactively refresh weather data when premium tier changes (activation or expiry).
         // drop(1) skips the initial emission so we only react to actual changes.
-        viewModelScope.launch {
+        viewModelScope.launch(dispatchers.io) {
             preferenceManager
                 .getUserPreferencesFlow()
                 .map { it.isPremium }
@@ -171,7 +172,7 @@ constructor(
 
         viewModelScope.launch(dispatchers.io) {
             _queryFlow
-                .debounce(400L)
+                .debounce(500.milliseconds)
                 .filter { it.length >= MIN_QUERY_LENGTH }
                 .distinctUntilChanged()
                 .collect { query -> fetchPlaceSuggestions(query) }

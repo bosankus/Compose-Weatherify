@@ -1,25 +1,30 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("com.android.library")
-    kotlin("multiplatform")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("org.jetbrains.compose")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.compose.multiplatform)
 }
 
 kotlin {
-    androidTarget {
+    android {
+        namespace = "bose.ankush.commonui"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64(),
-    ).forEach {
-        it.binaries.framework {
+    // iosX64 (Intel simulator) dropped: Compose Multiplatform stopped publishing artifacts for it
+    // starting at 1.11.0, following Apple's deprecation of the x86_64 iOS Simulator.
+    iosArm64()
+    iosSimulatorArm64()
+
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        binaries.framework {
             baseName = "common_ui"
             isStatic = true
         }
@@ -40,47 +45,29 @@ kotlin {
                 // Location models (SavedLocation, PlaceSuggestion) and repositories for SavedLocationsScreen
                 implementation(project(":network"))
                 // Date/time utilities for KMP
-                implementation(KmmDeps.kotlinxDateTime)
+                implementation(libs.kotlinx.datetime)
             }
         }
 
-        @Suppress("UNUSED_VARIABLE")
         val androidMain by getting {
             dependencies {
-                implementation(KmmDeps.kotlinxCoroutinesCore)
+                implementation(libs.kotlinx.coroutines.core)
                 // BackHandler support for InAppWebView
-                implementation("androidx.activity:activity-compose:1.13.0")
+                implementation(libs.androidx.activity.compose)
             }
         }
 
-        val iosX64Main by getting
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-
-        @Suppress("UNUSED_VARIABLE")
         val iosMain by creating {
             dependsOn(commonMain)
-            iosX64Main.dependsOn(this)
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
         }
-    }
-}
 
-android {
-    namespace = "bose.ankush.commonui"
-    compileSdk = ConfigData.compileSdkVersion
-
-    defaultConfig {
-        minSdk = ConfigData.minSdkVersion
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    buildFeatures {
-        compose = true
+        @Suppress("UNUSED_VARIABLE")
+        val iosArm64Main by getting {
+            dependsOn(iosMain)
+        }
+        @Suppress("UNUSED_VARIABLE")
+        val iosSimulatorArm64Main by getting {
+            dependsOn(iosMain)
+        }
     }
 }

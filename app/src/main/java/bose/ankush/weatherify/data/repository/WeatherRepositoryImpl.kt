@@ -1,8 +1,6 @@
 package bose.ankush.weatherify.data.repository
 
 import bose.ankush.storage.api.WeatherStorage
-import bose.ankush.storage.room.AirQualityEntity
-import bose.ankush.storage.room.WeatherEntity
 import bose.ankush.weatherify.base.dispatcher.DispatcherProvider
 import bose.ankush.weatherify.data.mapper.AirQualityMapper
 import bose.ankush.weatherify.data.mapper.NetworkToStorageMapper
@@ -11,7 +9,6 @@ import bose.ankush.weatherify.domain.model.AirQuality
 import bose.ankush.weatherify.domain.model.WeatherForecast
 import bose.ankush.weatherify.domain.repository.WeatherRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -25,14 +22,12 @@ constructor(
     private val dispatcher: DispatcherProvider,
 ) : WeatherRepository {
     override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality> =
-        weatherStorage.getAirQualityReport(coordinates).map { entity ->
-            (entity as? AirQualityEntity)?.let { AirQualityMapper.mapToDomain(it) } ?: AirQuality()
+        weatherStorage.getAirQualityReport(coordinates).map { data ->
+            data?.let { AirQualityMapper.mapToDomain(it) } ?: AirQuality()
         }
 
     override fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherForecast?> =
-        weatherStorage.getWeatherReport(location).map { entity ->
-            (entity as? WeatherEntity)?.let { WeatherMapper.mapToDomain(it) }
-        }
+        weatherStorage.getWeatherReport(location).map { data -> WeatherMapper.mapToDomain(data) }
 
     /**
      * Orchestrates data refresh: fetch unified response from network → extract weather + air
@@ -51,18 +46,16 @@ constructor(
             val isDataStale = forceRefresh || (currentTime - lastUpdateTime) > ONE_HOUR_IN_MILLIS
 
             if (isDataStale) {
-                networkRepository.refreshWeatherData(coordinates)
-
-                val weatherData = networkRepository.getWeatherReport(coordinates).firstOrNull()
+                val weatherData = networkRepository.refreshWeatherData(coordinates)
 
                 if (weatherData != null) {
-                    val weatherEntity =
+                    val weatherStorageData =
                         NetworkToStorageMapper.mapWeatherToStorageEntity(weatherData)
-                    val airQualityEntity =
+                    val airQualityStorageData =
                         NetworkToStorageMapper.mapAirQualityToStorageEntity(
                             weatherData.data?.airQuality,
                         )
-                    weatherStorage.saveWeatherData(weatherEntity, airQualityEntity)
+                    weatherStorage.saveWeatherData(weatherStorageData, airQualityStorageData)
                     weatherStorage.saveLastWeatherUpdateTime(coordinates, currentTime)
                 }
             }

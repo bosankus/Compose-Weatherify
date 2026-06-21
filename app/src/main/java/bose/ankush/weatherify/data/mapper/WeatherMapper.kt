@@ -1,9 +1,9 @@
 package bose.ankush.weatherify.data.mapper
 
-import bose.ankush.storage.room.WeatherEntity
+import bose.ankush.storage.model.WeatherData
 import bose.ankush.weatherify.domain.model.WeatherCondition
 import bose.ankush.weatherify.domain.model.WeatherForecast
-import bose.ankush.storage.room.Weather as StorageWeather
+import bose.ankush.storage.model.WeatherCondition as StorageWeather
 
 object WeatherMapper {
     private fun mapStorageWeatherToDomain(weather: StorageWeather): WeatherCondition =
@@ -17,7 +17,7 @@ object WeatherMapper {
     private fun mapWeather(list: List<StorageWeather?>?) =
         list?.map { it?.let { w -> mapStorageWeatherToDomain(w) } }
 
-    private fun mapAlerts(alerts: List<WeatherEntity.Alert?>?) =
+    private fun mapAlerts(alerts: List<WeatherData.Alert?>?) =
         alerts?.map { alert ->
             alert?.let {
                 WeatherForecast.Alert(
@@ -30,7 +30,7 @@ object WeatherMapper {
             }
         }
 
-    private fun mapCurrent(current: WeatherEntity.Current?) =
+    private fun mapCurrent(current: WeatherData.Current?) =
         current?.let {
             WeatherForecast.Current(
                 clouds = it.clouds,
@@ -48,7 +48,7 @@ object WeatherMapper {
             )
         }
 
-    private fun mapDaily(daily: List<WeatherEntity.Daily?>?) =
+    private fun mapDaily(daily: List<WeatherData.Daily?>?) =
         daily?.map { item ->
             item?.let {
                 WeatherForecast.Daily(
@@ -75,7 +75,7 @@ object WeatherMapper {
             }
         }
 
-    private fun mapHourly(hourly: List<WeatherEntity.Hourly?>?) =
+    private fun mapHourly(hourly: List<WeatherData.Hourly?>?) =
         hourly?.map { item ->
             item?.let {
                 WeatherForecast.Hourly(
@@ -89,15 +89,15 @@ object WeatherMapper {
             }
         }
 
-    fun mapToDomain(entity: WeatherEntity?): WeatherForecast? {
-        if (entity == null) return null
+    fun mapToDomain(data: WeatherData?): WeatherForecast? {
+        if (data == null) return null
         return WeatherForecast(
-            id = entity.id,
-            alerts = mapAlerts(entity.alerts),
-            current = mapCurrent(entity.current),
-            daily = mapDaily(entity.daily),
-            hourly = mapHourly(entity.hourly),
-            lastUpdated = entity.lastUpdated,
+            id = data.id,
+            alerts = mapAlerts(data.alerts),
+            current = mapCurrent(data.current),
+            daily = mapDaily(data.daily),
+            hourly = mapHourly(data.hourly),
+            lastUpdated = data.lastUpdated,
         )
     }
 }

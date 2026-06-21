@@ -1,29 +1,23 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    dependencies {
-        classpath(BuildPlugins.buildGradle)
-        classpath(BuildPlugins.kotlinGradlePlugin)
-        classpath(BuildPlugins.googleServicePlugin)
-        classpath(BuildPlugins.composeMultiplatformPlugin)
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Plugin versions all come from gradle/libs.versions.toml — the single source of truth for every
+// dependency/plugin version across modules. No buildscript{} classpath block is needed: applying
+// plugins below via the version catalog is enough to put them on every subproject's classpath.
 plugins {
-    id("com.android.application") version Versions.buildGradle apply false
-    id("com.android.library") version Versions.buildGradle apply false
-    id("org.jetbrains.kotlin.android") version Versions.kotlin apply false
-    id("org.jetbrains.kotlin.multiplatform") version Versions.kotlin apply false
-    id("org.jetbrains.kotlin.plugin.serialization") version Versions.kotlin apply false
-    id("com.google.dagger.hilt.android") version Versions.hilt apply false
-    id("com.google.devtools.ksp") version Versions.ksp apply false
-    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin") version Versions.secretPlugin apply false
-    id("org.jlleitschuh.gradle.ktlint") version Versions.ktLintGradlePlugin apply false
-    id("com.diffplug.spotless") version Versions.spotlessVersion apply false
-    id("io.gitlab.arturbosch.detekt") version Versions.detekt apply false
-    id("com.github.ben-manes.versions") version Versions.benManes
-    id("org.jetbrains.kotlin.plugin.compose") version Versions.kotlin apply false
-    id("org.jetbrains.compose") version Versions.composeMultiplatform apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
+    alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.hilt.android) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.secrets.gradle.plugin) apply false
+    alias(libs.plugins.ktlint) apply false
+    alias(libs.plugins.spotless) apply false
+    alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.ben.manes.versions)
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.compose.multiplatform) apply false
+    alias(libs.plugins.google.services) apply false
 }
 
 tasks.named<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask>("dependencyUpdates").configure {
@@ -61,7 +55,7 @@ subprojects {
         kotlin {
             target("**/*.kt")
             targetExclude("**/build/**")
-            ktlint(Versions.ktLintCli).editorConfigOverride(
+            ktlint(libs.versions.ktlintCli.get()).editorConfigOverride(
                 mapOf(
                     "ktlint_code_style" to "ktlint_official",
                     "indent_size" to "4",
@@ -79,7 +73,7 @@ subprojects {
         }
         kotlinGradle {
             target("**/*.gradle.kts")
-            ktlint(Versions.ktLintCli)
+            ktlint(libs.versions.ktlintCli.get())
         }
     }
 }

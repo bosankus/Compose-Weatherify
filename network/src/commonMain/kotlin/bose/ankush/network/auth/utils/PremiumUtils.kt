@@ -1,6 +1,6 @@
 package bose.ankush.network.auth.utils
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.Instant
 
 /**

@@ -5,7 +5,7 @@ import bose.ankush.storage.api.TokenStorage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class TokenManager(
     private val tokenStorage: TokenStorage,

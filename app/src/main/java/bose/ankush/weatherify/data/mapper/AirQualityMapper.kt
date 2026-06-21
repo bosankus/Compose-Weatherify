@@ -1,10 +1,10 @@
 package bose.ankush.weatherify.data.mapper
 
 import bose.ankush.weatherify.domain.model.AirQuality
-import bose.ankush.storage.room.AirQualityEntity as StorageAirQualityEntity
+import bose.ankush.storage.model.AirQualityData as StorageAirQualityData
 
 object AirQualityMapper {
-    fun mapToDomain(entity: StorageAirQualityEntity): AirQuality =
+    fun mapToDomain(entity: StorageAirQualityData): AirQuality =
         AirQuality(
             id = entity.id,
             aqi = entity.aqi ?: 0,

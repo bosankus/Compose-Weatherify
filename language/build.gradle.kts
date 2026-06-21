@@ -1,15 +1,14 @@
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "bose.ankush.language"
-    compileSdk = ConfigData.compileSdkVersion
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = ConfigData.minSdkVersion
+        minSdk = libs.versions.minSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -46,26 +45,23 @@ android {
     }
 }
 
-composeCompiler {
-    featureFlags.add(org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag.StrongSkipping)
-}
-
 dependencies {
     // Testing
-    testImplementation(Deps.junit)
+    testImplementation(libs.junit)
 
     // UI Testing
-    androidTestImplementation(Deps.extJunit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 
     // Core
-    implementation(Deps.androidCore)
-    implementation(Deps.appCompat)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
 
     // Compose
-    implementation(platform(Deps.composeBom))
-    implementation(Deps.composeUiTooling)
-    implementation(Deps.composeUiToolingPreview)
-    implementation(Deps.composeUi)
-    implementation(Deps.composeMaterial1)
-    implementation(Deps.composeMaterial3)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.core)
 }

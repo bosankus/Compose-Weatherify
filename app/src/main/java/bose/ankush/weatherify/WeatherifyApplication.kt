@@ -21,7 +21,7 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
     lateinit var remoteConfigService: RemoteConfigService
 
     override fun onCreate() {
-        super.onCreate() // Hilt initializes here — EntryPointAccessors is safe after this call
+        super.onCreate()
         initKoin()
         enableTimber()
         initializeFirebase()

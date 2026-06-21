@@ -1,8 +1,8 @@
 package bose.ankush.weatherify.data.mapper
 
-import bose.ankush.storage.room.AirQualityEntity
-import bose.ankush.storage.room.Weather
-import bose.ankush.storage.room.WeatherEntity
+import bose.ankush.storage.model.AirQualityData
+import bose.ankush.storage.model.WeatherCondition
+import bose.ankush.storage.model.WeatherData
 import bose.ankush.network.model.AirQuality as NetworkAirQuality
 import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
 
@@ -11,7 +11,7 @@ object NetworkToStorageMapper {
     private fun mapWeatherInfo(list: List<NetworkWeatherForecast.Data.WeatherInfo?>?) =
         list?.mapNotNull { info ->
             info?.let {
-                Weather(
+                WeatherCondition(
                     description = it.description,
                     icon = it.icon,
                     id = it.id,
@@ -20,10 +20,10 @@ object NetworkToStorageMapper {
             }
         }
 
-    private fun mapCurrentToEntity(
+    private fun mapCurrentToData(
         current: NetworkWeatherForecast.Data.Current?,
     ) = current?.let {
-        WeatherEntity.Current(
+        WeatherData.Current(
             clouds = it.clouds,
             dt = it.dt,
             feels_like = it.feelsLike,
@@ -39,11 +39,11 @@ object NetworkToStorageMapper {
         )
     }
 
-    private fun mapDailyToEntity(
+    private fun mapDailyToData(
         daily: List<NetworkWeatherForecast.Data.Daily?>?,
     ) = daily?.map { item ->
         item?.let {
-            WeatherEntity.Daily(
+            WeatherData.Daily(
                 clouds = it.clouds,
                 dew_point = it.dewPoint,
                 dt = it.dt,
@@ -54,7 +54,7 @@ object NetworkToStorageMapper {
                 sunrise = it.sunrise,
                 sunset = it.sunset,
                 temp = it.temp?.let { t ->
-                    WeatherEntity.Daily.Temp(
+                    WeatherData.Daily.Temp(
                         day = t.day, eve = t.eve, max = t.max,
                         min = t.min, morn = t.morn, night = t.night,
                     )
@@ -67,11 +67,11 @@ object NetworkToStorageMapper {
         }
     }
 
-    private fun mapHourlyToEntity(
+    private fun mapHourlyToData(
         hourly: List<NetworkWeatherForecast.Data.Hourly?>?,
     ) = hourly?.map { item ->
         item?.let {
-            WeatherEntity.Hourly(
+            WeatherData.Hourly(
                 clouds = it.clouds,
                 dt = it.dt,
                 feels_like = it.feelsLike,
@@ -82,11 +82,11 @@ object NetworkToStorageMapper {
         }
     }
 
-    private fun mapAlertsToEntity(
+    private fun mapAlertsToData(
         alerts: List<NetworkWeatherForecast.Data.Alert?>?,
     ) = alerts?.mapNotNull { alert ->
         alert?.let {
-            WeatherEntity.Alert(
+            WeatherData.Alert(
                 description = it.description,
                 end = it.end,
                 event = it.event,
@@ -96,26 +96,26 @@ object NetworkToStorageMapper {
         }
     } ?: emptyList()
 
-    fun mapWeatherToStorageEntity(weatherData: NetworkWeatherForecast): WeatherEntity {
+    fun mapWeatherToStorageEntity(weatherData: NetworkWeatherForecast): WeatherData {
         val data = weatherData.data
-        return WeatherEntity(
+        return WeatherData(
             id = 0,
             lastUpdated = System.currentTimeMillis(),
-            current = mapCurrentToEntity(data?.current),
-            daily = mapDailyToEntity(data?.daily),
-            hourly = mapHourlyToEntity(data?.hourly),
-            alerts = mapAlertsToEntity(data?.alerts),
+            current = mapCurrentToData(data?.current),
+            daily = mapDailyToData(data?.daily),
+            hourly = mapHourlyToData(data?.hourly),
+            alerts = mapAlertsToData(data?.alerts),
         )
     }
 
     /**
-     * Maps the air quality data embedded in the unified weather response to AirQualityEntity.
+     * Maps the air quality data embedded in the unified weather response to AirQualityData.
      * When [airQualityData] is null (free tier — air quality not included), stores a default
      * entity so existing storage contracts are preserved.
      */
-    fun mapAirQualityToStorageEntity(airQualityData: NetworkAirQuality.Data?): AirQualityEntity {
+    fun mapAirQualityToStorageEntity(airQualityData: NetworkAirQuality.Data?): AirQualityData {
         val entry = airQualityData?.list?.firstOrNull()
-        return AirQualityEntity(
+        return AirQualityData(
             id = null,
             aqi = entry?.main?.aqi,
             co = entry?.components?.co,

@@ -12,6 +12,6 @@ fun rememberLanguageScreenStrings(): LanguageScreenStrings {
         screenTitle = stringResource(R.string.language_screen_title),
         screenSubtitle = stringResource(R.string.language_screen_subtitle),
         navigateBack = stringResource(R.string.language_navigate_back),
-        languageSelected = { language -> languageSelectedTemplate.replace("%s", language) },
+        languageSelected = { language -> languageSelectedTemplate.format(language) },
     )
 }

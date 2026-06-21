@@ -37,8 +37,6 @@
     <string name="default_city" translatable="false">Kolkata</string>
     <string name="go_back">Go back</string>
     <string name="got_it">Got it</string>
-    <string name="got_it_colored">This is a new change to be connect with {brand}</string>
-    <string name="got_it_colored">This is a second new fine ness to be connected with {brand}</string>
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">Unauthorised access, Please log in!</string>
