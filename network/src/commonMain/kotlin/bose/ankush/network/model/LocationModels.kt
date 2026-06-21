@@ -38,6 +38,7 @@ private object ObjectIdAsStringSerializer : KSerializer<String> {
  */
 @Serializable
 data class SavedLocation(
+    @SerialName("_id")
     @Serializable(with = ObjectIdAsStringSerializer::class)
     val id: String = "",
     val userEmail: String = "",

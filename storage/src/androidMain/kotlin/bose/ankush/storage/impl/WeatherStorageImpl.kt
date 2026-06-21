@@ -11,6 +11,8 @@ import bose.ankush.storage.room.WeatherEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 class WeatherStorageImpl(
@@ -19,6 +21,7 @@ class WeatherStorageImpl(
     // In-memory per-location timestamp map. Keyed by "lat_lon" string.
     // Reset on process restart intentionally — fresh data should be fetched after a cold start.
     private val locationTimestamps = mutableMapOf<String, Long>()
+    private val timestampsMutex = Mutex()
 
     private fun locationKey(coordinates: Pair<Double, Double>) =
         "${coordinates.first}_${coordinates.second}"
@@ -30,13 +33,13 @@ class WeatherStorageImpl(
         weatherDatabase.weatherDao().getAirQuality().map { it?.toAirQualityData() }
 
     override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long =
-        locationTimestamps[locationKey(coordinates)] ?: 0L
+        timestampsMutex.withLock { locationTimestamps[locationKey(coordinates)] ?: 0L }
 
     override suspend fun saveLastWeatherUpdateTime(
         coordinates: Pair<Double, Double>,
         time: Long,
     ) {
-        locationTimestamps[locationKey(coordinates)] = time
+        timestampsMutex.withLock { locationTimestamps[locationKey(coordinates)] = time }
     }
 
     override suspend fun saveWeatherData(
@@ -55,7 +58,7 @@ class WeatherStorageImpl(
         withContext(Dispatchers.IO) {
             weatherDatabase.weatherDao().clearAll()
         }
-        locationTimestamps.clear()
+        timestampsMutex.withLock { locationTimestamps.clear() }
     }
 
     private fun List<Weather?>?.toWeatherConditions() =

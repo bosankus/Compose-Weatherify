@@ -2,6 +2,7 @@ package bose.ankush.network.repository
 
 import bose.ankush.network.api.WeatherApiService
 import bose.ankush.network.common.NetworkConnectivity
+import bose.ankush.network.common.NetworkException
 import bose.ankush.network.model.WeatherForecast
 import bose.ankush.network.utils.NetworkUtils
 
@@ -9,18 +10,30 @@ class WeatherRepositoryImpl(
     private val apiService: WeatherApiService,
     private val networkConnectivity: NetworkConnectivity,
 ) : WeatherRepository {
-    override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>): WeatherForecast? {
-        if (!networkConnectivity.isNetworkAvailable()) return null
+    override suspend fun refreshWeatherData(
+        coordinates: Pair<Double, Double>,
+    ): Result<WeatherForecast?> {
+        if (!networkConnectivity.isNetworkAvailable()) {
+            return Result.failure(
+                NetworkException(
+                    NetworkException.NETWORK_UNAVAILABLE,
+                    "No internet connection available",
+                ),
+            )
+        }
 
         return try {
-            NetworkUtils.retryWithExponentialBackoff {
-                apiService.getOneCallWeather(
-                    coordinates.first.toString(),
-                    coordinates.second.toString(),
-                )
-            }
+            Result.success(
+                NetworkUtils.retryWithExponentialBackoff {
+                    apiService.getOneCallWeather(
+                        coordinates.first.toString(),
+                        coordinates.second.toString(),
+                    )
+                },
+            )
         } catch (e: Exception) {
-            throw Exception("Network | Failed to refresh weather data: ${e.message}", e)
+            // retryWithExponentialBackoff already normalizes failures to NetworkException.
+            Result.failure(e)
         }
     }
 }
