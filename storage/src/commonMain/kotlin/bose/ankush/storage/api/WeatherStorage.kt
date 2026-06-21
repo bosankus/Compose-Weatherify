@@ -1,42 +1,25 @@
 package bose.ankush.storage.api
 
+import bose.ankush.storage.model.AirQualityData
+import bose.ankush.storage.model.WeatherData
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Interface for weather data storage operations.
- * 
- * This interface defines the contract for storing and retrieving weather and air quality data.
- * It abstracts the underlying storage mechanism (e.g., Room database) from the rest of the application.
- * Implementations of this interface are responsible for:
- * - Retrieving weather and air quality data
- * - Refreshing data from the network
- * - Tracking the last update time
- */
 interface WeatherStorage {
-    /**
-     * Get weather forecast data for a location
-     * @param coordinates Pair of latitude and longitude
-     * @return Flow of weather forecast data
-     */
-    fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<Any?>
+    fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherData?>
 
-    /**
-     * Get air quality data for a location
-     * @param coordinates Pair of latitude and longitude
-     * @return Flow of air quality data
-     */
-    fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<Any?>
+    fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQualityData?>
 
-    /**
-     * Refresh weather data from the network and store it
-     * @param coordinates Pair of latitude and longitude
-     * @throws Exception if there's an error refreshing the data
-     */
-    suspend fun refreshWeatherData(coordinates: Pair<Double, Double>)
+    suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long
 
-    /**
-     * Get the timestamp of the last weather data update
-     * @return Timestamp in milliseconds
-     */
-    suspend fun getLastWeatherUpdateTime(): Long
+    suspend fun saveLastWeatherUpdateTime(
+        coordinates: Pair<Double, Double>,
+        time: Long,
+    )
+
+    suspend fun saveWeatherData(
+        weatherData: WeatherData,
+        airQualityData: AirQualityData,
+    )
+
+    suspend fun clearAllData()
 }

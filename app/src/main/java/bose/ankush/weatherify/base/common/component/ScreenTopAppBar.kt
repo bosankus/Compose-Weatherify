@@ -28,7 +28,7 @@ fun ScreenTopAppBar(
                 text = stringResource(id = headlineId),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 16.dp),
             )
         },
         navigationIcon = {
@@ -36,11 +36,12 @@ fun ScreenTopAppBar(
                 painter = painterResource(id = R.drawable.ic_back),
                 tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = stringResource(id = R.string.close_icon_content),
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable { navIconAction.invoke() }
-                    .padding(all = 3.dp)
+                modifier =
+                    Modifier
+                        .clip(CircleShape)
+                        .clickable { navIconAction() }
+                        .padding(all = 3.dp),
             )
-        }
+        },
     )
 }

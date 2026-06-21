@@ -1,137 +1,156 @@
 package bose.ankush.storage.impl
 
-import bose.ankush.network.model.AirQuality as NetworkAirQuality
-import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
-import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 import bose.ankush.storage.api.WeatherStorage
+import bose.ankush.storage.model.AirQualityData
+import bose.ankush.storage.model.WeatherCondition
+import bose.ankush.storage.model.WeatherData
 import bose.ankush.storage.room.AirQualityEntity
 import bose.ankush.storage.room.Weather
 import bose.ankush.storage.room.WeatherDatabase
 import bose.ankush.storage.room.WeatherEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
-import java.io.IOException
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
-/**
- * Implementation of WeatherStorage that uses Room database for storage
- * and the network module for fetching data.
- * 
- * This class is responsible for:
- * - Retrieving weather and air quality data from the local database
- * - Refreshing data from the network when needed
- * - Mapping between network models and database entities
- * - Tracking the last update time for weather data
- */
-@Singleton
-class WeatherStorageImpl @Inject constructor(
-    private val networkRepository: NetworkWeatherRepository,
-    private val weatherDatabase: WeatherDatabase
+class WeatherStorageImpl(
+    private val weatherDatabase: WeatherDatabase,
 ) : WeatherStorage {
+    // In-memory per-location timestamp map. Keyed by "lat_lon" string.
+    // Reset on process restart intentionally — fresh data should be fetched after a cold start.
+    private val locationTimestamps = mutableMapOf<String, Long>()
 
-    /**
-     * Gets the latest weather report from the local database
-     * @param coordinates Pair of latitude and longitude (not used in current implementation)
-     * @return Flow of WeatherEntity as Any?
-     */
-    override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<Any?> {
-        return weatherDatabase.weatherDao().getWeather()
+    private fun locationKey(coordinates: Pair<Double, Double>) =
+        "${coordinates.first}_${coordinates.second}"
+
+    override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherData?> =
+        weatherDatabase.weatherDao().getWeather().map { it?.toWeatherData() }
+
+    override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQualityData?> =
+        weatherDatabase.weatherDao().getAirQuality().map { it?.toAirQualityData() }
+
+    override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long =
+        locationTimestamps[locationKey(coordinates)] ?: 0L
+
+    override suspend fun saveLastWeatherUpdateTime(
+        coordinates: Pair<Double, Double>,
+        time: Long,
+    ) {
+        locationTimestamps[locationKey(coordinates)] = time
     }
 
-    /**
-     * Gets the latest air quality report from the local database
-     * @param coordinates Pair of latitude and longitude (not used in current implementation)
-     * @return Flow of AirQualityEntity as Any?
-     */
-    override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<Any?> {
-        return weatherDatabase.weatherDao().getAirQuality()
-    }
-
-    /**
-     * Refreshes weather and air quality data from the network and stores it in the local database
-     * @param coordinates Pair of latitude and longitude
-     * @throws IOException if there's an error refreshing the data
-     */
-    override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>) {
-        try {
-            // Delegate to the network module's repository to refresh data
-            networkRepository.refreshWeatherData(coordinates)
-
-            // Get the latest data from the network repository
-            val weatherData = networkRepository.getWeatherReport(coordinates).firstOrNull()
-            val airQualityData = networkRepository.getAirQualityReport(coordinates).firstOrNull()
-
-            if (weatherData != null && airQualityData != null) {
-                // Convert network models to storage entities
-                val weatherEntity = mapNetworkWeatherToEntity(weatherData)
-                val airQualityEntity = mapNetworkAirQualityToEntity(airQualityData)
-
-                // Store the data in room db
-                weatherDatabase.weatherDao().refreshWeather(weatherEntity, airQualityEntity)
-            }
-        } catch (e: Exception) {
-            // If there's an error, throw a more specific IOException with detailed information
-            throw IOException("Failed to refresh weather data for coordinates (${coordinates.first}, ${coordinates.second}): ${e.message}", e)
+    override suspend fun saveWeatherData(
+        weatherData: WeatherData,
+        airQualityData: AirQualityData,
+    ) {
+        withContext(Dispatchers.IO) {
+            weatherDatabase.weatherDao().refreshWeather(
+                weatherData.toWeatherEntity(),
+                airQualityData.toAirQualityEntity(),
+            )
         }
     }
 
-    /**
-     * Gets the timestamp of the last weather data update
-     * @return Timestamp in milliseconds, or 0 if no data is available
-     */
-    override suspend fun getLastWeatherUpdateTime(): Long {
-        val weatherEntity = weatherDatabase.weatherDao().getWeather().firstOrNull()
-        return weatherEntity?.lastUpdated ?: 0L
+    override suspend fun clearAllData() {
+        withContext(Dispatchers.IO) {
+            weatherDatabase.weatherDao().clearAll()
+        }
+        locationTimestamps.clear()
     }
 
-    /**
-     * Maps a NetworkWeatherForecast to a WeatherEntity for storage in the database
-     * @param weatherData The network model to map
-     * @return A WeatherEntity with all fields mapped from the network model
-     */
-    private fun mapNetworkWeatherToEntity(weatherData: NetworkWeatherForecast): WeatherEntity {
-        return WeatherEntity(
-            id = 0, // Room will auto-generate this
-            lastUpdated = System.currentTimeMillis(),
-            alerts = weatherData.alerts?.map { alert ->
-                alert?.let {
-                    WeatherEntity.Alert(
-                        description = it.description,
-                        end = it.end,
-                        event = it.event,
-                        sender_name = it.sender_name,
-                        start = it.start
+    private fun List<Weather?>?.toWeatherConditions() =
+        this?.map { it?.let { w -> WeatherCondition(w.description, w.icon, w.id, w.main) } }
+
+    private fun List<WeatherCondition?>?.toStorageWeather() =
+        this?.map { it?.let { w -> Weather(w.description, w.icon, w.id, w.main) } }
+
+    private fun WeatherEntity.toWeatherData() =
+        WeatherData(
+            id = id,
+            alerts = alerts?.map {
+                it?.let { a ->
+                    WeatherData.Alert(a.description, a.end, a.event, a.sender_name, a.start)
+                }
+            },
+            current = current?.let {
+                WeatherData.Current(
+                    clouds = it.clouds,
+                    dt = it.dt,
+                    feels_like = it.feels_like,
+                    humidity = it.humidity,
+                    pressure = it.pressure,
+                    sunrise = it.sunrise,
+                    sunset = it.sunset,
+                    temp = it.temp,
+                    uvi = it.uvi,
+                    weather = it.weather.toWeatherConditions(),
+                    wind_gust = it.wind_gust,
+                    wind_speed = it.wind_speed,
+                )
+            },
+            daily = daily?.map { item ->
+                item?.let {
+                    WeatherData.Daily(
+                        clouds = it.clouds,
+                        dew_point = it.dew_point,
+                        dt = it.dt,
+                        humidity = it.humidity,
+                        pressure = it.pressure,
+                        rain = it.rain,
+                        summary = it.summary,
+                        sunrise = it.sunrise,
+                        sunset = it.sunset,
+                        temp = it.temp?.let { t ->
+                            WeatherData.Daily.Temp(t.day, t.eve, t.max, t.min, t.morn, t.night)
+                        },
+                        uvi = it.uvi,
+                        weather = it.weather.toWeatherConditions(),
+                        wind_gust = it.wind_gust,
+                        wind_speed = it.wind_speed,
                     )
                 }
             },
-            current = weatherData.current?.let { current ->
+            hourly = hourly?.map { item ->
+                item?.let {
+                    WeatherData.Hourly(
+                        clouds = it.clouds,
+                        dt = it.dt,
+                        feels_like = it.feels_like,
+                        humidity = it.humidity,
+                        temp = it.temp,
+                        weather = it.weather.toWeatherConditions(),
+                    )
+                }
+            },
+            lastUpdated = lastUpdated,
+        )
+
+    private fun WeatherData.toWeatherEntity() =
+        WeatherEntity(
+            id = id,
+            alerts = alerts?.map {
+                it?.let { a ->
+                    WeatherEntity.Alert(a.description, a.end, a.event, a.sender_name, a.start)
+                }
+            },
+            current = current?.let {
                 WeatherEntity.Current(
-                    clouds = current.clouds,
-                    dt = current.dt,
-                    feels_like = current.feels_like,
-                    humidity = current.humidity,
-                    pressure = current.pressure,
-                    sunrise = current.sunrise,
-                    sunset = current.sunset,
-                    temp = current.temp,
-                    uvi = current.uvi,
-                    weather = current.weather?.map { weatherCondition ->
-                        weatherCondition?.let {
-                            Weather(
-                                description = it.description,
-                                icon = it.icon,
-                                id = it.id,
-                                main = it.main
-                            )
-                        }
-                    },
-                    wind_gust = current.wind_gust,
-                    wind_speed = current.wind_speed
+                    clouds = it.clouds,
+                    dt = it.dt,
+                    feels_like = it.feels_like,
+                    humidity = it.humidity,
+                    pressure = it.pressure,
+                    sunrise = it.sunrise,
+                    sunset = it.sunset,
+                    temp = it.temp,
+                    uvi = it.uvi,
+                    weather = it.weather.toStorageWeather(),
+                    wind_gust = it.wind_gust,
+                    wind_speed = it.wind_speed,
                 )
             },
-            daily = weatherData.daily?.map { daily ->
-                daily?.let {
+            daily = daily?.map { item ->
+                item?.let {
                     WeatherEntity.Daily(
                         clouds = it.clouds,
                         dew_point = it.dew_point,
@@ -142,71 +161,34 @@ class WeatherStorageImpl @Inject constructor(
                         summary = it.summary,
                         sunrise = it.sunrise,
                         sunset = it.sunset,
-                        temp = it.temp?.let { temp ->
-                            WeatherEntity.Daily.Temp(
-                                day = temp.day,
-                                eve = temp.eve,
-                                max = temp.max,
-                                min = temp.min,
-                                morn = temp.morn,
-                                night = temp.night
-                            )
+                        temp = it.temp?.let { t ->
+                            WeatherEntity.Daily.Temp(t.day, t.eve, t.max, t.min, t.morn, t.night)
                         },
                         uvi = it.uvi,
-                        weather = it.weather?.map { weatherCondition ->
-                            weatherCondition?.let {
-                                Weather(
-                                    description = it.description,
-                                    icon = it.icon,
-                                    id = it.id,
-                                    main = it.main
-                                )
-                            }
-                        },
+                        weather = it.weather.toStorageWeather(),
                         wind_gust = it.wind_gust,
-                        wind_speed = it.wind_speed
+                        wind_speed = it.wind_speed,
                     )
                 }
             },
-            hourly = weatherData.hourly?.map { hourly ->
-                hourly?.let {
+            hourly = hourly?.map { item ->
+                item?.let {
                     WeatherEntity.Hourly(
                         clouds = it.clouds,
                         dt = it.dt,
                         feels_like = it.feels_like,
                         humidity = it.humidity,
                         temp = it.temp,
-                        weather = it.weather?.map { weatherCondition ->
-                            weatherCondition?.let {
-                                Weather(
-                                    description = it.description,
-                                    icon = it.icon,
-                                    id = it.id,
-                                    main = it.main
-                                )
-                            }
-                        }
+                        weather = it.weather.toStorageWeather(),
                     )
                 }
-            }
+            },
+            lastUpdated = lastUpdated,
         )
-    }
 
-    /**
-     * Maps a NetworkAirQuality to an AirQualityEntity for storage in the database
-     * @param airQualityData The network model to map
-     * @return An AirQualityEntity with all fields mapped from the network model
-     */
-    private fun mapNetworkAirQualityToEntity(airQualityData: NetworkAirQuality): AirQualityEntity {
-        return AirQualityEntity(
-            id = null, // Room will auto-generate this
-            aqi = airQualityData.aqi,
-            co = airQualityData.co,
-            no2 = airQualityData.no2,
-            o3 = airQualityData.o3,
-            so2 = airQualityData.so2,
-            pm10 = airQualityData.pm10,
-            pm25 = airQualityData.pm25
-        )
-    }
+    private fun AirQualityEntity.toAirQualityData() =
+        AirQualityData(id, aqi, co, no2, o3, so2, pm10, pm25)
+
+    private fun AirQualityData.toAirQualityEntity() =
+        AirQualityEntity(id, aqi, co, no2, o3, so2, pm10, pm25)
 }

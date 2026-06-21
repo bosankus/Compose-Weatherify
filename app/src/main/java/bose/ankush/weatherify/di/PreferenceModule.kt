@@ -8,19 +8,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Module for providing preference-related dependencies
- */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class PreferenceModule {
-
-    /**
-     * Binds PreferenceManagerImpl to PreferenceManager interface
-     */
+    @Suppress("unused")
     @Binds
     @Singleton
-    abstract fun bindPreferenceManager(
-        preferenceManagerImpl: PreferenceManagerImpl
-    ): PreferenceManager
+    abstract fun bindPreferenceManager(preferenceManagerImpl: PreferenceManagerImpl): PreferenceManager
 }

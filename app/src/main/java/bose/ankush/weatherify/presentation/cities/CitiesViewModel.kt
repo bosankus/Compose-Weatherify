@@ -6,14 +6,24 @@ import bose.ankush.weatherify.domain.model.CityName
 import bose.ankush.weatherify.domain.use_case.get_cities.GetCityNames
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-@HiltViewModel
-class CitiesViewModel @Inject constructor(
-    getCityNames: GetCityNames
-) : ViewModel() {
+private const val SEARCH_DEBOUNCE_MS = 500L
 
+@HiltViewModel
+class CitiesViewModel
+@Inject
+constructor(
+    getCityNames: GetCityNames,
+) : ViewModel() {
     var searchText = MutableStateFlow("")
         private set
 
@@ -23,19 +33,22 @@ class CitiesViewModel @Inject constructor(
     private val cityNameList = MutableStateFlow(getCityNames())
 
     @OptIn(FlowPreview::class)
-    val cityName: StateFlow<List<CityName>> = searchText
-        .debounce(500L)
-        .onEach { isSearching.update { true } }
-        .combine(cityNameList) { text, city ->
-            if (text.isBlank()) city
-            else city.filter { it.doesMatchSearchQuery(text) }
-        }
-        .onEach { isSearching.update { false } }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            cityNameList.value
-        )
+    val cityName: StateFlow<List<CityName>> =
+        searchText
+            .debounce(SEARCH_DEBOUNCE_MS)
+            .onEach { isSearching.update { true } }
+            .combine(cityNameList) { text, city ->
+                if (text.isBlank()) {
+                    city
+                } else {
+                    city.filter { it.doesMatchSearchQuery(text) }
+                }
+            }.onEach { isSearching.update { false } }
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                cityNameList.value,
+            )
 
     fun onSearchTextChange(text: String) {
         searchText.value = text

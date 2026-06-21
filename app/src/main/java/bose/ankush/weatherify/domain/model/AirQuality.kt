@@ -1,8 +1,5 @@
 package bose.ankush.weatherify.domain.model
 
-/**
- * Domain model for air quality data
- */
 data class AirQuality(
     val id: Long? = null,
     val aqi: Int = 0,

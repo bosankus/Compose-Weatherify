@@ -1,79 +1,152 @@
 package bose.ankush.network.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * Domain model for weather forecast data
- */
 @Serializable
 data class WeatherForecast(
-    val id: Long = 0, // Default value to handle missing id in API response
-    val alerts: List<Alert?>? = listOf(),
-    val current: Current? = null,
-    val daily: List<Daily?>? = listOf(),
-    val hourly: List<Hourly?>? = listOf(),
-    val lastUpdated: Long = 0,
+    @SerialName("data")
+    val `data`: Data?,
+    @SerialName("message")
+    val message: String?,
+    @SerialName("status")
+    val status: Boolean?,
 ) {
     @Serializable
-    data class Alert(
-        val description: String? = null,
-        val end: Int? = null,
-        val event: String? = null,
-        val sender_name: String? = null,
-        val start: Int? = null,
-    )
-
-    @Serializable
-    data class Current(
-        val clouds: Int? = null,
-        val dt: Long? = null,
-        val feels_like: Double? = null,
-        val humidity: Int? = null,
-        val pressure: Int? = null,
-        val sunrise: Int? = null,
-        val sunset: Int? = null,
-        val temp: Double? = null,
-        val uvi: Double? = null,
-        val weather: List<WeatherCondition?>? = listOf(),
-        val wind_gust: Double? = null,
-        val wind_speed: Double? = null
-    )
-
-    @Serializable
-    data class Daily(
-        val clouds: Int? = null,
-        val dew_point: Double? = null,
-        val dt: Long? = null,
-        val humidity: Int? = null,
-        val pressure: Int? = null,
-        val rain: Double? = null,
-        val summary: String? = null,
-        val sunrise: Int? = null,
-        val sunset: Int? = null,
-        val temp: Temp? = null,
-        val uvi: Double? = null,
-        val weather: List<WeatherCondition?>? = listOf(),
-        val wind_gust: Double? = null,
-        val wind_speed: Double? = null
+    data class Data(
+        @SerialName("alerts")
+        val alerts: List<Alert?>? = null,
+        @SerialName("current")
+        val current: Current?,
+        @SerialName("daily")
+        val daily: List<Daily?>?,
+        @SerialName("hourly")
+        val hourly: List<Hourly?>?,
+        @SerialName("airQuality")
+        val airQuality: AirQuality.Data? = null,
+        @SerialName("entitlements")
+        val entitlements: Entitlements? = null,
     ) {
         @Serializable
-        data class Temp(
-            val day: Double? = null,
-            val eve: Double? = null,
-            val max: Double? = null,
-            val min: Double? = null,
-            val morn: Double? = null,
-            val night: Double? = null
+        data class WeatherInfo(
+            @SerialName("description")
+            val description: String = "",
+            @SerialName("icon")
+            val icon: String = "",
+            @SerialName("id")
+            val id: Int = 0,
+            @SerialName("main")
+            val main: String = "",
+        )
+
+        @Serializable
+        data class Alert(
+            val description: String?,
+            val end: Long?,
+            val event: String?,
+            @SerialName("senderName") val senderName: String?,
+            val start: Long?,
+        )
+
+        @Serializable
+        data class Current(
+            @SerialName("clouds")
+            val clouds: Int? = null,
+            @SerialName("dt")
+            val dt: Long? = null,
+            @SerialName("feelsLike")
+            val feelsLike: Double? = null,
+            @SerialName("humidity")
+            val humidity: Int? = null,
+            @SerialName("pressure")
+            val pressure: Int? = null,
+            @SerialName("sunrise")
+            val sunrise: Long? = null,
+            @SerialName("sunset")
+            val sunset: Long? = null,
+            @SerialName("temp")
+            val temp: Double? = null,
+            @SerialName("uvi")
+            val uvi: Double? = null,
+            @SerialName("weather")
+            val weather: List<WeatherInfo?>? = null,
+            @SerialName("windGust")
+            val windGust: Double? = null,
+            @SerialName("windSpeed")
+            val windSpeed: Double? = null,
+        )
+
+        @Serializable
+        data class Daily(
+            @SerialName("clouds")
+            val clouds: Int? = null,
+            @SerialName("dewPoint")
+            val dewPoint: Double? = null,
+            @SerialName("dt")
+            val dt: Long? = null,
+            @SerialName("humidity")
+            val humidity: Int? = null,
+            @SerialName("pressure")
+            val pressure: Int? = null,
+            @SerialName("rain")
+            val rain: Double? = null,
+            @SerialName("summary")
+            val summary: String? = null,
+            @SerialName("sunrise")
+            val sunrise: Long? = null,
+            @SerialName("sunset")
+            val sunset: Long? = null,
+            @SerialName("temp")
+            val temp: Temp? = null,
+            @SerialName("uvi")
+            val uvi: Double? = null,
+            @SerialName("weather")
+            val weather: List<WeatherInfo?>? = null,
+            @SerialName("windGust")
+            val windGust: Double? = null,
+            @SerialName("windSpeed")
+            val windSpeed: Double? = null,
+        ) {
+            @Serializable
+            data class Temp(
+                @SerialName("day")
+                val day: Double?,
+                @SerialName("eve")
+                val eve: Double?,
+                @SerialName("max")
+                val max: Double?,
+                @SerialName("min")
+                val min: Double?,
+                @SerialName("morn")
+                val morn: Double?,
+                @SerialName("night")
+                val night: Double?,
+            )
+        }
+
+        @Serializable
+        data class Hourly(
+            @SerialName("clouds")
+            val clouds: Int? = null,
+            @SerialName("dt")
+            val dt: Long? = null,
+            @SerialName("feelsLike")
+            val feelsLike: Double? = null,
+            @SerialName("humidity")
+            val humidity: Int? = null,
+            @SerialName("temp")
+            val temp: Double? = null,
+            @SerialName("weather")
+            val weather: List<WeatherInfo?>? = null,
+        )
+
+        @Serializable
+        data class Entitlements(
+            val hourlyIncluded: Boolean = false,
+            val dailyIncluded: Boolean = false,
+            val alertsIncluded: Boolean = false,
+            val airQualityIncluded: Boolean = false,
+            val upgradeRequired: Boolean = true,
         )
     }
-
-    @Serializable
-    data class Hourly(
-        val clouds: Int? = null,
-        val dt: Long? = null,
-        val feels_like: Double? = null,
-        val humidity: Int? = null,
-        val temp: Double? = null,
-        val weather: List<WeatherCondition?>? = listOf(),
-    )
 }

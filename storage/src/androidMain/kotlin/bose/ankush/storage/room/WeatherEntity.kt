@@ -14,14 +14,14 @@ data class WeatherEntity(
     @Embedded val current: Current? = null,
     @field:TypeConverters(WeatherDataModelConverters::class) val daily: List<Daily?>? = listOf(),
     @field:TypeConverters(WeatherDataModelConverters::class) val hourly: List<Hourly?>? = listOf(),
-    @ColumnInfo(defaultValue = "0") val lastUpdated: Long = System.currentTimeMillis()
+    @ColumnInfo(defaultValue = "0") val lastUpdated: Long = System.currentTimeMillis(),
 ) {
     data class Alert(
         val description: String?,
-        val end: Int?,
+        val end: Long?,
         val event: String?,
         val sender_name: String?,
-        val start: Int?
+        val start: Long?,
     )
 
     data class Current(
@@ -30,13 +30,13 @@ data class WeatherEntity(
         val feels_like: Double?,
         val humidity: Int?,
         val pressure: Int?,
-        val sunrise: Int?,
-        val sunset: Int?,
+        val sunrise: Long?,
+        val sunset: Long?,
         val temp: Double?,
         val uvi: Double?,
         @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
         val wind_gust: Double?,
-        val wind_speed: Double?
+        val wind_speed: Double?,
     )
 
     data class Daily(
@@ -47,13 +47,13 @@ data class WeatherEntity(
         val pressure: Int?,
         val rain: Double?,
         val summary: String?,
-        val sunrise: Int?,
-        val sunset: Int?,
+        val sunrise: Long?,
+        val sunset: Long?,
         @Embedded val temp: Temp?,
         val uvi: Double?,
         @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
         val wind_gust: Double?,
-        val wind_speed: Double?
+        val wind_speed: Double?,
     ) {
         data class Temp(
             val day: Double?,
@@ -61,7 +61,7 @@ data class WeatherEntity(
             val max: Double?,
             val min: Double?,
             val morn: Double?,
-            val night: Double?
+            val night: Double?,
         )
     }
 
@@ -71,13 +71,13 @@ data class WeatherEntity(
         val feels_like: Double?,
         val humidity: Int?,
         val temp: Double?,
-        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf()
+        @field:TypeConverters(WeatherDataModelConverters::class) val weather: List<Weather?>? = listOf(),
     )
 }
 
 data class Weather(
-    val description: String,
-    val icon: String,
+    val description: String? = null,
+    val icon: String? = null,
     val id: Int,
-    val main: String
+    val main: String? = null,
 )

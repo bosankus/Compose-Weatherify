@@ -1,8 +1,7 @@
+@file:Suppress("ConstructorParameterNaming")
+
 package bose.ankush.weatherify.domain.model
 
-/**
- * Domain model for weather forecast data
- */
 data class WeatherForecast(
     val id: Long,
     val alerts: List<Alert?>? = listOf(),
@@ -13,10 +12,10 @@ data class WeatherForecast(
 ) {
     data class Alert(
         val description: String?,
-        val end: Int?,
+        val end: Long?,
         val event: String?,
         val sender_name: String?,
-        val start: Int?,
+        val start: Long?,
     )
 
     data class Current(
@@ -25,13 +24,13 @@ data class WeatherForecast(
         val feels_like: Double?,
         val humidity: Int?,
         val pressure: Int?,
-        val sunrise: Int?,
-        val sunset: Int?,
+        val sunrise: Long?,
+        val sunset: Long?,
         val temp: Double?,
         val uvi: Double?,
         val weather: List<WeatherCondition?>? = listOf(),
         val wind_gust: Double?,
-        val wind_speed: Double?
+        val wind_speed: Double?,
     )
 
     data class Daily(
@@ -42,13 +41,13 @@ data class WeatherForecast(
         val pressure: Int?,
         val rain: Double?,
         val summary: String?,
-        val sunrise: Int?,
-        val sunset: Int?,
+        val sunrise: Long?,
+        val sunset: Long?,
         val temp: Temp?,
         val uvi: Double?,
         val weather: List<WeatherCondition?>? = listOf(),
         val wind_gust: Double?,
-        val wind_speed: Double?
+        val wind_speed: Double?,
     ) {
         data class Temp(
             val day: Double?,
@@ -56,7 +55,7 @@ data class WeatherForecast(
             val max: Double?,
             val min: Double?,
             val morn: Double?,
-            val night: Double?
+            val night: Double?,
         )
     }
 
@@ -70,12 +69,9 @@ data class WeatherForecast(
     )
 }
 
-/**
- * Domain model for weather condition
- */
 data class WeatherCondition(
-    val description: String,
-    val icon: String,
+    val description: String = "",
+    val icon: String = "",
     val id: Int,
-    val main: String
+    val main: String = "",
 )

@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import bose.ankush.sunriseui.components.WeatherHourCard
+import bose.ankush.commonui.components.WeatherHourCard
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.DateTimeUtils.toFormattedTime
 import bose.ankush.weatherify.base.common.Extension.formatTextCapitalization
@@ -36,82 +36,81 @@ import bose.ankush.weatherify.domain.model.WeatherForecast
 import coil.compose.AsyncImage
 
 @Composable
-internal fun HourlyWeatherForecastReportLayout(
-    hourlyWeatherForecasts: List<WeatherForecast.Hourly?>
-) {
+internal fun HourlyWeatherForecastReportLayout(hourlyWeatherForecasts: List<WeatherForecast.Hourly?>) {
     if (hourlyWeatherForecasts.isNotEmpty()) {
         Column(
             horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 text = stringResource(id = R.string.hourly_forecast_heading_txt),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp),
             )
 
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-                )
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
+                    ),
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
                 ) {
-                    FutureForecastListItem(hourlyWeatherForecasts) { /* Item click action will be implemented in future */ }
+                    FutureForecastListItem(hourlyWeatherForecasts) {}
                 }
             }
         }
-    } else {
-        // Return empty content when no data is available
     }
 }
-
 
 @Composable
 private fun FutureForecastListItem(
     weatherForecast: List<WeatherForecast.Hourly?>,
-    onItemClick: (Int) -> Unit
+    onItemClick: (Int) -> Unit,
 ) {
     var selectedItem by remember { mutableStateOf(0) }
 
-    // Limit the number of items to display for better performance
-    val limitedForecast = remember(weatherForecast) {
-        weatherForecast.take(24) // Show only 24 hours
-    }
+    val limitedForecast = remember(weatherForecast) { weatherForecast.take(24) }
 
     LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp, top = 16.dp),
-        state = rememberLazyListState() // Add state to prevent unnecessary recompositions
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp, top = 16.dp),
+        state = rememberLazyListState(),
     ) {
         items(
             items = limitedForecast,
-            key = { item -> item?.dt ?: 0 } // Use unique key for each item
+            key = { item -> item?.dt ?: 0 },
         ) { item ->
             val index = limitedForecast.indexOf(item)
             val isSelected = selectedItem == index
 
             val time = item?.dt?.toFormattedTime() ?: stringResource(id = R.string.not_available)
-            val temperature = stringResource(
-                id = R.string.celsius,
-                item?.temp?.toCelsius() ?: stringResource(id = R.string.not_available)
-            )
+            val temperature =
+                stringResource(
+                    id = R.string.celsius,
+                    item?.temp?.toCelsius() ?: stringResource(id = R.string.not_available),
+                )
 
             val firstWeather = item?.weather?.firstOrNull()
             val description =
                 (firstWeather?.description ?: stringResource(id = R.string.not_available))
-                    .wrapText().formatTextCapitalization()
+                    .wrapText()
+                    .formatTextCapitalization()
             val weatherIconUrl = firstWeather?.icon?.getIconUrl()
 
             WeatherHourCard(
@@ -130,7 +129,7 @@ private fun FutureForecastListItem(
                         error = painterResource(id = R.drawable.ic_sunny),
                         contentDescription = stringResource(id = R.string.weather_icon_content),
                     )
-                }
+                },
             )
         }
     }

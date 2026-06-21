@@ -34,10 +34,29 @@
     <string name="city_error_txt">העיר לא נמצאה!</string>
     <string name="server_error_txt">מתמודד עם בעיה בשרת</string>
     <string name="no_internet_txt">האם תוכל לבדוק מחדש את חיבור האינטרנט!</string>
+    <string name="network_unavailable_txt">האם תוכל לבדוק מחדש את חיבור האינטרנט!</string>
+    <string name="network_timeout_txt">פג הזמן הקצוב לבקשה. אנא נסה שוב מאוחר יותר.</string>
     <string name="general_error_txt">אופס!..משהו השתבש.</string>
+    <string name="gps_disabled_error_txt">שירותי המיקום כבויים. הפעל GPS כדי לקבל את מזג האוויר המקומי.</string>
+    <string name="enable_gps_btn_txt">הפעל GPS</string>
     <string name="default_coordinates_txt">קואורדינטות המיקום עדיין לא עודכנו.</string>
     <string name="empty_city_list_error_txt">גישה לא מורשית!</string>
     <string name="empty_list">לא נמצאו פרטים. נסה שוב מאוחר יותר</string>
+
+    <!--Settings Screen-->
+    <string name="profile_title">פרופיל</string>
+    <string name="logout_btn_txt">התנתקות</string>
+    <string name="logout_confirmation_txt">האם אתה בטוח שברצונך להתנתק?</string>
+    <string name="logout_warning_txt">יהיה עليך להתחבר שוב כדי לגשת לחשבונך.</string>
+    <string name="confirm_btn_txt">אישור</string>
+    <string name="cancel_btn_txt">ביטול</string>
+    <string name="settings_notifications_txt">הודעות</string>
+    <string name="settings_language_txt">שפה</string>
+    <string name="legal_privacy_policy_txt">מדיניות פרטיות</string>
+    <string name="legal_terms_of_use_txt">תנאי שימוש</string>
+    <string name="legal_app_version_txt">גרסה אפליקציה</string>
+    <string name="settings_section_title">הגדרות</string>
+    <string name="legal_section_title">משפטי</string>
 
     <!--Content Descriptions-->
     <string name="weather_icon_content">סמל מצב מזג האוויר</string>
@@ -48,4 +67,64 @@
     <string name="error_icon_content">סמל שגיאה</string>
     <string name="close_icon_content">סמל סגירה</string>
     <string name="daily_forecast_heading_txt">תחזית יומית</string>
+    <string name="back_button_content">כפתור חזרה</string>
+    <string name="notification_icon_content">סמל הגדרות התראה</string>
+    <string name="privacy_icon_content">סמל מדיניות פרטיות</string>
+    <string name="terms_icon_content">סמל תנאי השימוש</string>
+    <string name="info_icon_content">סמל מידע</string>
+    <string name="arrow_right_icon_content">נווט למסך הבא</string>
+    <string name="locale_config_error_txt">כישלון בטעינת תצורת שפה. שימוש בשפה ברירת מחדל.</string>
+
+    <!--Notification Permission Card-->
+    <string name="notification_permission_title">להישאר מעודכן</string>
+    <string name="notification_permission_message">הפוך התראות חדשות מזג אוויר</string>
+    <string name="enable_notification_btn">הפוך</string>
+
+    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
+    <string name="premium_get_txt">קבל פרימיום</string>
+    <string name="premium_processing_txt">בעיבוד…</string>
+    <string name="premium_processing_desc_txt">אנא המתן בזמן שאנו מפעילים את מנוי הפרימיום שלך.</string>
+    <string name="premium_unlock_desc_txt">בטל את נעילת כל התכונות והנהנה מחוויה ללא מודעות.</string>
+    <string name="premium_upgrade_btn_txt">שדרג כעת</string>
+    <string name="premium_active_txt">אתה משתמש פרימיום</string>
+    <string name="premium_expires_txt">פג בתוקף %1$s</string>
+    <string name="premium_active_status_txt">פעיל</string>
+    <string name="premium_activated_title_txt">פרימיום הופעל</string>
+    <string name="premium_activated_msg_txt">מנוי הפרימיום שלך פעיל כעת!</string>
+
+    <!--Saved Locations (Premium Feature)-->
+    <string name="saved_locations_screen">מיקומים שמורים</string>
+    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
+    <string name="saved_locations_title">מיקומים שמורים</string>
+    <string name="saved_locations_empty_txt">אין מיקומים שמורים עדיין. הקש + כדי להוסיף אחד.</string>
+    <string name="saved_locations_add_btn">הוסף מיקום</string>
+    <string name="saved_locations_delete_btn">מחק</string>
+    <string name="saved_locations_save_btn">שמור</string>
+    <string name="saved_locations_name_hint">שם מיקום (למשל בית)</string>
+    <string name="saved_locations_premium_title">תכונת פרימיום</string>
+    <string name="saved_locations_premium_desc">שמור וגש אל מיקומיך המועדפים באופן מיידי. שדרג לפרימיום כדי להשיג נעילת תכונה זו.</string>
+    <string name="saved_locations_error_txt">כישלון בטעינת מיקומים שמורים.</string>
+    <string name="saved_locations_save_success">מיקום נשמר בהצלחה.</string>
+    <string name="saved_locations_delete_success">מיקום הוסר.</string>
+    <string name="saved_locations_icon_content">מיקומים שמורים</string>
+    <string name="add_icon_content">הוסף מיקום חדש</string>
+    <string name="delete_icon_content">מחק מיקום</string>
+
+    <!--Place Search Dialog-->
+    <string name="place_search_dialog_title">חפש מיקום</string>
+    <string name="place_search_hint">הקלד עיר או כתובת…</string>
+    <string name="place_search_no_results">לא נמצאו מיקומים עבור \'%1$s\'</string>
+    <string name="set_as_default_dialog_title">להשתמש כמיקום מזג האוויר?</string>
+    <string name="set_as_default_dialog_body">נתוני מזג האוויר יוצגו עבור %1$s במקום מיקום ה-GPS הנוכחי שלך.</string>
+    <string name="set_as_default_dialog_warning">מיקום ה-GPS החי שלך לא יתעדכן כל עוד זה פעיל.</string>
+    <string name="set_as_default_confirm_btn">הגדר כברירת מחדל</string>
+    <string name="location_override_chip_label">משתמש ב-%1$s</string>
+    <string name="location_override_reset_btn">אפס ל-GPS</string>
+    <string name="location_override_chip_content_desc">כרגע מוצג מזג האוויר עבור %1$s. הקש כדי לאפס ל-GPS.</string>
+    <string name="language_lib_screen_header">בחר שפה</string>
+    <string name="language_back_content_description">תחזור</string>
+    <string name="language_screen_title">בחר את השפה שלך</string>
+    <string name="language_screen_subtitle">בחר את השפה המועדפת עליך לחוויה מותאמת אישית</string>
+    <string name="language_selected">%s נבחר</string>
+    <string name="language_navigate_back">נווט לאחור</string>
 </resources>

@@ -8,19 +8,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Module for providing remote configuration related dependencies
- */
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RemoteConfigModule {
-
-    /**
-     * Binds FirebaseRemoteConfigService to RemoteConfigService interface
-     */
+    @Suppress("unused")
     @Binds
     @Singleton
-    abstract fun bindRemoteConfigService(
-        firebaseRemoteConfigService: FirebaseRemoteConfigService
-    ): RemoteConfigService
+    abstract fun bindRemoteConfigService(firebaseRemoteConfigService: FirebaseRemoteConfigService): RemoteConfigService
 }

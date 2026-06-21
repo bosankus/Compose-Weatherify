@@ -10,15 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ShowLoading(
-    modifier: Modifier
-) {
+fun ShowLoading(modifier: Modifier) {
     Box(modifier = modifier) {
         CircularProgressIndicator(
-            modifier = Modifier
-                .size(26.dp)
-                .align(Alignment.Center),
-            color = MaterialTheme.colorScheme.primary
+            modifier =
+                Modifier
+                    .size(26.dp)
+                    .align(Alignment.Center),
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }

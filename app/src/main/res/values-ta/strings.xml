@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Screen Name-->
+    <string name="splash_screen">ஸ்பிளாஷ்</string>
+    <string name="home_screen">முகப்பு</string>
+    <string name="aq_screen">காற்றின் தரம்</string>
+    <string name="city_screen">நகரங்கள்</string>
+    <string name="account_screen">சுயவிவரம்</string>
+    <string name="settings_screen">அமைப்புகள்</string>
+
+    <!--Nested NavGraph group name-->
+    <string name="home_nested_nav">home_nested_nav</string>
+    <string name="profile_nested_nav">profile_nested_nav</string>
+
+    <!--General Texts-->
+    <string name="app_name">Weatherify</string>
+    <string name="retry_btn_txt">மீண்டும் முயற்சி செய்க</string>
+    <string name="hourly_forecast_heading_txt">மணிநேர முன்னறிவிப்பு</string>
+    <string name="daily_forecast_heading_txt">தினசரி முன்னறிவிப்பு</string>
+    <string name="speed">%1$sகிமீ/மணி</string>
+    <string name="feels_like">%1$s° போல் உணர்கிறது</string>
+    <string name="select_city">நகரத்தை தேர்ந்தெடுக்கவும்</string>
+    <string name="air_quality">காற்றின் தரம்</string>
+    <string name="go_back">திரும்பி செல்லவும்</string>
+    <string name="got_it">புரிந்தது</string>
+
+    <!--Error Texts-->
+    <string name="unauthorised_access_txt">அங்கீகரிக்கப்படாத அணுகல்!</string>
+    <string name="city_error_txt">நகரம் கண்டுபிடிக்கப்படவில்லை!</string>
+    <string name="server_error_txt">சர்வர் சிக்கல் இருப்பது போல் தெரிகிறது!</string>
+    <string name="no_internet_txt">இணைய இணைப்பை மீண்டும் சரிபார்க்க முடியுமா!</string>
+    <string name="network_unavailable_txt">இணைய இணைப்பை மீண்டும் சரிபார்க்க முடியுமா!</string>
+    <string name="network_timeout_txt">கோரிக்கை நேர வரம்பு மீறியது. பிறகு மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="general_error_txt">அச்சோ!.. ஏதோ தவறு நடந்தது.</string>
+    <string name="gps_disabled_error_txt">இட சேவைகள் அணைக்கப்பட்டுள்ளன. உள்ளூர் வானிலை பெற GPS இயக்கவும்.</string>
+    <string name="enable_gps_btn_txt">GPS இயக்கு</string>
+    <string name="default_coordinates_txt">இட ஆயங்கள் இன்னும் புதுப்பிக்கப்படவில்லை.</string>
+    <string name="empty_city_list_error_txt">இப்போது எந்த நகரமும் கண்டுபிடிக்கப்படவில்லை. பிறகு சரிபார்க்கவும்</string>
+    <string name="empty_list">விவரங்கள் கண்டுபிடிக்கப்படவில்லை. சிறிது நேரம் கழித்து முயற்சிக்கவும்.</string>
+
+    <!--Settings Screen-->
+    <string name="profile_title">சுயவிவரம்</string>
+    <string name="logout_btn_txt">வெளியேறு</string>
+    <string name="logout_confirmation_txt">நீங்கள் நிச்சயமாக வெளியேற விரும்புகிறீர்களா?</string>
+    <string name="logout_warning_txt">உங்கள் கணக்கை அணுக மீண்டும் உள்நுழைய வேண்டும்.</string>
+    <string name="confirm_btn_txt">உறுதிப்படுத்து</string>
+    <string name="cancel_btn_txt">ரத்து செய்</string>
+    <string name="settings_notifications_txt">அறிவிப்புகள்</string>
+    <string name="settings_language_txt">மொழி</string>
+    <string name="legal_privacy_policy_txt">தனியுரிமைக் கொள்கை</string>
+    <string name="legal_terms_of_use_txt">பயன்பாட்டு விதிமுறைகள்</string>
+    <string name="legal_app_version_txt">ஆப் பதிப்பு</string>
+    <string name="settings_section_title">அமைப்புகள்</string>
+    <string name="legal_section_title">சட்டம்</string>
+
+    <!--Content Descriptions-->
+    <string name="weather_icon_content">வானிலை நிலை சின்னம்</string>
+    <string name="language_icon_content">மொழி சின்னம்</string>
+    <string name="menu_icon_content">மெனு சின்னம்</string>
+    <string name="wind_icon_content">காற்று சின்னம்</string>
+    <string name="humidity_icon_content">ஈரப்பதம் சின்னம்</string>
+    <string name="error_icon_content">பிழை சின்னம்</string>
+    <string name="close_icon_content">மூடு சின்னம்</string>
+    <string name="back_button_content">பின்னால் பொத்தான்</string>
+    <string name="notification_icon_content">அறிவிப்பு அமைப்புகள் சின்னம்</string>
+    <string name="privacy_icon_content">தனியுரிமைக் கொள்கை சின்னம்</string>
+    <string name="terms_icon_content">பயன்பாட்டு விதிமுறைகள் சின்னம்</string>
+    <string name="info_icon_content">தகவல் சின்னம்</string>
+    <string name="arrow_right_icon_content">அடுத்த திரைக்கு செல்லவும்</string>
+    <string name="locale_config_error_txt">மொழி அமைப்பை ஏற்ற முடியவில்லை. இயல்புநிலை மொழி பயன்படுத்தப்படுகிறது.</string>
+
+    <!--Notification Permission Card-->
+    <string name="notification_permission_title">புதுப்பித்த நிலையில் இருங்கள்</string>
+    <string name="notification_permission_message">வானிலை எச்சரிக்கைகளுக்கு அறிவிப்புகளை இயக்குங்கள்</string>
+    <string name="enable_notification_btn">இயக்கு</string>
+
+    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
+    <string name="premium_get_txt">பிரீமியம் பெறுங்கள்</string>
+    <string name="premium_processing_txt">செயல்பாட்டில்…</string>
+    <string name="premium_processing_desc_txt">உங்கள் பிரீமியம் சந்தாவை செயல்படுத்தும் போது தயவு செய்து காத்திருங்கள்.</string>
+    <string name="premium_unlock_desc_txt">அனைத்து বৈশিষ্ট্যগুலு திறந்து விளம்பரம் இல்லாத அভিজ்ঞতা ভொகியுங்கள்.</string>
+    <string name="premium_upgrade_btn_txt">இப்போது அப்கிரேड் செய்யுங்கள்</string>
+    <string name="premium_active_txt">நீங்கள் ஒரு பிரீமியம் பயனர்</string>
+    <string name="premium_expires_txt">%1$s இல் முடிவடையும்</string>
+    <string name="premium_active_status_txt">செயலில்</string>
+    <string name="premium_activated_title_txt">பிரீமியம் செயல்படுத்தப்பட்டது</string>
+    <string name="premium_activated_msg_txt">உங்கள் பிரீமியம் சந்தா இப்போது செயலில் உள்ளது!</string>
+
+    <!--Saved Locations (Premium Feature)-->
+    <string name="saved_locations_screen">சேமிக்கப்பட்ட இடங்கள்</string>
+    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
+    <string name="saved_locations_title">சேமிக்கப்பட்ட இடங்கள்</string>
+    <string name="saved_locations_empty_txt">சேமிக்கப்பட்ட இடங்கள் இல்லை. சேர்க்க + ஐ தட்டவும்.</string>
+    <string name="saved_locations_add_btn">இடத்தை சேர்க்கவும்</string>
+    <string name="saved_locations_delete_btn">நீக்கவும்</string>
+    <string name="saved_locations_save_btn">சேமிக்கவும்</string>
+    <string name="saved_locations_name_hint">இடத்தின் பெயர் (எ.கா. வீடு)</string>
+    <string name="saved_locations_premium_title">பிரீமியம் பிற்சேர்க்கை</string>
+    <string name="saved_locations_premium_desc">உங்கள் பிடித்தமான இடங்களை சேமிக்கவும் மற்றும் உடனடியாக அணுகவும். இந்த பிற்சேர்க்கையை திறக்க பிரீமியமாக அப்கிரேட் செய்யவும்.</string>
+    <string name="saved_locations_error_txt">சேமிக்கப்பட்ட இடங்களை ஏற்ற முடியவில்லை.</string>
+    <string name="saved_locations_save_success">இடம் வெற்றிகரமாக சேமிக்கப்பட்டது.</string>
+    <string name="saved_locations_delete_success">இடம் நீக்கப்பட்டது.</string>
+    <string name="saved_locations_icon_content">சேமிக்கப்பட்ட இடங்கள்</string>
+    <string name="add_icon_content">புதிய இடத்தை சேர்க்கவும்</string>
+    <string name="delete_icon_content">இடத்தை நீக்கவும்</string>
+
+    <!--Place Search Dialog-->
+    <string name="place_search_dialog_title">ஒரு இடத்திற்கு தேடுக</string>
+    <string name="place_search_hint">நகரம் அல்லது முகவரி உள்ளிடவும்…</string>
+    <string name="place_search_no_results">\'%1$s\'க்கு இடங்கள் கிடைக்கவில்லை</string>
+    <string name="set_as_default_dialog_title">வானிலை இடமாக பயன்படுத்தவா?</string>
+    <string name="set_as_default_dialog_body">உங்கள் தற்போதைய GPS நிலைக்கு பதிலாக %1$s-ன் வானிலை தரவு காட்டப்படும்.</string>
+    <string name="set_as_default_dialog_warning">இது செயல்பாட்டில் இருக்கும்போது உங்கள் நேரடி GPS இடம் புதுப்பிக்கப்படாது.</string>
+    <string name="set_as_default_confirm_btn">இயல்புநிலையாக அமைக்கவும்</string>
+    <string name="location_override_chip_label">%1$s பயன்படுத்தப்படுகிறது</string>
+    <string name="location_override_reset_btn">GPS-க்கு மீட்டமைக்கவும்</string>
+    <string name="location_override_chip_content_desc">தற்போது %1$s-ன் வானிலை காட்டப்படுகிறது. GPS-க்கு மீட்டமைக்க தட்டவும்.</string>
+    <string name="language_lib_screen_header">மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="language_back_content_description">திரும்பி செல்லவும்</string>
+    <string name="language_screen_title">உங்கள் மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="language_screen_subtitle">தனிப்பயனாக்கப்பட்ட அனுபவத்திற்கு உங்களுக்கு விருப்பமான மொழியை தேர்ந்தெடுக்கவும்</string>
+    <string name="language_selected">%s தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="language_navigate_back">பின்னால் செல்லவும்</string>
+</resources>

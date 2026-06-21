@@ -11,7 +11,6 @@ import org.junit.Before
 import org.junit.Test
 
 class ExtensionTest {
-
     @Before
     fun setup() {
         MockKAnnotations.init(this)

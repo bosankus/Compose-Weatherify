@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Screen Name-->
+    <string name="splash_screen">స్ప్లాష్</string>
+    <string name="home_screen">హోమ్</string>
+    <string name="aq_screen">వాయు నాణ్యత</string>
+    <string name="city_screen">నగరాలు</string>
+    <string name="account_screen">ప్రొఫైల్</string>
+    <string name="settings_screen">సెట్టింగులు</string>
+
+    <!--Nested NavGraph group name-->
+    <string name="home_nested_nav">home_nested_nav</string>
+    <string name="profile_nested_nav">profile_nested_nav</string>
+
+    <!--General Texts-->
+    <string name="app_name">Weatherify</string>
+    <string name="retry_btn_txt">మళ్ళీ ప్రయత్నించు</string>
+    <string name="hourly_forecast_heading_txt">గంటవారీ సూచన</string>
+    <string name="daily_forecast_heading_txt">రోజువారీ సూచన</string>
+    <string name="speed">%1$sకి.మీ/గం</string>
+    <string name="feels_like">%1$s° లా అనిపిస్తుంది</string>
+    <string name="select_city">నగరాన్ని ఎంచుకోండి</string>
+    <string name="air_quality">వాయు నాణ్యత</string>
+    <string name="go_back">వెనుకకు వెళ్ళు</string>
+    <string name="got_it">అర్థమైంది</string>
+
+    <!--Error Texts-->
+    <string name="unauthorised_access_txt">అనధికార ప్రవేశం!</string>
+    <string name="city_error_txt">నగరం కనుగొనబడలేదు!</string>
+    <string name="server_error_txt">సర్వర్ సమస్య ఉన్నట్లు కనిపిస్తుంది!</string>
+    <string name="no_internet_txt">ఇంటర్నెట్ కనెక్టివిటీని మళ్ళీ తనిఖీ చేయగలరా!</string>
+    <string name="network_unavailable_txt">ఇంటర్నెట్ కనెక్టివిటీని మళ్ళీ తనిఖీ చేయగలరా!</string>
+    <string name="network_timeout_txt">అభ్యర్థన గడువు ముగిసింది. దయచేసి తర్వాత మళ్ళీ ప్రయత్నించండి.</string>
+    <string name="general_error_txt">అయ్యో!.. ఏదో తప్పు జరిగింది.</string>
+    <string name="gps_disabled_error_txt">లొకేషన్ సేవలు ఆఫ్ ఉన్నాయి. స్థానిక వాతావరణం పొందడానికి GPS ఆన్ చేయండి.</string>
+    <string name="enable_gps_btn_txt">GPS ఆన్ చేయండి</string>
+    <string name="default_coordinates_txt">లొకేషన్ కోఆర్డినేట్లు ఇంకా అప్‌డేట్ కాలేదు.</string>
+    <string name="empty_city_list_error_txt">ఇప్పుడు ఏ నగరాలూ కనుగొనబడలేదు. తర్వాత తనిఖీ చేయండి</string>
+    <string name="empty_list">వివరాలు కనుగొనబడలేదు. కొంత సేపు తర్వాత ప్రయత్నించండి.</string>
+
+    <!--Settings Screen-->
+    <string name="profile_title">ప్రొఫైల్</string>
+    <string name="logout_btn_txt">లాగ్ అవుట్</string>
+    <string name="logout_confirmation_txt">మీరు ఖచ్చితంగా లాగ్ అవుట్ అవ్వాలనుకుంటున్నారా?</string>
+    <string name="logout_warning_txt">మీ ఖాతాను యాక్సెస్ చేయడానికి మళ్ళీ లాగిన్ అవ్వాలి.</string>
+    <string name="confirm_btn_txt">నిర్ధారించండి</string>
+    <string name="cancel_btn_txt">రద్దు చేయండి</string>
+    <string name="settings_notifications_txt">నోటిఫికేషన్లు</string>
+    <string name="settings_language_txt">భాష</string>
+    <string name="legal_privacy_policy_txt">గోప్యతా విధానం</string>
+    <string name="legal_terms_of_use_txt">వినియోగ నిబంధనలు</string>
+    <string name="legal_app_version_txt">యాప్ వెర్షన్</string>
+    <string name="settings_section_title">సెట్టింగులు</string>
+    <string name="legal_section_title">చట్టపరమైన</string>
+
+    <!--Content Descriptions-->
+    <string name="weather_icon_content">వాతావరణ స్థితి చిహ్నం</string>
+    <string name="language_icon_content">భాష చిహ్నం</string>
+    <string name="menu_icon_content">మెను చిహ్నం</string>
+    <string name="wind_icon_content">గాలి చిహ్నం</string>
+    <string name="humidity_icon_content">తేమ చిహ్నం</string>
+    <string name="error_icon_content">లోపం చిహ్నం</string>
+    <string name="close_icon_content">మూసివేయి చిహ్నం</string>
+    <string name="back_button_content">వెనుకకు బటన్</string>
+    <string name="notification_icon_content">నోటిఫికేషన్ సెట్టింగుల చిహ్నం</string>
+    <string name="privacy_icon_content">గోప్యతా విధానం చిహ్నం</string>
+    <string name="terms_icon_content">వినియోగ నిబంధనల చిహ్నం</string>
+    <string name="info_icon_content">సమాచారం చిహ్నం</string>
+    <string name="arrow_right_icon_content">తదుపరి స్క్రీన్‌కు నావిగేట్ చేయండి</string>
+    <string name="locale_config_error_txt">భాషా కాన్ఫిగరేషన్ లోడ్ చేయడంలో విఫలమైంది. డిఫాల్ట్ భాష ఉపయోగిస్తున్నారు.</string>
+
+    <!--Notification Permission Card-->
+    <string name="notification_permission_title">అప్‌డేట్‌గా ఉండండి</string>
+    <string name="notification_permission_message">వాతావరణ హెచ్చరికల కోసం నోటిఫికేషన్లను ప్రారంభించండి</string>
+    <string name="enable_notification_btn">ప్రారంభించు</string>
+
+    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
+    <string name="premium_get_txt">ప్రీమియం పొందండి</string>
+    <string name="premium_processing_txt">ప్రక్రియలో…</string>
+    <string name="premium_processing_desc_txt">మేము మీ ప్రీమియం సబ్‌స్క్రిప్షన్‌ను సక్రియం చేస్తున్నప్పుడు దయచేసి ఎదురుచూడండి.</string>
+    <string name="premium_unlock_desc_txt">అన్ని ఫీచర్‌లను అన్‌లాక్ చేయండి మరియు ప్రకటన లేని అనుభవాన్ని ఆస్వాదించండి.</string>
+    <string name="premium_upgrade_btn_txt">ఇప్పుడు అప్‌గ్రేడ్ చేయండి</string>
+    <string name="premium_active_txt">మీరు ప్రీమియం ఉపయోగకర్త</string>
+    <string name="premium_expires_txt">%1$sకు ముగుస్తుంది</string>
+    <string name="premium_active_status_txt">సక్రియ</string>
+    <string name="premium_activated_title_txt">ప్రీమియం సక్రియం చేయబడింది</string>
+    <string name="premium_activated_msg_txt">మీ ప్రీమియం సబ్‌స్క్రిప్షన్ ఇప్పుడు సక్రియమైంది!</string>
+
+    <!--Saved Locations (Premium Feature)-->
+    <string name="saved_locations_screen">సేవ్ చేసిన ప్రదేశాలు</string>
+    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
+    <string name="saved_locations_title">సేవ్ చేసిన ప్రదేశాలు</string>
+    <string name="saved_locations_empty_txt">ఇంకా సేవ్ చేసిన ప్రదేశాలు లేవు. జోడించడానికి + నొక్కండి.</string>
+    <string name="saved_locations_add_btn">ప్రదేశం జోడించండి</string>
+    <string name="saved_locations_delete_btn">తొలగించండి</string>
+    <string name="saved_locations_save_btn">సేవ్ చేయండి</string>
+    <string name="saved_locations_name_hint">ప్రదేశం పేరు (ఉదా. గృహం)</string>
+    <string name="saved_locations_premium_title">ప్రీమియం సవరణ</string>
+    <string name="saved_locations_premium_desc">మీ ఇష్టమైన ప్రదేశాలను సేవ్ చేయండి మరియు తక్షణమే ప్రాప్యత చేయండి. ఈ ఫీచర్‌ను అన్‌లాక్ చేయడానికి ప్రీమియం‌కు అప్‌గ్రేడ్ చేయండి.</string>
+    <string name="saved_locations_error_txt">సేవ్ చేసిన ప్రదేశాలను లోడ్ చేయడంలో విఫలమైంది.</string>
+    <string name="saved_locations_save_success">ప్రదేశం విజయవంతంగా సేవ్ చేయబడింది.</string>
+    <string name="saved_locations_delete_success">ప్రదేశం తొలగించబడింది.</string>
+    <string name="saved_locations_icon_content">సేవ్ చేసిన ప్రదేశాలు</string>
+    <string name="add_icon_content">కొత్త ప్రదేశం జోడించండి</string>
+    <string name="delete_icon_content">ప్రదేశం తొలగించండి</string>
+
+    <!--Place Search Dialog-->
+    <string name="place_search_dialog_title">ఒక ప్రదేశం కోసం వెతకండి</string>
+    <string name="place_search_hint">నగరం లేదా చిరునామా టైప్ చేయండి…</string>
+    <string name="place_search_no_results">\'%1$s\'కు ఎటువంటి ప్రదేశాలు కనుగొనబడలేదు</string>
+    <string name="set_as_default_dialog_title">వాతావరణ ప్రదేశంగా ఉపయోగించాలా?</string>
+    <string name="set_as_default_dialog_body">మీ ప్రస్తుత GPS స్థానానికి బదులుగా %1$s వాతావరణ డేటా చూపబడుతుంది.</string>
+    <string name="set_as_default_dialog_warning">ఇది సక్రియంగా ఉన్నప్పుడు మీ నేరుగా GPS స్థానం నవీకరించబడదు.</string>
+    <string name="set_as_default_confirm_btn">డిఫాల్ట్‌గా సెట్ చేయండి</string>
+    <string name="location_override_chip_label">%1$s ఉపయోగిస్తోంది</string>
+    <string name="location_override_reset_btn">GPS కి రీసెట్ చేయండి</string>
+    <string name="location_override_chip_content_desc">ప్రస్తుతం %1$s వాతావరణం చూపబడుతోంది. GPS కి రీసెట్ చేయడానికి నొక్కండి.</string>
+    <string name="language_lib_screen_header">భాష ఎంచుకోండి</string>
+    <string name="language_back_content_description">వెనుకకు వెళ్ళు</string>
+    <string name="language_screen_title">మీ భాష ఎంచుకోండి</string>
+    <string name="language_screen_subtitle">వ్యక్తిగత అనుభవం కోసం మీకు ఇష్టమైన భాషను ఎంచుకోండి</string>
+    <string name="language_selected">%s ఎంచుకోబడింది</string>
+    <string name="language_navigate_back">వెనుకకు నావిగేట్ చేయండి</string>
+</resources>

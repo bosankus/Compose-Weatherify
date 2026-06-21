@@ -1,9 +1,19 @@
 package bose.ankush.weatherify.presentation.cities
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -13,40 +23,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.component.ScreenTopAppBar
 import bose.ankush.weatherify.presentation.cities.component.CityListItem
 import bose.ankush.weatherify.presentation.home.state.ShowLoading
-import bose.ankush.weatherify.presentation.navigation.Screen
+import bose.ankush.weatherify.presentation.navigation.AppNavigator
 
 @Composable
-fun CitiesListScreen(
-    navController: NavController,
-) {
+fun CitiesListScreen(navigator: AppNavigator) {
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         Scaffold(
             topBar = {
                 ScreenTopAppBar(
                     headlineId = R.string.select_city,
-                    navIconAction = { navController.popBackStack() },
+                    navIconAction = { navigator.goBack() },
                 )
             },
             content = { innerPadding ->
                 Column(
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = Modifier.padding(innerPadding),
                 ) {
-                    CityNameSearchBarWithList(navController)
+                    CityNameSearchBarWithList(navigator)
                 }
-            }
+            },
         )
     }
 }
 
 @Composable
-private fun CityNameSearchBarWithList(navController: NavController) {
+private fun CityNameSearchBarWithList(navigator: AppNavigator) {
     val viewModels: CitiesViewModel = hiltViewModel()
     val searchText by viewModels.searchText.collectAsState()
     val isSearching by viewModels.isSearching.collectAsState()
@@ -55,7 +62,7 @@ private fun CityNameSearchBarWithList(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
+            .padding(10.dp),
     ) {
         TextField(
             modifier = Modifier
@@ -70,8 +77,8 @@ private fun CityNameSearchBarWithList(navController: NavController) {
                 unfocusedIndicatorColor = Color.Transparent,
                 cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            ),
         )
         Spacer(modifier = Modifier.height(10.dp))
         if (isSearching) {
@@ -80,11 +87,11 @@ private fun CityNameSearchBarWithList(navController: NavController) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(1f),
             ) {
                 items(cityName.size) {
-                    CityListItem(cityNameList = cityName, position = it) { _, name ->
-                        navController.navigate(Screen.HomeScreen.withArgs(name))
+                    CityListItem(cityNameList = cityName, position = it) { _, _ ->
+                        navigator.goBack()
                     }
                 }
             }

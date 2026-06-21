@@ -1,185 +1,263 @@
 package bose.ankush.weatherify.presentation.navigation
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import androidx.navigation.navigation
+import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
+import bose.ankush.commonui.components.ToastAnchorState
+import bose.ankush.commonui.locations.SavedLocationsScreen
+import bose.ankush.commonui.locations.SavedLocationsStrings
+import bose.ankush.commonui.settings.SettingsScreen
+import bose.ankush.commonui.settings.SettingsScreenState
+import bose.ankush.commonui.settings.SettingsScreenStrings
 import bose.ankush.language.presentation.LanguageScreen
-import bose.ankush.weatherify.base.common.Extension.callNumber
+import bose.ankush.payment.presentation.PaymentStage
+import bose.ankush.payment.presentation.PaymentViewModel
+import bose.ankush.weatherify.BuildConfig
+import bose.ankush.weatherify.R
+import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
+import bose.ankush.weatherify.presentation.AuthState
 import bose.ankush.weatherify.presentation.MainViewModel
+import bose.ankush.weatherify.presentation.SettingsEvent
+import bose.ankush.weatherify.presentation.SettingsViewModel
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
-import bose.ankush.weatherify.presentation.home.AirQualityDetailsScreen
 import bose.ankush.weatherify.presentation.home.HomeScreen
-import bose.ankush.weatherify.presentation.settings.SettingsScreen
-
-const val LANGUAGE_ARGUMENT_KEY = "country_config"
+import bose.ankush.weatherify.presentation.strings.rememberLanguageScreenStrings
 
 @SuppressLint("NewApi")
-@ExperimentalAnimationApi
 @Composable
-fun AppNavigation(viewModel: MainViewModel) {
-    val navController = rememberNavController()
-    val context = LocalContext.current
-    NavHost(
-        navController = navController,
-        startDestination = Screen.HomeNestedNav.route
-    ) {
-        /*Home Screens*/
-        navigation(
-            startDestination = Screen.HomeScreen.route,
-            route = Screen.HomeNestedNav.route
-        ) {
-            composable(
-                route = Screen.HomeScreen.route,
-            ) {
-                HomeScreen(
-                    viewModel = viewModel,
-                    navController = navController
-                )
-            }
-            composable(
-                route = Screen.CitiesListScreen.route,
-                enterTransition = {
-                    slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
-                        animationSpec = tween(500)
-                    )
-                },
-                popEnterTransition = {
-                    slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Down,
-                        animationSpec = tween(500)
-                    )
-                },
-                exitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                        animationSpec = tween(500)
-                    )
-                },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                        animationSpec = tween(500)
-                    )
-                },
-            ) {
-                CitiesListScreen(navController = navController)
-            }
-            composable(
-                route = Screen.AirQualityDetailsScreen.route,
-                enterTransition = {
-                    slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(500)
-                    )
-                },
-                popEnterTransition = {
-                    slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(500)
-                    )
-                },
-                exitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(500)
-                    )
-                },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(500)
+fun AppNavigation(
+    viewModel: MainViewModel,
+    paymentViewModel: PaymentViewModel,
+    toastAnchorState: ToastAnchorState? = null,
+) {
+    val navigationState = rememberAppNavigationState()
+    val navigator = remember { AppNavigator(navigationState) }
+
+    NavDisplay(
+        entries = navigationState.toEntries(
+            entryProvider {
+                entry<HomeRoute> { HomeScreen(viewModel, navigator, toastAnchorState) }
+                entry<CitiesListRoute> { CitiesListScreen(navigator) }
+                entry<SavedLocationsRoute> {
+                    SavedLocationsEntry(
+                        viewModel,
+                        navigator,
+                        toastAnchorState
                     )
                 }
-            ) {
-                AirQualityDetailsScreen(
-                    viewModel = viewModel,
-                    navController = navController
-                )
+                entry<SettingsRoute> {
+                    SettingsEntry(
+                        viewModel,
+                        paymentViewModel,
+                        navigator,
+                        toastAnchorState
+                    )
+                }
+                entry<LanguageRoute> { route ->
+                    LanguageScreen(
+                        languages = route.languages.toTypedArray(),
+                        strings = rememberLanguageScreenStrings(),
+                    ) { navigator.goBack() }
+                }
             }
+        ),
+        onBack = navigator::goBack,
+    )
+}
+
+@Composable
+private fun SavedLocationsEntry(
+    viewModel: MainViewModel,
+    navigator: AppNavigator,
+    toastAnchorState: ToastAnchorState?,
+) {
+    val locationsState by viewModel.savedLocationsState.collectAsState()
+    val searchState by viewModel.placeSearchState.collectAsState()
+
+    SavedLocationsScreen(
+        locationsState = locationsState,
+        searchState = searchState,
+        onQueryChanged = viewModel::onPlaceSearchQueryChanged,
+        onClearSearch = viewModel::clearPlaceSearch,
+        onSaveLocation = { name, lat, lon -> viewModel.saveLocation(name, lat, lon) },
+        onDeleteLocation = viewModel::deleteLocation,
+        onLocationSelected = { viewModel.setDefaultLocation(it.lat, it.lon, it.name) },
+        onMessageShown = viewModel::clearLocationMessage,
+        strings = rememberSavedLocationsStrings(),
+        bottomBar = {
+            AppBottomBar(rememberSaveable { mutableStateOf(true) }, navigator, toastAnchorState)
+        },
+    )
+}
+
+@SuppressLint("NewApi")
+@Composable
+private fun SettingsEntry(
+    viewModel: MainViewModel,
+    paymentViewModel: PaymentViewModel,
+    navigator: AppNavigator,
+    toastAnchorState: ToastAnchorState?,
+) {
+    val context = LocalContext.current
+    val authState by viewModel.authState.collectAsState()
+    val paymentUiState by paymentViewModel.uiState.collectAsState()
+    val settingsViewModel = hiltViewModel<SettingsViewModel>()
+    val settingsUiState by settingsViewModel.uiState.collectAsState()
+    val serviceSubscriptionUiState by settingsViewModel.serviceSubscriptionViewModel.uiState.collectAsState()
+    val isBottomBarVisible = rememberSaveable { mutableStateOf(true) }
+    val previousPaymentStage = remember { mutableStateOf(paymentUiState.stage) }
+    val languageList = rememberLanguageList()
+
+    LaunchedEffect(paymentUiState.stage) {
+        if (paymentUiState.stage == PaymentStage.Success && previousPaymentStage.value != PaymentStage.Success) {
+            settingsViewModel.showPremiumActivationToast()
+        }
+        previousPaymentStage.value = paymentUiState.stage
+    }
+
+    SettingsScreen(
+        paymentUiState = paymentUiState,
+        isLoggingOut = authState is AuthState.LogoutLoading,
+        isLoggedOut = authState is AuthState.LoggedOut,
+        versionName = BuildConfig.VERSION_NAME,
+        shouldShowNotificationItem = isDeviceSDKAndroid13OrAbove() && !context.hasNotificationPermission(),
+        languageList = languageList,
+        uiState = settingsUiState,
+        strings = rememberSettingsStrings(),
+        serviceSubscriptionBottomSheetUiState = serviceSubscriptionUiState,
+        onLogout = viewModel::logout,
+        onLoggedOutHandled = viewModel::resetAuthState,
+        onStartPayment = paymentViewModel::startPayment,
+        onLoadServices = { settingsViewModel.serviceSubscriptionViewModel.loadServices() },
+        onServiceSelected = { settingsViewModel.serviceSubscriptionViewModel.selectService(it) },
+        onTierSelected = { settingsViewModel.serviceSubscriptionViewModel.selectPricingTier(it) },
+        onBackNavAction = navigator::goBack,
+        onLanguageNavAction = { list ->
+            if (isDeviceSDKAndroid13OrAbove()) navigator.navigate(LanguageRoute(list.toList()))
+            else context.openAppLocaleSettings()
+        },
+        onNotificationNavAction = {
+            if (!context.hasNotificationPermission()) viewModel.updateNotificationPermission(true)
+        },
+        onStateChange = { settingsViewModel.handleScreenStateChange(it, settingsUiState) },
+        onBottomBarVisibilityChange = { isBottomBarVisible.value = it },
+        toastAnchorState = toastAnchorState,
+        bottomBar = { AppBottomBar(isBottomBarVisible, navigator, toastAnchorState) },
+    )
+}
+
+@Composable
+private fun rememberLanguageList(): Array<String> {
+    val context = LocalContext.current
+    val showError = remember { mutableStateOf(false) }
+    val errorMessage = stringResource(R.string.locale_config_error_txt)
+    val list = remember(context) {
+        runCatching {
+            LocaleConfigMapper.getAvailableLanguagesFromJson("countryConfig.json", context)
+        }.getOrElse {
+            showError.value = true
+            emptyArray()
+        }
+    }
+    LaunchedEffect(showError.value) {
+        if (showError.value) {
+            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+            showError.value = false
+        }
+    }
+    return list
+}
+
+@Composable
+private fun rememberSavedLocationsStrings(): SavedLocationsStrings {
+    val noResultsTemplate = stringResource(R.string.place_search_no_results)
+    val setAsDefaultBodyTemplate = stringResource(R.string.set_as_default_dialog_body)
+    return SavedLocationsStrings(
+        title = stringResource(R.string.saved_locations_title),
+        premiumTitle = stringResource(R.string.saved_locations_premium_title),
+        premiumDesc = stringResource(R.string.saved_locations_premium_desc),
+        emptyText = stringResource(R.string.saved_locations_empty_txt),
+        searchHint = stringResource(R.string.place_search_hint),
+        searchDialogTitle = stringResource(R.string.place_search_dialog_title),
+        noResults = { query -> noResultsTemplate.replace("%1\$s", query) },
+        deleteContentDesc = stringResource(R.string.delete_icon_content),
+        addContentDesc = stringResource(R.string.add_icon_content),
+        cancelBtn = stringResource(R.string.cancel_btn_txt),
+        saveSuccessMsg = stringResource(R.string.saved_locations_save_success),
+        deleteSuccessMsg = stringResource(R.string.saved_locations_delete_success),
+        setAsDefaultDialogTitle = stringResource(R.string.set_as_default_dialog_title),
+        setAsDefaultDialogBody = { name -> setAsDefaultBodyTemplate.replace("%1\$s", name) },
+        setAsDefaultDialogWarning = stringResource(R.string.set_as_default_dialog_warning),
+        setAsDefaultConfirmBtn = stringResource(R.string.set_as_default_confirm_btn),
+    )
+}
+
+@Composable
+private fun rememberSettingsStrings() = SettingsScreenStrings(
+    profileTitle = stringResource(R.string.profile_title),
+    logout = stringResource(R.string.logout_btn_txt),
+    logoutConfirmation = stringResource(R.string.logout_confirmation_txt),
+    confirm = stringResource(R.string.confirm_btn_txt),
+    cancel = stringResource(R.string.cancel_btn_txt),
+    getPremium = stringResource(R.string.premium_get_txt),
+    processing = stringResource(R.string.premium_processing_txt),
+    processingDescription = stringResource(R.string.premium_processing_desc_txt),
+    unlockDescription = stringResource(R.string.premium_unlock_desc_txt),
+    upgradeNow = stringResource(R.string.premium_upgrade_btn_txt),
+    premiumActive = stringResource(R.string.premium_active_txt),
+    premiumExpires = stringResource(R.string.premium_expires_txt),
+    premiumActiveStatus = stringResource(R.string.premium_active_status_txt),
+    notificationsTitle = stringResource(R.string.settings_notifications_txt),
+    languageTitle = stringResource(R.string.settings_language_txt),
+    privacyPolicy = stringResource(R.string.legal_privacy_policy_txt),
+    termsOfUse = stringResource(R.string.legal_terms_of_use_txt),
+    appVersion = stringResource(R.string.legal_app_version_txt),
+    backButtonDesc = stringResource(R.string.back_button_content),
+    arrowRightDesc = stringResource(R.string.arrow_right_icon_content),
+    premiumActivatedTitle = stringResource(R.string.premium_activated_title_txt),
+    premiumActivatedMessage = stringResource(R.string.premium_activated_msg_txt),
+)
+
+private fun SettingsViewModel.handleScreenStateChange(
+    newState: SettingsScreenState,
+    current: SettingsScreenState,
+) {
+    when {
+        newState.showPremiumBottomSheet != current.showPremiumBottomSheet -> {
+            if (!newState.showPremiumBottomSheet) serviceSubscriptionViewModel.resetState()
+            handleEvent(
+                if (newState.showPremiumBottomSheet) SettingsEvent.OpenPremiumSheet
+                else SettingsEvent.ClosePremiumSheet,
+            )
         }
 
-        /*Account/Profile Screens*/
-        navigation(
-            startDestination = Screen.SettingsScreen.route,
-            route = Screen.ProfileNestedNav.route
-        ) {
-            composable(
-                route = Screen.SettingsScreen.route,
-            ) {
-                SettingsScreen(
-                    viewModel = viewModel,
-                    navController = navController,
-                    onLanguageNavAction = {
-                        if (isDeviceSDKAndroid13OrAbove()) {
-                            navController.navigate(Screen.LanguageScreen.withArgs(it))
-                        } else {
-                            context.openAppLocaleSettings()
-                        }
-                    },
-                    onNotificationNavAction = {
-                        if (!context.hasNotificationPermission()) {
-                            viewModel.updateNotificationPermission(launchState = true)
-                        }
-                    },
-                    onAvatarNavAction = {
-                        if (!context.callNumber()) {
-                            viewModel.updatePhoneCallPermission(launchState = true)
-                        }
-                    }
-                )
-            }
-            composable(
-                route = Screen.LanguageScreen.route + "/{$LANGUAGE_ARGUMENT_KEY}",
-                arguments = listOf(navArgument(LANGUAGE_ARGUMENT_KEY) {
-                    type = StringListType()
-                    nullable = false
-                }),
-                enterTransition = {
-                    slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(500)
-                    )
-                },
-                popEnterTransition = {
-                    slideIntoContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Left,
-                        animationSpec = tween(500)
-                    )
-                },
-                exitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(500)
-                    )
-                },
-                popExitTransition = {
-                    slideOutOfContainer(
-                        towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                        animationSpec = tween(500)
-                    )
-                }
-            ) { entry ->
-                entry.arguments?.let {
-                    it.getStringArray(LANGUAGE_ARGUMENT_KEY)?.let { listOfString ->
-                        LanguageScreen(
-                            languages = listOfString,
-                            navAction = { navController.popBackStack() }
-                        )
-                    }
-                }
-            }
-        }
+        newState.showLogoutDialog != current.showLogoutDialog ->
+            handleEvent(
+                if (newState.showLogoutDialog) SettingsEvent.OpenLogoutDialog
+                else SettingsEvent.CloseLogoutDialog,
+            )
+
+        newState.showPremiumActivationToast != current.showPremiumActivationToast ->
+            if (!newState.showPremiumActivationToast) handleEvent(SettingsEvent.DismissPremiumToast)
+
+        newState.currentWebUrl != current.currentWebUrl ->
+            handleEvent(
+                newState.currentWebUrl?.let(SettingsEvent::OpenWebUrl)
+                    ?: SettingsEvent.CloseWebView,
+            )
     }
 }

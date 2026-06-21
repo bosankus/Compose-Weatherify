@@ -5,11 +5,10 @@ import bose.ankush.weatherify.domain.model.CityName
 data class CityDto(
     val id: String? = "",
     val name: String = "",
-    val state: String? = ""
+    val state: String? = "",
 )
 
-fun CityDto.toCityName(): CityName {
-    return CityName(
-        name = name
+fun CityDto.toCityName(): CityName =
+    CityName(
+        name = name,
     )
-}

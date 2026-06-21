@@ -12,4 +12,5 @@
     <color name="city_txt">#556799</color>
     <color name="retry_btn">#4A4A4A</color>
     <color name="compose_bg_color">#242534</color>
+    <color name="notification_accent">#FF6200EE</color>
 </resources>

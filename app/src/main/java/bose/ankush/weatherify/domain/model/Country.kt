@@ -16,5 +16,5 @@ data class Country(
     val codeA2: String = "in",
     val defaultLanguage: String? = "en",
     val languages: List<String> = listOf("en"),
-    val localCurrency: List<String> = listOf("INR")
-): Parcelable
+    val localCurrency: List<String> = listOf("INR"),
+) : Parcelable

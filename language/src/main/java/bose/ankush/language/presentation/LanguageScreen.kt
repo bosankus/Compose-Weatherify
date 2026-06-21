@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package bose.ankush.language.presentation
 
 import androidx.compose.animation.AnimatedVisibility
@@ -49,7 +51,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.EmojiSupportMatch
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -64,154 +65,173 @@ import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
 import bose.ankush.language.util.LocaleHelper.getDisplayName
 import kotlinx.coroutines.delay
 
+private const val ITEM_STAGGER_DELAY_MS = 100L
+
+data class LanguageScreenStrings(
+    val screenTitle: String,
+    val screenSubtitle: String,
+    val navigateBack: String,
+    val languageSelected: (String) -> String,
+)
+
 @Composable
 fun LanguageScreen(
     languages: Array<String>,
+    strings: LanguageScreenStrings,
     navAction: () -> Unit,
 ) {
-    // Create a transition state for the screen animation
     val screenTransitionState = remember { MutableTransitionState(false) }
-    // Remember the navigation action to prevent recompositions
     val rememberedNavAction = remember { navAction }
     // Hoist the changedLanguage state to prevent recreation in ShowUI
     val changedLanguage = remember { mutableStateOf(getDefaultLanguage()) }
 
-    // Start the animation when the screen is first displayed
     LaunchedEffect(Unit) {
         screenTransitionState.targetState = true
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         Scaffold(
-            topBar = { ScreenHeader(rememberedNavAction) },
+            topBar = { ScreenHeader(strings.navigateBack, rememberedNavAction) },
             content = { innerPadding ->
                 AnimatedVisibility(
                     visibleState = screenTransitionState,
-                    enter = fadeIn(animationSpec = tween(durationMillis = 400)) +
+                    enter =
+                        fadeIn(animationSpec = tween(durationMillis = 400)) +
                             slideInVertically(
                                 animationSpec = tween(durationMillis = 500),
-                                initialOffsetY = { it / 3 }
+                                initialOffsetY = { it / 3 },
                             ),
-                    exit = fadeOut()
+                    exit = fadeOut(),
                 ) {
                     Column(modifier = Modifier.padding(innerPadding)) {
-                        // Header text with animation
-                        LanguageScreenHeader()
+                        LanguageScreenHeader(strings.screenTitle, strings.screenSubtitle)
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         ShowUI(
                             languages = languages,
-                            changedLanguage = changedLanguage
+                            changedLanguage = changedLanguage,
+                            languageSelectedLabel = strings.languageSelected,
                         )
                     }
                 }
-            }
+            },
         )
     }
 }
 
 @Composable
-private fun LanguageScreenHeader() {
+private fun LanguageScreenHeader(
+    title: String,
+    subtitle: String,
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
-            text = stringResource(R.string.language_screen_title),
+            text = title,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = stringResource(R.string.language_screen_subtitle),
+            text = subtitle,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScreenHeader(navAction: () -> Unit) {
-    // Create a transition state for the header animation
+private fun ScreenHeader(
+    navigateBackDesc: String,
+    navAction: () -> Unit,
+) {
     val headerTransitionState = remember { MutableTransitionState(false) }
 
-    // Start the animation when the component is first displayed
     LaunchedEffect(Unit) {
         headerTransitionState.targetState = true
     }
 
     AnimatedVisibility(
         visibleState = headerTransitionState,
-        enter = fadeIn(animationSpec = tween(durationMillis = 300)) +
+        enter =
+            fadeIn(animationSpec = tween(durationMillis = 300)) +
                 slideInVertically(
                     animationSpec = tween(durationMillis = 300),
-                    initialOffsetY = { -it / 2 }
+                    initialOffsetY = { -it / 2 },
                 ),
-        exit = fadeOut()
+        exit = fadeOut(),
     ) {
         TopAppBar(
-            title = { /* Empty title, we'll use our custom title below */ },
+            title = { },
             navigationIcon = {
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable { navAction.invoke() }
+                    modifier =
+                        Modifier
+                            .padding(start = 8.dp)
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .clickable { navAction.invoke() },
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_back),
                         tint = MaterialTheme.colorScheme.onSurface,
-                        contentDescription = stringResource(R.string.navigate_back),
-                        modifier = Modifier.padding(8.dp)
+                        contentDescription = navigateBackDesc,
+                        modifier = Modifier.padding(8.dp),
                     )
                 }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                titleContentColor = MaterialTheme.colorScheme.onBackground
-            )
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                ),
         )
     }
 }
 
-
 @Composable
 private fun ShowUI(
     languages: Array<String>,
-    changedLanguage: androidx.compose.runtime.MutableState<String>
+    changedLanguage: androidx.compose.runtime.MutableState<String>,
+    languageSelectedLabel: (String) -> String,
 ) {
     val listState = rememberLazyListState()
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        state = listState
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        state = listState,
     ) {
         itemsIndexed(
             items = languages,
-            key = { _, item -> item }
+            key = { _, item -> item },
         ) { index, language ->
             LanguageItem(
                 language = language,
                 index = index,
                 isSelected = changedLanguage.value == language,
-                onLanguageSelected = remember(language) {
-                    {
-                        changedLanguage.value = changeLanguageTo(language)
-                    }
-                }
+                languageSelectedLabel = languageSelectedLabel,
+                onLanguageSelected =
+                    remember(language) {
+                        {
+                            changedLanguage.value = changeLanguageTo(language)
+                        }
+                    },
             )
         }
     }
@@ -222,82 +242,90 @@ private fun LanguageItem(
     language: String,
     index: Int,
     isSelected: Boolean,
-    onLanguageSelected: () -> Unit
+    languageSelectedLabel: (String) -> String,
+    onLanguageSelected: () -> Unit,
 ) {
-    // Create animation for selection
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.02f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessHigh,
-            visibilityThreshold = 0.005f
-        ),
-        label = "selection_scale"
+        animationSpec =
+            spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessHigh,
+                visibilityThreshold = 0.005f,
+            ),
+        label = "selection_scale",
     )
 
-    // Create a staggered animation for items
     val itemTransitionState = remember { MutableTransitionState(false) }
 
     LaunchedEffect(Unit) {
-        delay(100L * index) // Staggered delay based on item position
+        delay(ITEM_STAGGER_DELAY_MS * index)
         itemTransitionState.targetState = true
     }
 
     AnimatedVisibility(
         visibleState = itemTransitionState,
-        enter = fadeIn(animationSpec = tween(durationMillis = 300)) +
+        enter =
+            fadeIn(animationSpec = tween(durationMillis = 300)) +
                 slideInVertically(
                     animationSpec = tween(durationMillis = 400),
-                    initialOffsetY = { it / 3 }
+                    initialOffsetY = { it / 3 },
                 ),
-        exit = fadeOut()
+        exit = fadeOut(),
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .clickable(onClick = onLanguageSelected)
-                .scale(scale),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable(onClick = onLanguageSelected)
+                    .scale(scale),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isSelected)
-                    MaterialTheme.colorScheme.primaryContainer
-                else
-                    MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-            ),
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 0.dp
-            )
+            colors =
+                CardDefaults.cardColors(
+                    containerColor =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+                        },
+                ),
+            elevation =
+                CardDefaults.cardElevation(
+                    defaultElevation = 0.dp,
+                ),
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     LanguageFlag(language)
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    // Language name
                     Text(
                         text = language.getDisplayName(),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onSurface
+                        color =
+                            if (isSelected) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
                     )
                 }
 
                 if (isSelected) {
-                    SelectionCheckmark(language)
+                    SelectionCheckmark(language, languageSelectedLabel)
                 }
             }
         }
@@ -306,38 +334,42 @@ private fun LanguageItem(
 
 @Composable
 private fun LanguageFlag(language: String) {
-    // Flag in a circle
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.background,
-        modifier = Modifier.size(40.dp)
+        modifier = Modifier.size(40.dp),
     ) {
         Text(
             text = language.getCountryFlag(),
             fontFamily = FontFamily.Default,
-            style = TextStyle(
-                platformStyle = PlatformTextStyle(
-                    emojiSupportMatch = EmojiSupportMatch.None
-                )
-            ),
+            style =
+                TextStyle(
+                    platformStyle =
+                        PlatformTextStyle(
+                            emojiSupportMatch = EmojiSupportMatch.None,
+                        ),
+                ),
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp),
         )
     }
 }
 
 @Composable
-private fun SelectionCheckmark(language: String) {
+private fun SelectionCheckmark(
+    language: String,
+    languageSelectedLabel: (String) -> String,
+) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(32.dp)
+        modifier = Modifier.size(32.dp),
     ) {
         Icon(
             imageVector = Icons.Filled.Check,
             tint = MaterialTheme.colorScheme.onPrimary,
-            contentDescription = stringResource(R.string.language_selected, language),
-            modifier = Modifier.padding(6.dp)
+            contentDescription = languageSelectedLabel(language),
+            modifier = Modifier.padding(6.dp),
         )
     }
 }

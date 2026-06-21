@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Screen Name-->
+    <string name="splash_screen">സ്‌പ്ലാഷ്</string>
+    <string name="home_screen">ഹോം</string>
+    <string name="aq_screen">വായു ഗുണനിലവാരം</string>
+    <string name="city_screen">നഗരങ്ങൾ</string>
+    <string name="account_screen">പ്രൊഫൈൽ</string>
+    <string name="settings_screen">ക്രമീകരണങ്ങൾ</string>
+
+    <!--Nested NavGraph group name-->
+    <string name="home_nested_nav">home_nested_nav</string>
+    <string name="profile_nested_nav">profile_nested_nav</string>
+
+    <!--General Texts-->
+    <string name="app_name">Weatherify</string>
+    <string name="retry_btn_txt">വീണ്ടും ശ്രമിക്കുക</string>
+    <string name="hourly_forecast_heading_txt">മണിക്കൂർ തോറും പ്രവചനം</string>
+    <string name="daily_forecast_heading_txt">ദൈനംദിന പ്രവചനം</string>
+    <string name="speed">%1$sകി.മീ/മ</string>
+    <string name="feels_like">%1$s° പോലെ തോന്നുന്നു</string>
+    <string name="select_city">നഗരം തിരഞ്ഞെടുക്കുക</string>
+    <string name="air_quality">വായു ഗുണനിലവാരം</string>
+    <string name="go_back">തിരിച്ചുപോകുക</string>
+    <string name="got_it">മനസ്സിലായി</string>
+
+    <!--Error Texts-->
+    <string name="unauthorised_access_txt">അനധികൃത ആക്സസ്!</string>
+    <string name="city_error_txt">നഗരം കണ്ടെത്തിയില്ല!</string>
+    <string name="server_error_txt">സർവർ പ്രശ്‌നം ഉള്ളതായി തോന്നുന്നു!</string>
+    <string name="no_internet_txt">ഇന്റർനെറ്റ് കണക്റ്റിവിറ്റി വീണ്ടും പരിശോധിക്കാമോ!</string>
+    <string name="network_unavailable_txt">ഇന്റർനെറ്റ് കണക്റ്റിവിറ്റി വീണ്ടും പരിശോധിക്കാമോ!</string>
+    <string name="network_timeout_txt">അഭ്യർഥനയുടെ സമയം കഴിഞ്ഞു. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="general_error_txt">അയ്യോ!.. എന്തോ തകരാർ സംഭവിച്ചു.</string>
+    <string name="gps_disabled_error_txt">ലൊക്കേഷൻ സേവനങ്ങൾ ഓഫ് ആണ്. പ്രാദേശിക കാലാവസ്ഥ ലഭിക്കാൻ GPS ഓൺ ചെയ്യുക.</string>
+    <string name="enable_gps_btn_txt">GPS ഓൺ ചെയ്യുക</string>
+    <string name="default_coordinates_txt">ലൊക്കേഷൻ കോർഡിനേറ്റുകൾ ഇതുവരെ അപ്‌ഡേറ്റ് ചെയ്തിട്ടില്ല.</string>
+    <string name="empty_city_list_error_txt">ഇപ്പോൾ ഒരു നഗരവും കണ്ടെത്തിയില്ല. പിന്നീട് പരിശോധിക്കുക</string>
+    <string name="empty_list">വിവരങ്ങൾ കണ്ടെത്തിയില്ല. കുറച്ച് സമയം കഴിഞ്ഞ് ശ്രമിക്കുക.</string>
+
+    <!--Settings Screen-->
+    <string name="profile_title">പ്രൊഫൈൽ</string>
+    <string name="logout_btn_txt">ലോഗ് ഔട്ട്</string>
+    <string name="logout_confirmation_txt">നിങ്ങൾക്ക് ഉറപ്പായും ലോഗ് ഔട്ട് ചെയ്യണോ?</string>
+    <string name="logout_warning_txt">നിങ്ങളുടെ അക്കൗണ്ട് ആക്സസ് ചെയ്യാൻ വീണ്ടും ലോഗിൻ ചെയ്യേണ്ടതായി വരും.</string>
+    <string name="confirm_btn_txt">ഉറപ്പാക്കുക</string>
+    <string name="cancel_btn_txt">റദ്ദാക്കുക</string>
+    <string name="settings_notifications_txt">അറിയിപ്പുകൾ</string>
+    <string name="settings_language_txt">ഭാഷ</string>
+    <string name="legal_privacy_policy_txt">സ്വകാര്യതാ നയം</string>
+    <string name="legal_terms_of_use_txt">ഉപയോഗ നിബന്ധനകൾ</string>
+    <string name="legal_app_version_txt">ആപ്പ് പതിപ്പ്</string>
+    <string name="settings_section_title">ക്രമീകരണങ്ങൾ</string>
+    <string name="legal_section_title">നിയമം</string>
+
+    <!--Content Descriptions-->
+    <string name="weather_icon_content">കാലാവസ്ഥ ഐക്കൺ</string>
+    <string name="language_icon_content">ഭാഷ ഐക്കൺ</string>
+    <string name="menu_icon_content">മെനു ഐക്കൺ</string>
+    <string name="wind_icon_content">കാറ്റ് ഐക്കൺ</string>
+    <string name="humidity_icon_content">ഈർപ്പം ഐക്കൺ</string>
+    <string name="error_icon_content">പിശക് ഐക്കൺ</string>
+    <string name="close_icon_content">അടയ്‌ക്കുക ഐക്കൺ</string>
+    <string name="back_button_content">പിറകോട്ട് ബട്ടൺ</string>
+    <string name="notification_icon_content">അറിയിപ്പ് ക്രമീകരണ ഐക്കൺ</string>
+    <string name="privacy_icon_content">സ്വകാര്യതാ നയ ഐക്കൺ</string>
+    <string name="terms_icon_content">ഉപയോഗ നിബന്ധനകൾ ഐക്കൺ</string>
+    <string name="info_icon_content">വിവരം ഐക്കൺ</string>
+    <string name="arrow_right_icon_content">അടുത്ത സ്‌ക്രീനിലേക്ക് നാവിഗേറ്റ് ചെയ്യുക</string>
+    <string name="locale_config_error_txt">ഭാഷ കോൺഫിഗറേഷൻ ലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു. ഡിഫോൾട്ട് ഭാഷ ഉപയോഗിക്കുന്നു.</string>
+
+    <!--Notification Permission Card-->
+    <string name="notification_permission_title">അപ്‌ഡേറ്റ് ആയിരിക്കുക</string>
+    <string name="notification_permission_message">കാലാവസ്ഥ അലേർട്ടുകൾക്ക് അറിയിപ്പുകൾ ഓൺ ചെയ്യുക</string>
+    <string name="enable_notification_btn">ഓൺ ചെയ്യുക</string>
+
+    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
+    <string name="premium_get_txt">പ്രിമിയം നേടുക</string>
+    <string name="premium_processing_txt">പ്രോസെസ്സിംഗ്…</string>
+    <string name="premium_processing_desc_txt">ഞങ്ങൾ നിങ്ങളുടെ പ്രിമിയം സബ്‌സ്ക്രിപ്ഷൻ സജ്ജമാക്കുന്നതിനായി ദയവായി കാത്തിരിക്കുക.</string>
+    <string name="premium_unlock_desc_txt">എല്ലാ ഫീച്ചറുകൾ അൺലോക്ക് ചെയ്യുക കൂടാതെ പരസ്യരഹിത അനുഭവം ആസ്വദിക്കുക.</string>
+    <string name="premium_upgrade_btn_txt">ഇപ്പോൾ അപ്‌ഗ്രേഡ് ചെയ്യുക</string>
+    <string name="premium_active_txt">നിങ്ങൾ പ്രിമിയം ഉപയോക്താവാണ്</string>
+    <string name="premium_expires_txt">%1$s ആയി സ്ഫുടിക്കുന്നു</string>
+    <string name="premium_active_status_txt">സജീവ</string>
+    <string name="premium_activated_title_txt">പ്രിമിയം സജീവമാണ്</string>
+    <string name="premium_activated_msg_txt">നിങ്ങളുടെ പ്രിമിയം സബ്‌സ്ക്രിപ്ഷൻ ഇപ്പോൾ സജീവമാണ്!</string>
+
+    <!--Saved Locations (Premium Feature)-->
+    <string name="saved_locations_screen">സംരക്ഷിത സ്ഥാനങ്ങൾ</string>
+    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
+    <string name="saved_locations_title">സംരക്ഷിത സ്ഥാനങ്ങൾ</string>
+    <string name="saved_locations_empty_txt">ഇതുവരെ സംരക്ഷിത സ്ഥാനങ്ങൾ ഇല്ല. ഒന്ന് ചേർക്കാൻ + ടാപ്പ് ചെയ്യുക.</string>
+    <string name="saved_locations_add_btn">സ്ഥാനം ചേർക്കുക</string>
+    <string name="saved_locations_delete_btn">ഇല്ലാതാക്കുക</string>
+    <string name="saved_locations_save_btn">സംരക്ഷിക്കുക</string>
+    <string name="saved_locations_name_hint">സ്ഥാനത്തിന്റെ പേര് (ഉദാ. വീട്)</string>
+    <string name="saved_locations_premium_title">പ്രിമിയം ഫീച്ചർ</string>
+    <string name="saved_locations_premium_desc">നിങ്ങളുടെ പ്രിയപ്പെട്ട സ്ഥാനങ്ങൾ സംരക്ഷിക്കുക കൂടാതെ ഉടനടി ആക്സസ് ചെയ്യുക. ഈ ഫീച്ചർ അൺലോക്ക് ചെയ്യാൻ പ്രിമിയമായി അപ്‌ഗ്രേഡ് ചെയ്യുക.</string>
+    <string name="saved_locations_error_txt">സംരക്ഷിത സ്ഥാനങ്ങൾ ലോഡ് ചെയ്യാൻ പരാജയപ്പെട്ടു.</string>
+    <string name="saved_locations_save_success">സ്ഥാനം വിജയകരമായി സംരക്ഷിക്കപ്പെട്ടു.</string>
+    <string name="saved_locations_delete_success">സ്ഥാനം നീക്കം ചെയ്യപ്പെട്ടു.</string>
+    <string name="saved_locations_icon_content">സംരക്ഷിത സ്ഥാനങ്ങൾ</string>
+    <string name="add_icon_content">പുതിയ സ്ഥാനം ചേർക്കുക</string>
+    <string name="delete_icon_content">സ്ഥാനം ഇല്ലാതാക്കുക</string>
+
+    <!--Place Search Dialog-->
+    <string name="place_search_dialog_title">ഒരു സ്ഥാനം തിരയുക</string>
+    <string name="place_search_hint">നഗരം അല്ലെങ്കിൽ വിലാസം ടൈപ്പ് ചെയ്യുക…</string>
+    <string name="place_search_no_results">\'%1$s\'ക്കായി ഒരു സ്ഥാനവും കണ്ടെത്തിയില്ല</string>
+    <string name="set_as_default_dialog_title">കാലാവസ്ഥ സ്ഥാനമായി ഉപയോഗിക്കണോ?</string>
+    <string name="set_as_default_dialog_body">നിങ്ങളുടെ നിലവിലെ GPS സ്ഥാനത്തിന് പകരം %1$s-ന്റെ കാലാവസ്ഥ ഡാറ്റ കാണിക്കും.</string>
+    <string name="set_as_default_dialog_warning">ഇത് സജീവമായിരിക്കുമ്പോൾ നിങ്ങളുടെ ലൈവ് GPS സ്ഥാനം അപ്‌ഡേറ്റ് ആകില്ല.</string>
+    <string name="set_as_default_confirm_btn">ഡിഫോൾട്ടായി സജ്ജമാക്കുക</string>
+    <string name="location_override_chip_label">%1$s ഉപയോഗിക്കുന്നു</string>
+    <string name="location_override_reset_btn">GPS-ലേക്ക് റീസെറ്റ് ചെയ്യുക</string>
+    <string name="location_override_chip_content_desc">നിലവിൽ %1$s-ന്റെ കാലാവസ്ഥ കാണിക്കുന്നു. GPS-ലേക്ക് റീസെറ്റ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക.</string>
+    <string name="language_lib_screen_header">ഭാഷ തിരഞ്ഞെടുക്കുക</string>
+    <string name="language_back_content_description">തിരികെ പോകുക</string>
+    <string name="language_screen_title">നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക</string>
+    <string name="language_screen_subtitle">വ്യക്തിഗത അനുഭവത്തിനായി നിങ്ങൾ ഇഷ്ടപ്പെടുന്ന ഭാഷ തിരഞ്ഞെടുക്കുക</string>
+    <string name="language_selected">%s തിരഞ്ഞെടുത്തു</string>
+    <string name="language_navigate_back">പിറകോട്ട് നാവിഗേറ്റ് ചെയ്യുക</string>
+</resources>

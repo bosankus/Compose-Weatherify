@@ -12,27 +12,25 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-
+import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
 object RepoModule {
-
     @Singleton
     @Provides
     fun provideWeatherRepository(
+        networkRepository: NetworkWeatherRepository,
         weatherStorage: WeatherStorage,
-        dispatcherProvider: DispatcherProvider
+        dispatcherProvider: DispatcherProvider,
     ): WeatherRepository =
         WeatherRepositoryImpl(
+            networkRepository,
             weatherStorage,
-            dispatcherProvider
+            dispatcherProvider,
         )
 
     @Singleton
     @Provides
-    fun provideCityRepository(
-        context: Context
-    ): CityRepository =
-        CityRepositoryImpl(context)
+    fun provideCityRepository(context: Context): CityRepository = CityRepositoryImpl(context)
 }
