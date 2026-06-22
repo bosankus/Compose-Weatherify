@@ -81,7 +81,7 @@ jobs:
         run: ./gradlew --no-daemon --parallel codeFormat
 
       - name: Commit formatting fixes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "style: apply automatic code formatting"
           file_pattern: "**/*.kt **/*.kts"
