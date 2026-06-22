@@ -61,7 +61,7 @@ firebaseBom = "34.15.0"
 coroutines = "1.11.0"
 
 # Kotlinx Date/Time (KMP-compatible, replaces java.time) — single version shared by all modules
-kotlinxDatetime = "0.8.0"
+kotlinxDatetime = "0.8.0-0.6.x-compat"
 
 # Dependency Injection
 hilt = "2.59.2"
