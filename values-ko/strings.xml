@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_unavailable_txt">인터넷 연결을 다시 확인해 주세요!</string>
+</resources>
