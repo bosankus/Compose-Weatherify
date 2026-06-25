@@ -9,6 +9,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 
 suspend fun HttpClient.authorizedRequest(
     tokenManager: TokenManager,
@@ -21,6 +22,10 @@ suspend fun HttpClient.authorizedRequest(
 
     val firstToken = tokenManager.getStoredToken()
     val response = block(authHeader(firstToken))
+
+    if (response.status != HttpStatusCode.Unauthorized) {
+        return response
+    }
 
     return when (val result = tokenManager.handleUnauthorized()) {
         is TokenResult.Valid -> block(authHeader(result.token))
