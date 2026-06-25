@@ -97,12 +97,12 @@ fun AnimatedWeatherIcon(
     val needsCloudAnimation =
         remember(weatherCondition) {
             weatherCondition in
-                    listOf(
-                        WeatherCondition.FEW_CLOUDS,
-                        WeatherCondition.SCATTERED_CLOUDS,
-                        WeatherCondition.BROKEN_CLOUDS,
-                        WeatherCondition.OVERCAST_CLOUDS,
-                    ) || weatherCondition.description.contains("rain") ||
+                listOf(
+                    WeatherCondition.FEW_CLOUDS,
+                    WeatherCondition.SCATTERED_CLOUDS,
+                    WeatherCondition.BROKEN_CLOUDS,
+                    WeatherCondition.OVERCAST_CLOUDS,
+                ) || weatherCondition.description.contains("rain") ||
                 weatherCondition.description.contains("drizzle") ||
                 weatherCondition.description.contains("snow") ||
                 weatherCondition.description.contains("thunderstorm")
@@ -129,18 +129,18 @@ fun AnimatedWeatherIcon(
     val needsFogAnimation =
         remember(weatherCondition) {
             weatherCondition in
-                    listOf(
-                        WeatherCondition.MIST,
-                        WeatherCondition.SMOKE,
-                        WeatherCondition.HAZE,
-                        WeatherCondition.SAND_DUST_WHIRLS,
-                        WeatherCondition.FOG,
-                        WeatherCondition.SAND,
-                        WeatherCondition.DUST,
-                        WeatherCondition.VOLCANIC_ASH,
-                        WeatherCondition.SQUALLS,
-                        WeatherCondition.TORNADO,
-                    )
+                listOf(
+                    WeatherCondition.MIST,
+                    WeatherCondition.SMOKE,
+                    WeatherCondition.HAZE,
+                    WeatherCondition.SAND_DUST_WHIRLS,
+                    WeatherCondition.FOG,
+                    WeatherCondition.SAND,
+                    WeatherCondition.DUST,
+                    WeatherCondition.VOLCANIC_ASH,
+                    WeatherCondition.SQUALLS,
+                    WeatherCondition.TORNADO,
+                )
         }
 
     val sunAnimSpec =
@@ -272,13 +272,13 @@ fun AnimatedWeatherIcon(
                 }
 
                 weatherCondition in
-                        listOf(
-                            WeatherCondition.FEW_CLOUDS,
-                            WeatherCondition.SCATTERED_CLOUDS,
-                            WeatherCondition.BROKEN_CLOUDS,
-                            WeatherCondition.OVERCAST_CLOUDS,
-                        )
-                    -> {
+                    listOf(
+                        WeatherCondition.FEW_CLOUDS,
+                        WeatherCondition.SCATTERED_CLOUDS,
+                        WeatherCondition.BROKEN_CLOUDS,
+                        WeatherCondition.OVERCAST_CLOUDS,
+                    )
+                -> {
                     val cloudiness =
                         when (weatherCondition) {
                             WeatherCondition.FEW_CLOUDS -> 0.2f
@@ -306,10 +306,10 @@ fun AnimatedWeatherIcon(
                 }
 
                 weatherCondition.description.contains("rain") &&
-                        !weatherCondition.description.contains(
-                            "thunderstorm",
-                        )
-                    -> {
+                    !weatherCondition.description.contains(
+                        "thunderstorm",
+                    )
+                -> {
                     val intensity =
                         when {
                             weatherCondition.description.contains("light") -> 0.3f
@@ -333,10 +333,10 @@ fun AnimatedWeatherIcon(
                 }
 
                 weatherCondition.description.contains("snow") ||
-                        weatherCondition.description.contains(
-                            "sleet",
-                        )
-                    -> {
+                    weatherCondition.description.contains(
+                        "sleet",
+                    )
+                -> {
                     val intensity =
                         when {
                             weatherCondition.description.contains("light") -> 0.3f
@@ -387,19 +387,19 @@ fun AnimatedWeatherIcon(
                 }
 
                 weatherCondition in
-                        listOf(
-                            WeatherCondition.MIST,
-                            WeatherCondition.SMOKE,
-                            WeatherCondition.HAZE,
-                            WeatherCondition.SAND_DUST_WHIRLS,
-                            WeatherCondition.FOG,
-                            WeatherCondition.SAND,
-                            WeatherCondition.DUST,
-                            WeatherCondition.VOLCANIC_ASH,
-                            WeatherCondition.SQUALLS,
-                            WeatherCondition.TORNADO,
-                        )
-                    -> {
+                    listOf(
+                        WeatherCondition.MIST,
+                        WeatherCondition.SMOKE,
+                        WeatherCondition.HAZE,
+                        WeatherCondition.SAND_DUST_WHIRLS,
+                        WeatherCondition.FOG,
+                        WeatherCondition.SAND,
+                        WeatherCondition.DUST,
+                        WeatherCondition.VOLCANIC_ASH,
+                        WeatherCondition.SQUALLS,
+                        WeatherCondition.TORNADO,
+                    )
+                -> {
                     drawFog(
                         animationProgress = cloudDrift.value,
                         fogColor = colors.fogColor,

@@ -139,11 +139,11 @@ fun SettingsScreen(
     LaunchedEffect(paymentUiState.stage) {
         when {
             paymentUiState.stage == PaymentStage.CreatingOrder ||
-                    paymentUiState.stage == PaymentStage.AwaitingPayment ->
+                paymentUiState.stage == PaymentStage.AwaitingPayment ->
                 onStateChange(uiState.copy(showPremiumBottomSheet = false))
 
             paymentUiState.stage == PaymentStage.Success &&
-                    previousPaymentStage.value != PaymentStage.Success -> {
+                previousPaymentStage.value != PaymentStage.Success -> {
                 onStateChange(
                     uiState.copy(
                         showPremiumActivationToast = true,

@@ -80,7 +80,7 @@ data class SavedLocationsStrings(
     val premiumTitle: String = "Premium Feature",
     val premiumDesc: String =
         "Save your favorite locations to access them quickly. " +
-                "Upgrade to premium to unlock this feature.",
+            "Upgrade to premium to unlock this feature.",
     val emptyText: String = "No saved locations yet. Add one to get started!",
     val searchHint: String = "Search for a place",
     val searchDialogTitle: String = "Add Location",

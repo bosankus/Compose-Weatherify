@@ -13,5 +13,5 @@ interface AuthApiService {
 
     suspend fun refreshToken(request: RefreshTokenRequest): AuthResponse
 
-    suspend fun logout(): LogoutResponse
+    suspend fun logout(token: String?): LogoutResponse
 }

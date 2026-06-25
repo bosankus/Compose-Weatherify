@@ -1,7 +1,7 @@
 package bose.ankush.network.model
 
-import kotlin.time.Clock
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
 
 @Serializable
 data class ServiceListResponse(

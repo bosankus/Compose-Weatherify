@@ -24,94 +24,94 @@ import kotlin.coroutines.resume
 
 @Singleton
 class DeviceLocationClient
-@Inject
-constructor(
-    private val context: Context,
-    private val client: FusedLocationProviderClient,
-) : LocationClient {
-    private fun checkLocationPermission() {
-        if (!context.hasLocationPermission()) {
-            throw LocationClient.LocationException("Location permission is not given.")
+    @Inject
+    constructor(
+        private val context: Context,
+        private val client: FusedLocationProviderClient,
+    ) : LocationClient {
+        private fun checkLocationPermission() {
+            if (!context.hasLocationPermission()) {
+                throw LocationClient.LocationException("Location permission is not given.")
+            }
         }
-    }
 
-    private fun checkGpsEnabled(): Pair<Boolean, Boolean> {
-        val locationManager =
-            context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        val isNetworkEnabled =
-            locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        if (!isGPSEnabled && !isNetworkEnabled) {
-            throw LocationClient.LocationException("GPS is disabled")
+        private fun checkGpsEnabled(): Pair<Boolean, Boolean> {
+            val locationManager =
+                context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            val isNetworkEnabled =
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+            if (!isGPSEnabled && !isNetworkEnabled) {
+                throw LocationClient.LocationException("GPS is disabled")
+            }
+            return Pair(isGPSEnabled, isNetworkEnabled)
         }
-        return Pair(isGPSEnabled, isNetworkEnabled)
-    }
 
-    @SuppressLint("MissingPermission")
-    override fun getLocationUpdates(interval: Long): Flow<Coordinates> =
-        callbackFlow {
-            checkLocationPermission()
-            checkGpsEnabled()
-
-            val request =
-                LocationRequest
-                    .Builder(
-                        Priority.PRIORITY_HIGH_ACCURACY,
-                        interval,
-                    ).apply {
-                        setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-                        setWaitForAccurateLocation(true)
-                    }.build()
-
-            val locationCallback =
-                object : LocationCallback() {
-                    override fun onLocationResult(result: LocationResult) {
-                        super.onLocationResult(result)
-                        result.locations.lastOrNull()?.let { location ->
-                            launch { send(location) }
-                        }
-                    }
-                }
-
-            client.requestLocationUpdates(
-                request,
-                locationCallback,
-                Looper.getMainLooper(),
-            )
-
-            awaitClose { client.removeLocationUpdates(locationCallback) }
-        }.map { loc -> Coordinates(loc.latitude, loc.longitude) }
-
-    @SuppressLint("MissingPermission")
-    override suspend fun getCurrentLocation(): Result<Coordinates> =
-        suspendCancellableCoroutine { continuation ->
-            try {
+        @SuppressLint("MissingPermission")
+        override fun getLocationUpdates(interval: Long): Flow<Coordinates> =
+            callbackFlow {
                 checkLocationPermission()
                 checkGpsEnabled()
-            } catch (e: LocationClient.LocationException) {
-                continuation.resume(Result.failure(e))
-                return@suspendCancellableCoroutine
-            }
 
-            val cts = CancellationTokenSource()
+                val request =
+                    LocationRequest
+                        .Builder(
+                            Priority.PRIORITY_HIGH_ACCURACY,
+                            interval,
+                        ).apply {
+                            setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+                            setWaitForAccurateLocation(true)
+                        }.build()
 
-            client
-                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
-                .addOnSuccessListener { location ->
-                    if (location != null) {
-                        val coords = Coordinates(location.latitude, location.longitude)
-                        continuation.resume(Result.success(coords))
-                    } else {
-                        val ex = LocationClient.LocationException("Location is null")
-                        continuation.resume(Result.failure(ex))
+                val locationCallback =
+                    object : LocationCallback() {
+                        override fun onLocationResult(result: LocationResult) {
+                            super.onLocationResult(result)
+                            result.locations.lastOrNull()?.let { location ->
+                                launch { send(location) }
+                            }
+                        }
                     }
-                }.addOnFailureListener { e ->
-                    val ex = LocationClient.LocationException(e.message ?: "Unknown error")
-                    continuation.resume(Result.failure(ex))
+
+                client.requestLocationUpdates(
+                    request,
+                    locationCallback,
+                    Looper.getMainLooper(),
+                )
+
+                awaitClose { client.removeLocationUpdates(locationCallback) }
+            }.map { loc -> Coordinates(loc.latitude, loc.longitude) }
+
+        @SuppressLint("MissingPermission")
+        override suspend fun getCurrentLocation(): Result<Coordinates> =
+            suspendCancellableCoroutine { continuation ->
+                try {
+                    checkLocationPermission()
+                    checkGpsEnabled()
+                } catch (e: LocationClient.LocationException) {
+                    continuation.resume(Result.failure(e))
+                    return@suspendCancellableCoroutine
                 }
 
-            continuation.invokeOnCancellation { cts.cancel() }
-        }
+                val cts = CancellationTokenSource()
 
-    override fun hasLocationPermission(): Boolean = context.hasLocationPermission()
-}
+                client
+                    .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
+                    .addOnSuccessListener { location ->
+                        if (location != null) {
+                            val cords = Coordinates(location.latitude, location.longitude)
+                            continuation.resume(Result.success(cords))
+                        } else {
+                            val ex = LocationClient.LocationException("Location is not present")
+                            continuation.resume(Result.failure(ex))
+                        }
+                    }.addOnFailureListener { e ->
+                        val ex = LocationClient.LocationException(e.message ?: "Unknown error")
+                        continuation.resume(Result.failure(ex))
+                    }
+
+                continuation.invokeOnCancellation { cts.cancel() }
+            }
+
+        override fun hasLocationPermission(): Boolean = context.hasLocationPermission()
+    }

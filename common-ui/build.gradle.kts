@@ -10,8 +10,14 @@ plugins {
 kotlin {
     android {
         namespace = "bose.ankush.commonui"
-        compileSdk = libs.versions.compileSdk.get().toInt()
-        minSdk = libs.versions.minSdk.get().toInt()
+        compileSdk =
+            libs.versions.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.minSdk
+                .get()
+                .toInt()
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -65,6 +71,7 @@ kotlin {
         val iosArm64Main by getting {
             dependsOn(iosMain)
         }
+
         @Suppress("UNUSED_VARIABLE")
         val iosSimulatorArm64Main by getting {
             dependsOn(iosMain)

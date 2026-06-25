@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.domain.use_case.feedback
+package bose.ankush.weatherify.domain.use_case
 
 import bose.ankush.network.model.FeedbackRequest
 import bose.ankush.network.model.FeedbackResponse

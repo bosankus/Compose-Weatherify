@@ -1,6 +1,6 @@
 @file:Suppress("UNCHECKED_CAST")
 
-package bose.ankush.storage.impl
+package bose.ankush.storage
 
 import bose.ankush.storage.api.TokenStorage
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -109,7 +109,7 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
             setObject(ACCOUNT_ID, forKey = kSecAttrAccount as Any)
             setObject(
                 kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-                forKey = kSecAttrAccessible as Any
+                forKey = kSecAttrAccessible as Any,
             )
         }
 

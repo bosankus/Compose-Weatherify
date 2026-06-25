@@ -1,4 +1,4 @@
-package bose.ankush.network.common
+package bose.ankush.network.util
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
@@ -25,7 +25,7 @@ class IOSNetworkConnectivity : NetworkConnectivity {
             val flags = alloc<SCNetworkReachabilityFlagsVar>()
             if (SCNetworkReachabilityGetFlags(reachability, flags.ptr)) {
                 (flags.value and kSCNetworkReachabilityFlagsReachable) != 0u &&
-                        (flags.value and kSCNetworkReachabilityFlagsConnectionRequired) == 0u
+                    (flags.value and kSCNetworkReachabilityFlagsConnectionRequired) == 0u
             } else {
                 false
             }

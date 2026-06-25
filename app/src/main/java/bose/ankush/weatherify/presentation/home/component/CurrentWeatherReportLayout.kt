@@ -167,7 +167,9 @@ private fun LocationAndDateHeader(
                         }
                     }
                 locationName = result
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            } catch (
+                @Suppress("TooGenericExceptionCaught") e: Exception,
+            ) {
                 Timber.e(e, "Geocoding failed; using default location label")
             }
         }

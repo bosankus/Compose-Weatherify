@@ -1,6 +1,6 @@
 package bose.ankush.network.utils
 
-import bose.ankush.network.common.NetworkException
+import bose.ankush.network.util.NetworkException
 import kotlinx.coroutines.delay
 
 object NetworkUtils {

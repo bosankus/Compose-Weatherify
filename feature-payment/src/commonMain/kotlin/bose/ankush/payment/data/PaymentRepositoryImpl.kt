@@ -1,7 +1,7 @@
 package bose.ankush.payment.data
 
 import bose.ankush.network.api.PaymentApiService
-import bose.ankush.network.common.NetworkConnectivity
+import bose.ankush.network.util.NetworkConnectivity
 import bose.ankush.network.model.CreateOrderRequest
 import bose.ankush.network.model.CreateOrderResponse
 import bose.ankush.network.model.VerifyPaymentRequest

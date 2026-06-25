@@ -14,8 +14,7 @@ object WeatherMapper {
             main = weather.main ?: "",
         )
 
-    private fun mapWeather(list: List<StorageWeather?>?) =
-        list?.map { it?.let { w -> mapStorageWeatherToDomain(w) } }
+    private fun mapWeather(list: List<StorageWeather?>?) = list?.map { it?.let { w -> mapStorageWeatherToDomain(w) } }
 
     private fun mapAlerts(alerts: List<WeatherData.Alert?>?) =
         alerts?.map { alert ->
@@ -61,12 +60,17 @@ object WeatherMapper {
                     summary = it.summary,
                     sunrise = it.sunrise,
                     sunset = it.sunset,
-                    temp = it.temp?.let { t ->
-                        WeatherForecast.Daily.Temp(
-                            day = t.day, eve = t.eve, max = t.max,
-                            min = t.min, morn = t.morn, night = t.night,
-                        )
-                    },
+                    temp =
+                        it.temp?.let { t ->
+                            WeatherForecast.Daily.Temp(
+                                day = t.day,
+                                eve = t.eve,
+                                max = t.max,
+                                min = t.min,
+                                morn = t.morn,
+                                night = t.night,
+                            )
+                        },
                     uvi = it.uvi,
                     weather = mapWeather(it.weather),
                     wind_gust = it.wind_gust,

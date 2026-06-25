@@ -259,12 +259,12 @@ private fun createSoothingSkyGradient(
             progress >= SunriseConstants.TimeThresholds.DUSK_START -> {
                 val transitionFactor =
                     (
-                            (progress - SunriseConstants.TimeThresholds.DUSK_START) /
-                                    (1f - SunriseConstants.TimeThresholds.DUSK_START)
-                            ).coerceIn(
-                            0f,
-                            1f,
-                        )
+                        (progress - SunriseConstants.TimeThresholds.DUSK_START) /
+                            (1f - SunriseConstants.TimeThresholds.DUSK_START)
+                    ).coerceIn(
+                        0f,
+                        1f,
+                    )
                 listOf(
                     lerpColor(dayColors[0], duskColors[0], transitionFactor),
                     lerpColor(dayColors[1], duskColors[1], transitionFactor),
@@ -293,7 +293,7 @@ private fun DrawScope.drawStarField(
 
         val twinkle =
             sin((twinkleIntensity * 2 * PI + index * 0.5).toFloat()) * SunriseConstants.Opacity.TWINKLE_VARIATION +
-                    SunriseConstants.Opacity.TWINKLE_BASE
+                SunriseConstants.Opacity.TWINKLE_BASE
         val starOpacity = baseOpacity * twinkle
 
         val starSize =
@@ -324,19 +324,19 @@ private fun DrawScope.drawMoon(
             val nightProgress = (timeElapsed.toFloat() / nightDuration).coerceIn(0f, 1f)
             moonX =
                 size.width *
-                        (
-                                SunriseConstants.Positioning.MOON_START_X -
-                                        nightProgress * SunriseConstants.Positioning.MOON_TRAVEL_DISTANCE
-                                )
+                (
+                    SunriseConstants.Positioning.MOON_START_X -
+                        nightProgress * SunriseConstants.Positioning.MOON_TRAVEL_DISTANCE
+                )
             moonY =
                 size.height *
+                (
+                    SunriseConstants.Positioning.MOON_Y_VARIATION -
                         (
-                                SunriseConstants.Positioning.MOON_Y_VARIATION -
-                                        (
-                                                sin(nightProgress * PI).toFloat() *
-                                                        SunriseConstants.Positioning.MOON_Y_AMPLITUDE
-                                                )
-                                )
+                            sin(nightProgress * PI).toFloat() *
+                                SunriseConstants.Positioning.MOON_Y_AMPLITUDE
+                        )
+                )
         } else {
             val nextSunrise = sunriseTimestamp + 24 * 3600
             val nightDuration = nextSunrise - sunsetTimestamp
@@ -344,19 +344,19 @@ private fun DrawScope.drawMoon(
             val nightProgress = (timeElapsed.toFloat() / nightDuration).coerceIn(0f, 1f)
             moonX =
                 size.width *
-                        (
-                                SunriseConstants.Positioning.MOON_END_X +
-                                        nightProgress * SunriseConstants.Positioning.MOON_TRAVEL_DISTANCE
-                                )
+                (
+                    SunriseConstants.Positioning.MOON_END_X +
+                        nightProgress * SunriseConstants.Positioning.MOON_TRAVEL_DISTANCE
+                )
             moonY =
                 size.height *
+                (
+                    SunriseConstants.Positioning.MOON_Y_VARIATION -
                         (
-                                SunriseConstants.Positioning.MOON_Y_VARIATION -
-                                        (
-                                                sin(nightProgress * PI).toFloat() *
-                                                        SunriseConstants.Positioning.MOON_Y_AMPLITUDE
-                                                )
-                                )
+                            sin(nightProgress * PI).toFloat() *
+                                SunriseConstants.Positioning.MOON_Y_AMPLITUDE
+                        )
+                )
         }
     } else {
         moonX =
@@ -370,7 +370,7 @@ private fun DrawScope.drawMoon(
 
     val moonRadius =
         SunriseConstants.Dimensions.MOON_BASE_RADIUS +
-                (SunriseConstants.Dimensions.MOON_RADIUS_VARIATION * atmosphericIntensity)
+            (SunriseConstants.Dimensions.MOON_RADIUS_VARIATION * atmosphericIntensity)
     val moonOpacity =
         SunriseConstants.Opacity.MOON_BASE + (SunriseConstants.Opacity.MOON_VARIATION * atmosphericIntensity)
 
@@ -407,20 +407,20 @@ private fun DrawScope.drawSun(
 
     val sunX =
         size.width *
-                (
-                        SunriseConstants.Positioning.SUN_START_X +
-                                timeProgress * SunriseConstants.Positioning.SUN_TRAVEL_DISTANCE
-                        )
+            (
+                SunriseConstants.Positioning.SUN_START_X +
+                    timeProgress * SunriseConstants.Positioning.SUN_TRAVEL_DISTANCE
+            )
     val sunY =
         size.height *
-                (
-                        SunriseConstants.Positioning.SUN_BASE_Y -
-                                (sin(timeProgress * PI).toFloat() * SunriseConstants.Positioning.SUN_Y_AMPLITUDE)
-                        )
+            (
+                SunriseConstants.Positioning.SUN_BASE_Y -
+                    (sin(timeProgress * PI).toFloat() * SunriseConstants.Positioning.SUN_Y_AMPLITUDE)
+            )
 
     val sunRadius =
         SunriseConstants.Dimensions.SUN_BASE_RADIUS +
-                (SunriseConstants.Dimensions.SUN_RADIUS_VARIATION * atmosphericIntensity)
+            (SunriseConstants.Dimensions.SUN_RADIUS_VARIATION * atmosphericIntensity)
     val sunOpacity =
         SunriseConstants.Opacity.SUN_BASE + (SunriseConstants.Opacity.SUN_VARIATION * atmosphericIntensity)
     val sunColor =
@@ -482,11 +482,11 @@ private fun DrawScope.drawClouds(
 
     val baseOpacity =
         SunriseConstants.Opacity.CLOUD_BASE + (
-                SunriseConstants.Opacity.CLOUD_VARIATION *
-                        sin(
-                            cloudDriftProgress * PI,
-                        ).toFloat()
-                )
+            SunriseConstants.Opacity.CLOUD_VARIATION *
+                sin(
+                    cloudDriftProgress * PI,
+                ).toFloat()
+        )
 
     val windInfluenceX =
         cos(windDirection * PI / 180f).toFloat() * SunriseConstants.Positioning.CLOUD_DRIFT_SPEED
@@ -498,7 +498,7 @@ private fun DrawScope.drawClouds(
             (i * SunriseConstants.Positioning.CLOUD_SPACING_X + cloudDriftProgress * windInfluenceX) % 1.2f - 0.1f
         val baseY =
             SunriseConstants.Positioning.CLOUD_BASE_Y + (i % 2) * SunriseConstants.Positioning.CLOUD_Y_VARIATION +
-                    windInfluenceY
+                windInfluenceY
 
         val cloudX = size.width * baseX
         val cloudY = size.height * baseY

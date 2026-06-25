@@ -14,4 +14,5 @@ data class UIState(
     val isGpsDisabled: Boolean = false,
     val isLocationOverridden: Boolean = false,
     val activeLocationName: String? = null,
+    val isOffline: Boolean = false,
 )

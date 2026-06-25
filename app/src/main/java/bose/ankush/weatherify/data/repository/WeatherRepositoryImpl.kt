@@ -46,18 +46,24 @@ constructor(
             val isDataStale = forceRefresh || (currentTime - lastUpdateTime) > ONE_HOUR_IN_MILLIS
 
             if (isDataStale) {
-                val weatherData = networkRepository.refreshWeatherData(coordinates)
-
-                if (weatherData != null) {
-                    val weatherStorageData =
-                        NetworkToStorageMapper.mapWeatherToStorageEntity(weatherData)
-                    val airQualityStorageData =
-                        NetworkToStorageMapper.mapAirQualityToStorageEntity(
-                            weatherData.data?.airQuality,
+                networkRepository.refreshWeatherData(coordinates).fold(
+                    onSuccess = {
+                        val weatherStorageData =
+                            NetworkToStorageMapper.mapWeatherToStorageEntity(it)
+                        val airQualityStorageData =
+                            NetworkToStorageMapper.mapAirQualityToStorageEntity(
+                                it.data?.airQuality,
+                            )
+                        weatherStorage.saveWeatherData(
+                            weatherStorageData,
+                            airQualityStorageData
                         )
-                    weatherStorage.saveWeatherData(weatherStorageData, airQualityStorageData)
-                    weatherStorage.saveLastWeatherUpdateTime(coordinates, currentTime)
-                }
+                        weatherStorage.saveLastWeatherUpdateTime(coordinates, currentTime)
+                    },
+                    onFailure = {
+                        // Handle exception
+                    }
+                )
             }
         }
     }

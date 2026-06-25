@@ -274,9 +274,10 @@ private fun getAirQualityColor(aqi: Int): Color =
     when (aqi) {
         in EPA_AQI_MIN..EPA_GOOD_MAX -> Color(COLOR_AQI_GOOD)
         in (EPA_GOOD_MAX + 1)..EPA_MODERATE_MAX -> Color(COLOR_AQI_MODERATE)
-        in (EPA_MODERATE_MAX + 1)..EPA_UNHEALTHY_SENSITIVE_MAX -> Color(
-            COLOR_AQI_UNHEALTHY_SENSITIVE
-        )
+        in (EPA_MODERATE_MAX + 1)..EPA_UNHEALTHY_SENSITIVE_MAX ->
+            Color(
+                COLOR_AQI_UNHEALTHY_SENSITIVE,
+            )
 
         in (EPA_UNHEALTHY_SENSITIVE_MAX + 1)..EPA_UNHEALTHY_MAX -> Color(COLOR_AQI_UNHEALTHY)
         in (EPA_UNHEALTHY_MAX + 1)..EPA_VERY_UNHEALTHY_MAX -> Color(COLOR_AQI_VERY_UNHEALTHY)

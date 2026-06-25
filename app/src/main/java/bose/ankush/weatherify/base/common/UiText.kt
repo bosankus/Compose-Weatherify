@@ -2,7 +2,7 @@ package bose.ankush.weatherify.base.common
 
 import android.content.Context
 import androidx.annotation.StringRes
-import bose.ankush.network.common.NetworkException
+import bose.ankush.network.util.NetworkException
 import bose.ankush.weatherify.R
 
 sealed class UiText {
@@ -18,7 +18,9 @@ sealed class UiText {
     fun asString(context: Context): String =
         when (this) {
             is DynamicText -> value
-            is StringResource -> @Suppress("SpreadOperator") context.getString(resId, *args)
+            is StringResource ->
+                @Suppress("SpreadOperator")
+                context.getString(resId, *args)
         }
 }
 

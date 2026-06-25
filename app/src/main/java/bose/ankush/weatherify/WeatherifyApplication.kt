@@ -2,10 +2,13 @@ package bose.ankush.weatherify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import bose.ankush.payment.di.featurePaymentModules
+import bose.ankush.network.di.networkDomainModule
+import bose.ankush.payment.di.paymentDomainModule
+import bose.ankush.payment.di.paymentViewModelModule
+import bose.ankush.weatherify.di.appPaymentKoinModule
+import bose.ankush.storage.di.storageDomainModule
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
-import bose.ankush.weatherify.di.appPaymentKoinModule
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
@@ -33,7 +36,15 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
     private fun initKoin() {
         startKoin {
             androidContext(this@WeatherifyApplication)
-            modules(featurePaymentModules + appPaymentKoinModule(this@WeatherifyApplication))
+            modules(
+                listOf(
+                    storageDomainModule,
+                    networkDomainModule,
+                    paymentDomainModule,
+                    paymentViewModelModule,
+                    appPaymentKoinModule,
+                )
+            )
         }
     }
 

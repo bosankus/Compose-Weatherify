@@ -18,10 +18,11 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 
 private val TAB_ROUTES: List<NavKey> = listOf(HomeRoute, SavedLocationsRoute, SettingsRoute)
 
-private val TabRouteSaver = Saver<MutableState<NavKey>, Int>(
-    save = { state -> TAB_ROUTES.indexOf(state.value).coerceAtLeast(0) },
-    restore = { index -> mutableStateOf(TAB_ROUTES.getOrElse(index) { HomeRoute }) },
-)
+private val TabRouteSaver =
+    Saver<MutableState<NavKey>, Int>(
+        save = { state -> TAB_ROUTES.indexOf(state.value).coerceAtLeast(0) },
+        restore = { index -> mutableStateOf(TAB_ROUTES.getOrElse(index) { HomeRoute }) },
+    )
 
 class AppNavigationState(
     topLevelRoute: MutableState<NavKey>,
@@ -38,9 +39,10 @@ class AppNavigationState(
 
 @Composable
 fun rememberAppNavigationState(): AppNavigationState {
-    val topLevelRoute = rememberSaveable(saver = TabRouteSaver) {
-        mutableStateOf(HomeRoute)
-    }
+    val topLevelRoute =
+        rememberSaveable(saver = TabRouteSaver) {
+            mutableStateOf(HomeRoute)
+        }
     val homeStack = rememberNavBackStack(HomeRoute)
     val savedLocationsStack = rememberNavBackStack(SavedLocationsRoute)
     val settingsStack = rememberNavBackStack(SettingsRoute)
@@ -48,37 +50,39 @@ fun rememberAppNavigationState(): AppNavigationState {
     return remember {
         AppNavigationState(
             topLevelRoute = topLevelRoute,
-            backStacks = mapOf(
-                HomeRoute to homeStack,
-                SavedLocationsRoute to savedLocationsStack,
-                SettingsRoute to settingsStack,
-            ),
+            backStacks =
+                mapOf(
+                    HomeRoute to homeStack,
+                    SavedLocationsRoute to savedLocationsStack,
+                    SettingsRoute to settingsStack,
+                ),
         )
     }
 }
 
 @Composable
-fun AppNavigationState.toEntries(
-    entryProvider: (NavKey) -> NavEntry<NavKey>,
-): List<NavEntry<NavKey>> {
+fun AppNavigationState.toEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): List<NavEntry<NavKey>> {
     val saveableDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
     val vmDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
 
-    val homeEntries = rememberDecoratedNavEntries(
-        backStack = backStacks[HomeRoute]!!,
-        entryDecorators = listOf(saveableDecorator, vmDecorator),
-        entryProvider = entryProvider,
-    )
-    val savedLocationsEntries = rememberDecoratedNavEntries(
-        backStack = backStacks[SavedLocationsRoute]!!,
-        entryDecorators = listOf(saveableDecorator, vmDecorator),
-        entryProvider = entryProvider,
-    )
-    val settingsEntries = rememberDecoratedNavEntries(
-        backStack = backStacks[SettingsRoute]!!,
-        entryDecorators = listOf(saveableDecorator, vmDecorator),
-        entryProvider = entryProvider,
-    )
+    val homeEntries =
+        rememberDecoratedNavEntries(
+            backStack = backStacks[HomeRoute]!!,
+            entryDecorators = listOf(saveableDecorator, vmDecorator),
+            entryProvider = entryProvider,
+        )
+    val savedLocationsEntries =
+        rememberDecoratedNavEntries(
+            backStack = backStacks[SavedLocationsRoute]!!,
+            entryDecorators = listOf(saveableDecorator, vmDecorator),
+            entryProvider = entryProvider,
+        )
+    val settingsEntries =
+        rememberDecoratedNavEntries(
+            backStack = backStacks[SettingsRoute]!!,
+            entryDecorators = listOf(saveableDecorator, vmDecorator),
+            entryProvider = entryProvider,
+        )
 
     return when (topLevelRoute) {
         SavedLocationsRoute -> savedLocationsEntries
@@ -87,7 +91,9 @@ fun AppNavigationState.toEntries(
     }
 }
 
-class AppNavigator(private val state: AppNavigationState) {
+class AppNavigator(
+    private val state: AppNavigationState,
+) {
     val navigationState: AppNavigationState get() = state
 
     fun navigate(route: NavKey) {

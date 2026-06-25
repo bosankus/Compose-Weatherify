@@ -1,5 +1,7 @@
 package bose.ankush.network.api
 
+import bose.ankush.network.auth.interceptor.authorizedRequest
+import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.model.CreateOrderRequest
 import bose.ankush.network.model.CreateOrderResponse
 import bose.ankush.network.model.VerifyPaymentRequest
@@ -14,23 +16,28 @@ import io.ktor.http.contentType
 
 class KtorPaymentApiService(
     private val httpClient: HttpClient,
-    private val baseUrl: String,
+    private val tokenManager: TokenManager,
+    private val baseUrl: String
 ) : PaymentApiService {
     override suspend fun createOrder(request: CreateOrderRequest): CreateOrderResponse =
         NetworkUtils.retryWithExponentialBackoff {
-            httpClient
-                .post("$baseUrl/create-order") {
+            httpClient.authorizedRequest(tokenManager) { authConfig ->
+                post("$baseUrl/create-order") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
-                }.body()
+                    authConfig()
+                }
+            }.body()
         }
 
     override suspend fun verifyPayment(request: VerifyPaymentRequest): VerifyPaymentResponse =
         NetworkUtils.retryWithExponentialBackoff {
-            httpClient
-                .post("$baseUrl/store-payment") {
+            httpClient.authorizedRequest(tokenManager) { authConfig ->
+                post("$baseUrl/store-payment") {
                     contentType(ContentType.Application.Json)
                     setBody(request)
-                }.body()
+                    authConfig()
+                }
+            }.body()
         }
 }
