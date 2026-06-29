@@ -138,7 +138,7 @@ fun WeatherAlertCard(
                         expandVertically(tween(350, easing = FastOutSlowInEasing)),
                 exit =
                     fadeOut(tween(200)) +
-                            shrinkVertically(tween(250)),
+                        shrinkVertically(tween(250)),
             ) {
                 Column(modifier = Modifier.padding(top = 16.dp)) {
                     AlertInfoSection(

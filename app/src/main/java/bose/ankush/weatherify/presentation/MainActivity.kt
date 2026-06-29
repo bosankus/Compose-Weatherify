@@ -107,7 +107,11 @@ class MainActivity :
         var toastTitle by remember { mutableStateOf("") }
         var toastType by remember { mutableStateOf(ToastType.ERROR) }
 
-        fun showToast(message: String, title: String = "Error", type: ToastType = ToastType.ERROR) {
+        fun showToast(
+            message: String,
+            title: String = "Error",
+            type: ToastType = ToastType.ERROR,
+        ) {
             toastMessage = message
             toastTitle = title
             toastType = type
@@ -124,13 +128,14 @@ class MainActivity :
             isLoggedIn = isLoggedIn,
             authState = authState,
             toastAnchorState = toastAnchorState,
-            toastState = ToastDisplayState(
-                visible = toastVisible,
-                message = toastMessage,
-                title = toastTitle,
-                type = toastType,
-                onDismiss = { toastVisible = false },
-            ),
+            toastState =
+                ToastDisplayState(
+                    visible = toastVisible,
+                    message = toastMessage,
+                    title = toastTitle,
+                    type = toastType,
+                    onDismiss = { toastVisible = false },
+                ),
         )
     }
 
@@ -211,7 +216,9 @@ class MainActivity :
                             put("prefill", prefill)
                         }
                     razorpayCheckout?.open(this@MainActivity, options)
-                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                } catch (
+                    @Suppress("TooGenericExceptionCaught") e: Exception,
+                ) {
                     paymentViewModel.onPaymentFailed(
                         e.message ?: "Unable to open payment checkout",
                     )

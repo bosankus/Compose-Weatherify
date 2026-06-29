@@ -48,33 +48,34 @@ fun AppNavigation(
     val navigator = remember { AppNavigator(navigationState) }
 
     NavDisplay(
-        entries = navigationState.toEntries(
-            entryProvider {
-                entry<HomeRoute> { HomeScreen(viewModel, navigator, toastAnchorState) }
-                entry<CitiesListRoute> { CitiesListScreen(navigator) }
-                entry<SavedLocationsRoute> {
-                    SavedLocationsEntry(
-                        viewModel,
-                        navigator,
-                        toastAnchorState
-                    )
-                }
-                entry<SettingsRoute> {
-                    SettingsEntry(
-                        viewModel,
-                        paymentViewModel,
-                        navigator,
-                        toastAnchorState
-                    )
-                }
-                entry<LanguageRoute> { route ->
-                    LanguageScreen(
-                        languages = route.languages.toTypedArray(),
-                        strings = rememberLanguageScreenStrings(),
-                    ) { navigator.goBack() }
-                }
-            }
-        ),
+        entries =
+            navigationState.toEntries(
+                entryProvider {
+                    entry<HomeRoute> { HomeScreen(viewModel, navigator, toastAnchorState) }
+                    entry<CitiesListRoute> { CitiesListScreen(navigator) }
+                    entry<SavedLocationsRoute> {
+                        SavedLocationsEntry(
+                            viewModel,
+                            navigator,
+                            toastAnchorState,
+                        )
+                    }
+                    entry<SettingsRoute> {
+                        SettingsEntry(
+                            viewModel,
+                            paymentViewModel,
+                            navigator,
+                            toastAnchorState,
+                        )
+                    }
+                    entry<LanguageRoute> { route ->
+                        LanguageScreen(
+                            languages = route.languages.toTypedArray(),
+                            strings = rememberLanguageScreenStrings(),
+                        ) { navigator.goBack() }
+                    }
+                },
+            ),
         onBack = navigator::goBack,
     )
 }
@@ -147,8 +148,11 @@ private fun SettingsEntry(
         onTierSelected = { settingsViewModel.serviceSubscriptionViewModel.selectPricingTier(it) },
         onBackNavAction = navigator::goBack,
         onLanguageNavAction = { list ->
-            if (isDeviceSDKAndroid13OrAbove()) navigator.navigate(LanguageRoute(list.toList()))
-            else context.openAppLocaleSettings()
+            if (isDeviceSDKAndroid13OrAbove()) {
+                navigator.navigate(LanguageRoute(list.toList()))
+            } else {
+                context.openAppLocaleSettings()
+            }
         },
         onNotificationNavAction = {
             if (!context.hasNotificationPermission()) viewModel.updateNotificationPermission(true)
@@ -165,14 +169,15 @@ private fun rememberLanguageList(): Array<String> {
     val context = LocalContext.current
     val showError = remember { mutableStateOf(false) }
     val errorMessage = stringResource(R.string.locale_config_error_txt)
-    val list = remember(context) {
-        runCatching {
-            LocaleConfigMapper.getAvailableLanguagesFromJson("countryConfig.json", context)
-        }.getOrElse {
-            showError.value = true
-            emptyArray()
+    val list =
+        remember(context) {
+            runCatching {
+                LocaleConfigMapper.getAvailableLanguagesFromJson("countryConfig.json", context)
+            }.getOrElse {
+                showError.value = true
+                emptyArray()
+            }
         }
-    }
     LaunchedEffect(showError.value) {
         if (showError.value) {
             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
@@ -207,30 +212,31 @@ private fun rememberSavedLocationsStrings(): SavedLocationsStrings {
 }
 
 @Composable
-private fun rememberSettingsStrings() = SettingsScreenStrings(
-    profileTitle = stringResource(R.string.profile_title),
-    logout = stringResource(R.string.logout_btn_txt),
-    logoutConfirmation = stringResource(R.string.logout_confirmation_txt),
-    confirm = stringResource(R.string.confirm_btn_txt),
-    cancel = stringResource(R.string.cancel_btn_txt),
-    getPremium = stringResource(R.string.premium_get_txt),
-    processing = stringResource(R.string.premium_processing_txt),
-    processingDescription = stringResource(R.string.premium_processing_desc_txt),
-    unlockDescription = stringResource(R.string.premium_unlock_desc_txt),
-    upgradeNow = stringResource(R.string.premium_upgrade_btn_txt),
-    premiumActive = stringResource(R.string.premium_active_txt),
-    premiumExpires = stringResource(R.string.premium_expires_txt),
-    premiumActiveStatus = stringResource(R.string.premium_active_status_txt),
-    notificationsTitle = stringResource(R.string.settings_notifications_txt),
-    languageTitle = stringResource(R.string.settings_language_txt),
-    privacyPolicy = stringResource(R.string.legal_privacy_policy_txt),
-    termsOfUse = stringResource(R.string.legal_terms_of_use_txt),
-    appVersion = stringResource(R.string.legal_app_version_txt),
-    backButtonDesc = stringResource(R.string.back_button_content),
-    arrowRightDesc = stringResource(R.string.arrow_right_icon_content),
-    premiumActivatedTitle = stringResource(R.string.premium_activated_title_txt),
-    premiumActivatedMessage = stringResource(R.string.premium_activated_msg_txt),
-)
+private fun rememberSettingsStrings() =
+    SettingsScreenStrings(
+        profileTitle = stringResource(R.string.profile_title),
+        logout = stringResource(R.string.logout_btn_txt),
+        logoutConfirmation = stringResource(R.string.logout_confirmation_txt),
+        confirm = stringResource(R.string.confirm_btn_txt),
+        cancel = stringResource(R.string.cancel_btn_txt),
+        getPremium = stringResource(R.string.premium_get_txt),
+        processing = stringResource(R.string.premium_processing_txt),
+        processingDescription = stringResource(R.string.premium_processing_desc_txt),
+        unlockDescription = stringResource(R.string.premium_unlock_desc_txt),
+        upgradeNow = stringResource(R.string.premium_upgrade_btn_txt),
+        premiumActive = stringResource(R.string.premium_active_txt),
+        premiumExpires = stringResource(R.string.premium_expires_txt),
+        premiumActiveStatus = stringResource(R.string.premium_active_status_txt),
+        notificationsTitle = stringResource(R.string.settings_notifications_txt),
+        languageTitle = stringResource(R.string.settings_language_txt),
+        privacyPolicy = stringResource(R.string.legal_privacy_policy_txt),
+        termsOfUse = stringResource(R.string.legal_terms_of_use_txt),
+        appVersion = stringResource(R.string.legal_app_version_txt),
+        backButtonDesc = stringResource(R.string.back_button_content),
+        arrowRightDesc = stringResource(R.string.arrow_right_icon_content),
+        premiumActivatedTitle = stringResource(R.string.premium_activated_title_txt),
+        premiumActivatedMessage = stringResource(R.string.premium_activated_msg_txt),
+    )
 
 private fun SettingsViewModel.handleScreenStateChange(
     newState: SettingsScreenState,
@@ -240,15 +246,21 @@ private fun SettingsViewModel.handleScreenStateChange(
         newState.showPremiumBottomSheet != current.showPremiumBottomSheet -> {
             if (!newState.showPremiumBottomSheet) serviceSubscriptionViewModel.resetState()
             handleEvent(
-                if (newState.showPremiumBottomSheet) SettingsEvent.OpenPremiumSheet
-                else SettingsEvent.ClosePremiumSheet,
+                if (newState.showPremiumBottomSheet) {
+                    SettingsEvent.OpenPremiumSheet
+                } else {
+                    SettingsEvent.ClosePremiumSheet
+                },
             )
         }
 
         newState.showLogoutDialog != current.showLogoutDialog ->
             handleEvent(
-                if (newState.showLogoutDialog) SettingsEvent.OpenLogoutDialog
-                else SettingsEvent.CloseLogoutDialog,
+                if (newState.showLogoutDialog) {
+                    SettingsEvent.OpenLogoutDialog
+                } else {
+                    SettingsEvent.CloseLogoutDialog
+                },
             )
 
         newState.showPremiumActivationToast != current.showPremiumActivationToast ->

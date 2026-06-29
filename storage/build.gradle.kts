@@ -10,8 +10,14 @@ plugins {
 kotlin {
     android {
         namespace = "bose.ankush.storage"
-        compileSdk = libs.versions.compileSdk.get().toInt()
-        minSdk = libs.versions.minSdk.get().toInt()
+        compileSdk =
+            libs.versions.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.minSdk
+                .get()
+                .toInt()
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -57,8 +63,7 @@ kotlin {
                 implementation(libs.androidx.security.crypto)
                 // Gson for JSON serialization
                 implementation(libs.gson)
-                // Note: Network dependency removed to avoid circular dependency
-                // WeatherDataFetcher is injected via DI from app module
+                implementation(libs.koin.android)
             }
         }
 

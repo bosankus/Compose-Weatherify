@@ -16,4 +16,6 @@ data object SavedLocationsRoute : NavKey
 data object SettingsRoute : NavKey
 
 @Serializable
-data class LanguageRoute(val languages: List<String>) : NavKey
+data class LanguageRoute(
+    val languages: List<String>,
+) : NavKey

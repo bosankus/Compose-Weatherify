@@ -29,50 +29,50 @@ sealed class SettingsEvent {
 
 @HiltViewModel
 class SettingsViewModel
-@Inject
-constructor(
-    private val serviceRepository: ServiceRepository,
-) : ViewModel() {
-    private val _uiState = MutableStateFlow(SettingsScreenState())
-    val uiState: StateFlow<SettingsScreenState> = _uiState
+    @Inject
+    constructor(
+        private val serviceRepository: ServiceRepository,
+    ) : ViewModel() {
+        private val _uiState = MutableStateFlow(SettingsScreenState())
+        val uiState: StateFlow<SettingsScreenState> = _uiState
 
-    val serviceSubscriptionViewModel by lazy {
-        ServiceSubscriptionViewModel(repository = serviceRepository)
-    }
+        val serviceSubscriptionViewModel by lazy {
+            ServiceSubscriptionViewModel(repository = serviceRepository)
+        }
 
-    fun handleEvent(event: SettingsEvent) {
-        when (event) {
-            SettingsEvent.OpenPremiumSheet -> {
-                _uiState.value = _uiState.value.copy(showPremiumBottomSheet = true)
-            }
+        fun handleEvent(event: SettingsEvent) {
+            when (event) {
+                SettingsEvent.OpenPremiumSheet -> {
+                    _uiState.value = _uiState.value.copy(showPremiumBottomSheet = true)
+                }
 
-            SettingsEvent.ClosePremiumSheet -> {
-                _uiState.value = _uiState.value.copy(showPremiumBottomSheet = false)
-            }
+                SettingsEvent.ClosePremiumSheet -> {
+                    _uiState.value = _uiState.value.copy(showPremiumBottomSheet = false)
+                }
 
-            SettingsEvent.OpenLogoutDialog -> {
-                _uiState.value = _uiState.value.copy(showLogoutDialog = true)
-            }
+                SettingsEvent.OpenLogoutDialog -> {
+                    _uiState.value = _uiState.value.copy(showLogoutDialog = true)
+                }
 
-            SettingsEvent.CloseLogoutDialog -> {
-                _uiState.value = _uiState.value.copy(showLogoutDialog = false)
-            }
+                SettingsEvent.CloseLogoutDialog -> {
+                    _uiState.value = _uiState.value.copy(showLogoutDialog = false)
+                }
 
-            SettingsEvent.DismissPremiumToast -> {
-                _uiState.value = _uiState.value.copy(showPremiumActivationToast = false)
-            }
+                SettingsEvent.DismissPremiumToast -> {
+                    _uiState.value = _uiState.value.copy(showPremiumActivationToast = false)
+                }
 
-            is SettingsEvent.OpenWebUrl -> {
-                _uiState.value = _uiState.value.copy(currentWebUrl = event.url)
-            }
+                is SettingsEvent.OpenWebUrl -> {
+                    _uiState.value = _uiState.value.copy(currentWebUrl = event.url)
+                }
 
-            SettingsEvent.CloseWebView -> {
-                _uiState.value = _uiState.value.copy(currentWebUrl = null)
+                SettingsEvent.CloseWebView -> {
+                    _uiState.value = _uiState.value.copy(currentWebUrl = null)
+                }
             }
         }
-    }
 
-    fun showPremiumActivationToast() {
-        _uiState.value = _uiState.value.copy(showPremiumActivationToast = true)
+        fun showPremiumActivationToast() {
+            _uiState.value = _uiState.value.copy(showPremiumActivationToast = true)
+        }
     }
-}

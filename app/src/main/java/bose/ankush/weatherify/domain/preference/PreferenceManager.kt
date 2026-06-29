@@ -16,7 +16,11 @@ interface PreferenceManager {
         expiryMillis: Long?,
     )
 
-    suspend fun saveLocationOverride(lat: Double, lon: Double, name: String)
+    suspend fun saveLocationOverride(
+        lat: Double,
+        lon: Double,
+        name: String,
+    )
 
     suspend fun clearLocationOverride()
 

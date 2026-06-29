@@ -8,24 +8,24 @@ import javax.inject.Singleton
 
 @Singleton
 class NotificationHelper
-@Inject
-constructor(
-    private val context: Context,
-) {
-    fun getNotificationBuilder(
-        channelId: String,
-        title: String,
-        message: String,
-    ): NotificationCompat.Builder =
-        NotificationCompat
-            .Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_home)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true)
+    @Inject
+    constructor(
+        private val context: Context,
+    ) {
+        fun getNotificationBuilder(
+            channelId: String,
+            title: String,
+            message: String,
+        ): NotificationCompat.Builder =
+            NotificationCompat
+                .Builder(context, channelId)
+                .setSmallIcon(R.drawable.ic_home)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
 
-    companion object {
-        const val DEFAULT_CHANNEL_ID = "weatherify_notifications"
+        companion object {
+            const val DEFAULT_CHANNEL_ID = "weatherify_notifications"
+        }
     }
-}

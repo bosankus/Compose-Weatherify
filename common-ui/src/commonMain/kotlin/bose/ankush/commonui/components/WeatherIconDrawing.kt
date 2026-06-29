@@ -73,8 +73,8 @@ fun DrawScope.drawClouds(
         val speedFactor = 0.8f + (i % 3) * 0.1f
         val baseX =
             size.width *
-                    (0.3f + (i * 0.15f) + animationProgress * WeatherIconConstants.CLOUD_MOVEMENT_SCALE * speedFactor) %
-                    size.width
+                (0.3f + (i * 0.15f) + animationProgress * WeatherIconConstants.CLOUD_MOVEMENT_SCALE * speedFactor) %
+                size.width
         val baseY =
             size.height * (0.4f + (i % 2) * 0.1f + sin(animationProgress * PI * speedFactor) * 0.02f)
 

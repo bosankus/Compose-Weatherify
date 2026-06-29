@@ -11,8 +11,6 @@ import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.auth.utils.isPremiumActive
-import bose.ankush.network.domain.SavedLocationsUseCase
-import bose.ankush.network.domain.SearchPlacesUseCase
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.DeviceInfoProvider
 import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
@@ -25,9 +23,11 @@ import bose.ankush.weatherify.base.location.LocationPermissions
 import bose.ankush.weatherify.domain.preference.PreferenceManager
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
 import bose.ankush.weatherify.domain.repository.WeatherRepository
-import bose.ankush.weatherify.domain.use_case.get_air_quality.GetAirQuality
-import bose.ankush.weatherify.domain.use_case.get_weather_reports.GetWeatherReport
-import bose.ankush.weatherify.domain.use_case.refresh_weather_reports.RefreshWeatherReport
+import bose.ankush.weatherify.domain.use_case.GetAirQuality
+import bose.ankush.weatherify.domain.use_case.GetWeatherReport
+import bose.ankush.weatherify.domain.use_case.RefreshWeatherReport
+import bose.ankush.weatherify.domain.use_case.SavedLocationsUseCase
+import bose.ankush.weatherify.domain.use_case.SearchPlacesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -49,10 +49,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.time.Clock
-import kotlin.time.Instant
 import javax.inject.Inject
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Instant
 
 /**
  * Main ViewModel for Weatherify.
@@ -73,6 +73,7 @@ import kotlin.time.Duration.Companion.milliseconds
 class MainViewModel
 @Inject
 constructor(
+    loggerFactory: LoggerFactory,
     private val refreshWeatherReport: RefreshWeatherReport,
     private val getWeatherReport: GetWeatherReport,
     private val getAirQuality: GetAirQuality,
@@ -85,7 +86,6 @@ constructor(
     private val tokenManager: TokenManager,
     private val searchPlacesUseCase: SearchPlacesUseCase,
     private val savedLocationsUseCase: SavedLocationsUseCase,
-    loggerFactory: LoggerFactory,
     private val deviceInfoProvider: DeviceInfoProvider,
 ) : ViewModel() {
     private val logger = loggerFactory.create("${MainViewModel::class.simpleName} ->")
@@ -175,7 +175,7 @@ constructor(
                 .debounce(500.milliseconds)
                 .filter { it.length >= MIN_QUERY_LENGTH }
                 .distinctUntilChanged()
-                .collect { query -> fetchPlaceSuggestions(query) }
+                .collectLatest { query -> fetchPlaceSuggestions(query) }
         }
 
         viewModelScope.launch(dispatchers.io) {
@@ -287,7 +287,7 @@ constructor(
                                 e is LocationClient.LocationException &&
                                         e.message?.contains(
                                             "GPS is disabled",
-                                            ignoreCase = true
+                                            ignoreCase = true,
                                         ) == true
                             val error =
                                 if (isGpsDisabled) {
@@ -342,7 +342,7 @@ constructor(
                                 e is LocationClient.LocationException &&
                                         e.message?.contains(
                                             "GPS is disabled",
-                                            ignoreCase = true
+                                            ignoreCase = true,
                                         ) == true
                             val error =
                                 if (isGpsDisabled) {
@@ -356,13 +356,11 @@ constructor(
                                 it.copy(
                                     isRefreshing = false,
                                     error = error,
-                                    isGpsDisabled = isGpsDisabled
+                                    isGpsDisabled = isGpsDisabled,
                                 )
                             }
                         },
                     )
-                } catch (_: CancellationException) {
-                    logger.d("Pull-to-refresh cancelled")
                 } catch (e: Exception) {
                     logger.e("Error during pull-to-refresh", e)
                     _uiState.update {
@@ -379,8 +377,9 @@ constructor(
             viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
                 try {
                     val prefs = preferenceManager.getUserPreferencesFlow().first()
-                    val isOverridden = prefs.isLocationOverridden &&
-                            prefs.overrideLat != null && prefs.overrideLon != null
+                    val isOverridden =
+                        prefs.isLocationOverridden &&
+                                prefs.overrideLat != null && prefs.overrideLon != null
                     val lat = if (isOverridden) prefs.overrideLat else prefs.latitude
                     val lon = if (isOverridden) prefs.overrideLon else prefs.longitude
                     val overrideName = if (isOverridden) prefs.overrideLocationName else null
@@ -405,7 +404,7 @@ constructor(
                         it.copy(
                             isLoading = false,
                             isRefreshing = false,
-                            error = errorResponseFromException(e)
+                            error = errorResponseFromException(e),
                         )
                     }
                 }
@@ -442,8 +441,11 @@ constructor(
                 if (e is CancellationException) throw e
                 logger.e("Error loading weather data", e)
                 val error =
-                    if (e is Exception) errorResponseFromException(e)
-                    else UiText.StringResource(resId = R.string.general_error_txt)
+                    if (e is Exception) {
+                        errorResponseFromException(e)
+                    } else {
+                        UiText.StringResource(resId = R.string.general_error_txt)
+                    }
                 _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
             }.collectLatest { state -> _uiState.value = state }
     }
@@ -519,7 +521,7 @@ constructor(
                     val active = isPremiumActive(response.data?.premiumExpiresAt)
                     preferenceManager.savePremiumStatus(
                         isPremium = active,
-                        expiryMillis = expiryMillis
+                        expiryMillis = expiryMillis,
                     )
                 } else {
                     // 400 Bad Request — token is invalid, force logout
@@ -542,8 +544,8 @@ constructor(
                     _authState.value =
                         AuthState.Error(
                             UiText.DynamicText(
-                                response.message ?: "Authentication failed"
-                            )
+                                response.message ?: "Authentication failed",
+                            ),
                         )
                     return
                 }
@@ -688,33 +690,38 @@ constructor(
     }
 
     /** Pin a saved location as the default weather source and reload weather data. */
-    fun setDefaultLocation(lat: Double, lon: Double, name: String) {
+    fun setDefaultLocation(
+        lat: Double,
+        lon: Double,
+        name: String,
+    ) {
         _uiState.update { UIState(isLoading = true) }
         dataLoadingJob?.cancel()
-        dataLoadingJob = viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
-            try {
-                logger.i("Setting default location override: $name ($lat, $lon)")
-                preferenceManager.saveLocationOverride(lat, lon, name)
-                // Use coordinates directly — avoids DataStore re-read race condition
-                fetchWeatherData(
-                    lat,
-                    lon,
-                    isOverridden = true,
-                    overrideName = name,
-                    forceRefresh = true
-                )
-            } catch (_: CancellationException) {
-                logger.d("setDefaultLocation cancelled")
-            } catch (e: Exception) {
-                logger.e("Error setting default location", e)
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = errorResponseFromException(e)
+        dataLoadingJob =
+            viewModelScope.launch(dataFetchExceptionHandler + dispatchers.io) {
+                try {
+                    logger.i("Setting default location override: $name ($lat, $lon)")
+                    preferenceManager.saveLocationOverride(lat, lon, name)
+                    // Use coordinates directly — avoids DataStore re-read race condition
+                    fetchWeatherData(
+                        lat,
+                        lon,
+                        isOverridden = true,
+                        overrideName = name,
+                        forceRefresh = true,
                     )
+                } catch (_: CancellationException) {
+                    logger.d("setDefaultLocation cancelled")
+                } catch (e: Exception) {
+                    logger.e("Error setting default location", e)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = errorResponseFromException(e),
+                        )
+                    }
                 }
             }
-        }
     }
 
     /** Clear the pinned location override and revert to live GPS. */
@@ -748,11 +755,11 @@ constructor(
     }
 
     override fun onCleared() {
-        super.onCleared()
         logger.d("MainViewModel cleared - cancelling all jobs")
         notificationBannerJob?.cancel()
         locationJob?.cancel()
         dataLoadingJob?.cancel()
+        super.onCleared()
     }
 }
 

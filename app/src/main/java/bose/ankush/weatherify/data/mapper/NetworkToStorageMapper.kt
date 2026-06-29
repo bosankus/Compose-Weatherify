@@ -7,7 +7,6 @@ import bose.ankush.network.model.AirQuality as NetworkAirQuality
 import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
 
 object NetworkToStorageMapper {
-
     private fun mapWeatherInfo(list: List<NetworkWeatherForecast.Data.WeatherInfo?>?) =
         list?.mapNotNull { info ->
             info?.let {
@@ -20,81 +19,82 @@ object NetworkToStorageMapper {
             }
         }
 
-    private fun mapCurrentToData(
-        current: NetworkWeatherForecast.Data.Current?,
-    ) = current?.let {
-        WeatherData.Current(
-            clouds = it.clouds,
-            dt = it.dt,
-            feels_like = it.feelsLike,
-            humidity = it.humidity,
-            pressure = it.pressure,
-            sunrise = it.sunrise,
-            sunset = it.sunset,
-            temp = it.temp,
-            uvi = it.uvi,
-            weather = mapWeatherInfo(it.weather),
-            wind_gust = it.windGust,
-            wind_speed = it.windSpeed,
-        )
-    }
-
-    private fun mapDailyToData(
-        daily: List<NetworkWeatherForecast.Data.Daily?>?,
-    ) = daily?.map { item ->
-        item?.let {
-            WeatherData.Daily(
+    private fun mapCurrentToData(current: NetworkWeatherForecast.Data.Current?) =
+        current?.let {
+            WeatherData.Current(
                 clouds = it.clouds,
-                dew_point = it.dewPoint,
                 dt = it.dt,
+                feels_like = it.feelsLike,
                 humidity = it.humidity,
                 pressure = it.pressure,
-                rain = it.rain,
-                summary = it.summary,
                 sunrise = it.sunrise,
                 sunset = it.sunset,
-                temp = it.temp?.let { t ->
-                    WeatherData.Daily.Temp(
-                        day = t.day, eve = t.eve, max = t.max,
-                        min = t.min, morn = t.morn, night = t.night,
-                    )
-                },
+                temp = it.temp,
                 uvi = it.uvi,
                 weather = mapWeatherInfo(it.weather),
                 wind_gust = it.windGust,
                 wind_speed = it.windSpeed,
             )
         }
-    }
 
-    private fun mapHourlyToData(
-        hourly: List<NetworkWeatherForecast.Data.Hourly?>?,
-    ) = hourly?.map { item ->
-        item?.let {
-            WeatherData.Hourly(
-                clouds = it.clouds,
-                dt = it.dt,
-                feels_like = it.feelsLike,
-                humidity = it.humidity,
-                temp = it.temp,
-                weather = mapWeatherInfo(it.weather),
-            )
+    private fun mapDailyToData(daily: List<NetworkWeatherForecast.Data.Daily?>?) =
+        daily?.map { item ->
+            item?.let {
+                WeatherData.Daily(
+                    clouds = it.clouds,
+                    dew_point = it.dewPoint,
+                    dt = it.dt,
+                    humidity = it.humidity,
+                    pressure = it.pressure,
+                    rain = it.rain,
+                    summary = it.summary,
+                    sunrise = it.sunrise,
+                    sunset = it.sunset,
+                    temp =
+                        it.temp?.let { t ->
+                            WeatherData.Daily.Temp(
+                                day = t.day,
+                                eve = t.eve,
+                                max = t.max,
+                                min = t.min,
+                                morn = t.morn,
+                                night = t.night,
+                            )
+                        },
+                    uvi = it.uvi,
+                    weather = mapWeatherInfo(it.weather),
+                    wind_gust = it.windGust,
+                    wind_speed = it.windSpeed,
+                )
+            }
         }
-    }
 
-    private fun mapAlertsToData(
-        alerts: List<NetworkWeatherForecast.Data.Alert?>?,
-    ) = alerts?.mapNotNull { alert ->
-        alert?.let {
-            WeatherData.Alert(
-                description = it.description,
-                end = it.end,
-                event = it.event,
-                sender_name = it.senderName,
-                start = it.start,
-            )
+    private fun mapHourlyToData(hourly: List<NetworkWeatherForecast.Data.Hourly?>?) =
+        hourly?.map { item ->
+            item?.let {
+                WeatherData.Hourly(
+                    clouds = it.clouds,
+                    dt = it.dt,
+                    feels_like = it.feelsLike,
+                    humidity = it.humidity,
+                    temp = it.temp,
+                    weather = mapWeatherInfo(it.weather),
+                )
+            }
         }
-    } ?: emptyList()
+
+    private fun mapAlertsToData(alerts: List<NetworkWeatherForecast.Data.Alert?>?) =
+        alerts?.mapNotNull { alert ->
+            alert?.let {
+                WeatherData.Alert(
+                    description = it.description,
+                    end = it.end,
+                    event = it.event,
+                    sender_name = it.senderName,
+                    start = it.start,
+                )
+            }
+        } ?: emptyList()
 
     fun mapWeatherToStorageEntity(weatherData: NetworkWeatherForecast): WeatherData {
         val data = weatherData.data

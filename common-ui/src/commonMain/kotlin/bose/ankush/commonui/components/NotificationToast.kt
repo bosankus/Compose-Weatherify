@@ -136,16 +136,16 @@ fun NotificationToast(
             visible = isVisible,
             enter =
                 fadeIn(animationSpec = tween(300, easing = FastOutSlowInEasing)) +
-                        slideInVertically(
-                            animationSpec = tween(300, easing = FastOutSlowInEasing),
-                            initialOffsetY = { it },
-                        ),
+                    slideInVertically(
+                        animationSpec = tween(300, easing = FastOutSlowInEasing),
+                        initialOffsetY = { it },
+                    ),
             exit =
                 fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing)) +
-                        slideOutVertically(
-                            animationSpec = tween(300, easing = FastOutSlowInEasing),
-                            targetOffsetY = { it },
-                        ),
+                    slideOutVertically(
+                        animationSpec = tween(300, easing = FastOutSlowInEasing),
+                        targetOffsetY = { it },
+                    ),
         ) {
             Row(
                 modifier =

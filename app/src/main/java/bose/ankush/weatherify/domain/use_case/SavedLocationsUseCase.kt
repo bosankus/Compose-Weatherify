@@ -1,11 +1,11 @@
-package bose.ankush.network.domain
+package bose.ankush.weatherify.domain.use_case
 
 import bose.ankush.network.model.SavedLocation
 import bose.ankush.network.repository.LocationRepository
+import javax.inject.Inject
 
-class SavedLocationsUseCase(
-    private val repository: LocationRepository,
-) {
+class SavedLocationsUseCase @Inject constructor(private val repository: LocationRepository) {
+
     suspend fun getSavedLocations(): Result<List<SavedLocation>> = repository.getSavedLocations()
 
     suspend fun saveLocation(

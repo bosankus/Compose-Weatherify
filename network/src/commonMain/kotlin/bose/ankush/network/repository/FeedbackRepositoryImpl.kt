@@ -1,7 +1,7 @@
 package bose.ankush.network.repository
 
 import bose.ankush.network.api.FeedbackApiService
-import bose.ankush.network.common.NetworkConnectivity
+import bose.ankush.network.util.NetworkConnectivity
 import bose.ankush.network.model.FeedbackRequest
 import bose.ankush.network.model.FeedbackResponse
 

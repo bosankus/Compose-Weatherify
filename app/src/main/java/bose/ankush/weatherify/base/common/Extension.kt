@@ -49,27 +49,28 @@ object Extension {
     @SuppressLint("QueryPermissionsNeeded")
     private fun Context.resolveLocaleIntent(): Intent? {
         val pm = packageManager
-        val candidates = buildList {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val candidates =
+            buildList {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    add(
+                        Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                            data = Uri.fromParts("package", packageName, null)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        },
+                    )
+                }
                 add(
-                    Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                         data = Uri.fromParts("package", packageName, null)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     },
                 )
+                add(
+                    Intent(Settings.ACTION_LOCALE_SETTINGS).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                )
             }
-            add(
-                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", packageName, null)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                },
-            )
-            add(
-                Intent(Settings.ACTION_LOCALE_SETTINGS).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                },
-            )
-        }
         return candidates.firstOrNull { intent ->
             try {
                 intent.resolveActivity(pm) != null
@@ -105,6 +106,7 @@ object Extension {
     fun getDeviceModel(): String = Build.MODEL
 
     const val OPERATING_SYSTEM: String = "Android"
+
     fun getOperatingSystem(): String = OPERATING_SYSTEM
 
     fun getOsVersion(): String = Build.VERSION.RELEASE
@@ -118,15 +120,18 @@ object Extension {
     }
 
     const val REGISTRATION_SOURCE: String = "Android App"
+
     fun getRegistrationSource(): String = REGISTRATION_SOURCE
 
-    fun getIpAddress(): String? = runCatching {
-        NetworkInterface.getNetworkInterfaces()
-            .asSequence()
-            .flatMap { it.inetAddresses.asSequence() }
-            .firstOrNull { !it.isLoopbackAddress && !it.isLinkLocalAddress }
-            ?.hostAddress
-    }.getOrNull()
+    fun getIpAddress(): String? =
+        runCatching {
+            NetworkInterface
+                .getNetworkInterfaces()
+                .asSequence()
+                .flatMap { it.inetAddresses.asSequence() }
+                .firstOrNull { !it.isLoopbackAddress && !it.isLinkLocalAddress }
+                ?.hostAddress
+        }.getOrNull()
 
     suspend fun getFirebaseToken(): String? =
         try {

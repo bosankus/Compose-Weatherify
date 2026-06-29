@@ -44,6 +44,7 @@
     <string name="server_error_txt">Umm… Looks like server issue!</string>
     <string name="no_internet_txt">Umm… Can you re-check internet connectivity!</string>
     <string name="network_unavailable_txt">Umm… Can you re-check internet connectivity!</string>
+    <string name="offline_toast_title_txt">You\'re offline</string>
     <string name="network_timeout_txt">Request timed out. Please try again later.</string>
     <string name="general_error_txt">Oops!..Something went wrong.</string>
     <string name="gps_disabled_error_txt">Location services are turned off. Enable GPS to get your local weather.</string>

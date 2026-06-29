@@ -60,34 +60,38 @@ private fun CityNameSearchBarWithList(navigator: AppNavigator) {
     val cityName by viewModels.cityName.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(10.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
     ) {
         TextField(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp)),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp)),
             value = searchText,
             onValueChange = viewModels::onSearchTextChange,
             placeholder = { Text(text = stringResource(id = R.string.select_city) + "...") },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            ),
+            colors =
+                TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    cursorColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    focusedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
         )
         Spacer(modifier = Modifier.height(10.dp))
         if (isSearching) {
             ShowLoading(modifier = Modifier.fillMaxSize())
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
             ) {
                 items(cityName.size) {
                     CityListItem(cityNameList = cityName, position = it) { _, _ ->

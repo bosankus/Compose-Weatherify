@@ -1,4 +1,4 @@
-package bose.ankush.storage.impl
+package bose.ankush.storage
 
 import android.content.Context
 import androidx.security.crypto.EncryptedSharedPreferences

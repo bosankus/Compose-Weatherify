@@ -1,4 +1,4 @@
-package bose.ankush.storage.impl
+package bose.ankush.storage
 
 import bose.ankush.storage.api.TokenStorage
 import kotlinx.coroutines.flow.Flow

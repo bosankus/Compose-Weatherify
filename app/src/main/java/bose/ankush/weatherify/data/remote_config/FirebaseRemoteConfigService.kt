@@ -12,38 +12,38 @@ import javax.inject.Singleton
 
 @Singleton
 class FirebaseRemoteConfigService
-@Inject
-constructor() : RemoteConfigService {
-    private val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
-    private val tag = "${FirebaseRemoteConfigService::class.simpleName} ->"
+    @Inject
+    constructor() : RemoteConfigService {
+        private val remoteConfig: FirebaseRemoteConfig = Firebase.remoteConfig
+        private val tag = "${FirebaseRemoteConfigService::class.simpleName} ->"
 
-    override fun initialize() {
-        val configSettings =
-            remoteConfigSettings {
-                minimumFetchIntervalInSeconds = DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS
+        override fun initialize() {
+            val configSettings =
+                remoteConfigSettings {
+                    minimumFetchIntervalInSeconds = DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS
+                }
+
+            remoteConfig.apply {
+                setConfigSettingsAsync(configSettings)
+                setDefaultsAsync(R.xml.remote_config_defaults)
             }
 
-        remoteConfig.apply {
-            setConfigSettingsAsync(configSettings)
-            setDefaultsAsync(R.xml.remote_config_defaults)
+            Timber.tag(tag).d("Firebase Remote Config initialized")
         }
 
-        Timber.tag(tag).d("Firebase Remote Config initialized")
-    }
+        @Suppress("TooGenericExceptionCaught")
+        override fun getBoolean(
+            key: String,
+            defaultValue: Boolean,
+        ): Boolean =
+            try {
+                remoteConfig.getBoolean(key)
+            } catch (e: Exception) {
+                Timber.tag(tag).e(e, "Error getting boolean value for key: $key")
+                defaultValue
+            }
 
-    @Suppress("TooGenericExceptionCaught")
-    override fun getBoolean(
-        key: String,
-        defaultValue: Boolean,
-    ): Boolean =
-        try {
-            remoteConfig.getBoolean(key)
-        } catch (e: Exception) {
-            Timber.tag(tag).e(e, "Error getting boolean value for key: $key")
-            defaultValue
+        companion object {
+            private const val DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS = 3600L
         }
-
-    companion object {
-        private const val DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS = 3600L
     }
-}

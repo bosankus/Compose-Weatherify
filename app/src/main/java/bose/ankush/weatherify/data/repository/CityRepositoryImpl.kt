@@ -8,20 +8,22 @@ import com.google.gson.reflect.TypeToken
 import javax.inject.Inject
 
 class CityRepositoryImpl
-@Inject
-constructor(
-    private val context: Context,
-) : CityRepository {
-    override fun getCityNames(): List<CityDto> {
-        val jsonString: String =
-            context.assets
-                .open("city_names.json")
-                .bufferedReader()
-                .use { it.readText() }
+    @Inject
+    constructor(
+        private val context: Context,
+    ) : CityRepository {
+        override fun getCityNames(): List<CityDto> {
+            val jsonString: String =
+                context.assets
+                    .open("city_names.json")
+                    .bufferedReader()
+                    .use { it.readText() }
 
-        val cityNameListType = object : TypeToken<List<CityDto>>() {}.type
+            val cityNameListType = object : TypeToken<List<CityDto>>() {}.type
 
-        return (Gson().fromJson<List<CityDto>?>(jsonString, cityNameListType)
-            ?: emptyList()).sortedBy { it.name }
+            return (
+                Gson().fromJson<List<CityDto>?>(jsonString, cityNameListType)
+                    ?: emptyList()
+            ).sortedBy { it.name }
+        }
     }
-}

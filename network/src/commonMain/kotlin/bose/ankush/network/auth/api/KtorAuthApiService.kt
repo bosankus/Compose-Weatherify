@@ -8,9 +8,11 @@ import bose.ankush.network.auth.model.RegisterRequest
 import bose.ankush.network.utils.NetworkUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 
 class KtorAuthApiService(
@@ -44,8 +46,10 @@ class KtorAuthApiService(
                 }.body()
         }
 
-    override suspend fun logout(): LogoutResponse =
+    override suspend fun logout(token: String?): LogoutResponse =
         NetworkUtils.retryWithExponentialBackoff {
-            httpClient.post("$baseUrl/logout").body()
+            httpClient.post("$baseUrl/logout") {
+                token?.let { header(HttpHeaders.Authorization, "Bearer $it") }
+            }.body()
         }
 }

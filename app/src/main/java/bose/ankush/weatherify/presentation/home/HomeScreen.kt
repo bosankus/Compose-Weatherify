@@ -31,17 +31,21 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.SunriseSunsetCombinedAnimation
 import bose.ankush.commonui.components.ToastAnchorState
+import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.Extension.openLocationSettings
@@ -174,6 +178,11 @@ private fun ShowUIContainer(
     val weatherReports = uiState.weatherData
     val airQualityReports = uiState.airQualityData
 
+    var showOfflineToast by remember { mutableStateOf(false) }
+    LaunchedEffect(uiState.isOffline) {
+        if (uiState.isOffline) showOfflineToast = true
+    }
+
     val pullToRefreshState = rememberPullToRefreshState()
 
     val currentWeatherTransitionState = remember { MutableTransitionState(false) }
@@ -225,6 +234,16 @@ private fun ShowUIContainer(
                 negativeButtonLabel = stringResource(R.string.cancel_btn_txt),
             )
         }
+
+        NotificationToast(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            message = stringResource(R.string.network_unavailable_txt),
+            title = stringResource(R.string.offline_toast_title_txt),
+            type = ToastType.WARNING,
+            isVisible = showOfflineToast,
+            onDismiss = { showOfflineToast = false },
+            anchorState = toastAnchorState,
+        )
 
         Scaffold(
             containerColor = Color.Transparent,

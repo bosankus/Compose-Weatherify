@@ -38,8 +38,7 @@ internal fun CityListItem(
                 .clickable {
                     selectedItem = position
                     onItemClick(position, cityName)
-                }
-                .background(bgColor)
+                }.background(bgColor)
                 .padding(start = 3.dp, top = 10.dp, bottom = 10.dp),
     )
 }

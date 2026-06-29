@@ -1,4 +1,4 @@
-package bose.ankush.network.common
+package bose.ankush.network.util
 
 class NetworkException(
     val errorCode: Int,
