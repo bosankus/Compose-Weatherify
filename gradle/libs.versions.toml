@@ -82,7 +82,7 @@ leakCanary = "2.14"
 razorpayCheckout = "1.6.41"
 
 # KMP — Ktor
-ktor = "3.5.0"
+ktor = "3.5.1"
 
 # KMP — Serialization
 kotlinxSerialization = "1.11.0"
