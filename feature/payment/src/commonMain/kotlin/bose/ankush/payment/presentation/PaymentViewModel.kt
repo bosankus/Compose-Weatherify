@@ -41,15 +41,17 @@ class PaymentViewModel(
 
     fun processIntent(intent: PaymentIntent) {
         when (intent) {
-            is PaymentIntent.StartPayment -> handleStartPayment(
-                intent.amountInPaisa,
-                intent.currency,
-            )
-            is PaymentIntent.VerifyPayment -> handleVerifyPayment(
-                intent.orderId,
-                intent.paymentId,
-                intent.signature,
-            )
+            is PaymentIntent.StartPayment ->
+                handleStartPayment(
+                    intent.amountInPaisa,
+                    intent.currency,
+                )
+            is PaymentIntent.VerifyPayment ->
+                handleVerifyPayment(
+                    intent.orderId,
+                    intent.paymentId,
+                    intent.signature,
+                )
             is PaymentIntent.PaymentFailed -> handlePaymentFailed(intent.message)
         }
     }
@@ -107,8 +109,8 @@ class PaymentViewModel(
                                     currency = order.currency,
                                     name = "Weatherify Subscription",
                                     description = "Premium Plan",
-                                )
-                            )
+                                ),
+                            ),
                         )
                         _uiState.update {
                             it.copy(
@@ -126,7 +128,7 @@ class PaymentViewModel(
                                 stage = PaymentStage.Failure,
                             )
                         }
-                    }
+                    },
                 )
         }
     }
@@ -158,7 +160,11 @@ class PaymentViewModel(
                             }
                             return@fold
                         }
-                        val expiryMillis = Clock.System.now().plus(30.days).toEpochMilliseconds()
+                        val expiryMillis =
+                            Clock.System
+                                .now()
+                                .plus(30.days)
+                                .toEpochMilliseconds()
                         premiumStore.savePremiumStatus(isPremium = true, expiryMillis = expiryMillis)
                         // _uiState auto-updates via observePremiumStatus() collecting the new value
                         _uiState.update {

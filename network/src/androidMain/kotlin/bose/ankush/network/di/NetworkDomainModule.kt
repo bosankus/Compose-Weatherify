@@ -31,48 +31,49 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-actual val networkDomainModule: Module = module {
-    single<NetworkConnectivity> { AndroidNetworkConnectivity(androidContext()) }
-    single<HttpClient> { createHttpClient() }
-    single<AuthApiService> { KtorAuthApiService(get(), NetworkConstants.WEATHER_BASE_URL) }
-    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
-    single<TokenManager> { TokenManager(get(), get()) }
-    single<WeatherApiService> {
-        KtorWeatherApiService(
-            get(),
-            get(),
-            NetworkConstants.WEATHER_BASE_URL
-        )
+actual val networkDomainModule: Module =
+    module {
+        single<NetworkConnectivity> { AndroidNetworkConnectivity(androidContext()) }
+        single<HttpClient> { createHttpClient() }
+        single<AuthApiService> { KtorAuthApiService(get(), NetworkConstants.WEATHER_BASE_URL) }
+        single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+        single<TokenManager> { TokenManager(get(), get()) }
+        single<WeatherApiService> {
+            KtorWeatherApiService(
+                get(),
+                get(),
+                NetworkConstants.WEATHER_BASE_URL,
+            )
+        }
+        single<WeatherRepository> { WeatherRepositoryImpl(get(), get()) }
+        single<FeedbackApiService> {
+            KtorFeedbackApiService(
+                get(),
+                get(),
+                NetworkConstants.WEATHER_BASE_URL,
+            )
+        }
+        single<FeedbackRepository> { FeedbackRepositoryImpl(get(), get()) }
+        single<LocationApiService> {
+            KtorLocationApiService(
+                get(),
+                get(),
+                NetworkConstants.WEATHER_BASE_URL,
+            )
+        }
+        single<LocationRepository> { LocationRepositoryImpl(get()) }
+        single<ServiceApiService> {
+            KtorServiceApiService(
+                get(),
+                NetworkConstants.WEATHER_BASE_URL,
+            )
+        }
+        single<ServiceRepository> { ServiceRepositoryImpl(get()) }
+        single<PaymentApiService> {
+            KtorPaymentApiService(
+                get(),
+                get(),
+                NetworkConstants.WEATHER_BASE_URL,
+            )
+        }
     }
-    single<WeatherRepository> { WeatherRepositoryImpl(get(), get()) }
-    single<FeedbackApiService> {
-        KtorFeedbackApiService(
-            get(),
-            get(),
-            NetworkConstants.WEATHER_BASE_URL
-        )
-    }
-    single<FeedbackRepository> { FeedbackRepositoryImpl(get(), get()) }
-    single<LocationApiService> {
-        KtorLocationApiService(
-            get(),
-            get(),
-            NetworkConstants.WEATHER_BASE_URL
-        )
-    }
-    single<LocationRepository> { LocationRepositoryImpl(get()) }
-    single<ServiceApiService> {
-        KtorServiceApiService(
-            get(),
-            NetworkConstants.WEATHER_BASE_URL
-        )
-    }
-    single<ServiceRepository> { ServiceRepositoryImpl(get()) }
-    single<PaymentApiService> {
-        KtorPaymentApiService(
-            get(),
-            get(),
-            NetworkConstants.WEATHER_BASE_URL
-        )
-    }
-}

@@ -15,19 +15,19 @@ internal class PaymentRepositoryImpl(
     private val apiService: PaymentApiService,
     private val networkConnectivity: NetworkConnectivity,
 ) : PaymentRepository {
-
     override suspend fun createOrder(params: CreateOrderParams): Result<Order> {
         if (!networkConnectivity.isNetworkAvailable()) {
             return Result.failure(IllegalStateException("No internet connection"))
         }
         return runCatching {
-            val request = CreateOrderRequest(
-                amount = params.amount,
-                currency = params.currency,
-                receipt = "receipt_${Clock.System.now().toEpochMilliseconds()}",
-                partialPayment = true,
-                firstPaymentMinAmount = 500L,
-            )
+            val request =
+                CreateOrderRequest(
+                    amount = params.amount,
+                    currency = params.currency,
+                    receipt = "receipt_${Clock.System.now().toEpochMilliseconds()}",
+                    partialPayment = true,
+                    firstPaymentMinAmount = 500L,
+                )
             val response = apiService.createOrder(request)
             response.toOrder()
                 ?: error("Order data missing or invalid in server response")
@@ -39,11 +39,12 @@ internal class PaymentRepositoryImpl(
             return Result.failure(IllegalStateException("No internet connection"))
         }
         return runCatching {
-            val request = VerifyPaymentRequest(
-                razorpayOrderId = params.orderId,
-                razorpayPaymentId = params.paymentId,
-                razorpaySignature = params.signature,
-            )
+            val request =
+                VerifyPaymentRequest(
+                    razorpayOrderId = params.orderId,
+                    razorpayPaymentId = params.paymentId,
+                    razorpaySignature = params.signature,
+                )
             val response = apiService.verifyPayment(request)
             PaymentVerificationResult(
                 success = response.success,

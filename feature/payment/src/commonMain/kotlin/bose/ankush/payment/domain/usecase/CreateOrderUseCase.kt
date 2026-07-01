@@ -7,6 +7,5 @@ import bose.ankush.payment.domain.repository.PaymentRepository
 class CreateOrderUseCase(
     private val repository: PaymentRepository,
 ) {
-    suspend operator fun invoke(params: CreateOrderParams): Result<Order> =
-        repository.createOrder(params)
+    suspend operator fun invoke(params: CreateOrderParams): Result<Order> = repository.createOrder(params)
 }

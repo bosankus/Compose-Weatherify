@@ -22,7 +22,6 @@ class PreferenceManagerImpl
     constructor(
         @get:ApplicationContext private val context: Context,
     ) : PreferenceManager {
-
         override fun getUserPreferencesFlow(): Flow<UserPreferences> =
             context.dataStore.data.map { preferences ->
                 UserPreferences(

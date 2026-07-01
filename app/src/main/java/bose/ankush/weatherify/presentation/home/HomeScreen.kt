@@ -63,6 +63,7 @@ import bose.ankush.weatherify.presentation.home.state.ShowLoading
 import bose.ankush.weatherify.presentation.navigation.AppBottomBar
 import bose.ankush.weatherify.presentation.navigation.AppNavigator
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val ANIMATION_INITIAL_DELAY_MS = 100L
 private const val ANIMATION_STAGGER_DELAY_MS = 150L
@@ -100,17 +101,18 @@ fun HomeScreen(
             ?.current
             ?.weather
             ?.isNotEmpty() == true ||
-                uiState.airQualityData != null -> {
+            uiState.airQualityData != null -> {
             ShowUIContainer(
                 uiState = uiState,
                 navigator = navigator,
                 toastAnchorState = toastAnchorState,
-                notificationCardState = NotificationCardState(
-                    isVisible = showNotificationCard,
-                    isPermanentlyDeclined = isNotificationPermissionPermanentlyDeclined,
-                    onEnableClick = { viewModel.updateNotificationPermission(true) },
-                    onDismissClick = { viewModel.updateShowNotificationBannerState(false) },
-                ),
+                notificationCardState =
+                    NotificationCardState(
+                        isVisible = showNotificationCard,
+                        isPermanentlyDeclined = isNotificationPermissionPermanentlyDeclined,
+                        onEnableClick = { viewModel.updateNotificationPermission(true) },
+                        onDismissClick = { viewModel.updateShowNotificationBannerState(false) },
+                    ),
                 onRefresh = { viewModel.refreshWeatherData() },
                 onResetLocationOverride = { viewModel.clearLocationOverride() },
             )
@@ -199,19 +201,19 @@ private fun ShowUIContainer(
         hourlyForecastTransitionState.targetState = false
         dailyForecastTransitionState.targetState = false
 
-        delay(ANIMATION_INITIAL_DELAY_MS)
+        delay(ANIMATION_INITIAL_DELAY_MS.milliseconds)
         currentWeatherTransitionState.targetState = true
 
-        delay(ANIMATION_STAGGER_DELAY_MS)
+        delay(ANIMATION_STAGGER_DELAY_MS.milliseconds)
         alertsTransitionState.targetState = true
 
-        delay(ANIMATION_STAGGER_DELAY_MS)
+        delay(ANIMATION_STAGGER_DELAY_MS.milliseconds)
         airQualityTransitionState.targetState = true
 
-        delay(ANIMATION_STAGGER_DELAY_MS)
+        delay(ANIMATION_STAGGER_DELAY_MS.milliseconds)
         hourlyForecastTransitionState.targetState = true
 
-        delay(ANIMATION_STAGGER_DELAY_MS)
+        delay(ANIMATION_STAGGER_DELAY_MS.milliseconds)
         dailyForecastTransitionState.targetState = true
     }
 
@@ -263,9 +265,10 @@ private fun ShowUIContainer(
                         if (uiState.isLocationOverridden && uiState.activeLocationName != null) {
                             item(key = "location_override_chip") {
                                 Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 4.dp),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     AssistChip(
@@ -274,7 +277,7 @@ private fun ShowUIContainer(
                                             Text(
                                                 text = "${uiState.activeLocationName}  ·  ${
                                                     stringResource(
-                                                        R.string.location_override_reset_btn
+                                                        R.string.location_override_reset_btn,
                                                     )
                                                 }",
                                             )
@@ -282,18 +285,21 @@ private fun ShowUIContainer(
                                         leadingIcon = {
                                             Icon(
                                                 imageVector = Icons.Default.LocationOn,
-                                                contentDescription = stringResource(
-                                                    R.string.location_override_chip_content_desc,
-                                                    uiState.activeLocationName,
-                                                ),
+                                                contentDescription =
+                                                    stringResource(
+                                                        R.string.location_override_chip_content_desc,
+                                                        uiState.activeLocationName,
+                                                    ),
                                                 modifier = Modifier.size(AssistChipDefaults.IconSize),
                                             )
                                         },
-                                        colors = AssistChipDefaults.assistChipColors(
-                                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                            labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                            leadingIconContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                        ),
+                                        colors =
+                                            AssistChipDefaults.assistChipColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                labelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                leadingIconContentColor =
+                                                    MaterialTheme.colorScheme.onSecondaryContainer,
+                                            ),
                                     )
                                 }
                             }
@@ -305,10 +311,10 @@ private fun ShowUIContainer(
                                     visibleState = currentWeatherTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     CurrentWeatherReportLayout(
@@ -326,10 +332,10 @@ private fun ShowUIContainer(
                                     visibleState = alertsTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     WeatherAlertLayout(alerts = alerts)
@@ -343,10 +349,10 @@ private fun ShowUIContainer(
                                     visibleState = airQualityTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     BriefAirQualityReportCardLayout(aq)
@@ -360,10 +366,10 @@ private fun ShowUIContainer(
                                     visibleState = hourlyForecastTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     HourlyWeatherForecastReportLayout(it)
@@ -377,10 +383,10 @@ private fun ShowUIContainer(
                                     visibleState = dailyForecastTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     DailyWeatherForecastReportLayout(list)

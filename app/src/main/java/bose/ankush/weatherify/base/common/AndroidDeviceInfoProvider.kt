@@ -1,5 +1,7 @@
 package bose.ankush.weatherify.base.common
 
+import bose.ankush.auth.domain.DeviceInfoProvider
+
 /** Android implementation of [DeviceInfoProvider] backed by the existing Extension helpers. */
 class AndroidDeviceInfoProvider : DeviceInfoProvider {
     override fun getDeviceModel(): String = Extension.getDeviceModel()

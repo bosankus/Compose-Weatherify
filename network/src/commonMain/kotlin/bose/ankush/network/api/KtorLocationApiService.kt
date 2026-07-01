@@ -19,32 +19,36 @@ import io.ktor.http.contentType
 class KtorLocationApiService(
     private val httpClient: HttpClient,
     private val tokenManager: TokenManager,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : LocationApiService {
     override suspend fun saveLocation(request: SaveLocationRequest): ApiResponse<Unit> =
-        httpClient.authorizedRequest(tokenManager) { authConfig ->
-            post("$baseUrl/save-location") {
-                contentType(ContentType.Application.Json)
-                setBody(request)
-                authConfig()
-            }
-        }.body()
+        httpClient
+            .authorizedRequest(tokenManager) { authConfig ->
+                post("$baseUrl/save-location") {
+                    contentType(ContentType.Application.Json)
+                    setBody(request)
+                    authConfig()
+                }
+            }.body()
 
     override suspend fun getSavedLocations(): ApiResponse<List<SavedLocation>> =
-        httpClient.authorizedRequest(tokenManager) { authConfig ->
-            get("$baseUrl/saved-places") { authConfig() }
-        }.body()
+        httpClient
+            .authorizedRequest(tokenManager) { authConfig ->
+                get("$baseUrl/saved-places") { authConfig() }
+            }.body()
 
     override suspend fun deleteLocation(id: String): ApiResponse<Unit> =
-        httpClient.authorizedRequest(tokenManager) { authConfig ->
-            delete("$baseUrl/saved-places/$id") { authConfig() }
-        }.body()
+        httpClient
+            .authorizedRequest(tokenManager) { authConfig ->
+                delete("$baseUrl/saved-places/$id") { authConfig() }
+            }.body()
 
     override suspend fun searchPlaces(query: String): ApiResponse<List<PlaceSuggestion>> =
-        httpClient.authorizedRequest(tokenManager) { authConfig ->
-            get("$baseUrl/search-place") {
-                parameter("q", query)
-                authConfig()
-            }
-        }.body()
+        httpClient
+            .authorizedRequest(tokenManager) { authConfig ->
+                get("$baseUrl/search-place") {
+                    parameter("q", query)
+                    authConfig()
+                }
+            }.body()
 }

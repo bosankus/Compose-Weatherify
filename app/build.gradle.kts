@@ -88,6 +88,7 @@ ksp {
 dependencies {
 
     api(project(":common-ui"))
+    api(project(":feature:auth"))
     api(project(":feature:payment"))
     api(project(":language"))
     api(project(":storage"))

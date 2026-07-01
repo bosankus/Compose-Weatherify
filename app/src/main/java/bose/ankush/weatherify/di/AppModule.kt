@@ -2,8 +2,6 @@ package bose.ankush.weatherify.di
 
 import android.app.Application
 import android.content.Context
-import bose.ankush.weatherify.base.common.AndroidDeviceInfoProvider
-import bose.ankush.weatherify.base.common.DeviceInfoProvider
 import bose.ankush.weatherify.base.common.LoggerFactory
 import bose.ankush.weatherify.base.common.TimberLoggerFactory
 import bose.ankush.weatherify.base.config.AndroidAppConfig
@@ -24,10 +22,6 @@ object AppModule {
     @Provides
     @Singleton
     fun provideLoggerFactory(): LoggerFactory = TimberLoggerFactory()
-
-    @Provides
-    @Singleton
-    fun provideDeviceInfoProvider(): DeviceInfoProvider = AndroidDeviceInfoProvider()
 
     @Provides
     @Singleton

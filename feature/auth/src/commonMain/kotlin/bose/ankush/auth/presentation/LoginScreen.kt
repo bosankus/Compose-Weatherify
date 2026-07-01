@@ -1,4 +1,4 @@
-package bose.ankush.commonui.auth
+package bose.ankush.auth.presentation
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -53,7 +53,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
-// Multiplatform-safe email regex (replaces android.util.Patterns)
 private val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
 @Composable
@@ -371,7 +370,6 @@ fun LoginScreen(
                                                                 onWebUrlClick(
                                                                     "https://data.androidplay.in/wfy/terms-and-conditions",
                                                                 )
-
                                                             "privacy" ->
                                                                 onWebUrlClick(
                                                                     "https://data.androidplay.in/wfy/privacy-policy",

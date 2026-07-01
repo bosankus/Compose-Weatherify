@@ -48,8 +48,9 @@ class KtorAuthApiService(
 
     override suspend fun logout(token: String?): LogoutResponse =
         NetworkUtils.retryWithExponentialBackoff {
-            httpClient.post("$baseUrl/logout") {
-                token?.let { header(HttpHeaders.Authorization, "Bearer $it") }
-            }.body()
+            httpClient
+                .post("$baseUrl/logout") {
+                    token?.let { header(HttpHeaders.Authorization, "Bearer $it") }
+                }.body()
         }
 }
