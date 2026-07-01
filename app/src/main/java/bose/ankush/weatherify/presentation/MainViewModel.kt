@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import bose.ankush.commonui.locations.PlaceSearchUiState
 import bose.ankush.commonui.locations.SavedLocationsUiState
 import bose.ankush.network.auth.events.AuthEvent
+import bose.ankush.network.auth.events.AuthEventBus
 import bose.ankush.network.auth.events.AuthEventBus.emit
 import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.repository.AuthRepository
@@ -152,6 +153,22 @@ constructor(
                     _isAuthInitialized.value = true
                     initialized = true
                     logger.d("Auth initialization completed")
+                }
+            }
+        }
+
+        viewModelScope.launch(dispatchers.io) {
+            AuthEventBus.events.collect { event ->
+                if (event is AuthEvent.Unauthorized) {
+                    _authState.update {
+                        AuthState.SessionExpired(
+                            UiText.DynamicText(
+                                event.message.ifBlank {
+                                    "You need to log in again to continue using the app for security purposes."
+                                }
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -446,7 +463,13 @@ constructor(
                     } else {
                         UiText.StringResource(resId = R.string.general_error_txt)
                     }
-                _uiState.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isRefreshing = false,
+                        error = error
+                    )
+                }
             }.collectLatest { state -> _uiState.value = state }
     }
 
@@ -517,7 +540,8 @@ constructor(
             try {
                 val response = authRepository.refreshToken() ?: return@launch
                 if (response.isSuccess()) {
-                    val expiryMillis = response.data?.premiumExpiresAt?.let { parseIsoToMillis(it) }
+                    val expiryMillis =
+                        response.data?.premiumExpiresAt?.let { parseIsoToMillis(it) }
                     val active = isPremiumActive(response.data?.premiumExpiresAt)
                     preferenceManager.savePremiumStatus(
                         isPremium = active,
@@ -557,7 +581,10 @@ constructor(
 
         if (!premiumActive) {
             viewModelScope.launch(dispatchers.io) {
-                preferenceManager.savePremiumStatus(isPremium = false, expiryMillis = expiryMillis)
+                preferenceManager.savePremiumStatus(
+                    isPremium = false,
+                    expiryMillis = expiryMillis
+                )
             }
             _authState.value = AuthState.Success
             return
@@ -766,18 +793,12 @@ constructor(
 private const val ONE_YEAR_MILLIS = 365L * 24 * 60 * 60 * 1000
 private const val MIN_QUERY_LENGTH = 2
 
-sealed class AuthState {
-    object Initial : AuthState()
-
-    object Loading : AuthState()
-
-    object LogoutLoading : AuthState()
-
-    object Success : AuthState()
-
-    object LoggedOut : AuthState()
-
-    data class Error(
-        val message: UiText,
-    ) : AuthState()
+sealed interface AuthState {
+    object Initial : AuthState
+    object Loading : AuthState
+    object LogoutLoading : AuthState
+    object Success : AuthState
+    object LoggedOut : AuthState
+    data class Error(val message: UiText) : AuthState
+    data class SessionExpired(val message: UiText) : AuthState
 }

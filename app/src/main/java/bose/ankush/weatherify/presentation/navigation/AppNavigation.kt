@@ -21,6 +21,7 @@ import bose.ankush.commonui.settings.SettingsScreen
 import bose.ankush.commonui.settings.SettingsScreenState
 import bose.ankush.commonui.settings.SettingsScreenStrings
 import bose.ankush.language.presentation.LanguageScreen
+import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentStage
 import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.weatherify.BuildConfig
@@ -142,7 +143,7 @@ private fun SettingsEntry(
         serviceSubscriptionBottomSheetUiState = serviceSubscriptionUiState,
         onLogout = viewModel::logout,
         onLoggedOutHandled = viewModel::resetAuthState,
-        onStartPayment = paymentViewModel::startPayment,
+        onStartPayment = { paymentViewModel.processIntent(PaymentIntent.StartPayment(it)) },
         onLoadServices = { settingsViewModel.serviceSubscriptionViewModel.loadServices() },
         onServiceSelected = { settingsViewModel.serviceSubscriptionViewModel.selectService(it) },
         onTierSelected = { settingsViewModel.serviceSubscriptionViewModel.selectPricingTier(it) },

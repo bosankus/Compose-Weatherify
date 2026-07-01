@@ -17,7 +17,6 @@ sealed class AuthEvent {
 object AuthEventBus {
     private val _events =
         MutableSharedFlow<AuthEvent>(
-            replay = 1,
             extraBufferCapacity = 1,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
