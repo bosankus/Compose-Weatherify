@@ -39,7 +39,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-stdlib")
                 // Compose Multiplatform — works on Android + iOS
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -47,7 +46,7 @@ kotlin {
                 implementation(compose.ui)
                 implementation(compose.materialIconsExtended)
                 // Payment UI state types (PaymentUiState, PaymentStage) used in SettingsScreen
-                implementation(project(":feature-payment"))
+                implementation(project(":feature:payment"))
                 // Location models (SavedLocation, PlaceSuggestion) and repositories for SavedLocationsScreen
                 implementation(project(":network"))
                 // Date/time utilities for KMP

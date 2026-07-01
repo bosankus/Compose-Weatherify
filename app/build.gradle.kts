@@ -88,7 +88,7 @@ ksp {
 dependencies {
 
     api(project(":common-ui"))
-    api(project(":feature-payment"))
+    api(project(":feature:payment"))
     api(project(":language"))
     api(project(":storage"))
     api(project(":network"))
@@ -106,7 +106,6 @@ dependencies {
     implementation(libs.google.play.app.update)
     implementation(libs.google.play.app.update.ktx)
     implementation(libs.google.play.services.location)
-    implementation(libs.accompanist.systemuicontroller)
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.core.splashscreen)
@@ -196,6 +195,6 @@ kotlin {
 // last version before the split.
 configurations.all {
     resolutionStrategy {
-        force("com.razorpay:standard-core:1.6.56")
+        force("com.razorpay:standard-core:1.7.15")
     }
 }

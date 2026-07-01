@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +25,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,11 +32,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.WindowCompat
 import bose.ankush.commonui.auth.LoginScreen
 import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastAnchorState
@@ -44,11 +41,13 @@ import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.commonui.web.InAppWebView
+import bose.ankush.payment.presentation.CheckoutParams
+import bose.ankush.payment.presentation.PaymentEffect
+import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
-import bose.ankush.weatherify.base.common.LUMINANCE_THRESHOLD
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
 import bose.ankush.weatherify.base.location.LocationClient
@@ -56,7 +55,6 @@ import bose.ankush.weatherify.base.permissions.CoarseLocationPermissionTextProvi
 import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvider
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
@@ -77,6 +75,7 @@ class MainActivity :
     // Koin-managed: owns payment state and Razorpay flow
     private val paymentViewModel: PaymentViewModel by koinViewModel()
 
+    // Android-managed: owns location state
     @Inject
     lateinit var locationClient: LocationClient
 
@@ -86,7 +85,7 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        enableEdgeToEdge()
         startInAppUpdate(this)
         setContent {
             WeatherifyTheme {
@@ -118,10 +117,8 @@ class MainActivity :
             toastVisible = true
         }
 
-        SetupSystemUi()
         ObserveAuthState(authState = authState, context = context, onShowToast = ::showToast)
-        ObserveAuthEventBus(onShowToast = ::showToast)
-        ObservePaymentCheckout(context = context)
+        ObservePaymentEffect(context = context)
 
         AppScreen(
             isAuthInitialized = isAuthInitialized,
@@ -137,20 +134,6 @@ class MainActivity :
                     onDismiss = { toastVisible = false },
                 ),
         )
-    }
-
-    @Suppress("DEPRECATION")
-    @Composable
-    private fun SetupSystemUi() {
-        val systemUiController = rememberSystemUiController()
-        val bgColor = MaterialTheme.colorScheme.background
-        val useDarkIcons = bgColor.luminance() > LUMINANCE_THRESHOLD
-        SideEffect {
-            systemUiController.setStatusBarColor(
-                color = Color.Transparent,
-                darkIcons = useDarkIcons,
-            )
-        }
     }
 
     @Composable
@@ -171,59 +154,26 @@ class MainActivity :
                     viewModel.resetAuthState()
                 }
 
+                is AuthState.SessionExpired -> {
+                    onShowToast(
+                        authState.message.asString(context),
+                        "Session Expired",
+                        ToastType.WARNING
+                    )
+                    viewModel.resetAuthState()
+                }
+
                 else -> Unit
             }
         }
     }
 
     @Composable
-    private fun ObserveAuthEventBus(onShowToast: (String, String, ToastType) -> Unit) {
+    private fun ObservePaymentEffect(context: Context) {
         LaunchedEffect(Unit) {
-            bose.ankush.network.auth.events.AuthEventBus.events.collect { event ->
-                if (event is bose.ankush.network.auth.events.AuthEvent.Unauthorized) {
-                    onShowToast(
-                        event.message.ifBlank {
-                            "You need to log in again to continue using the app for security purposes."
-                        },
-                        "Session Expired",
-                        ToastType.WARNING,
-                    )
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun ObservePaymentCheckout(context: Context) {
-        LaunchedEffect(Unit) {
-            paymentViewModel.checkoutParams.collect { params ->
-                try {
-                    Checkout.preload(applicationContext)
-                    razorpayCheckout = Checkout()
-                    razorpayCheckout?.setKeyID(params.keyId)
-                    val options =
-                        JSONObject().apply {
-                            put("name", params.name)
-                            put("description", params.description)
-                            put("order_id", params.orderId)
-                            put("currency", params.currency)
-                            put("amount", params.amount)
-                            val prefill =
-                                JSONObject().apply {
-                                    params.email?.let { put("email", it) }
-                                    params.contact?.let { put("contact", it) }
-                                }
-                            put("prefill", prefill)
-                        }
-                    razorpayCheckout?.open(this@MainActivity, options)
-                } catch (
-                    @Suppress("TooGenericExceptionCaught") e: Exception,
-                ) {
-                    paymentViewModel.onPaymentFailed(
-                        e.message ?: "Unable to open payment checkout",
-                    )
-                    Checkout.clearUserData(context)
-                    razorpayCheckout = null
+            paymentViewModel.effect.collect { effect ->
+                when (effect) {
+                    is PaymentEffect.LaunchCheckout -> launchCheckout(context, effect.params)
                 }
             }
         }
@@ -417,10 +367,43 @@ class MainActivity :
             val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
             val isLocationAvailable =
                 locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                    locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                        locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
             if (isLocationAvailable) {
                 viewModel.fetchAndSaveLocationCoordinates()
             }
+        }
+    }
+
+    private fun launchCheckout(context: Context, params: CheckoutParams) {
+        try {
+            Checkout.preload(applicationContext)
+            razorpayCheckout = Checkout()
+            razorpayCheckout?.setKeyID(params.keyId)
+            val options =
+                JSONObject().apply {
+                    put("name", params.name)
+                    put("description", params.description)
+                    put("order_id", params.orderId)
+                    put("currency", params.currency)
+                    put("amount", params.amount)
+                    val prefill =
+                        JSONObject().apply {
+                            params.email?.let { put("email", it) }
+                            params.contact?.let { put("contact", it) }
+                        }
+                    put("prefill", prefill)
+                }
+            razorpayCheckout?.open(this@MainActivity, options)
+        } catch (
+            @Suppress("TooGenericExceptionCaught") e: Exception,
+        ) {
+            paymentViewModel.processIntent(
+                PaymentIntent.PaymentFailed(
+                    e.message ?: "Unable to open payment checkout",
+                )
+            )
+            Checkout.clearUserData(context)
+            razorpayCheckout = null
         }
     }
 
@@ -435,9 +418,17 @@ class MainActivity :
         val paymentId = paymentData?.paymentId ?: razorpayPaymentID.orEmpty()
         val signature = paymentData?.signature.orEmpty()
         if (orderId.isNotBlank() && paymentId.isNotBlank() && signature.isNotBlank()) {
-            paymentViewModel.verifyPayment(orderId, paymentId, signature)
+            paymentViewModel.processIntent(
+                PaymentIntent.VerifyPayment(
+                    orderId,
+                    paymentId,
+                    signature
+                )
+            )
         } else {
-            paymentViewModel.onPaymentFailed("Payment succeeded but missing data")
+            paymentViewModel.processIntent(
+                PaymentIntent.PaymentFailed("Payment succeeded but missing data")
+            )
         }
         razorpayCheckout = null
     }
@@ -451,7 +442,7 @@ class MainActivity :
         paymentData: PaymentData?,
     ) {
         val message = response ?: "Payment failed with code $code"
-        paymentViewModel.onPaymentFailed(message)
+        paymentViewModel.processIntent(PaymentIntent.PaymentFailed(message))
         razorpayCheckout = null
     }
 
@@ -461,7 +452,7 @@ class MainActivity :
     }
 }
 
-private class ToastDisplayState(
+private data class ToastDisplayState(
     val visible: Boolean,
     val message: String,
     val title: String,

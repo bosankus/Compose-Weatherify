@@ -9,7 +9,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -38,7 +38,7 @@ fun WeatherifyTheme(
 
     val view = LocalView.current
     if (!view.isInEditMode) {
-        SideEffect {
+        DisposableEffect(darkTheme) {
             val window = (view.context as Activity).window
             val controller = WindowCompat.getInsetsController(window, view)
             controller.isAppearanceLightStatusBars = !darkTheme
@@ -46,6 +46,8 @@ fun WeatherifyTheme(
             controller.hide(WindowInsetsCompat.Type.navigationBars())
             controller.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+            onDispose { }
         }
     }
 
