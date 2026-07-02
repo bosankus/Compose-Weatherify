@@ -15,16 +15,17 @@ import io.ktor.http.contentType
 class KtorFeedbackApiService(
     private val httpClient: HttpClient,
     private val tokenManager: TokenManager,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : FeedbackApiService {
     override suspend fun submitFeedback(request: FeedbackRequest): FeedbackResponse =
         NetworkUtils.retryWithExponentialBackoff {
-            httpClient.authorizedRequest(tokenManager) { authConfig ->
-                post("$baseUrl/feedback") {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
-                    authConfig()
-                }
-            }.body()
+            httpClient
+                .authorizedRequest(tokenManager) { authConfig ->
+                    post("$baseUrl/feedback") {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                        authConfig()
+                    }
+                }.body()
         }
 }

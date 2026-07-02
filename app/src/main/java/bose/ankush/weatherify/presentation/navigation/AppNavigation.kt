@@ -14,6 +14,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import bose.ankush.auth.presentation.AuthIntent
+import bose.ankush.auth.presentation.AuthState
+import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.locations.SavedLocationsScreen
 import bose.ankush.commonui.locations.SavedLocationsStrings
@@ -30,7 +33,6 @@ import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
-import bose.ankush.weatherify.presentation.AuthState
 import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.SettingsEvent
 import bose.ankush.weatherify.presentation.SettingsViewModel
@@ -42,6 +44,7 @@ import bose.ankush.weatherify.presentation.strings.rememberLanguageScreenStrings
 @Composable
 fun AppNavigation(
     viewModel: MainViewModel,
+    authViewModel: AuthViewModel,
     paymentViewModel: PaymentViewModel,
     toastAnchorState: ToastAnchorState? = null,
 ) {
@@ -64,6 +67,7 @@ fun AppNavigation(
                     entry<SettingsRoute> {
                         SettingsEntry(
                             viewModel,
+                            authViewModel,
                             paymentViewModel,
                             navigator,
                             toastAnchorState,
@@ -110,12 +114,13 @@ private fun SavedLocationsEntry(
 @Composable
 private fun SettingsEntry(
     viewModel: MainViewModel,
+    authViewModel: AuthViewModel,
     paymentViewModel: PaymentViewModel,
     navigator: AppNavigator,
     toastAnchorState: ToastAnchorState?,
 ) {
     val context = LocalContext.current
-    val authState by viewModel.authState.collectAsState()
+    val authState by authViewModel.authState.collectAsState()
     val paymentUiState by paymentViewModel.uiState.collectAsState()
     val settingsViewModel = hiltViewModel<SettingsViewModel>()
     val settingsUiState by settingsViewModel.uiState.collectAsState()
@@ -141,8 +146,8 @@ private fun SettingsEntry(
         uiState = settingsUiState,
         strings = rememberSettingsStrings(),
         serviceSubscriptionBottomSheetUiState = serviceSubscriptionUiState,
-        onLogout = viewModel::logout,
-        onLoggedOutHandled = viewModel::resetAuthState,
+        onLogout = { authViewModel.processIntent(AuthIntent.Logout) },
+        onLoggedOutHandled = { authViewModel.processIntent(AuthIntent.Reset) },
         onStartPayment = { paymentViewModel.processIntent(PaymentIntent.StartPayment(it)) },
         onLoadServices = { settingsViewModel.serviceSubscriptionViewModel.loadServices() },
         onServiceSelected = { settingsViewModel.serviceSubscriptionViewModel.selectService(it) },

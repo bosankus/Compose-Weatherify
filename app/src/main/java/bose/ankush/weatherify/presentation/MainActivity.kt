@@ -34,7 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import bose.ankush.commonui.auth.LoginScreen
+import bose.ankush.auth.presentation.AuthEffect
+import bose.ankush.auth.presentation.AuthIntent
+import bose.ankush.auth.presentation.AuthState
+import bose.ankush.auth.presentation.AuthViewModel
+import bose.ankush.auth.presentation.LoginScreen
 import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.components.ToastType
@@ -72,6 +76,9 @@ class MainActivity :
     PaymentResultWithDataListener {
     private val viewModel: MainViewModel by viewModels()
 
+    // Koin-managed: owns auth state and session management
+    private val authViewModel: AuthViewModel by koinViewModel()
+
     // Koin-managed: owns payment state and Razorpay flow
     private val paymentViewModel: PaymentViewModel by koinViewModel()
 
@@ -97,9 +104,9 @@ class MainActivity :
     @Composable
     private fun AppContent() {
         val context = LocalContext.current
-        val isLoggedIn by viewModel.isLoggedIn.collectAsState()
-        val authState by viewModel.authState.collectAsState()
-        val isAuthInitialized by viewModel.isAuthInitialized.collectAsState()
+        val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
+        val authState by authViewModel.authState.collectAsState()
+        val isAuthInitialized by authViewModel.isAuthInitialized.collectAsState()
         val toastAnchorState = rememberToastAnchorState()
         var toastVisible by remember { mutableStateOf(false) }
         var toastMessage by remember { mutableStateOf("") }
@@ -118,6 +125,7 @@ class MainActivity :
         }
 
         ObserveAuthState(authState = authState, context = context, onShowToast = ::showToast)
+        ObserveAuthEffect()
         ObservePaymentEffect(context = context)
 
         AppScreen(
@@ -145,25 +153,32 @@ class MainActivity :
         LaunchedEffect(authState) {
             when (authState) {
                 is AuthState.Error -> {
-                    onShowToast(authState.message.asString(context), "Error", ToastType.ERROR)
-                    viewModel.resetAuthState()
+                    onShowToast(authState.message, "Error", ToastType.ERROR)
+                    authViewModel.processIntent(AuthIntent.Reset)
                 }
-
                 is AuthState.Success -> {
                     onShowToast("Authentication successful", "Success", ToastType.SUCCESS)
-                    viewModel.resetAuthState()
+                    authViewModel.processIntent(AuthIntent.Reset)
                 }
-
                 is AuthState.SessionExpired -> {
-                    onShowToast(
-                        authState.message.asString(context),
-                        "Session Expired",
-                        ToastType.WARNING
-                    )
-                    viewModel.resetAuthState()
+                    onShowToast(authState.message, "Session Expired", ToastType.WARNING)
+                    authViewModel.processIntent(AuthIntent.Reset)
                 }
-
                 else -> Unit
+            }
+        }
+    }
+
+    @Composable
+    private fun ObserveAuthEffect() {
+        LaunchedEffect(Unit) {
+            authViewModel.effect.collect { effect ->
+                when (effect) {
+                    is AuthEffect.PremiumStatusChanged ->
+                        viewModel.updatePremiumStatus(effect.isPremium, effect.expiryMillis)
+                    AuthEffect.LoggedOut ->
+                        viewModel.handleLoggedOut()
+                }
             }
         }
     }
@@ -238,7 +253,7 @@ class MainActivity :
         LaunchedEffect(launchNotificationPermissionState.value) {
             viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
         }
-        AppNavigation(viewModel, paymentViewModel, toastAnchorState)
+        AppNavigation(viewModel, authViewModel, paymentViewModel, toastAnchorState)
     }
 
     @Composable
@@ -251,8 +266,12 @@ class MainActivity :
             )
         } else {
             LoginScreen(
-                onLoginClick = { email, password -> viewModel.login(email, password) },
-                onRegisterClick = { email, password -> viewModel.register(email, password) },
+                onLoginClick = { email, password ->
+                    authViewModel.processIntent(AuthIntent.Login(email, password))
+                },
+                onRegisterClick = { email, password ->
+                    authViewModel.processIntent(AuthIntent.Register(email, password))
+                },
                 onWebUrlClick = { url -> currentWebUrl = url },
                 isLoading = authState is AuthState.Loading,
             )
@@ -353,7 +372,7 @@ class MainActivity :
     override fun onResume() {
         super.onResume()
         startInAppUpdate(this)
-        viewModel.refreshTokenOnForeground()
+        authViewModel.processIntent(AuthIntent.RefreshToken)
         // If user granted a permission via system Settings and returned, clear it from the queue
         val granted =
             viewModel.permissionDialogQueue.filter { permission ->
@@ -367,14 +386,17 @@ class MainActivity :
             val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
             val isLocationAvailable =
                 locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                        locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                    locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
             if (isLocationAvailable) {
                 viewModel.fetchAndSaveLocationCoordinates()
             }
         }
     }
 
-    private fun launchCheckout(context: Context, params: CheckoutParams) {
+    private fun launchCheckout(
+        context: Context,
+        params: CheckoutParams,
+    ) {
         try {
             Checkout.preload(applicationContext)
             razorpayCheckout = Checkout()
@@ -400,7 +422,7 @@ class MainActivity :
             paymentViewModel.processIntent(
                 PaymentIntent.PaymentFailed(
                     e.message ?: "Unable to open payment checkout",
-                )
+                ),
             )
             Checkout.clearUserData(context)
             razorpayCheckout = null
@@ -422,12 +444,12 @@ class MainActivity :
                 PaymentIntent.VerifyPayment(
                     orderId,
                     paymentId,
-                    signature
-                )
+                    signature,
+                ),
             )
         } else {
             paymentViewModel.processIntent(
-                PaymentIntent.PaymentFailed("Payment succeeded but missing data")
+                PaymentIntent.PaymentFailed("Payment succeeded but missing data"),
             )
         }
         razorpayCheckout = null

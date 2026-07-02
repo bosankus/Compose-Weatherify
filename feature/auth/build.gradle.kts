@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "bose.ankush.commonui"
+        namespace = "bose.ankush.auth"
         compileSdk =
             libs.versions.compileSdk
                 .get()
@@ -24,42 +24,37 @@ kotlin {
         }
     }
 
-    // iosX64 (Intel simulator) dropped: Compose Multiplatform stopped publishing artifacts for it
+    // iosX64 dropped: Compose Multiplatform stopped publishing artifacts for it
     // starting at 1.11.0, following Apple's deprecation of the x86_64 iOS Simulator.
     iosArm64()
     iosSimulatorArm64()
 
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
         binaries.framework {
-            baseName = "common_ui"
+            baseName = "feature_auth"
             isStatic = true
         }
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(project(":feature:payment"))
-                implementation(project(":network"))
-                implementation(libs.compose.multiplatform.runtime)
-                implementation(libs.compose.multiplatform.foundation)
-                implementation(libs.compose.multiplatform.material3)
-                implementation(libs.compose.multiplatform.ui)
-                implementation(libs.compose.multiplatform.materialIconsExtended)
-                implementation(libs.kotlinx.datetime)
-            }
+        commonMain.dependencies {
+            implementation(project(":network"))
+            implementation(libs.compose.multiplatform.runtime)
+            implementation(libs.compose.multiplatform.foundation)
+            implementation(libs.compose.multiplatform.material3)
+            implementation(libs.compose.multiplatform.ui)
+            implementation(libs.koin.core)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.androidx.lifecycle.viewmodel.kmp)
+            implementation(libs.kotlinx.datetime)
         }
 
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.kotlinx.coroutines.core)
-                // BackHandler support for InAppWebView
-                implementation(libs.androidx.activity.compose)
-            }
+        androidMain.dependencies {
+            implementation(libs.koin.android)
         }
 
         val iosMain by creating {
-            dependsOn(commonMain)
+            dependsOn(commonMain.get())
         }
 
         @Suppress("UNUSED_VARIABLE")

@@ -23,10 +23,14 @@ class WeatherStorageImpl(
     private fun locationKey(coordinates: Pair<Double, Double>) = "${coordinates.first}_${coordinates.second}"
 
     override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherData?> =
-        weatherDatabase.weatherDao().getWeather().map { it?.toWeatherData() }
+        weatherDatabase.weatherDao().getWeather().map {
+            it?.toWeatherData()
+        }
 
     override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQualityData?> =
-        weatherDatabase.weatherDao().getAirQuality().map { it?.toAirQualityData() }
+        weatherDatabase.weatherDao().getAirQuality().map {
+            it?.toAirQualityData()
+        }
 
     override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long =
         locationTimestamps[locationKey(coordinates)] ?: 0L
@@ -58,10 +62,14 @@ class WeatherStorageImpl(
     }
 
     private fun List<Weather?>?.toWeatherConditions() =
-        this?.map { it?.let { w -> WeatherCondition(w.description, w.icon, w.id, w.main) } }
+        this?.map {
+            it?.let { w -> WeatherCondition(w.description, w.icon, w.id, w.main) }
+        }
 
     private fun List<WeatherCondition?>?.toStorageWeather() =
-        this?.map { it?.let { w -> Weather(w.description, w.icon, w.id, w.main) } }
+        this?.map {
+            it?.let { w -> Weather(w.description, w.icon, w.id, w.main) }
+        }
 
     private fun WeatherEntity.toWeatherData() =
         WeatherData(
@@ -110,7 +118,7 @@ class WeatherStorageImpl(
                                         t.max,
                                         t.min,
                                         t.morn,
-                                        t.night
+                                        t.night,
                                     )
                                 },
                             uvi = it.uvi,
@@ -183,7 +191,7 @@ class WeatherStorageImpl(
                                         t.max,
                                         t.min,
                                         t.morn,
-                                        t.night
+                                        t.night,
                                     )
                                 },
                             uvi = it.uvi,
@@ -209,9 +217,7 @@ class WeatherStorageImpl(
             lastUpdated = lastUpdated,
         )
 
-    private fun AirQualityEntity.toAirQualityData() =
-        AirQualityData(id, aqi, co, no2, o3, so2, pm10, pm25)
+    private fun AirQualityEntity.toAirQualityData() = AirQualityData(id, aqi, co, no2, o3, so2, pm10, pm25)
 
-    private fun AirQualityData.toAirQualityEntity() =
-        AirQualityEntity(id, aqi, co, no2, o3, so2, pm10, pm25)
+    private fun AirQualityData.toAirQualityEntity() = AirQualityEntity(id, aqi, co, no2, o3, so2, pm10, pm25)
 }

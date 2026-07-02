@@ -17,27 +17,29 @@ import io.ktor.http.contentType
 class KtorPaymentApiService(
     private val httpClient: HttpClient,
     private val tokenManager: TokenManager,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : PaymentApiService {
     override suspend fun createOrder(request: CreateOrderRequest): CreateOrderResponse =
         NetworkUtils.retryWithExponentialBackoff {
-            httpClient.authorizedRequest(tokenManager) { authConfig ->
-                post("$baseUrl/create-order") {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
-                    authConfig()
-                }
-            }.body()
+            httpClient
+                .authorizedRequest(tokenManager) { authConfig ->
+                    post("$baseUrl/create-order") {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                        authConfig()
+                    }
+                }.body()
         }
 
     override suspend fun verifyPayment(request: VerifyPaymentRequest): VerifyPaymentResponse =
         NetworkUtils.retryWithExponentialBackoff {
-            httpClient.authorizedRequest(tokenManager) { authConfig ->
-                post("$baseUrl/store-payment") {
-                    contentType(ContentType.Application.Json)
-                    setBody(request)
-                    authConfig()
-                }
-            }.body()
+            httpClient
+                .authorizedRequest(tokenManager) { authConfig ->
+                    post("$baseUrl/store-payment") {
+                        contentType(ContentType.Application.Json)
+                        setBody(request)
+                        authConfig()
+                    }
+                }.body()
         }
 }

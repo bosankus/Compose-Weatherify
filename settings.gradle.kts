@@ -1,8 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-include(":feature:auth")
-
-
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -28,6 +25,7 @@ rootProject.name = "Weatherify"
 include(
     ":app",
     ":common-ui",
+    ":feature:auth",
     ":feature:payment",
     ":language",
     ":network",

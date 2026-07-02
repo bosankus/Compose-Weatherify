@@ -15,10 +15,10 @@ suspend fun HttpClient.authorizedRequest(
     tokenManager: TokenManager,
     block: suspend HttpClient.(HttpRequestBuilder.() -> Unit) -> HttpResponse,
 ): HttpResponse {
-
-    fun authHeader(token: String?): HttpRequestBuilder.() -> Unit = {
-        token?.takeIf { it.isNotBlank() }?.let { header(HttpHeaders.Authorization, "Bearer $it") }
-    }
+    fun authHeader(token: String?): HttpRequestBuilder.() -> Unit =
+        {
+            token?.takeIf { it.isNotBlank() }?.let { header(HttpHeaders.Authorization, "Bearer $it") }
+        }
 
     val firstToken = tokenManager.getStoredToken()
     val response = block(authHeader(firstToken))
@@ -32,8 +32,8 @@ suspend fun HttpClient.authorizedRequest(
         is TokenResult.Error -> {
             AuthEventBus.tryEmit(
                 AuthEvent.Unauthorized(
-                    "Network error during re-authentication: ${result.exception.message}"
-                )
+                    "Network error during re-authentication: ${result.exception.message}",
+                ),
             )
             response
         }
@@ -42,8 +42,8 @@ suspend fun HttpClient.authorizedRequest(
             tokenManager.forceLogout()
             AuthEventBus.tryEmit(
                 AuthEvent.Unauthorized(
-                    "For security, please log in again to continue using the app."
-                )
+                    "For security, please log in again to continue using the app.",
+                ),
             )
             response
         }

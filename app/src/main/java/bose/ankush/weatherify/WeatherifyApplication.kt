@@ -2,13 +2,15 @@ package bose.ankush.weatherify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import bose.ankush.auth.di.authViewModelModule
 import bose.ankush.network.di.networkDomainModule
 import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
-import bose.ankush.weatherify.di.appPaymentKoinModule
 import bose.ankush.storage.di.storageDomainModule
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
+import bose.ankush.weatherify.di.appAuthKoinModule
+import bose.ankush.weatherify.di.appPaymentKoinModule
 import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
@@ -43,7 +45,9 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
                     paymentDomainModule,
                     paymentViewModelModule,
                     appPaymentKoinModule,
-                )
+                    authViewModelModule,
+                    appAuthKoinModule,
+                ),
             )
         }
     }
@@ -83,8 +87,8 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
                     ) {
                         val isLowPriority =
                             priority == android.util.Log.VERBOSE ||
-                                    priority == android.util.Log.DEBUG ||
-                                    priority == android.util.Log.INFO
+                                priority == android.util.Log.DEBUG ||
+                                priority == android.util.Log.INFO
                         if (isLowPriority) return
                         android.util.Log.println(priority, tag, message)
                     }

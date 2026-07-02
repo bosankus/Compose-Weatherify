@@ -11,17 +11,18 @@ import io.ktor.client.request.parameter
 class KtorWeatherApiService(
     private val httpClient: HttpClient,
     private val tokenManager: TokenManager,
-    private val baseUrl: String
+    private val baseUrl: String,
 ) : WeatherApiService {
     override suspend fun getOneCallWeather(
         latitude: String,
         longitude: String,
     ): WeatherForecast =
-        httpClient.authorizedRequest(tokenManager) { authConfig ->
-            get("$baseUrl/weather") {
-                parameter("lat", latitude)
-                parameter("lon", longitude)
-                authConfig()
-            }
-        }.body()
+        httpClient
+            .authorizedRequest(tokenManager) { authConfig ->
+                get("$baseUrl/weather") {
+                    parameter("lat", latitude)
+                    parameter("lon", longitude)
+                    authConfig()
+                }
+            }.body()
 }

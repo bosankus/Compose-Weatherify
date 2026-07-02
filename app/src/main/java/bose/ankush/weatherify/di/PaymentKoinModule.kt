@@ -10,7 +10,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-val appPaymentKoinModule: Module = module {
-    single<PremiumStore> { PreferenceManagerPremiumStore(PreferenceManagerImpl(androidContext())) }
-    single<PaymentConfig> { AppConfigPaymentConfig(AndroidAppConfig()) }
-}
+val appPaymentKoinModule: Module =
+    module {
+        single<PremiumStore> { PreferenceManagerPremiumStore(PreferenceManagerImpl(androidContext())) }
+        single<PaymentConfig> { AppConfigPaymentConfig(AndroidAppConfig()) }
+    }

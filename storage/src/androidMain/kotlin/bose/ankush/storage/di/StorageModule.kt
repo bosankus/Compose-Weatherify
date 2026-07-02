@@ -16,23 +16,24 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-actual val storageDomainModule: Module = module {
-    single<Gson> { Gson() }
-    single<Parser> { JsonParser(get()) }
-    single<WeatherDataModelConverters> { WeatherDataModelConverters(get()) }
-    single<WeatherDatabase> {
-        Room.databaseBuilder(
-            androidContext(),
-            WeatherDatabase::class.java,
-            WEATHER_DATABASE_NAME
-        )
-            .addTypeConverter(get<WeatherDataModelConverters>())
-            .fallbackToDestructiveMigration(false)
-            .build()
+actual val storageDomainModule: Module =
+    module {
+        single<Gson> { Gson() }
+        single<Parser> { JsonParser(get()) }
+        single<WeatherDataModelConverters> { WeatherDataModelConverters(get()) }
+        single<WeatherDatabase> {
+            Room
+                .databaseBuilder(
+                    androidContext(),
+                    WeatherDatabase::class.java,
+                    WEATHER_DATABASE_NAME,
+                ).addTypeConverter(get<WeatherDataModelConverters>())
+                .fallbackToDestructiveMigration(false)
+                .build()
+        }
+        single<WeatherStorage> { WeatherStorageImpl(get()) }
+        single<TokenStorage> {
+            setApplicationContext(androidContext())
+            EncryptedTokenStorageImpl()
+        }
     }
-    single<WeatherStorage> { WeatherStorageImpl(get()) }
-    single<TokenStorage> {
-        setApplicationContext(androidContext())
-        EncryptedTokenStorageImpl()
-    }
-}

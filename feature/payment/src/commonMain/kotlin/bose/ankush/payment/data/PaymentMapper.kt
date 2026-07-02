@@ -8,8 +8,9 @@ import kotlinx.serialization.json.jsonPrimitive
 
 internal fun CreateOrderResponse.toOrder(): Order? {
     val obj = data as? JsonObject ?: return null
-    val orderId = obj["orderId"]?.jsonPrimitive?.contentOrNull
-        ?: obj["order_id"]?.jsonPrimitive?.contentOrNull ?: ""
+    val orderId =
+        obj["orderId"]?.jsonPrimitive?.contentOrNull
+            ?: obj["order_id"]?.jsonPrimitive?.contentOrNull ?: ""
     val amount = obj["amount"]?.jsonPrimitive?.content?.toLongOrNull() ?: 0L
     val currency = obj["currency"]?.jsonPrimitive?.contentOrNull ?: ""
     if (orderId.isBlank() || amount <= 0L || currency.isBlank()) return null
