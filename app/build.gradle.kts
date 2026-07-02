@@ -12,7 +12,27 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.addAll(
+            "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode",
+            "-opt-in=kotlin.RequiresOptIn",
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi"
+        )
+    }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 android {
+    namespace = "bose.ankush.weatherify"
     compileSdk =
         libs.versions.compileSdk
             .get()
@@ -72,17 +92,6 @@ android {
     lint {
         abortOnError = false
     }
-
-    namespace = "bose.ankush.weatherify"
-    kotlin {
-        compilerOptions {
-            freeCompilerArgs.add("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
-        }
-    }
-}
-
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -178,16 +187,6 @@ dependencies {
     // Koin — bridges the feature-payment Koin module with Hilt-managed singletons
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-        freeCompilerArgs.addAll(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
-        )
-    }
 }
 
 // com.razorpay:checkout:1.6.41 pulls in standard-core via a dynamic "latest.integration" version,

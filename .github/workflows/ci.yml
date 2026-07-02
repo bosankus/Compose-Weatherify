@@ -87,4 +87,6 @@ jobs:
           file_pattern: "**/*.kt **/*.kts"
 
       - name: Code check (spotless + detekt)
+        env:
+          RAZORPAY_KEY: ${{ secrets.RAZORPAY_KEY }}
         run: ./gradlew --no-daemon --parallel codeCheck

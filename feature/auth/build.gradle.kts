@@ -39,7 +39,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":network"))
-            // Compose Multiplatform — cross-platform accessors (Android + iOS)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)
             implementation(libs.compose.multiplatform.material3)
