@@ -22,7 +22,7 @@ kotlin {
         freeCompilerArgs.addAll(
             "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode",
             "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi"
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
         )
     }
 }
