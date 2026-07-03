@@ -1,7 +1,7 @@
 package bose.ankush.network.auth.utils
 
-import kotlinx.datetime.Instant
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Returns true if the user's premium subscription is currently active.

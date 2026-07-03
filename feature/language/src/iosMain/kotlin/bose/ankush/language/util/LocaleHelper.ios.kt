@@ -19,5 +19,5 @@ internal actual fun platformChangeLanguageTo(languageCode: String): String {
 
 internal actual fun platformGetDisplayName(languageTag: String): String {
     val tag = languageTag.ifBlank { platformGetDefaultLanguage() }
-    return NSLocale.currentLocale.displayNameForKey(NSLocaleIdentifier, tag) ?: tag
+    return NSLocale(localeIdentifier = tag).displayNameForKey(NSLocaleIdentifier, tag) ?: tag
 }
