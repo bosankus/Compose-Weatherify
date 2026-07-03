@@ -29,6 +29,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,15 +51,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.EmojiSupportMatch
-import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import bose.ankush.language.R
 import bose.ankush.language.util.LocaleHelper.changeLanguageTo
 import bose.ankush.language.util.LocaleHelper.getCountryFlag
 import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
@@ -186,7 +182,7 @@ private fun ScreenHeader(
                             .clickable { navAction.invoke() },
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_back),
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         tint = MaterialTheme.colorScheme.onSurface,
                         contentDescription = navigateBackDesc,
                         modifier = Modifier.padding(8.dp),
@@ -342,13 +338,6 @@ private fun LanguageFlag(language: String) {
         Text(
             text = language.getCountryFlag(),
             fontFamily = FontFamily.Default,
-            style =
-                TextStyle(
-                    platformStyle =
-                        PlatformTextStyle(
-                            emojiSupportMatch = EmojiSupportMatch.None,
-                        ),
-                ),
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(8.dp),
         )
