@@ -26,8 +26,8 @@ include(
     ":app",
     ":common-ui",
     ":feature:auth",
+    ":feature:language",
     ":feature:payment",
-    ":language",
     ":network",
     ":storage"
 )

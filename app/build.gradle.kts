@@ -98,8 +98,8 @@ dependencies {
 
     api(project(":common-ui"))
     api(project(":feature:auth"))
+    api(project(":feature:language"))
     api(project(":feature:payment"))
-    api(project(":language"))
     api(project(":storage"))
     api(project(":network"))
 
