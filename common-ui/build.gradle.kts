@@ -47,6 +47,7 @@ kotlin {
                 implementation(libs.compose.multiplatform.ui)
                 implementation(libs.compose.multiplatform.materialIconsExtended)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.androidx.lifecycle.viewmodel.kmp)
             }
         }
 
