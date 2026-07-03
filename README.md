@@ -1,8 +1,8 @@
-[![Dependency Updates](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependecy-updates.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependecy-updates.yml)
+[![CI](https://github.com/bosankus/Compose-Weatherify/actions/workflows/ci.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/ci.yml)
+[![Dependency Updates](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependency-updates.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependency-updates.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/dda6430161e146518704730d9916dba7)](https://www.codacy.com/gh/bosankus/Compose-Weatherify/dashboard?utm_source=github.com&utm_medium=referral&utm_content=bosankus/Compose-Weatherify&utm_campaign=Badge_Grade)
-[![Qodana](https://github.com/bosankus/Compose-Weatherify/actions/workflows/code_quality.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/code_quality.yml)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-7F52FF?style=flat&logo=kotlin&logoColor=white)
-![Android](https://img.shields.io/badge/Min%20SDK-26%20(Oreo)-3DDC84?style=flat&logo=android&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?style=flat&logo=kotlin&logoColor=white)
+![Android](https://img.shields.io/badge/Min%20SDK-28%20(Pie)-3DDC84?style=flat&logo=android&logoColor=white)
 ![Version](https://img.shields.io/badge/Version-1.1-0078D4?style=flat)
 
 # Weatherify
@@ -21,8 +21,8 @@ A production-grade Android weather app built with **Jetpack Compose**, **Clean A
 | **Forecast** | 5-day weather forecast with hourly breakdown |
 | **Air Quality** | Real-time AQI with pollutant details |
 | **Location** | GPS-based auto-detection + manual city search |
-| **Sunrise/Sunset** | Custom animated sunrise/sunset arc (`:sunriseui` module) |
-| **Multi-language** | English, Bengali (বাংলা), Hindi (हिन्दी), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), Tamil (தமிழ்), Telugu (తెలుగు), Hebrew (עברית) via Per-App Language API |
+| **Sunrise/Sunset** | Custom animated sunrise/sunset arc (`:common-ui` module) |
+| **Multi-language** | English, Bengali (বাংলা), Hindi (हिन्दी), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), Tamil (தமிழ்), Telugu (తెలుగు), Hebrew (עברית) via Per-App Language API (`:feature:language` KMP module) |
 | **Premium** | In-app purchase flow via Razorpay with a premium bottom sheet |
 | **Notifications** | Firebase Cloud Messaging (FCM) push notifications |
 | **In-App Updates** | Google Play in-app update prompts |
@@ -32,7 +32,7 @@ A production-grade Android weather app built with **Jetpack Compose**, **Clean A
 
 ## Module Architecture
 
-The project is split into clearly bounded Gradle modules. `common-ui` and `feature-payment` are **Kotlin Multiplatform (KMP)** modules with `commonMain`, `androidMain`, and `iosMain` source sets — making the app iOS-portable without a full rewrite.
+The project is split into clearly bounded Gradle modules. `common-ui`, `feature:auth`, `feature:payment`, and `feature:language` are **Kotlin Multiplatform (KMP)** modules with `commonMain` and `androidMain` source sets (`feature:language` also ships `iosMain`) — making the app iOS-portable without a full rewrite.
 
 ```mermaid
 graph TD
@@ -41,10 +41,14 @@ graph TD
     end
 
     subgraph COMMON["🟩 :common-ui  (KMP)"]
-        B[SettingsScreen\nLoginScreen\nInAppWebView\nPermissionDialog\nDateFormatter]
+        B[SettingsScreen\nInAppWebView\nSunrise/Sunset Canvas Animation\nPermissionDialog\nDateFormatter]
     end
 
-    subgraph PAYMENT["🟨 :feature-payment  (KMP)"]
+    subgraph AUTH["🟦 :feature:auth  (KMP)"]
+        H[LoginScreen\nAuthViewModel\nDeviceInfoProvider]
+    end
+
+    subgraph PAYMENT["🟨 :feature:payment  (KMP)"]
         C[PaymentViewModel\nCreateOrderUseCase\nVerifyPaymentUseCase\nPremiumStore]
     end
 
@@ -56,20 +60,16 @@ graph TD
         E[Room Database\nDataStore Preferences\nWeatherDao]
     end
 
-    subgraph LANGUAGE["🟪 :language  (Android)"]
-        F[LanguageScreen\nLocale Config]
-    end
-
-    subgraph SUNRISE["⬛ :sunriseui  (Android)"]
-        G[Sunrise/Sunset\nCanvas Animation]
+    subgraph LANGUAGE["🟪 :feature:language  (KMP)"]
+        F[LanguageScreen\nLocaleHelper]
     end
 
     APP --> COMMON
+    APP --> AUTH
     APP --> PAYMENT
     APP --> NETWORK
     APP --> STORAGE
     APP --> LANGUAGE
-    APP --> SUNRISE
 ```
 
 ---
@@ -149,7 +149,8 @@ OpenWeatherMap API
 
 | Library | Version | Purpose |
 |---|---|---|
-| Jetpack Compose BOM | `2025.06.01` | Declarative UI framework |
+| Jetpack Compose BOM | `2026.06.00` | Declarative UI framework |
+| Compose Multiplatform | `1.11.1` | Shared Compose UI for KMP modules |
 | Material 3 | BOM-managed | Design system + dynamic theming |
 | Compose Navigation | `2.7.7` | Type-safe screen navigation |
 | Accompanist Permissions | `0.36.0` | Runtime permissions in Compose |
@@ -160,17 +161,17 @@ OpenWeatherMap API
 
 | Library | Version | Purpose |
 |---|---|---|
-| Hilt | `2.58` | Dependency injection (Android) |
-| Koin | — | DI bridge for KMP modules |
-| Kotlin Coroutines | `1.10.2` | Async & structured concurrency |
+| Hilt | `2.59.2` | Dependency injection (Android) |
+| Koin | `4.2.2` | DI in KMP feature modules |
+| Kotlin Coroutines | `1.11.0` | Async & structured concurrency |
 | StateFlow / Flow | — | Reactive UI state management |
 
 ### Networking
 
 | Library | Version | Purpose |
 |---|---|---|
-| Ktor Client | — | KMP-compatible HTTP client |
-| Kotlinx Serialization | — | JSON parsing |
+| Ktor Client | `3.5.1` | KMP-compatible HTTP client |
+| Kotlinx Serialization | `1.11.0` | JSON parsing |
 | OkHttp MockWebServer | `4.12.0` | Network mocking in tests |
 
 ### Local Storage
@@ -178,14 +179,14 @@ OpenWeatherMap API
 | Library | Version | Purpose |
 |---|---|---|
 | Room | `2.8.4` | SQLite ORM (weather cache) |
-| DataStore Preferences | `1.1.1` | Key-value persistent settings |
-| Kotlinx DateTime | `0.6.2` | KMP-compatible date/time |
+| DataStore Preferences | `1.2.1` | Key-value persistent settings |
+| Kotlinx DateTime | `0.8.0` | KMP-compatible date/time |
 
 ### Firebase
 
 | SDK | Purpose |
 |---|---|
-| Firebase BOM `34.10.0` | BoM for consistent versions |
+| Firebase BOM `34.15.0` | BoM for consistent versions |
 | Analytics | User behaviour tracking |
 | Remote Config | Server-driven feature flags |
 | Performance Monitoring | Network + rendering metrics |
@@ -197,9 +198,9 @@ OpenWeatherMap API
 |---|---|
 | JUnit 4 + Truth | Unit assertions |
 | Turbine `1.2.1` | Flow/StateFlow testing |
-| Mockk `1.14.9` | Kotlin-first mocking |
+| Mockk `1.14.11` | Kotlin-first mocking |
 | Mockito + Nhaarman | Java-style mocking |
-| Espresso | Instrumentation UI tests |
+| Espresso `3.7.0` | Instrumentation UI tests |
 | Hilt Testing | DI in Android tests |
 
 ### Other
@@ -257,8 +258,8 @@ MainActivity
    # or just hit Run in Android Studio
    ```
 
-> **Minimum Android version:** API 26 (Android 8.0 Oreo)  
-> **Target SDK:** 36
+> **Minimum Android version:** API 28 (Android 9 Pie)  
+> **Target SDK:** 37
 
 ---
 
@@ -274,7 +275,7 @@ Contributions are very welcome!
    ```
 4. Push and open a Pull Request against **`develop`**
 
-Please check the [PR template](.github/PULL_REQUEST_TEMPLATE.md) before submitting.
+CI (`.github/workflows/ci.yml`) builds the project and runs spotless/detekt checks on every PR.
 
 ---
 
@@ -282,16 +283,15 @@ Please check the [PR template](.github/PULL_REQUEST_TEMPLATE.md) before submitti
 
 These are the planned improvements currently in progress or on the roadmap:
 
-- **iOS target** — the KMP foundation is in place (`commonMain`/`iosMain` source sets exist in `:common-ui` and `:feature-payment`). The next step is wiring up a SwiftUI host app and completing the iOS-specific implementations.
-- **Navigation v3 migration** — active migration branch (`migration/navigation-3`) moving from Navigation 2.x to the new type-safe Navigation 3 APIs with full back-stack support.
+- **iOS target** — the KMP foundation is in place (`:common-ui`, `:feature:auth`, `:feature:payment`, `:feature:language` all build `androidMain`/`commonMain`, with `:feature:language` already shipping `iosMain`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
 - **Offline-first strategy** — full read-from-cache-then-network flow using Room as the single source of truth, with explicit stale-data indicators in the UI.
 - **Widget support** — a Glance-based home screen widget showing current temperature and conditions.
 - **Wear OS companion** — lightweight Wear Compose screen for wrist-based weather glances.
-- **CI/CD pipeline** — automated release builds and Play Store internal track deployments via GitHub Actions.
+- **Release automation** — CI already builds and lints every PR (`ci.yml`); the next step is automated release builds and Play Store internal track deployments.
 - **Accessibility pass** — semantic descriptions, touch target sizing, and TalkBack compatibility audit.
 
 ---
 
 ## License
 
-This project is open-sourced under the [MIT License](LICENSE).
+This project intends to use the MIT License; a `LICENSE` file has not yet been added to the repository.
