@@ -44,6 +44,7 @@ kotlin {
             implementation(libs.compose.multiplatform.material3)
             implementation(libs.compose.multiplatform.ui)
             implementation(libs.koin.core)
+            implementation(libs.koin.core.viewmodel)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel.kmp)
             implementation(libs.kotlinx.datetime)
@@ -51,6 +52,8 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.koin.android)
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.messaging)
         }
 
         val iosMain by creating {

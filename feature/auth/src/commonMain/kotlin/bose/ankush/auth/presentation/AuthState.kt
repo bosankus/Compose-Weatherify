@@ -1,15 +1,15 @@
 package bose.ankush.auth.presentation
 
 sealed interface AuthState {
-    object Initial : AuthState
+    data object Initial : AuthState
 
-    object Loading : AuthState
+    data object Loading : AuthState
 
-    object LogoutLoading : AuthState
+    data object LogoutLoading : AuthState
 
-    object Success : AuthState
+    data object Success : AuthState
 
-    object LoggedOut : AuthState
+    data object LoggedOut : AuthState
 
     data class Error(
         val message: String,
