@@ -1,10 +1,5 @@
-package bose.ankush.commonui.locations
+package bose.ankush.finder.presentation.savedlocations
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,7 +29,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -49,32 +42,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import bose.ankush.network.model.PlaceSuggestion
-import bose.ankush.network.model.SavedLocation
+import bose.ankush.finder.domain.model.Location
+import bose.ankush.finder.domain.model.LocationSuggestion
 import kotlin.math.round
 
 @Immutable
-data class SavedLocationsUiState(
-    val isPremium: Boolean = false,
-    val isLoading: Boolean = false,
-    val locations: List<SavedLocation> = emptyList(),
-    val error: String? = null,
-    val successMessage: String? = null,
-)
-
-@Immutable
-data class PlaceSearchUiState(
-    val searchQuery: String = "",
-    val results: List<PlaceSuggestion> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null,
-)
-
 data class SavedLocationsStrings(
     val title: String = "Saved Locations",
     val premiumTitle: String = "Premium Feature",
@@ -100,38 +75,32 @@ data class SavedLocationsStrings(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SavedLocationsScreen(
-    locationsState: SavedLocationsUiState,
-    searchState: PlaceSearchUiState,
-    onQueryChanged: (String) -> Unit,
-    onClearSearch: () -> Unit,
-    onSaveLocation: (name: String, lat: Double, lon: Double) -> Unit,
-    onDeleteLocation: (String) -> Unit,
-    onLocationSelected: (SavedLocation) -> Unit,
-    onMessageShown: () -> Unit,
+internal fun SavedLocationsScreen(
+    state: SavedLocationsState,
+    onIntent: (SavedLocationsIntent) -> Unit,
     strings: SavedLocationsStrings = SavedLocationsStrings(),
     bottomBar: @Composable () -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val pendingLocation = remember { mutableStateOf<SavedLocation?>(null) }
+    val pendingLocation = remember { mutableStateOf<Location?>(null) }
 
     pendingLocation.value?.let { location ->
         SetAsDefaultLocationDialog(
             locationName = location.name,
             strings = strings,
             onConfirm = {
-                onLocationSelected(location)
+                onIntent(SavedLocationsIntent.SelectLocation(location))
                 pendingLocation.value = null
             },
             onDismiss = { pendingLocation.value = null },
         )
     }
 
-    LaunchedEffect(locationsState.successMessage, locationsState.error) {
-        val message = locationsState.successMessage ?: locationsState.error
+    LaunchedEffect(state.successMessage, state.error) {
+        val message = state.successMessage ?: state.error
         if (message != null) {
             snackbarHostState.showSnackbar(message)
-            onMessageShown()
+            onIntent(SavedLocationsIntent.MessageShown)
         }
     }
 
@@ -148,18 +117,17 @@ fun SavedLocationsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            if (locationsState.isPremium) {
+            if (state.isPremium) {
                 AddLocationFab(
                     onPlaceSelected = { place ->
-                        onSaveLocation(
-                            place.name,
-                            place.latitude.toDouble(),
-                            place.longitude.toDouble(),
+                        onIntent(
+                            SavedLocationsIntent.Save(
+                                place.name,
+                                place.latitude,
+                                place.longitude,
+                            ),
                         )
                     },
-                    searchState = searchState,
-                    onQueryChanged = onQueryChanged,
-                    onClearSearch = onClearSearch,
                     strings = strings,
                 )
             }
@@ -173,13 +141,13 @@ fun SavedLocationsScreen(
                     .padding(innerPadding),
         ) {
             when {
-                !locationsState.isPremium -> PremiumGate(strings)
-                locationsState.isLoading && locationsState.locations.isEmpty() -> ShowLoading()
-                locationsState.locations.isEmpty() -> EmptyLocations(strings)
+                !state.isPremium -> PremiumGate(strings)
+                state.isLoading && state.locations.isEmpty() -> ShowLoading()
+                state.locations.isEmpty() -> EmptyLocations(strings)
                 else ->
                     LocationList(
-                        locations = locationsState.locations,
-                        onDelete = onDeleteLocation,
+                        locations = state.locations,
+                        onDelete = { onIntent(SavedLocationsIntent.Delete(it)) },
                         onLocationClick = { pendingLocation.value = it },
                         strings = strings,
                     )
@@ -241,9 +209,9 @@ private fun EmptyLocations(strings: SavedLocationsStrings) {
 
 @Composable
 private fun LocationList(
-    locations: List<SavedLocation>,
+    locations: List<Location>,
     onDelete: (String) -> Unit,
-    onLocationClick: (SavedLocation) -> Unit,
+    onLocationClick: (Location) -> Unit,
     strings: SavedLocationsStrings,
 ) {
     LazyColumn(
@@ -267,7 +235,7 @@ private fun LocationList(
 
 @Composable
 private fun LocationCard(
-    location: SavedLocation,
+    location: Location,
     onClick: () -> Unit,
     onDelete: () -> Unit,
     strings: SavedLocationsStrings,
@@ -335,10 +303,7 @@ private fun formatCoordinates(
 
 @Composable
 private fun AddLocationFab(
-    onPlaceSelected: (PlaceSuggestion) -> Unit,
-    searchState: PlaceSearchUiState,
-    onQueryChanged: (String) -> Unit,
-    onClearSearch: () -> Unit,
+    onPlaceSelected: (LocationSuggestion) -> Unit,
     strings: SavedLocationsStrings,
 ) {
     val showDialog = remember { mutableStateOf(false) }
@@ -357,185 +322,7 @@ private fun AddLocationFab(
                 showDialog.value = false
                 onPlaceSelected(place)
             },
-            searchState = searchState,
-            onQueryChanged = onQueryChanged,
-            onClearSearch = onClearSearch,
             strings = strings,
-        )
-    }
-}
-
-@Composable
-private fun PlaceSearchDialog(
-    onDismiss: () -> Unit,
-    onPlaceSelected: (PlaceSuggestion) -> Unit,
-    searchState: PlaceSearchUiState,
-    onQueryChanged: (String) -> Unit,
-    onClearSearch: () -> Unit,
-    strings: SavedLocationsStrings,
-) {
-    val focusRequester = remember { FocusRequester() }
-
-    AlertDialog(
-        onDismissRequest = {
-            onClearSearch()
-            onDismiss()
-        },
-        title = { Text(strings.searchDialogTitle) },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                OutlinedTextField(
-                    value = searchState.searchQuery,
-                    onValueChange = onQueryChanged,
-                    placeholder = { Text(strings.searchHint) },
-                    singleLine = true,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequester),
-                )
-
-                AnimatedVisibility(
-                    visible = searchState.isLoading,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible = searchState.error != null,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {
-                    if (searchState.error != null) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        MaterialTheme.colorScheme.errorContainer,
-                                        shape = MaterialTheme.shapes.small,
-                                    ).padding(12.dp),
-                        ) {
-                            Text(
-                                text = searchState.error,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                        }
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible =
-                        searchState.searchQuery.length >= 2 &&
-                            searchState.results.isEmpty() &&
-                            !searchState.isLoading &&
-                            searchState.error == null,
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 12.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = strings.noResults(searchState.searchQuery),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible = searchState.results.isNotEmpty(),
-                    enter = fadeIn(),
-                    exit = fadeOut(),
-                ) {
-                    LazyColumn(
-                        modifier = Modifier.heightIn(max = 280.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        items(
-                            searchState.results,
-                            key = { "${it.name}_${it.latitude}_${it.longitude}" },
-                        ) { place ->
-                            PlaceSuggestionItem(
-                                place = place,
-                                onClick = {
-                                    onClearSearch()
-                                    onPlaceSelected(place)
-                                },
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = {
-                onClearSearch()
-                onDismiss()
-            }) {
-                Text(strings.cancelBtn)
-            }
-        },
-    )
-
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
-}
-
-@Composable
-private fun PlaceSuggestionItem(
-    place: PlaceSuggestion,
-    onClick: () -> Unit,
-) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = MaterialTheme.shapes.small,
-                ).padding(vertical = 12.dp, horizontal = 12.dp),
-    ) {
-        Text(
-            text = place.name,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text =
-                listOfNotNull(place.city, place.state, place.country)
-                    .filter { it.isNotEmpty() }
-                    .joinToString(", "),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
         )
     }
 }

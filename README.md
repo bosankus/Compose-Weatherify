@@ -32,7 +32,7 @@ A production-grade Android weather app built with **Jetpack Compose**, **Clean A
 
 ## Module Architecture
 
-The project is split into clearly bounded Gradle modules. `common-ui`, `feature:auth`, `feature:payment`, and `feature:language` are **Kotlin Multiplatform (KMP)** modules with `commonMain` and `androidMain` source sets (`feature:language` also ships `iosMain`) — making the app iOS-portable without a full rewrite.
+The project is split into clearly bounded Gradle modules. `common-ui`, `feature:auth`, `feature:finder`, `feature:payment`, and `feature:language` are **Kotlin Multiplatform (KMP)** modules with `commonMain` source sets — making the app iOS-portable without a full rewrite.
 
 ```mermaid
 graph TD
@@ -64,25 +64,30 @@ graph TD
         F[LanguageScreen\nLocaleHelper]
     end
 
+    subgraph FINDER["🔍 :feature:finder (KMP)"]
+        G[SavedLocationsScreen\nPlaceSearchDialog\nGetSavedLocationsUseCase\nFinderRepository]
+    end
+
     APP --> COMMON
     APP --> AUTH
     APP --> PAYMENT
     APP --> NETWORK
     APP --> STORAGE
     APP --> LANGUAGE
+    APP --> FINDER
 ```
 
 ---
 
 ## Clean Architecture
 
-Each feature inside `:app` is structured across three layers. Dependency arrows always point **inward** — the domain layer has zero Android or framework dependencies.
+Each feature is structured across three layers. Dependency arrows always point **inward** — the domain layer has zero Android or framework dependencies. Features like `:feature:finder` and `:feature:payment` strictly follow Clean Architecture with abstracted UseCase interfaces and separate data-layer implementations.
 
 ```mermaid
 graph LR
     subgraph Presentation["🎨 Presentation Layer"]
-        UI["Compose Screens\n(HomeScreen, CitiesListScreen\nProfileScreen, PaymentScreen)"]
-        VM["ViewModels\n(MainViewModel, CitiesViewModel)"]
+        UI["Compose Screens\n(HomeScreen, SavedLocationsScreen\nProfileScreen, PaymentScreen)"]
+        VM["ViewModels\n(MainViewModel, SavedLocationsViewModel)"]
         UI -- "UI Events" --> VM
         VM -- "UI State (StateFlow)" --> UI
     end
@@ -220,7 +225,7 @@ OpenWeatherMap API
 ```text
 MainActivity
 ├── HomeScreen          — current weather + AQI card + hourly strip
-├── CitiesListScreen    — search & manage saved cities
+├── SavedLocationsScreen — manage saved cities & search for new places (via `:feature:finder`)
 ├── ProfileScreen       — user profile & settings shortcut
 ├── SettingsScreen      — language, theme, notification toggles
 ├── LoginScreen         — authentication entry point
@@ -283,7 +288,7 @@ CI (`.github/workflows/ci.yml`) builds the project and runs spotless/detekt chec
 
 These are the planned improvements currently in progress or on the roadmap:
 
-- **iOS target** — the KMP foundation is in place (`:common-ui`, `:feature:auth`, `:feature:payment`, `:feature:language` all build `androidMain`/`commonMain`, with `:feature:language` already shipping `iosMain`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
+- **iOS target** — the KMP foundation is in place (`:common-ui`, `:feature:auth`, `:feature:finder`, `:feature:payment`, `:feature:language` all build `commonMain`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
 - **Offline-first strategy** — full read-from-cache-then-network flow using Room as the single source of truth, with explicit stale-data indicators in the UI.
 - **Widget support** — a Glance-based home screen widget showing current temperature and conditions.
 - **Wear OS companion** — lightweight Wear Compose screen for wrist-based weather glances.

@@ -28,6 +28,7 @@ include(
     ":feature:auth",
     ":feature:language",
     ":feature:payment",
+    ":feature:finder",
     ":network",
     ":storage"
 )

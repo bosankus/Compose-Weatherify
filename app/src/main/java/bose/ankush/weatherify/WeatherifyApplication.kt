@@ -4,6 +4,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import bose.ankush.auth.di.authDomainModule
 import bose.ankush.auth.di.authViewModelModule
+import bose.ankush.finder.di.finderDomainModule
+import bose.ankush.finder.di.finderViewModelModule
 import bose.ankush.network.di.networkDomainModule
 import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
@@ -47,6 +49,8 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
                     appPaymentKoinModule,
                     authViewModelModule,
                     authDomainModule,
+                    finderDomainModule,
+                    finderViewModelModule,
                 ),
             )
         }

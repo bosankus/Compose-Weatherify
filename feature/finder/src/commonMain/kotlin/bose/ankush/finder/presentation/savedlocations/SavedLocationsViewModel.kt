@@ -1,0 +1,141 @@
+package bose.ankush.finder.presentation.savedlocations
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import bose.ankush.finder.domain.usecase.DeleteLocationUseCase
+import bose.ankush.finder.domain.usecase.GetSavedLocationsUseCase
+import bose.ankush.finder.domain.usecase.SaveLocationParams
+import bose.ankush.finder.domain.usecase.SaveLocationUseCase
+import bose.ankush.payment.domain.store.PremiumStore
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+internal class SavedLocationsViewModel(
+    private val getSavedLocationsUseCase: GetSavedLocationsUseCase,
+    private val saveLocationUseCase: SaveLocationUseCase,
+    private val deleteLocationUseCase: DeleteLocationUseCase,
+    private val premiumStore: PremiumStore,
+) : ViewModel() {
+    private val _state = MutableStateFlow(SavedLocationsState())
+    val state: StateFlow<SavedLocationsState> = _state.asStateFlow()
+
+    private val _effect = Channel<SavedLocationsEffect>(Channel.BUFFERED)
+    val effect: Flow<SavedLocationsEffect> = _effect.receiveAsFlow()
+
+    init {
+        viewModelScope.launch {
+            premiumStore.observePremiumStatus().collect { status ->
+                val wasPremium = _state.value.isPremium
+                _state.update { it.copy(isPremium = status.isPremium) }
+                if (status.isPremium && !wasPremium) loadSavedLocations()
+            }
+        }
+    }
+
+    fun processIntent(intent: SavedLocationsIntent) {
+        when (intent) {
+            is SavedLocationsIntent.Load -> loadSavedLocations()
+            is SavedLocationsIntent.Save -> saveLocation(intent.name, intent.lat, intent.lon)
+            is SavedLocationsIntent.Delete -> deleteLocation(intent.id)
+            is SavedLocationsIntent.SelectLocation ->
+                emitLocationSelected(
+                    intent.location.lat,
+                    intent.location.lon,
+                    intent.location.name,
+                )
+            is SavedLocationsIntent.MessageShown -> clearMessage()
+        }
+    }
+
+    private fun loadSavedLocations() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            getSavedLocationsUseCase().fold(
+                onSuccess = { locations ->
+                    _state.update { it.copy(isLoading = false, locations = locations) }
+                },
+                onFailure = { e ->
+                    if (e !is CancellationException) {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = "Unable to load saved locations. Please try again later.",
+                            )
+                        }
+                    }
+                },
+            )
+        }
+    }
+
+    private fun saveLocation(
+        name: String,
+        lat: Double,
+        lon: Double,
+    ) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            saveLocationUseCase(SaveLocationParams(name, lat, lon)).fold(
+                onSuccess = {
+                    _state.update {
+                        it.copy(isLoading = false, successMessage = "Location saved successfully")
+                    }
+                    loadSavedLocations()
+                },
+                onFailure = { e ->
+                    if (e !is CancellationException) {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = "Unable to save location. Please try again later.",
+                            )
+                        }
+                    }
+                },
+            )
+        }
+    }
+
+    private fun deleteLocation(id: String) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, error = null) }
+            deleteLocationUseCase(id).fold(
+                onSuccess = {
+                    _state.update {
+                        it.copy(isLoading = false, successMessage = "Location deleted successfully")
+                    }
+                    loadSavedLocations()
+                },
+                onFailure = { e ->
+                    if (e !is CancellationException) {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = "Unable to delete location. Please try again later.",
+                            )
+                        }
+                    }
+                },
+            )
+        }
+    }
+
+    private fun clearMessage() {
+        _state.update { it.copy(error = null, successMessage = null) }
+    }
+
+    private fun emitLocationSelected(
+        lat: Double,
+        lon: Double,
+        name: String,
+    ) {
+        _effect.trySend(SavedLocationsEffect.LocationSelected(lat, lon, name))
+    }
+}

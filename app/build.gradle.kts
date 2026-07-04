@@ -100,6 +100,7 @@ dependencies {
     api(project(":feature:auth"))
     api(project(":feature:language"))
     api(project(":feature:payment"))
+    api(project(":feature:finder"))
     api(project(":storage"))
     api(project(":network"))
 
@@ -187,6 +188,9 @@ dependencies {
     // Koin — bridges the feature-payment Koin module with Hilt-managed singletons
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+    // Koin Compose Multiplatform — needed to host KoinContext for feature modules
+    // (e.g. :feature:finder) that resolve ViewModels via koinViewModel() in commonMain.
+    implementation(libs.koin.compose)
 }
 
 // com.razorpay:checkout:1.6.41 pulls in standard-core via a dynamic "latest.integration" version,
