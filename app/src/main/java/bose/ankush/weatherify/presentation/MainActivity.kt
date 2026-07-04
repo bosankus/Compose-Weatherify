@@ -65,6 +65,7 @@ import com.razorpay.PaymentResultWithDataListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
+import org.koin.compose.KoinContext
 import javax.inject.Inject
 import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 
@@ -95,8 +96,10 @@ class MainActivity :
         enableEdgeToEdge()
         startInAppUpdate(this)
         setContent {
-            WeatherifyTheme {
-                AppContent()
+            KoinContext {
+                WeatherifyTheme {
+                    AppContent()
+                }
             }
         }
     }

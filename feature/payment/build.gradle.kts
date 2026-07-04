@@ -39,7 +39,6 @@ kotlin {
             implementation(libs.koin.core)
             implementation(libs.koin.core.viewmodel)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.lifecycle.viewmodel.kmp)
             implementation(libs.kotlinx.serialization.json)
         }

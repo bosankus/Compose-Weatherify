@@ -8,15 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.core.content.ContextCompat
-import bose.ankush.weatherify.BuildConfig
-import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.suspendCancellableCoroutine
-import java.net.NetworkInterface
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
-import kotlin.coroutines.resume
 import kotlin.math.roundToInt
 
 object Extension {
@@ -102,52 +93,4 @@ object Extension {
             this
         }
     }
-
-    fun getDeviceModel(): String = Build.MODEL
-
-    const val OPERATING_SYSTEM: String = "Android"
-
-    fun getOperatingSystem(): String = OPERATING_SYSTEM
-
-    fun getOsVersion(): String = Build.VERSION.RELEASE
-
-    fun getAppVersion(): String = BuildConfig.VERSION_NAME
-
-    fun getCurrentUtcTimestamp(): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-        dateFormat.timeZone = TimeZone.getTimeZone("UTC")
-        return dateFormat.format(Date())
-    }
-
-    const val REGISTRATION_SOURCE: String = "Android App"
-
-    fun getRegistrationSource(): String = REGISTRATION_SOURCE
-
-    fun getIpAddress(): String? =
-        runCatching {
-            NetworkInterface
-                .getNetworkInterfaces()
-                .asSequence()
-                .flatMap { it.inetAddresses.asSequence() }
-                .firstOrNull { !it.isLoopbackAddress && !it.isLinkLocalAddress }
-                ?.hostAddress
-        }.getOrNull()
-
-    suspend fun getFirebaseToken(): String? =
-        try {
-            suspendCancellableCoroutine<String?> { cont ->
-                try {
-                    FirebaseMessaging
-                        .getInstance()
-                        .token
-                        .addOnCompleteListener { task: com.google.android.gms.tasks.Task<String> ->
-                            if (cont.isActive) cont.resume(if (task.isSuccessful) task.result else null)
-                        }
-                } catch (_: Exception) {
-                    if (cont.isActive) cont.resume(null)
-                }
-            }
-        } catch (_: Exception) {
-            null
-        }
 }

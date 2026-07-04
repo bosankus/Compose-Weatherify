@@ -18,11 +18,11 @@ import bose.ankush.auth.presentation.AuthIntent
 import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.commonui.components.ToastAnchorState
-import bose.ankush.commonui.locations.SavedLocationsScreen
-import bose.ankush.commonui.locations.SavedLocationsStrings
 import bose.ankush.commonui.settings.SettingsScreen
 import bose.ankush.commonui.settings.SettingsScreenState
 import bose.ankush.commonui.settings.SettingsScreenStrings
+import bose.ankush.finder.presentation.savedlocations.SavedLocationsFinderRoute
+import bose.ankush.finder.presentation.savedlocations.SavedLocationsStrings
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentStage
@@ -91,18 +91,8 @@ private fun SavedLocationsEntry(
     navigator: AppNavigator,
     toastAnchorState: ToastAnchorState?,
 ) {
-    val locationsState by viewModel.savedLocationsState.collectAsState()
-    val searchState by viewModel.placeSearchState.collectAsState()
-
-    SavedLocationsScreen(
-        locationsState = locationsState,
-        searchState = searchState,
-        onQueryChanged = viewModel::onPlaceSearchQueryChanged,
-        onClearSearch = viewModel::clearPlaceSearch,
-        onSaveLocation = { name, lat, lon -> viewModel.saveLocation(name, lat, lon) },
-        onDeleteLocation = viewModel::deleteLocation,
-        onLocationSelected = { viewModel.setDefaultLocation(it.lat, it.lon, it.name) },
-        onMessageShown = viewModel::clearLocationMessage,
+    SavedLocationsFinderRoute(
+        onLocationSelected = { lat, lon, name -> viewModel.setDefaultLocation(lat, lon, name) },
         strings = rememberSavedLocationsStrings(),
         bottomBar = {
             AppBottomBar(rememberSaveable { mutableStateOf(true) }, navigator, toastAnchorState)
@@ -211,7 +201,7 @@ private fun rememberSavedLocationsStrings(): SavedLocationsStrings {
         saveSuccessMsg = stringResource(R.string.saved_locations_save_success),
         deleteSuccessMsg = stringResource(R.string.saved_locations_delete_success),
         setAsDefaultDialogTitle = stringResource(R.string.set_as_default_dialog_title),
-        setAsDefaultDialogBody = { name -> setAsDefaultBodyTemplate.replace("%1\$s", name) },
+        setAsDefaultDialogBody = { name -> setAsDefaultBodyTemplate.replace($$"%1$s", name) },
         setAsDefaultDialogWarning = stringResource(R.string.set_as_default_dialog_warning),
         setAsDefaultConfirmBtn = stringResource(R.string.set_as_default_confirm_btn),
     )

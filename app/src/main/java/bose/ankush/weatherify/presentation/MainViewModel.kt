@@ -3,9 +3,6 @@ package bose.ankush.weatherify.presentation
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bose.ankush.commonui.locations.PlaceSearchUiState
-import bose.ankush.commonui.locations.SavedLocationsUiState
-import bose.ankush.network.auth.utils.isPremiumActive
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.common.ENABLE_NOTIFICATION
 import bose.ankush.weatherify.base.common.LoggerFactory
@@ -20,23 +17,17 @@ import bose.ankush.weatherify.domain.repository.WeatherRepository
 import bose.ankush.weatherify.domain.use_case.GetAirQuality
 import bose.ankush.weatherify.domain.use_case.GetWeatherReport
 import bose.ankush.weatherify.domain.use_case.RefreshWeatherReport
-import bose.ankush.weatherify.domain.use_case.SavedLocationsUseCase
-import bose.ankush.weatherify.domain.use_case.SearchPlacesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -44,8 +35,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Instant
 
 /**
  * Main ViewModel for Weatherify.
@@ -53,8 +42,8 @@ import kotlin.time.Instant
  *
  * Auth state and logic lives in [bose.ankush.auth.presentation.AuthViewModel].
  * Payment state and logic lives in [bose.ankush.payment.presentation.PaymentViewModel].
+ * Saved-locations and place-search logic lives in [bose.ankush.finder.presentation.savedlocations.SavedLocationsViewModel].
  */
-@OptIn(FlowPreview::class)
 @Suppress("TooGenericExceptionCaught")
 @HiltViewModel
 class MainViewModel
@@ -69,8 +58,6 @@ class MainViewModel
         private val preferenceManager: PreferenceManager,
         private val dispatchers: DispatcherProvider,
         private val remoteConfigService: RemoteConfigService,
-        private val searchPlacesUseCase: SearchPlacesUseCase,
-        private val savedLocationsUseCase: SavedLocationsUseCase,
     ) : ViewModel() {
         private val logger = loggerFactory.create("${MainViewModel::class.simpleName} ->")
 
@@ -89,14 +76,6 @@ class MainViewModel
         private val _isNotificationPermissionPermanentlyDeclined = MutableStateFlow(false)
         val isNotificationPermissionPermanentlyDeclined =
             _isNotificationPermissionPermanentlyDeclined.asStateFlow()
-
-        private val _savedLocationsState = MutableStateFlow(SavedLocationsUiState())
-        val savedLocationsState: StateFlow<SavedLocationsUiState> = _savedLocationsState.asStateFlow()
-
-        private val _placeSearchState = MutableStateFlow(PlaceSearchUiState())
-        val placeSearchState: StateFlow<PlaceSearchUiState> = _placeSearchState.asStateFlow()
-
-        private val _queryFlow = MutableStateFlow("")
 
         private var notificationBannerJob: Job? = null
         private var locationJob: Job? = null
@@ -132,27 +111,6 @@ class MainViewModel
                     }
             }
 
-            viewModelScope.launch(dispatchers.io) {
-                _queryFlow
-                    .debounce(500.milliseconds)
-                    .filter { it.length >= MIN_QUERY_LENGTH }
-                    .distinctUntilChanged()
-                    .collectLatest { query -> fetchPlaceSuggestions(query) }
-            }
-
-            viewModelScope.launch(dispatchers.io) {
-                preferenceManager.getUserPreferencesFlow().collect { prefs ->
-                    val premiumActive =
-                        isPremiumActive(
-                            prefs.premiumExpiry?.let { millis ->
-                                Instant.fromEpochMilliseconds(millis).toString()
-                            },
-                        )
-                    val wasPremium = _savedLocationsState.value.isPremium
-                    _savedLocationsState.update { it.copy(isPremium = premiumActive) }
-                    if (premiumActive && !wasPremium) loadSavedLocations()
-                }
-            }
         }
 
         fun dismissDialog() {
@@ -438,107 +396,6 @@ class MainViewModel
             }
         }
 
-        fun loadSavedLocations() {
-            viewModelScope.launch(dispatchers.io) {
-                _savedLocationsState.update { it.copy(isLoading = true, error = null) }
-                savedLocationsUseCase.getSavedLocations().fold(
-                    onSuccess = { locations ->
-                        _savedLocationsState.update {
-                            it.copy(
-                                isLoading = false,
-                                locations = locations,
-                            )
-                        }
-                    },
-                    onFailure = { e ->
-                        if (e !is CancellationException) {
-                            _savedLocationsState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = "Unable to load saved locations. Please try again later.",
-                                )
-                            }
-                        }
-                    },
-                )
-            }
-        }
-
-        fun saveLocation(
-            name: String,
-            lat: Double,
-            lon: Double,
-        ) {
-            viewModelScope.launch(dispatchers.io) {
-                _savedLocationsState.update { it.copy(isLoading = true, error = null) }
-                savedLocationsUseCase.saveLocation(name, lat, lon).fold(
-                    onSuccess = {
-                        _savedLocationsState.update {
-                            it.copy(
-                                isLoading = false,
-                                successMessage = "Location saved successfully",
-                            )
-                        }
-                        loadSavedLocations()
-                    },
-                    onFailure = { e ->
-                        if (e !is CancellationException) {
-                            _savedLocationsState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = "Unable to save location. Please try again later.",
-                                )
-                            }
-                        }
-                    },
-                )
-            }
-        }
-
-        fun deleteLocation(id: String) {
-            viewModelScope.launch(dispatchers.io) {
-                _savedLocationsState.update { it.copy(isLoading = true, error = null) }
-                savedLocationsUseCase.deleteLocation(id).fold(
-                    onSuccess = {
-                        _savedLocationsState.update {
-                            it.copy(
-                                isLoading = false,
-                                successMessage = "Location deleted successfully",
-                            )
-                        }
-                        loadSavedLocations()
-                    },
-                    onFailure = { e ->
-                        if (e !is CancellationException) {
-                            _savedLocationsState.update {
-                                it.copy(
-                                    isLoading = false,
-                                    error = "Unable to delete location. Please try again later.",
-                                )
-                            }
-                        }
-                    },
-                )
-            }
-        }
-
-        fun onPlaceSearchQueryChanged(query: String) {
-            _placeSearchState.update { it.copy(searchQuery = query, error = null) }
-            _queryFlow.value = query
-            if (query.length < 2) {
-                _placeSearchState.update { it.copy(results = emptyList(), isLoading = false) }
-            }
-        }
-
-        fun clearPlaceSearch() {
-            _placeSearchState.value = PlaceSearchUiState()
-            _queryFlow.value = ""
-        }
-
-        fun clearLocationMessage() {
-            _savedLocationsState.update { it.copy(error = null, successMessage = null) }
-        }
-
         /** Pin a saved location as the default weather source and reload weather data. */
         fun setDefaultLocation(
             lat: Double,
@@ -585,25 +442,6 @@ class MainViewModel
             }
         }
 
-        private suspend fun fetchPlaceSuggestions(query: String) {
-            _placeSearchState.update { it.copy(isLoading = true, error = null) }
-            searchPlacesUseCase(query).fold(
-                onSuccess = { suggestions ->
-                    _placeSearchState.update { it.copy(isLoading = false, results = suggestions) }
-                },
-                onFailure = { e ->
-                    if (e !is CancellationException) {
-                        _placeSearchState.update {
-                            it.copy(
-                                isLoading = false,
-                                error = "Unable to fetch places. Please try again.",
-                            )
-                        }
-                    }
-                },
-            )
-        }
-
         override fun onCleared() {
             logger.d("MainViewModel cleared - cancelling all jobs")
             notificationBannerJob?.cancel()
@@ -612,5 +450,3 @@ class MainViewModel
             super.onCleared()
         }
     }
-
-private const val MIN_QUERY_LENGTH = 2

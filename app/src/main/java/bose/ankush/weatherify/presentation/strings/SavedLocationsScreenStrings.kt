@@ -2,7 +2,7 @@ package bose.ankush.weatherify.presentation.strings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import bose.ankush.commonui.locations.SavedLocationsStrings
+import bose.ankush.finder.presentation.savedlocations.SavedLocationsStrings
 import bose.ankush.weatherify.R
 
 @Composable
