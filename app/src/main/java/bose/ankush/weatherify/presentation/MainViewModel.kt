@@ -110,7 +110,6 @@ class MainViewModel
                         performInitialDataLoading(forceRefresh = true)
                     }
             }
-
         }
 
         fun dismissDialog() {

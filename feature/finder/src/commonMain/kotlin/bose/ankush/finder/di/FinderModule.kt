@@ -6,7 +6,10 @@ import bose.ankush.finder.data.usecase.GetSavedLocationsUseCaseImpl
 import bose.ankush.finder.data.usecase.SaveLocationUseCaseImpl
 import bose.ankush.finder.data.usecase.SearchPlacesUseCaseImpl
 import bose.ankush.finder.domain.repository.FinderRepository
-import bose.ankush.finder.domain.usecase.*
+import bose.ankush.finder.domain.usecase.DeleteLocationUseCase
+import bose.ankush.finder.domain.usecase.GetSavedLocationsUseCase
+import bose.ankush.finder.domain.usecase.SaveLocationUseCase
+import bose.ankush.finder.domain.usecase.SearchPlacesUseCase
 import bose.ankush.finder.presentation.placesearch.PlaceSearchViewModel
 import bose.ankush.finder.presentation.savedlocations.SavedLocationsViewModel
 import org.koin.core.module.Module
