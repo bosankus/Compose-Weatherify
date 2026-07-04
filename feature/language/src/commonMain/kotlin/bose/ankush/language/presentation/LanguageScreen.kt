@@ -4,9 +4,6 @@ package bose.ankush.language.presentation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -44,13 +41,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,7 +54,6 @@ import bose.ankush.language.util.LocaleHelper.changeLanguageTo
 import bose.ankush.language.util.LocaleHelper.getCountryFlag
 import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
 import bose.ankush.language.util.LocaleHelper.getDisplayName
-import kotlinx.coroutines.delay
 
 private const val ITEM_STAGGER_DELAY_MS = 100L
 
@@ -72,7 +66,7 @@ data class LanguageScreenStrings(
 
 @Composable
 fun LanguageScreen(
-    languages: Array<String>,
+    languages: List<String>,
     strings: LanguageScreenStrings,
     navAction: () -> Unit,
 ) {
@@ -95,10 +89,10 @@ fun LanguageScreen(
                     visibleState = screenTransitionState,
                     enter =
                         fadeIn(animationSpec = tween(durationMillis = 400)) +
-                            slideInVertically(
-                                animationSpec = tween(durationMillis = 500),
-                                initialOffsetY = { it / 3 },
-                            ),
+                                slideInVertically(
+                                    animationSpec = tween(durationMillis = 500),
+                                    initialOffsetY = { it / 3 },
+                                ),
                     exit = fadeOut(),
                 ) {
                     Column(modifier = Modifier.padding(innerPadding)) {
@@ -162,10 +156,10 @@ private fun ScreenHeader(
         visibleState = headerTransitionState,
         enter =
             fadeIn(animationSpec = tween(durationMillis = 300)) +
-                slideInVertically(
-                    animationSpec = tween(durationMillis = 300),
-                    initialOffsetY = { -it / 2 },
-                ),
+                    slideInVertically(
+                        animationSpec = tween(durationMillis = 300),
+                        initialOffsetY = { -it / 2 },
+                    ),
         exit = fadeOut(),
     ) {
         TopAppBar(
@@ -200,7 +194,7 @@ private fun ScreenHeader(
 
 @Composable
 private fun ShowUI(
-    languages: Array<String>,
+    languages: List<String>,
     changedLanguage: androidx.compose.runtime.MutableState<String>,
     languageSelectedLabel: (String) -> String,
 ) {
@@ -216,10 +210,9 @@ private fun ShowUI(
         itemsIndexed(
             items = languages,
             key = { _, item -> item },
-        ) { index, language ->
+        ) { _, language ->
             LanguageItem(
                 language = language,
-                index = index,
                 isSelected = changedLanguage.value == language,
                 languageSelectedLabel = languageSelectedLabel,
                 onLanguageSelected =
@@ -236,107 +229,79 @@ private fun ShowUI(
 @Composable
 private fun LanguageItem(
     language: String,
-    index: Int,
     isSelected: Boolean,
     languageSelectedLabel: (String) -> String,
     onLanguageSelected: () -> Unit,
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.02f else 1f,
-        animationSpec =
-            spring(
-                dampingRatio = Spring.DampingRatioNoBouncy,
-                stiffness = Spring.StiffnessHigh,
-                visibilityThreshold = 0.005f,
+    val displayName = remember(language) { language.getDisplayName() }
+    val countryFlag = remember(language) { language.getCountryFlag() }
+
+    Card(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .clickable(onClick = onLanguageSelected),
+        shape = RoundedCornerShape(16.dp),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (isSelected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+                    },
             ),
-        label = "selection_scale",
-    )
-
-    val itemTransitionState = remember { MutableTransitionState(false) }
-
-    LaunchedEffect(Unit) {
-        delay(ITEM_STAGGER_DELAY_MS * index)
-        itemTransitionState.targetState = true
-    }
-
-    AnimatedVisibility(
-        visibleState = itemTransitionState,
-        enter =
-            fadeIn(animationSpec = tween(durationMillis = 300)) +
-                slideInVertically(
-                    animationSpec = tween(durationMillis = 400),
-                    initialOffsetY = { it / 3 },
-                ),
-        exit = fadeOut(),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = 0.dp,
+            ),
     ) {
-        Card(
+        Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .clickable(onClick = onLanguageSelected)
-                    .scale(scale),
-            shape = RoundedCornerShape(16.dp),
-            colors =
-                CardDefaults.cardColors(
-                    containerColor =
-                        if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-                        },
-                ),
-            elevation =
-                CardDefaults.cardElevation(
-                    defaultElevation = 0.dp,
-                ),
+                    .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f),
-                ) {
-                    LanguageFlag(language)
+                LanguageFlag(countryFlag)
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
-                    Text(
-                        text = language.getDisplayName(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color =
-                            if (isSelected) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            },
-                    )
-                }
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    color =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                )
+            }
 
-                if (isSelected) {
-                    SelectionCheckmark(language, languageSelectedLabel)
-                }
+            if (isSelected) {
+                SelectionCheckmark(language, languageSelectedLabel)
             }
         }
     }
 }
 
 @Composable
-private fun LanguageFlag(language: String) {
+private fun LanguageFlag(countryFlag: String) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.background,
         modifier = Modifier.size(40.dp),
     ) {
         Text(
-            text = language.getCountryFlag(),
+            text = countryFlag,
             fontFamily = FontFamily.Default,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(8.dp),

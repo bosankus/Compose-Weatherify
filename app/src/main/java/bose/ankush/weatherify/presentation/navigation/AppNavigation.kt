@@ -75,7 +75,7 @@ fun AppNavigation(
                     }
                     entry<LanguageRoute> { route ->
                         LanguageScreen(
-                            languages = route.languages.toTypedArray(),
+                            languages = route.languages,
                             strings = rememberLanguageScreenStrings(),
                         ) { navigator.goBack() }
                     }
