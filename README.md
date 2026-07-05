@@ -2,12 +2,13 @@
 [![Dependency Updates](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependency-updates.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependency-updates.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/dda6430161e146518704730d9916dba7)](https://www.codacy.com/gh/bosankus/Compose-Weatherify/dashboard?utm_source=github.com&utm_medium=referral&utm_content=bosankus/Compose-Weatherify&utm_campaign=Badge_Grade)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?style=flat&logo=kotlin&logoColor=white)
+![AGP](https://img.shields.io/badge/AGP-9.3.0--rc01-3DDC84?style=flat&logo=android&logoColor=white)
 ![Android](https://img.shields.io/badge/Min%20SDK-28%20(Pie)-3DDC84?style=flat&logo=android&logoColor=white)
 ![Version](https://img.shields.io/badge/Version-1.1-0078D4?style=flat)
 
 # Weatherify
 
-A production-grade Android weather app built with **Jetpack Compose**, **Clean Architecture**, and a **Kotlin Multiplatform-ready** module structure. It shows real-time weather, 5-day forecasts, air quality data, and sunrise/sunset animations — with multi-language support and an in-app premium upgrade flow.
+A production-grade Android weather app built with **Jetpack Compose**, **Clean Architecture**, and a **Kotlin Multiplatform** module structure. It shows real-time weather, 5-day forecasts, air quality data, and sunrise/sunset animations — with multi-language support and an in-app premium upgrade flow.
 
 [![Download APK](https://img.shields.io/badge/Download%20Latest%20APK-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)](https://github.com/bosankus/Compose-Weatherify/releases/latest)
 
@@ -20,52 +21,52 @@ A production-grade Android weather app built with **Jetpack Compose**, **Clean A
 | **Weather** | Current conditions, feels-like temp, humidity, wind speed |
 | **Forecast** | 5-day weather forecast with hourly breakdown |
 | **Air Quality** | Real-time AQI with pollutant details |
-| **Location** | GPS-based auto-detection + manual city search |
+| **Location** | GPS-based auto-detection, saved cities list, and place search (`:feature:finder`) |
 | **Sunrise/Sunset** | Custom animated sunrise/sunset arc (`:common-ui` module) |
 | **Multi-language** | English, Bengali (বাংলা), Hindi (हिन्दी), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), Tamil (தமிழ்), Telugu (తెలుగు), Hebrew (עברית) via Per-App Language API (`:feature:language` KMP module) |
-| **Premium** | In-app purchase flow via Razorpay with a premium bottom sheet |
+| **Premium** | In-app purchase flow via Razorpay, surfaced as a bottom sheet inside Settings |
 | **Notifications** | Firebase Cloud Messaging (FCM) push notifications |
-| **In-App Updates** | Google Play in-app update prompts |
+| **In-App Updates** | Google Play in-app update prompts (`InAppUpdateManager`) |
 | **Theming** | Material 3 + dynamic color + dark/light mode |
 
 ---
 
 ## Module Architecture
 
-The project is split into clearly bounded Gradle modules. `common-ui`, `feature:auth`, `feature:finder`, `feature:payment`, and `feature:language` are **Kotlin Multiplatform (KMP)** modules with `commonMain` source sets — making the app iOS-portable without a full rewrite.
+The project is split into clearly bounded Gradle modules. Everything except `:app` is a **Kotlin Multiplatform (KMP)** module (`org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library` plugins) with `commonMain`/`androidMain`/`iosMain` source sets — making the app iOS-portable without a full rewrite. `:app` stays a plain Android application module and is the only place Hilt is used; every KMP module uses **Koin**, bridged into `:app`'s Hilt graph via a Koin-Hilt adapter module.
 
 ```mermaid
 graph TD
-    subgraph APP["🟦 :app  (Android)"]
-        A[WeatherifyApplication\nMainActivity\nMainViewModel]
+    subgraph APP["🟦 :app  (Android, Hilt)"]
+        A[WeatherifyApplication\nMainActivity\nAppNavigation (Nav3)\nMainViewModel / SettingsViewModel / CitiesViewModel]
     end
 
-    subgraph COMMON["🟩 :common-ui  (KMP)"]
+    subgraph COMMON["🟩 :common-ui  (KMP, Koin)"]
         B[SettingsScreen\nInAppWebView\nSunrise/Sunset Canvas Animation\nPermissionDialog\nDateFormatter]
     end
 
-    subgraph AUTH["🟦 :feature:auth  (KMP)"]
-        H[LoginScreen\nAuthViewModel\nDeviceInfoProvider]
+    subgraph AUTH["🟦 :feature:auth  (KMP, Koin)"]
+        H[LoginScreen\nAuthViewModel\nDeviceInfoProvider\n(domain-only, no data layer)]
     end
 
-    subgraph PAYMENT["🟨 :feature:payment  (KMP)"]
-        C[PaymentViewModel\nCreateOrderUseCase\nVerifyPaymentUseCase\nPremiumStore]
+    subgraph PAYMENT["🟨 :feature:payment  (KMP, Koin)"]
+        C[PaymentViewModel\nCreateOrderUseCase\nVerifyPaymentUseCase\nPremiumStore\nRazorpay checkout]
     end
 
-    subgraph NETWORK["🟧 :network  (Android)"]
+    subgraph NETWORK["🟧 :network  (KMP, Koin)"]
         D[Ktor Client\nWeatherApi\nKotlinx Serialization]
     end
 
-    subgraph STORAGE["🟥 :storage  (Android)"]
+    subgraph STORAGE["🟥 :storage  (KMP, Koin)"]
         E[Room Database\nDataStore Preferences\nWeatherDao]
     end
 
-    subgraph LANGUAGE["🟪 :feature:language  (KMP)"]
+    subgraph LANGUAGE["🟪 :feature:language  (KMP, Koin)"]
         F[LanguageScreen\nLocaleHelper]
     end
 
-    subgraph FINDER["🔍 :feature:finder (KMP)"]
-        G[SavedLocationsScreen\nPlaceSearchDialog\nGetSavedLocationsUseCase\nFinderRepository]
+    subgraph FINDER["🔍 :feature:finder (KMP, Koin)"]
+        G[SavedLocationsScreen\nPlaceSearchDialog\nGetSavedLocationsUseCase\nFinderRepository / Impl]
     end
 
     APP --> COMMON
@@ -77,29 +78,31 @@ graph TD
     APP --> FINDER
 ```
 
+> **DI note:** `:app` uses Hilt for its own ViewModels (`SettingsViewModel`, `MainViewModel`, `CitiesViewModel`). Every KMP module (`:common-ui`, `:feature:*`, `:network`, `:storage`) uses Koin internally. `app/.../di/PaymentKoinModule.kt` bridges the two graphs so Hilt-managed code can resolve Koin-provided dependencies (e.g. `PaymentViewModel`).
+
 ---
 
 ## Clean Architecture
 
-Each feature is structured across three layers. Dependency arrows always point **inward** — the domain layer has zero Android or framework dependencies. Features like `:feature:finder` and `:feature:payment` strictly follow Clean Architecture with abstracted UseCase interfaces and separate data-layer implementations.
+Each feature is structured across three layers, with dependency arrows pointing **inward** — the domain layer has zero Android or framework dependencies. `:feature:finder` and `:feature:payment` follow this strictly with a full `domain/` + `data/` split (repository interfaces vs. impls, use cases, mappers). `:feature:auth` is lighter-weight: it only defines a `domain/DeviceInfoProvider` interface with a platform-specific implementation wired directly through Koin — there is no separate `data/` package for auth.
 
 ```mermaid
 graph LR
     subgraph Presentation["🎨 Presentation Layer"]
-        UI["Compose Screens\n(HomeScreen, SavedLocationsScreen\nProfileScreen, PaymentScreen)"]
-        VM["ViewModels\n(MainViewModel, SavedLocationsViewModel)"]
-        UI -- "UI Events" --> VM
+        UI["Compose Screens\n(HomeScreen, CitiesListScreen\nSavedLocationsScreen, SettingsScreen\nLoginScreen, LanguageScreen)"]
+        VM["ViewModels\n(MainViewModel, PaymentViewModel\nAuthViewModel, SettingsViewModel)"]
+        UI -- "UI Events / Intents" --> VM
         VM -- "UI State (StateFlow)" --> UI
     end
 
     subgraph Domain["🧠 Domain Layer"]
-        UC["Use Cases\n(GetWeatherReports\nGetForecastReports\nGetAirQuality...)"]
-        REPO_IF["Repository Interfaces"]
+        UC["Use Cases\n(GetWeatherReports, GetForecastReports\nGetAirQuality, GetSavedLocationsUseCase\nCreateOrderUseCase, VerifyPaymentUseCase...)"]
+        REPO_IF["Repository Interfaces\n(FinderRepository, PaymentRepository...)"]
         UC --> REPO_IF
     end
 
     subgraph Data["💾 Data Layer"]
-        REPO_IMPL["WeatherRepositoryImpl"]
+        REPO_IMPL["Repository Impls\n(FinderRepositoryImpl, PaymentRepositoryImpl\nWeatherRepositoryImpl)"]
         MAPPER["Mappers\n(Network → Storage\nStorage → Domain)"]
         REPO_IMPL --> MAPPER
     end
@@ -107,6 +110,7 @@ graph LR
     subgraph External["🌐 External Sources"]
         NET[":network\nKtor + OpenWeatherMap API"]
         DB[":storage\nRoom DB + DataStore"]
+        PAY["Razorpay SDK"]
     end
 
     VM -- "calls" --> UC
@@ -114,7 +118,29 @@ graph LR
     REPO_IF -. "implemented by" .-> REPO_IMPL
     REPO_IMPL --> NET
     REPO_IMPL --> DB
+    REPO_IMPL --> PAY
 ```
+
+---
+
+## Navigation (Navigation 3)
+
+The app runs on **Jetpack Navigation 3** (`androidx.navigation3`), not the older `NavHost`/`NavController` API. `AppNavigation.kt` builds an `entryProvider` and renders it through `NavDisplay`, driven by a custom `AppNavigator` / `rememberAppNavigationState()` wrapper around the Nav3 backstack. Routes are `@Serializable` `NavKey` objects defined in `Routes.kt`.
+
+```mermaid
+graph TD
+    Home["HomeRoute\n(HomeScreen)"] -->|bottom bar| Cities["CitiesListRoute\n(CitiesListScreen)"]
+    Home -->|bottom bar| Saved["SavedLocationsRoute\n(SavedLocationsFinderRoute — :feature:finder)"]
+    Home -->|bottom bar| Settings["SettingsRoute\n(SettingsScreen — :common-ui)"]
+    Settings -->|language row, API 33+| Language["LanguageRoute(languages)\n(LanguageScreen — :feature:language)"]
+    Settings -.->|API < 33| SystemSettings["System App Locale Settings"]
+    Settings -->|premium bottom sheet| Payment["Razorpay checkout\n(PaymentViewModel, in-place sheet — no route)"]
+```
+
+Notes:
+- There is no standalone `ProfileScreen` or `PaymentScreen` route — profile info and the premium upgrade flow are both embedded inside `SettingsScreen` (profile header + a `PremiumBottomSheet`).
+- `InAppWebView` is a composable (not a route) shown conditionally inside `SettingsScreen` for Terms/Privacy links.
+- On Android 13+ (`isDeviceSDKAndroid13OrAbove()`), language selection pushes `LanguageRoute`; below API 33 it deep-links to the system per-app language settings instead.
 
 ---
 
@@ -139,11 +165,11 @@ OpenWeatherMap API
                            Use Cases (domain layer)
                                   │
                                   ▼
-                          MainViewModel / CitiesViewModel
+                MainViewModel / CitiesListViewModel / SavedLocationsViewModel
                           (StateFlow<UIState>)
                                   │
                                   ▼
-                        Jetpack Compose UI (screens)
+                  Jetpack Compose UI (screens, via Nav3 NavDisplay)
 ```
 
 ---
@@ -156,9 +182,9 @@ OpenWeatherMap API
 |---|---|---|
 | Jetpack Compose BOM | `2026.06.00` | Declarative UI framework |
 | Compose Multiplatform | `1.11.1` | Shared Compose UI for KMP modules |
-| Material 3 | BOM-managed | Design system + dynamic theming |
-| Compose Navigation | `2.7.7` | Type-safe screen navigation |
-| Accompanist Permissions | `0.36.0` | Runtime permissions in Compose |
+| Material 3 | `1.9.0` | Design system + dynamic theming |
+| Navigation 3 (`androidx.navigation3`) | `1.1.4` | Type-safe backstack + `NavDisplay`/`entryProvider` |
+| Lifecycle ViewModel Nav3 | `2.11.0` | ViewModel scoping for Nav3 entries |
 | Coil Compose | `2.7.0` | Async image loading |
 | Splash Screen API | `1.2.0` | Android 12+ splash screen |
 
@@ -166,8 +192,8 @@ OpenWeatherMap API
 
 | Library | Version | Purpose |
 |---|---|---|
-| Hilt | `2.59.2` | Dependency injection (Android) |
-| Koin | `4.2.2` | DI in KMP feature modules |
+| Hilt | `2.59.2` | Dependency injection — `:app` module only |
+| Koin | `4.2.2` | DI in all KMP modules (`:common-ui`, `:feature:*`, `:network`, `:storage`) |
 | Kotlin Coroutines | `1.11.0` | Async & structured concurrency |
 | StateFlow / Flow | — | Reactive UI state management |
 
@@ -177,13 +203,13 @@ OpenWeatherMap API
 |---|---|---|
 | Ktor Client | `3.5.1` | KMP-compatible HTTP client |
 | Kotlinx Serialization | `1.11.0` | JSON parsing |
-| OkHttp MockWebServer | `4.12.0` | Network mocking in tests |
+| OkHttp MockWebServer | `4.12.0` | Network mocking (declared; not yet exercised by tests — see Testing) |
 
 ### Local Storage
 
 | Library | Version | Purpose |
 |---|---|---|
-| Room | `2.8.4` | SQLite ORM (weather cache) |
+| Room | `2.8.4` | SQLite ORM (weather cache) — requires 2.7+ to emit Kotlin under the KMP Android library plugin |
 | DataStore Preferences | `1.2.1` | Key-value persistent settings |
 | Kotlinx DateTime | `0.8.0` | KMP-compatible date/time |
 
@@ -192,30 +218,31 @@ OpenWeatherMap API
 | SDK | Purpose |
 |---|---|
 | Firebase BOM `34.15.0` | BoM for consistent versions |
-| Analytics | User behaviour tracking |
-| Remote Config | Server-driven feature flags |
+| Analytics | Declared dependency; no explicit `logEvent` calls in code yet (auto-instrumentation only) |
+| Remote Config | Server-driven feature flags (`RemoteConfigModule`, `FirebaseRemoteConfigService`) |
 | Performance Monitoring | Network + rendering metrics |
-| Cloud Messaging (FCM) | Push notifications |
+| Cloud Messaging (FCM) | Push notifications (`WeatherifyMessagingService`) |
 
 ### Testing
 
-| Library | Purpose |
-|---|---|
-| JUnit 4 + Truth | Unit assertions |
-| Turbine `1.2.1` | Flow/StateFlow testing |
-| Mockk `1.14.11` | Kotlin-first mocking |
-| Mockito + Nhaarman | Java-style mocking |
-| Espresso `3.7.0` | Instrumentation UI tests |
-| Hilt Testing | DI in Android tests |
+| Library | Purpose | Status |
+|---|---|---|
+| JUnit 4 + Truth | Unit assertions | 2 real test files in `app/src/test` |
+| Turbine `1.2.1` | Flow/StateFlow testing | Declared, not yet exercised |
+| Mockk `1.14.11` | Kotlin-first mocking | Declared, not yet exercised |
+| Mockito + Nhaarman | Java-style mocking | Declared, not yet exercised |
+| Espresso `3.7.0` + Hilt Testing | Instrumentation UI tests | Declared; **no `androidTest` sources exist yet** |
+
+> See [Testing Status](#testing-status) below — the test table above reflects declared dependencies, not actual coverage.
 
 ### Other
 
 | Library | Purpose |
 |---|---|
 | Timber `5.0.1` | Structured logging |
-| LeakCanary `2.13` | Memory leak detection (debug) |
+| LeakCanary `2.14` | Memory leak detection (debug) |
 | Razorpay `1.6.41` | In-app payment checkout |
-| Google Play In-App Update | Forced/flexible update prompts |
+| Google Play In-App Update | Forced/flexible update prompts (`InAppUpdateManager`) |
 | Google Play Location `21.3.0` | FusedLocationProvider |
 
 ---
@@ -223,15 +250,31 @@ OpenWeatherMap API
 ## Screens
 
 ```text
-MainActivity
-├── HomeScreen          — current weather + AQI card + hourly strip
-├── SavedLocationsScreen — manage saved cities & search for new places (via `:feature:finder`)
-├── ProfileScreen       — user profile & settings shortcut
-├── SettingsScreen      — language, theme, notification toggles
-├── LoginScreen         — authentication entry point
-├── PaymentScreen       — Razorpay premium upgrade flow
-└── InAppWebView        — in-app browser for T&C / privacy policy
+MainActivity (Hilt entry point)
+└── AppNavigation (Nav3 NavDisplay + entryProvider)
+    ├── HomeScreen           — current weather + AQI card + hourly strip          (:app)
+    ├── CitiesListScreen     — quick city switcher shown from the bottom bar      (:app)
+    ├── SavedLocationsFinderRoute — manage saved cities & search new places       (:feature:finder)
+    ├── SettingsScreen       — profile header, language row, notification toggle, (:common-ui)
+    │                          premium bottom sheet, and in-app Terms/Privacy web view
+    │   └── InAppWebView     — in-app browser composable, not a separate route    (:common-ui)
+    ├── LanguageScreen       — per-app language picker (Android 13+ only)         (:feature:language)
+    └── LoginScreen          — authentication entry point                        (:feature:auth)
 ```
+
+> There is no standalone `ProfileScreen` or `PaymentScreen` — both live inside `SettingsScreen`.
+
+---
+
+## Testing Status
+
+Test infrastructure (Espresso, Hilt Testing, MockWebServer, `commonTest`/`iosTest` source sets in `:storage`/`:network`) is declared in the build files, but real coverage today is minimal:
+
+- `app/src/test/` — 2 unit tests (`common/ExtensionTest.kt`, `base/DateTimeUtilsTest.kt`)
+- No `androidTest` directory exists in any module
+- `:storage` and `:network` declare `commonTest`/`iosTest` source sets with no test files in them
+
+This is a known gap, not a design choice — treat the Testing table above as the target stack, not current coverage.
 
 ---
 
@@ -239,7 +282,7 @@ MainActivity
 
 ### Prerequisites
 - Android Studio Narwhal or later
-- JDK 17
+- JDK 17 (JDK 21 is used by CI)
 - An [OpenWeatherMap](https://openweathermap.org/api) API key (free tier works)
 
 ### Steps
@@ -263,8 +306,19 @@ MainActivity
    # or just hit Run in Android Studio
    ```
 
-> **Minimum Android version:** API 28 (Android 9 Pie)  
-> **Target SDK:** 37
+> **Minimum Android version:** API 28 (Android 9 Pie)
+> **Compile / Target SDK:** 37
+
+---
+
+## CI/CD
+
+`.github/workflows/ci.yml` runs on every PR:
+
+- **`build`** — JDK 21, Android SDK 36, `./gradlew build`, uploads the debug APK and publishes JUnit XML test results
+- **`lint`** — runs `codeFormat` (auto-commits formatting fixes), then `codeCheck` (Spotless + Detekt)
+
+`.github/workflows/check-dependency-updates.yml` runs weekly, executes the `dependencyUpdates` (ben-manes) task, and opens a GitHub issue if outdated dependencies are found.
 
 ---
 
@@ -280,7 +334,7 @@ Contributions are very welcome!
    ```
 4. Push and open a Pull Request against **`develop`**
 
-CI (`.github/workflows/ci.yml`) builds the project and runs spotless/detekt checks on every PR.
+CI builds the project and runs Spotless/Detekt checks on every PR (see [CI/CD](#cicd)).
 
 ---
 
@@ -288,11 +342,12 @@ CI (`.github/workflows/ci.yml`) builds the project and runs spotless/detekt chec
 
 These are the planned improvements currently in progress or on the roadmap:
 
-- **iOS target** — the KMP foundation is in place (`:common-ui`, `:feature:auth`, `:feature:finder`, `:feature:payment`, `:feature:language` all build `commonMain`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
+- **iOS target** — the KMP foundation is in place across all non-`:app` modules (`commonMain`/`androidMain`/`iosMain`, with `:network`/`:storage` also building `iosX64`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
+- **Real test coverage** — close the gap described in [Testing Status](#testing-status): add `androidTest` instrumentation tests, exercise the already-declared Mockk/Turbine/MockWebServer dependencies, and populate the empty `commonTest`/`iosTest` source sets in `:storage`/`:network`.
 - **Offline-first strategy** — full read-from-cache-then-network flow using Room as the single source of truth, with explicit stale-data indicators in the UI.
 - **Widget support** — a Glance-based home screen widget showing current temperature and conditions.
 - **Wear OS companion** — lightweight Wear Compose screen for wrist-based weather glances.
-- **Release automation** — CI already builds and lints every PR (`ci.yml`); the next step is automated release builds and Play Store internal track deployments.
+- **Release automation** — CI already builds and lints every PR; the next step is automated release builds and Play Store internal track deployments.
 - **Accessibility pass** — semantic descriptions, touch target sizing, and TalkBack compatibility audit.
 
 ---
