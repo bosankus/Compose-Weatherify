@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="offline_toast_title_txt">오프라인 상태입니다</string>
+</resources>
