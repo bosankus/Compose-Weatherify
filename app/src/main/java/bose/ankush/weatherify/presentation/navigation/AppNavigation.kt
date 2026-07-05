@@ -22,7 +22,6 @@ import bose.ankush.commonui.settings.SettingsScreen
 import bose.ankush.commonui.settings.SettingsScreenState
 import bose.ankush.commonui.settings.SettingsScreenStrings
 import bose.ankush.finder.presentation.savedlocations.SavedLocationsFinderRoute
-import bose.ankush.finder.presentation.savedlocations.SavedLocationsStrings
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentStage
@@ -38,7 +37,6 @@ import bose.ankush.weatherify.presentation.SettingsEvent
 import bose.ankush.weatherify.presentation.SettingsViewModel
 import bose.ankush.weatherify.presentation.cities.CitiesListScreen
 import bose.ankush.weatherify.presentation.home.HomeScreen
-import bose.ankush.weatherify.presentation.strings.rememberLanguageScreenStrings
 
 @SuppressLint("NewApi")
 @Composable
@@ -58,10 +56,21 @@ fun AppNavigation(
                     entry<HomeRoute> { HomeScreen(viewModel, navigator, toastAnchorState) }
                     entry<CitiesListRoute> { CitiesListScreen(navigator) }
                     entry<SavedLocationsRoute> {
-                        SavedLocationsEntry(
-                            viewModel,
-                            navigator,
-                            toastAnchorState,
+                        SavedLocationsFinderRoute(
+                            onLocationSelected = { lat, lon, name ->
+                                viewModel.setDefaultLocation(
+                                    lat,
+                                    lon,
+                                    name,
+                                )
+                            },
+                            bottomBar = {
+                                AppBottomBar(
+                                    rememberSaveable { mutableStateOf(true) },
+                                    navigator,
+                                    toastAnchorState,
+                                )
+                            },
                         )
                     }
                     entry<SettingsRoute> {
@@ -74,29 +83,11 @@ fun AppNavigation(
                         )
                     }
                     entry<LanguageRoute> { route ->
-                        LanguageScreen(
-                            languages = route.languages,
-                            strings = rememberLanguageScreenStrings(),
-                        ) { navigator.goBack() }
+                        LanguageScreen(languages = route.languages) { navigator.goBack() }
                     }
                 },
             ),
         onBack = navigator::goBack,
-    )
-}
-
-@Composable
-private fun SavedLocationsEntry(
-    viewModel: MainViewModel,
-    navigator: AppNavigator,
-    toastAnchorState: ToastAnchorState?,
-) {
-    SavedLocationsFinderRoute(
-        onLocationSelected = { lat, lon, name -> viewModel.setDefaultLocation(lat, lon, name) },
-        strings = rememberSavedLocationsStrings(),
-        bottomBar = {
-            AppBottomBar(rememberSaveable { mutableStateOf(true) }, navigator, toastAnchorState)
-        },
     )
 }
 
@@ -181,30 +172,6 @@ private fun rememberLanguageList(): Array<String> {
         }
     }
     return list
-}
-
-@Composable
-private fun rememberSavedLocationsStrings(): SavedLocationsStrings {
-    val noResultsTemplate = stringResource(R.string.place_search_no_results)
-    val setAsDefaultBodyTemplate = stringResource(R.string.set_as_default_dialog_body)
-    return SavedLocationsStrings(
-        title = stringResource(R.string.saved_locations_title),
-        premiumTitle = stringResource(R.string.saved_locations_premium_title),
-        premiumDesc = stringResource(R.string.saved_locations_premium_desc),
-        emptyText = stringResource(R.string.saved_locations_empty_txt),
-        searchHint = stringResource(R.string.place_search_hint),
-        searchDialogTitle = stringResource(R.string.place_search_dialog_title),
-        noResults = { query -> noResultsTemplate.replace("%1\$s", query) },
-        deleteContentDesc = stringResource(R.string.delete_icon_content),
-        addContentDesc = stringResource(R.string.add_icon_content),
-        cancelBtn = stringResource(R.string.cancel_btn_txt),
-        saveSuccessMsg = stringResource(R.string.saved_locations_save_success),
-        deleteSuccessMsg = stringResource(R.string.saved_locations_delete_success),
-        setAsDefaultDialogTitle = stringResource(R.string.set_as_default_dialog_title),
-        setAsDefaultDialogBody = { name -> setAsDefaultBodyTemplate.replace($$"%1$s", name) },
-        setAsDefaultDialogWarning = stringResource(R.string.set_as_default_dialog_warning),
-        setAsDefaultConfirmBtn = stringResource(R.string.set_as_default_confirm_btn),
-    )
 }
 
 @Composable

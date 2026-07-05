@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="payment_creating_order">Creating order...</string>
+    <string name="payment_unavailable">Payment is temporarily unavailable. Please try again later.</string>
+    <string name="payment_order_created">Order created</string>
+    <string name="payment_verifying">Verifying payment...</string>
+    <string name="payment_verified">Payment verified</string>
+    <string name="payment_checkout_name">Weatherify Subscription</string>
+    <string name="payment_checkout_description">Premium Plan</string>
+    <string name="payment_error_generic">Something went wrong. Please try again.</string>
+    <string name="payment_error_timeout">The server took too long to respond. Please try again.</string>
+    <string name="payment_error_cancelled">Payment was cancelled.</string>
+    <string name="payment_error_network">Please check your internet connection and try again.</string>
+</resources>

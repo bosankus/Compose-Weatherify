@@ -87,38 +87,12 @@
     <string name="premium_activated_msg_txt">మీ ప్రీమియం సబ్‌స్క్రిప్షన్ ఇప్పుడు సక్రియమైంది!</string>
 
     <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_screen">సేవ్ చేసిన ప్రదేశాలు</string>
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_title">సేవ్ చేసిన ప్రదేశాలు</string>
-    <string name="saved_locations_empty_txt">ఇంకా సేవ్ చేసిన ప్రదేశాలు లేవు. జోడించడానికి + నొక్కండి.</string>
-    <string name="saved_locations_add_btn">ప్రదేశం జోడించండి</string>
-    <string name="saved_locations_delete_btn">తొలగించండి</string>
-    <string name="saved_locations_save_btn">సేవ్ చేయండి</string>
-    <string name="saved_locations_name_hint">ప్రదేశం పేరు (ఉదా. గృహం)</string>
-    <string name="saved_locations_premium_title">ప్రీమియం సవరణ</string>
-    <string name="saved_locations_premium_desc">మీ ఇష్టమైన ప్రదేశాలను సేవ్ చేయండి మరియు తక్షణమే ప్రాప్యత చేయండి. ఈ ఫీచర్‌ను అన్‌లాక్ చేయడానికి ప్రీమియం‌కు అప్‌గ్రేడ్ చేయండి.</string>
-    <string name="saved_locations_error_txt">సేవ్ చేసిన ప్రదేశాలను లోడ్ చేయడంలో విఫలమైంది.</string>
-    <string name="saved_locations_save_success">ప్రదేశం విజయవంతంగా సేవ్ చేయబడింది.</string>
-    <string name="saved_locations_delete_success">ప్రదేశం తొలగించబడింది.</string>
     <string name="saved_locations_icon_content">సేవ్ చేసిన ప్రదేశాలు</string>
-    <string name="add_icon_content">కొత్త ప్రదేశం జోడించండి</string>
-    <string name="delete_icon_content">ప్రదేశం తొలగించండి</string>
 
-    <!--Place Search Dialog-->
-    <string name="place_search_dialog_title">ఒక ప్రదేశం కోసం వెతకండి</string>
-    <string name="place_search_hint">నగరం లేదా చిరునామా టైప్ చేయండి…</string>
-    <string name="place_search_no_results">\'%1$s\'కు ఎటువంటి ప్రదేశాలు కనుగొనబడలేదు</string>
-    <string name="set_as_default_dialog_title">వాతావరణ ప్రదేశంగా ఉపయోగించాలా?</string>
-    <string name="set_as_default_dialog_body">మీ ప్రస్తుత GPS స్థానానికి బదులుగా %1$s వాతావరణ డేటా చూపబడుతుంది.</string>
-    <string name="set_as_default_dialog_warning">ఇది సక్రియంగా ఉన్నప్పుడు మీ నేరుగా GPS స్థానం నవీకరించబడదు.</string>
-    <string name="set_as_default_confirm_btn">డిఫాల్ట్‌గా సెట్ చేయండి</string>
     <string name="location_override_chip_label">%1$s ఉపయోగిస్తోంది</string>
     <string name="location_override_reset_btn">GPS కి రీసెట్ చేయండి</string>
     <string name="location_override_chip_content_desc">ప్రస్తుతం %1$s వాతావరణం చూపబడుతోంది. GPS కి రీసెట్ చేయడానికి నొక్కండి.</string>
     <string name="language_lib_screen_header">భాష ఎంచుకోండి</string>
     <string name="language_back_content_description">వెనుకకు వెళ్ళు</string>
-    <string name="language_screen_title">మీ భాష ఎంచుకోండి</string>
-    <string name="language_screen_subtitle">వ్యక్తిగత అనుభవం కోసం మీకు ఇష్టమైన భాషను ఎంచుకోండి</string>
-    <string name="language_selected">%s ఎంచుకోబడింది</string>
-    <string name="language_navigate_back">వెనుకకు నావిగేట్ చేయండి</string>
 </resources>

@@ -87,38 +87,12 @@
     <string name="premium_activated_msg_txt">உங்கள் பிரீமியம் சந்தா இப்போது செயலில் உள்ளது!</string>
 
     <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_screen">சேமிக்கப்பட்ட இடங்கள்</string>
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_title">சேமிக்கப்பட்ட இடங்கள்</string>
-    <string name="saved_locations_empty_txt">சேமிக்கப்பட்ட இடங்கள் இல்லை. சேர்க்க + ஐ தட்டவும்.</string>
-    <string name="saved_locations_add_btn">இடத்தை சேர்க்கவும்</string>
-    <string name="saved_locations_delete_btn">நீக்கவும்</string>
-    <string name="saved_locations_save_btn">சேமிக்கவும்</string>
-    <string name="saved_locations_name_hint">இடத்தின் பெயர் (எ.கா. வீடு)</string>
-    <string name="saved_locations_premium_title">பிரீமியம் பிற்சேர்க்கை</string>
-    <string name="saved_locations_premium_desc">உங்கள் பிடித்தமான இடங்களை சேமிக்கவும் மற்றும் உடனடியாக அணுகவும். இந்த பிற்சேர்க்கையை திறக்க பிரீமியமாக அப்கிரேட் செய்யவும்.</string>
-    <string name="saved_locations_error_txt">சேமிக்கப்பட்ட இடங்களை ஏற்ற முடியவில்லை.</string>
-    <string name="saved_locations_save_success">இடம் வெற்றிகரமாக சேமிக்கப்பட்டது.</string>
-    <string name="saved_locations_delete_success">இடம் நீக்கப்பட்டது.</string>
     <string name="saved_locations_icon_content">சேமிக்கப்பட்ட இடங்கள்</string>
-    <string name="add_icon_content">புதிய இடத்தை சேர்க்கவும்</string>
-    <string name="delete_icon_content">இடத்தை நீக்கவும்</string>
 
-    <!--Place Search Dialog-->
-    <string name="place_search_dialog_title">ஒரு இடத்திற்கு தேடுக</string>
-    <string name="place_search_hint">நகரம் அல்லது முகவரி உள்ளிடவும்…</string>
-    <string name="place_search_no_results">\'%1$s\'க்கு இடங்கள் கிடைக்கவில்லை</string>
-    <string name="set_as_default_dialog_title">வானிலை இடமாக பயன்படுத்தவா?</string>
-    <string name="set_as_default_dialog_body">உங்கள் தற்போதைய GPS நிலைக்கு பதிலாக %1$s-ன் வானிலை தரவு காட்டப்படும்.</string>
-    <string name="set_as_default_dialog_warning">இது செயல்பாட்டில் இருக்கும்போது உங்கள் நேரடி GPS இடம் புதுப்பிக்கப்படாது.</string>
-    <string name="set_as_default_confirm_btn">இயல்புநிலையாக அமைக்கவும்</string>
     <string name="location_override_chip_label">%1$s பயன்படுத்தப்படுகிறது</string>
     <string name="location_override_reset_btn">GPS-க்கு மீட்டமைக்கவும்</string>
     <string name="location_override_chip_content_desc">தற்போது %1$s-ன் வானிலை காட்டப்படுகிறது. GPS-க்கு மீட்டமைக்க தட்டவும்.</string>
     <string name="language_lib_screen_header">மொழியை தேர்ந்தெடுக்கவும்</string>
     <string name="language_back_content_description">திரும்பி செல்லவும்</string>
-    <string name="language_screen_title">உங்கள் மொழியை தேர்ந்தெடுக்கவும்</string>
-    <string name="language_screen_subtitle">தனிப்பயனாக்கப்பட்ட அனுபவத்திற்கு உங்களுக்கு விருப்பமான மொழியை தேர்ந்தெடுக்கவும்</string>
-    <string name="language_selected">%s தேர்ந்தெடுக்கப்பட்டது</string>
-    <string name="language_navigate_back">பின்னால் செல்லவும்</string>
 </resources>

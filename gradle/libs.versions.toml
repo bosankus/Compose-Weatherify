@@ -205,6 +205,7 @@ compose-multiplatform-animation = { module = "org.jetbrains.compose.animation:an
 compose-multiplatform-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "cmp-material3" }
 compose-multiplatform-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "cmp-ui" }
 compose-multiplatform-materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "cmp-materialIconsExtended" }
+compose-multiplatform-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "cmp-foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

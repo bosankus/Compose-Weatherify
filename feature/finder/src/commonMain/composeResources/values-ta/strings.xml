@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_locations_title">சேமிக்கப்பட்ட இடங்கள்</string>
+    <string name="saved_locations_empty_txt">சேமிக்கப்பட்ட இடங்கள் இல்லை. சேர்க்க + ஐ தட்டவும்.</string>
+    <string name="saved_locations_premium_title">பிரீமியம் பிற்சேர்க்கை</string>
+    <string name="saved_locations_premium_desc">உங்கள் பிடித்தமான இடங்களை சேமிக்கவும் மற்றும் உடனடியாக அணுகவும். இந்த பிற்சேர்க்கையை திறக்க பிரீமியமாக அப்கிரேட் செய்யவும்.</string>
+    <string name="saved_locations_save_success">இடம் வெற்றிகரமாக சேமிக்கப்பட்டது.</string>
+    <string name="saved_locations_delete_success">இடம் நீக்கப்பட்டது.</string>
+    <string name="add_icon_content">புதிய இடத்தை சேர்க்கவும்</string>
+    <string name="delete_icon_content">இடத்தை நீக்கவும்</string>
+    <string name="cancel_btn_txt">ரத்து செய்</string>
+    <string name="set_as_default_dialog_title">வானிலை இடமாக பயன்படுத்தவா?</string>
+    <string name="set_as_default_dialog_body">உங்கள் தற்போதைய GPS நிலைக்கு பதிலாக %1$s-ன் வானிலை தரவு காட்டப்படும்.</string>
+    <string name="set_as_default_dialog_warning">இது செயல்பாட்டில் இருக்கும்போது உங்கள் நேரடி GPS இடம் புதுப்பிக்கப்படாது.</string>
+    <string name="set_as_default_confirm_btn">இயல்புநிலையாக அமைக்கவும்</string>
+    <string name="place_search_dialog_title">ஒரு இடத்திற்கு தேடுக</string>
+    <string name="place_search_hint">நகரம் அல்லது முகவரி உள்ளிடவும்…</string>
+    <string name="place_search_no_results">\'%1$s\'க்கு இடங்கள் கிடைக்கவில்லை</string>
+</resources>

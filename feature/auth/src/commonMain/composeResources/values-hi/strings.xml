@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_welcome_back_title">वापसी पर स्वागत है</string>
+    <string name="login_create_account_title">खाता बनाएं</string>
+    <string name="login_signin_subtitle">जारी रखने के लिए साइन इन करें</string>
+    <string name="login_join_community_subtitle">हमारे समुदाय में शामिल हों</string>
+    <string name="login_email_label">ईमेल पता</string>
+    <string name="login_password_label">पासवर्ड</string>
+    <string name="login_password_hide_btn">छुपाएं</string>
+    <string name="login_password_show_btn">दिखाएं</string>
+    <string name="login_signin_btn">साइन इन करें</string>
+    <string name="login_toggle_to_register_txt">खाता नहीं है? पंजीकरण करें</string>
+    <string name="login_toggle_to_login_txt">पहले से पंजीकृत हैं? लॉगिन करें</string>
+    <string name="login_terms_agreement_txt">जारी रखकर, आप हमारी %1$s और %2$s से सहमत होते हैं</string>
+    <string name="login_terms_link_txt">नियम एवं शर्तें</string>
+    <string name="login_privacy_link_txt">गोपनीयता नीति</string>
+    <string name="login_error_email_empty">ईमेल खाली नहीं हो सकता</string>
+    <string name="login_error_email_invalid">कृपया एक मान्य ईमेल पता दर्ज करें</string>
+    <string name="login_error_password_empty">पासवर्ड खाली नहीं हो सकता</string>
+    <string name="login_error_password_short">पासवर्ड कम से कम 6 अक्षरों का होना चाहिए</string>
+</resources>

@@ -22,6 +22,8 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+
+        androidResources.enable = true
     }
 
     iosArm64()
@@ -38,6 +40,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":network"))
             implementation(project(":feature:payment"))
+            implementation(libs.compose.multiplatform.resources)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)
             implementation(libs.compose.multiplatform.material3)
@@ -52,4 +55,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel.compose)
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "bose.ankush.finder.generated.resources"
 }

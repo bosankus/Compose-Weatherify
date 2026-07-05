@@ -6,6 +6,12 @@ import bose.ankush.finder.domain.usecase.DeleteLocationUseCase
 import bose.ankush.finder.domain.usecase.GetSavedLocationsUseCase
 import bose.ankush.finder.domain.usecase.SaveLocationParams
 import bose.ankush.finder.domain.usecase.SaveLocationUseCase
+import bose.ankush.finder.generated.resources.Res
+import bose.ankush.finder.generated.resources.saved_locations_delete_error
+import bose.ankush.finder.generated.resources.saved_locations_delete_success
+import bose.ankush.finder.generated.resources.saved_locations_load_error
+import bose.ankush.finder.generated.resources.saved_locations_save_error
+import bose.ankush.finder.generated.resources.saved_locations_save_success
 import bose.ankush.payment.domain.store.PremiumStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
@@ -16,6 +22,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 
 internal class SavedLocationsViewModel(
     private val getSavedLocationsUseCase: GetSavedLocationsUseCase,
@@ -63,12 +70,8 @@ internal class SavedLocationsViewModel(
                 },
                 onFailure = { e ->
                     if (e !is CancellationException) {
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                error = "Unable to load saved locations. Please try again later.",
-                            )
-                        }
+                        val message = getString(Res.string.saved_locations_load_error)
+                        _state.update { it.copy(isLoading = false, error = message) }
                     }
                 },
             )
@@ -84,19 +87,14 @@ internal class SavedLocationsViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             saveLocationUseCase(SaveLocationParams(name, lat, lon)).fold(
                 onSuccess = {
-                    _state.update {
-                        it.copy(isLoading = false, successMessage = "Location saved successfully")
-                    }
+                    val message = getString(Res.string.saved_locations_save_success)
+                    _state.update { it.copy(isLoading = false, successMessage = message) }
                     loadSavedLocations()
                 },
                 onFailure = { e ->
                     if (e !is CancellationException) {
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                error = "Unable to save location. Please try again later.",
-                            )
-                        }
+                        val message = getString(Res.string.saved_locations_save_error)
+                        _state.update { it.copy(isLoading = false, error = message) }
                     }
                 },
             )
@@ -108,19 +106,14 @@ internal class SavedLocationsViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             deleteLocationUseCase(id).fold(
                 onSuccess = {
-                    _state.update {
-                        it.copy(isLoading = false, successMessage = "Location deleted successfully")
-                    }
+                    val message = getString(Res.string.saved_locations_delete_success)
+                    _state.update { it.copy(isLoading = false, successMessage = message) }
                     loadSavedLocations()
                 },
                 onFailure = { e ->
                     if (e !is CancellationException) {
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                error = "Unable to delete location. Please try again later.",
-                            )
-                        }
+                        val message = getString(Res.string.saved_locations_delete_error)
+                        _state.update { it.copy(isLoading = false, error = message) }
                     }
                 },
             )

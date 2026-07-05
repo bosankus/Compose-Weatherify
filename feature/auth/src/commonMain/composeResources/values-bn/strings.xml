@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_welcome_back_title">স্বাগতম</string>
+    <string name="login_create_account_title">অ্যাকাউন্ট তৈরি করুন</string>
+    <string name="login_signin_subtitle">চালিয়ে যেতে সাইন ইন করুন</string>
+    <string name="login_join_community_subtitle">আমাদের সম্প্রদায়ে যোগ দিন</string>
+    <string name="login_email_label">ইমেল ঠিকানা</string>
+    <string name="login_password_label">পাসওয়ার্ড</string>
+    <string name="login_password_hide_btn">লুকান</string>
+    <string name="login_password_show_btn">দেখান</string>
+    <string name="login_signin_btn">সাইন ইন</string>
+    <string name="login_toggle_to_register_txt">অ্যাকাউন্ট নেই? নিবন্ধন করুন</string>
+    <string name="login_toggle_to_login_txt">ইতিমধ্যে নিবন্ধিত? লগ ইন করুন</string>
+    <string name="login_terms_agreement_txt">চালিয়ে যাওয়ার মাধ্যমে, আপনি আমাদের %1$s ও %2$s এর সাথে সম্মত হচ্ছেন</string>
+    <string name="login_terms_link_txt">নিয়ম ও শর্তাবলী</string>
+    <string name="login_privacy_link_txt">গোপনীয়তা নীতি</string>
+    <string name="login_error_email_empty">ইমেল খালি রাখা যাবে না</string>
+    <string name="login_error_email_invalid">দয়া করে একটি বৈধ ইমেল ঠিকানা লিখুন</string>
+    <string name="login_error_password_empty">পাসওয়ার্ড খালি রাখা যাবে না</string>
+    <string name="login_error_password_short">পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে</string>
+</resources>

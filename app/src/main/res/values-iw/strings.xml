@@ -93,38 +93,12 @@
     <string name="premium_activated_msg_txt">מנוי הפרימיום שלך פעיל כעת!</string>
 
     <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_screen">מיקומים שמורים</string>
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_title">מיקומים שמורים</string>
-    <string name="saved_locations_empty_txt">אין מיקומים שמורים עדיין. הקש + כדי להוסיף אחד.</string>
-    <string name="saved_locations_add_btn">הוסף מיקום</string>
-    <string name="saved_locations_delete_btn">מחק</string>
-    <string name="saved_locations_save_btn">שמור</string>
-    <string name="saved_locations_name_hint">שם מיקום (למשל בית)</string>
-    <string name="saved_locations_premium_title">תכונת פרימיום</string>
-    <string name="saved_locations_premium_desc">שמור וגש אל מיקומיך המועדפים באופן מיידי. שדרג לפרימיום כדי להשיג נעילת תכונה זו.</string>
-    <string name="saved_locations_error_txt">כישלון בטעינת מיקומים שמורים.</string>
-    <string name="saved_locations_save_success">מיקום נשמר בהצלחה.</string>
-    <string name="saved_locations_delete_success">מיקום הוסר.</string>
     <string name="saved_locations_icon_content">מיקומים שמורים</string>
-    <string name="add_icon_content">הוסף מיקום חדש</string>
-    <string name="delete_icon_content">מחק מיקום</string>
 
-    <!--Place Search Dialog-->
-    <string name="place_search_dialog_title">חפש מיקום</string>
-    <string name="place_search_hint">הקלד עיר או כתובת…</string>
-    <string name="place_search_no_results">לא נמצאו מיקומים עבור \'%1$s\'</string>
-    <string name="set_as_default_dialog_title">להשתמש כמיקום מזג האוויר?</string>
-    <string name="set_as_default_dialog_body">נתוני מזג האוויר יוצגו עבור %1$s במקום מיקום ה-GPS הנוכחי שלך.</string>
-    <string name="set_as_default_dialog_warning">מיקום ה-GPS החי שלך לא יתעדכן כל עוד זה פעיל.</string>
-    <string name="set_as_default_confirm_btn">הגדר כברירת מחדל</string>
     <string name="location_override_chip_label">משתמש ב-%1$s</string>
     <string name="location_override_reset_btn">אפס ל-GPS</string>
     <string name="location_override_chip_content_desc">כרגע מוצג מזג האוויר עבור %1$s. הקש כדי לאפס ל-GPS.</string>
     <string name="language_lib_screen_header">בחר שפה</string>
     <string name="language_back_content_description">תחזור</string>
-    <string name="language_screen_title">בחר את השפה שלך</string>
-    <string name="language_screen_subtitle">בחר את השפה המועדפת עליך לחוויה מותאמת אישית</string>
-    <string name="language_selected">%s נבחר</string>
-    <string name="language_navigate_back">נווט לאחור</string>
 </resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_welcome_back_title">తిరిగి స్వాగతం</string>
+    <string name="login_create_account_title">ఖాతాను సృష్టించండి</string>
+    <string name="login_signin_subtitle">కొనసాగించడానికి సైన్ ఇన్ చేయండి</string>
+    <string name="login_join_community_subtitle">మా సంఘంలో చేరండి</string>
+    <string name="login_email_label">ఇమెయిల్ చిరునామా</string>
+    <string name="login_password_label">పాస్‌వర్డ్</string>
+    <string name="login_password_hide_btn">దాచు</string>
+    <string name="login_password_show_btn">చూపించు</string>
+    <string name="login_signin_btn">సైన్ ఇన్</string>
+    <string name="login_toggle_to_register_txt">ఖాతా లేదా? నమోదు చేసుకోండి</string>
+    <string name="login_toggle_to_login_txt">ఇప్పటికే నమోదు చేసుకున్నారా? లాగిన్ చేయండి</string>
+    <string name="login_terms_agreement_txt">కొనసాగించడం ద్వారా, మీరు మా %1$s మరియు %2$s ను అంగీకరిస్తున్నారు</string>
+    <string name="login_terms_link_txt">నిబంధనలు మరియు షరతులు</string>
+    <string name="login_privacy_link_txt">గోప్యతా విధానం</string>
+    <string name="login_error_email_empty">ఇమెయిల్ ఖాళీగా ఉండకూడదు</string>
+    <string name="login_error_email_invalid">దయచేసి చెల్లుబాటు అయ్యే ఇమెయిల్ చిరునామాను నమోదు చేయండి</string>
+    <string name="login_error_password_empty">పాస్‌వర్డ్ ఖాళీగా ఉండకూడదు</string>
+    <string name="login_error_password_short">పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి</string>
+</resources>

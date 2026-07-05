@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_welcome_back_title">ಮರಳಿ ಸ್ವಾಗತ</string>
+    <string name="login_create_account_title">ಖಾತೆ ರಚಿಸಿ</string>
+    <string name="login_signin_subtitle">ಮುಂದುವರಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ</string>
+    <string name="login_join_community_subtitle">ನಮ್ಮ ಸಮುದಾಯಕ್ಕೆ ಸೇರಿ</string>
+    <string name="login_email_label">ಇಮೇಲ್ ವಿಳಾಸ</string>
+    <string name="login_password_label">ಪಾಸ್‌ವರ್ಡ್</string>
+    <string name="login_password_hide_btn">ಮರೆಮಾಡಿ</string>
+    <string name="login_password_show_btn">ತೋರಿಸಿ</string>
+    <string name="login_signin_btn">ಸೈನ್ ಇನ್</string>
+    <string name="login_toggle_to_register_txt">ಖಾತೆ ಇಲ್ಲವೇ? ನೋಂದಾಯಿಸಿ</string>
+    <string name="login_toggle_to_login_txt">ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಿದ್ದೀರಾ? ಲಾಗಿನ್ ಮಾಡಿ</string>
+    <string name="login_terms_agreement_txt">ಮುಂದುವರಿಸುವ ಮೂಲಕ, ನೀವು ನಮ್ಮ %1$s ಮತ್ತು %2$s ಗೆ ಒಪ್ಪುತ್ತೀರಿ</string>
+    <string name="login_terms_link_txt">ನಿಯಮಗಳು ಮತ್ತು ಷರತ್ತುಗಳು</string>
+    <string name="login_privacy_link_txt">ಗೌಪ್ಯತಾ ನೀತಿ</string>
+    <string name="login_error_email_empty">ಇಮೇಲ್ ಖಾಲಿ ಇರಬಾರದು</string>
+    <string name="login_error_email_invalid">ದಯವಿಟ್ಟು ಮಾನ್ಯ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ನಮೂದಿಸಿ</string>
+    <string name="login_error_password_empty">ಪಾಸ್‌ವರ್ಡ್ ಖಾಲಿ ಇರಬಾರದು</string>
+    <string name="login_error_password_short">ಪಾಸ್‌ವರ್ಡ್ ಕನಿಷ್ಠ 6 ಅಕ್ಷರಗಳಿರಬೇಕು</string>
+</resources>

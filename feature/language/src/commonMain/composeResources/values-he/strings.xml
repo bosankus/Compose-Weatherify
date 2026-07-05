@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_screen_title">בחר את השפה שלך</string>
+    <string name="language_screen_subtitle">בחר את השפה המועדפת עליך לחוויה מותאמת אישית</string>
+    <string name="language_selected">%1$s נבחר</string>
+    <string name="language_navigate_back">נווט לאחור</string>
+</resources>

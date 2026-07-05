@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_welcome_back_title">ברוך שובך</string>
+    <string name="login_create_account_title">צור חשבון</string>
+    <string name="login_signin_subtitle">היכנס כדי להמשיך</string>
+    <string name="login_join_community_subtitle">הצטרף לקהילה שלנו</string>
+    <string name="login_email_label">כתובת אימייל</string>
+    <string name="login_password_label">סיסמה</string>
+    <string name="login_password_hide_btn">הסתר</string>
+    <string name="login_password_show_btn">הצג</string>
+    <string name="login_signin_btn">התחבר</string>
+    <string name="login_toggle_to_register_txt">אין לך חשבון? הרשם</string>
+    <string name="login_toggle_to_login_txt">כבר רשום? התחבר</string>
+    <string name="login_terms_agreement_txt">בהמשך, אתה מסכים ל-%1$s ול-%2$s שלנו</string>
+    <string name="login_terms_link_txt">תנאים והגבלות</string>
+    <string name="login_privacy_link_txt">מדיניות פרטיות</string>
+    <string name="login_error_email_empty">האימייל לא יכול להיות ריק</string>
+    <string name="login_error_email_invalid">אנא הזן כתובת אימייל תקינה</string>
+    <string name="login_error_password_empty">הסיסמה לא יכולה להיות ריקה</string>
+    <string name="login_error_password_short">הסיסמה חייבת להכיל לפחות 6 תווים</string>
+</resources>

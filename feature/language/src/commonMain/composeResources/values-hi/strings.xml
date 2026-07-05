@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_screen_title">अपनी भाषा चुनें</string>
+    <string name="language_screen_subtitle">व्यक्तिगत अनुभव के लिए अपनी पसंदीदा भाषा चुनें</string>
+    <string name="language_selected">%1$s चयनित</string>
+    <string name="language_navigate_back">वापस जाएं</string>
+</resources>

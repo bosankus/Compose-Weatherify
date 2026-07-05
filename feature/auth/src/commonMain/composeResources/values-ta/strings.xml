@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_welcome_back_title">மீண்டும் வரவேற்கிறோம்</string>
+    <string name="login_create_account_title">கணக்கை உருவாக்கவும்</string>
+    <string name="login_signin_subtitle">தொடர உள்நுழையவும்</string>
+    <string name="login_join_community_subtitle">எங்கள் சமூகத்தில் சேரவும்</string>
+    <string name="login_email_label">மின்னஞ்சல் முகவரி</string>
+    <string name="login_password_label">கடவுச்சொல்</string>
+    <string name="login_password_hide_btn">மறை</string>
+    <string name="login_password_show_btn">காட்டு</string>
+    <string name="login_signin_btn">உள்நுழைக</string>
+    <string name="login_toggle_to_register_txt">கணக்கு இல்லையா? பதிவு செய்யவும்</string>
+    <string name="login_toggle_to_login_txt">ஏற்கனவே பதிவு செய்துள்ளீர்களா? உள்நுழையவும்</string>
+    <string name="login_terms_agreement_txt">தொடர்வதன் மூலம், நீங்கள் எங்கள் %1$s மற்றும் %2$s ஐ ஏற்கிறீர்கள்</string>
+    <string name="login_terms_link_txt">விதிமுறைகள் மற்றும் நிபந்தனைகள்</string>
+    <string name="login_privacy_link_txt">தனியுரிமைக் கொள்கை</string>
+    <string name="login_error_email_empty">மின்னஞ்சல் காலியாக இருக்கக்கூடாது</string>
+    <string name="login_error_email_invalid">சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்</string>
+    <string name="login_error_password_empty">கடவுச்சொல் காலியாக இருக்கக்கூடாது</string>
+    <string name="login_error_password_short">கடவுச்சொல் குறைந்தது 6 எழுத்துகள் இருக்க வேண்டும்</string>
+</resources>

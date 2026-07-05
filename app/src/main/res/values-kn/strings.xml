@@ -87,38 +87,12 @@
     <string name="premium_activated_msg_txt">ನಿಮ್ಮ ಪ್ರೀಮಿಯಂ ಗ್ರಾಹಕತ್ವ ಈಗ ಸಕ್ರಿಯವಾಗಿದೆ!</string>
 
     <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_screen">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳು</string>
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_title">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳು</string>
-    <string name="saved_locations_empty_txt">ಇನ್ನೂ ಸಂರಕ್ಷಿತ ಸ್ಥಳಗಳಿಲ್ಲ. ಸೇರಿಸಲು + ಟ್ಯಾಪ್ ಮಾಡಿ.</string>
-    <string name="saved_locations_add_btn">ಸ್ಥಳ ಸೇರಿಸಿ</string>
-    <string name="saved_locations_delete_btn">ಅಳಿಸಿ</string>
-    <string name="saved_locations_save_btn">ಉಳಿಸಿ</string>
-    <string name="saved_locations_name_hint">ಸ್ಥಳ ಹೆಸರು (ಉದಾ. ಮನೆ)</string>
-    <string name="saved_locations_premium_title">ಪ್ರೀಮಿಯಂ ವೈಶಿಷ್ಟ್ಯ</string>
-    <string name="saved_locations_premium_desc">ನಿಮ್ಮ ಮೆಚ್ಚುವ ಸ್ಥಳಗಳನ್ನು ಉಳಿಸಿ ಮತ್ತು ತಕ್ಷಣ ಪ್ರವೇಶಿಸಿ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಪ್ರೀಮಿಯಂಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ.</string>
-    <string name="saved_locations_error_txt">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ.</string>
-    <string name="saved_locations_save_success">ಸ್ಥಳ ಯಶಸ್ವಿಯಾಗಿ ಉಳಿಸಲಾಗಿದೆ.</string>
-    <string name="saved_locations_delete_success">ಸ್ಥಳ ತೆಗೆದುಹಾಕಲಾಗಿದೆ.</string>
     <string name="saved_locations_icon_content">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳು</string>
-    <string name="add_icon_content">ಹೊಸ ಸ್ಥಳ ಸೇರಿಸಿ</string>
-    <string name="delete_icon_content">ಸ್ಥಳ ಅಳಿಸಿ</string>
 
-    <!--Place Search Dialog-->
-    <string name="place_search_dialog_title">ಸ್ಥಳವನ್ನು ಹುಡುಕಿ</string>
-    <string name="place_search_hint">ಪಟ್ಟಣ ಅಥವಾ ವಿಳಾಸ ಟೈಪ್ ಮಾಡಿ…</string>
-    <string name="place_search_no_results">\'%1$s\'ಗೆ ಯಾವುದೇ ಸ್ಥಳಗಳು ಕಂಡುಬಂದಿಲ್ಲ</string>
-    <string name="set_as_default_dialog_title">ಹವಾಮಾನ ಸ್ಥಳವಾಗಿ ಬಳಸುವಿರಾ?</string>
-    <string name="set_as_default_dialog_body">ನಿಮ್ಮ ಪ್ರಸ್ತುತ GPS ಸ್ಥಳದ ಬದಲಿಗೆ %1$s ಗಾಗಿ ಹವಾಮಾನ ಡೇಟಾ ತೋರಿಸಲಾಗುತ್ತದೆ.</string>
-    <string name="set_as_default_dialog_warning">ಇದು ಸಕ್ರಿಯವಾಗಿರುವಾಗ ನಿಮ್ಮ ಲೈವ್ GPS ಸ್ಥಳ ಅಪ್‌ಡೇಟ್ ಆಗುವುದಿಲ್ಲ.</string>
-    <string name="set_as_default_confirm_btn">ಡಿಫಾಲ್ಟ್ ಆಗಿ ಹೊಂದಿಸಿ</string>
     <string name="location_override_chip_label">%1$s ಬಳಸಲಾಗುತ್ತಿದೆ</string>
     <string name="location_override_reset_btn">GPS ಗೆ ರೀಸೆಟ್ ಮಾಡಿ</string>
     <string name="location_override_chip_content_desc">ಪ್ರಸ್ತುತ %1$s ಗಾಗಿ ಹವಾಮಾನ ತೋರಿಸಲಾಗುತ್ತಿದೆ. GPS ಗೆ ರೀಸೆಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ.</string>
     <string name="language_lib_screen_header">ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ</string>
     <string name="language_back_content_description">ಹಿಂದೆ ಹೋಗಿ</string>
-    <string name="language_screen_title">ನಿಮ್ಮ ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ</string>
-    <string name="language_screen_subtitle">ವೈಯಕ್ತಿಕ ಅನುಭವಕ್ಕಾಗಿ ನಿಮ್ಮ ಆದ್ಯತೆಯ ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ</string>
-    <string name="language_selected">%s ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ</string>
-    <string name="language_navigate_back">ಹಿಂದೆ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ</string>
 </resources>

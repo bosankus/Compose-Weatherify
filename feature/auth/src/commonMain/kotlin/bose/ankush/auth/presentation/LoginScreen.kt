@@ -50,8 +50,27 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import bose.ankush.auth.generated.resources.Res
+import bose.ankush.auth.generated.resources.login_create_account_title
+import bose.ankush.auth.generated.resources.login_email_label
+import bose.ankush.auth.generated.resources.login_error_email_empty
+import bose.ankush.auth.generated.resources.login_error_email_invalid
+import bose.ankush.auth.generated.resources.login_error_password_empty
+import bose.ankush.auth.generated.resources.login_error_password_short
+import bose.ankush.auth.generated.resources.login_join_community_subtitle
+import bose.ankush.auth.generated.resources.login_password_hide_btn
+import bose.ankush.auth.generated.resources.login_password_label
+import bose.ankush.auth.generated.resources.login_password_show_btn
+import bose.ankush.auth.generated.resources.login_privacy_link_txt
+import bose.ankush.auth.generated.resources.login_signin_btn
+import bose.ankush.auth.generated.resources.login_signin_subtitle
+import bose.ankush.auth.generated.resources.login_terms_agreement_txt
+import bose.ankush.auth.generated.resources.login_terms_link_txt
+import bose.ankush.auth.generated.resources.login_toggle_to_login_txt
+import bose.ankush.auth.generated.resources.login_toggle_to_register_txt
+import bose.ankush.auth.generated.resources.login_welcome_back_title
+import org.jetbrains.compose.resources.stringResource
 
 private val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
@@ -73,25 +92,44 @@ fun LoginScreen(
 
     val focusManager = LocalFocusManager.current
 
+    val emailEmptyError = stringResource(Res.string.login_error_email_empty)
+    val emailInvalidError = stringResource(Res.string.login_error_email_invalid)
+    val passwordEmptyError = stringResource(Res.string.login_error_password_empty)
+    val passwordShortError = stringResource(Res.string.login_error_password_short)
+
+    val welcomeBackTitle = stringResource(Res.string.login_welcome_back_title)
+    val createAccountTitle = stringResource(Res.string.login_create_account_title)
+    val signInSubtitle = stringResource(Res.string.login_signin_subtitle)
+    val joinCommunitySubtitle = stringResource(Res.string.login_join_community_subtitle)
+    val signInBtnText = stringResource(Res.string.login_signin_btn)
+    val hidePasswordText = stringResource(Res.string.login_password_hide_btn)
+    val showPasswordText = stringResource(Res.string.login_password_show_btn)
+    val toggleToRegisterText = stringResource(Res.string.login_toggle_to_register_txt)
+    val toggleToLoginText = stringResource(Res.string.login_toggle_to_login_txt)
+    val termsLinkText = stringResource(Res.string.login_terms_link_txt)
+    val privacyLinkText = stringResource(Res.string.login_privacy_link_txt)
+    val termsAgreementText =
+        stringResource(Res.string.login_terms_agreement_txt, termsLinkText, privacyLinkText)
+
     val isEmailValid = { input: String -> EMAIL_REGEX.matches(input) }
     val isPasswordValid = { input: String -> input.length >= 6 }
 
     val validateInputs = {
         when {
             email.isBlank() -> {
-                errorMessage = "Email cannot be empty"
+                errorMessage = emailEmptyError
                 false
             }
             !isEmailValid(email) -> {
-                errorMessage = "Please enter a valid email address"
+                errorMessage = emailInvalidError
                 false
             }
             password.isBlank() -> {
-                errorMessage = "Password cannot be empty"
+                errorMessage = passwordEmptyError
                 false
             }
             !isPasswordValid(password) -> {
-                errorMessage = "Password must be at least 6 characters"
+                errorMessage = passwordShortError
                 false
             }
             else -> {
@@ -138,7 +176,7 @@ fun LoginScreen(
                     }
 
                 Text(
-                    text = if (isLoginMode) "Welcome Back" else "Create Account",
+                    text = if (isLoginMode) welcomeBackTitle else createAccountTitle,
                     style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                     color = titleColor,
                     textAlign = TextAlign.Start,
@@ -167,7 +205,7 @@ fun LoginScreen(
                     }
 
                 Text(
-                    text = if (isLoginMode) "Sign in to continue" else "Join our community",
+                    text = if (isLoginMode) signInSubtitle else joinCommunitySubtitle,
                     style = MaterialTheme.typography.bodyLarge,
                     color = subtitleColor,
                     textAlign = TextAlign.Start,
@@ -199,7 +237,7 @@ fun LoginScreen(
                             email = it
                             errorMessage = null
                         },
-                        label = { Text("Email address") },
+                        label = { Text(stringResource(Res.string.login_email_label)) },
                         singleLine = true,
                         keyboardOptions =
                             KeyboardOptions(
@@ -221,7 +259,7 @@ fun LoginScreen(
                             password = it
                             errorMessage = null
                         },
-                        label = { Text("Password") },
+                        label = { Text(stringResource(Res.string.login_password_label)) },
                         singleLine = true,
                         visualTransformation =
                             if (isPasswordVisible) {
@@ -248,7 +286,7 @@ fun LoginScreen(
                                 contentPadding = ButtonDefaults.TextButtonWithIconContentPadding,
                             ) {
                                 Text(
-                                    text = if (isPasswordVisible) "Hide" else "Show",
+                                    text = if (isPasswordVisible) hidePasswordText else showPasswordText,
                                     color = MaterialTheme.colorScheme.primary,
                                 )
                             }
@@ -286,7 +324,7 @@ fun LoginScreen(
                             )
                         } else {
                             Text(
-                                text = if (isLoginMode) "Sign In" else "Create Account",
+                                text = if (isLoginMode) signInBtnText else createAccountTitle,
                                 style =
                                     MaterialTheme.typography.titleMedium.copy(
                                         fontWeight = FontWeight.Bold,
@@ -305,39 +343,36 @@ fun LoginScreen(
                         enabled = !isLoading,
                     ) {
                         Text(
-                            text =
-                                if (isLoginMode) {
-                                    "Don't have an account? Register"
-                                } else {
-                                    "Already registered? Login"
-                                },
+                            text = if (isLoginMode) toggleToRegisterText else toggleToLoginText,
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
 
+                    val linkStyle =
+                        SpanStyle(
+                            color = MaterialTheme.colorScheme.primary,
+                            textDecoration = TextDecoration.Underline,
+                        )
+                    val termsStart = termsAgreementText.indexOf(termsLinkText)
+                    val privacyStart = termsAgreementText.indexOf(privacyLinkText)
                     val termsText =
                         buildAnnotatedString {
-                            append("By continuing, you agree to our ")
-                            pushStringAnnotation(tag = "terms", annotation = "terms")
-                            withStyle(
-                                style =
-                                    SpanStyle(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        textDecoration = TextDecoration.Underline,
-                                    ),
-                            ) { append("Terms & Conditions") }
-                            pop()
-                            append(" & ")
-                            pushStringAnnotation(tag = "privacy", annotation = "privacy")
-                            withStyle(
-                                style =
-                                    SpanStyle(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        textDecoration = TextDecoration.Underline,
-                                    ),
-                            ) { append("Privacy Policy") }
-                            pop()
+                            append(termsAgreementText)
+                            addStringAnnotation(
+                                tag = "terms",
+                                annotation = "terms",
+                                start = termsStart,
+                                end = termsStart + termsLinkText.length,
+                            )
+                            addStyle(linkStyle, termsStart, termsStart + termsLinkText.length)
+                            addStringAnnotation(
+                                tag = "privacy",
+                                annotation = "privacy",
+                                start = privacyStart,
+                                end = privacyStart + privacyLinkText.length,
+                            )
+                            addStyle(linkStyle, privacyStart, privacyStart + privacyLinkText.length)
                         }
 
                     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }

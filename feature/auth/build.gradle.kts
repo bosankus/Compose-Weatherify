@@ -22,6 +22,8 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+
+        androidResources.enable = true
     }
 
     // iosX64 dropped: Compose Multiplatform stopped publishing artifacts for it
@@ -39,6 +41,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":network"))
+            implementation(libs.compose.multiplatform.resources)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)
             implementation(libs.compose.multiplatform.material3)
@@ -70,4 +73,8 @@ kotlin {
             dependsOn(iosMain)
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "bose.ankush.auth.generated.resources"
 }

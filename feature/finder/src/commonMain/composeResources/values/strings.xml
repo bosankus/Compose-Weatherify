@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Saved Locations (Premium Feature)-->
+    <string name="saved_locations_title">Saved Locations</string>
+    <string name="saved_locations_empty_txt">No saved locations yet. Tap + to add one.</string>
+    <string name="saved_locations_premium_title">Premium Feature</string>
+    <string name="saved_locations_premium_desc">Save and access your favourite locations instantly. Upgrade to Premium to unlock this feature.</string>
+    <string name="saved_locations_save_success">Location saved successfully.</string>
+    <string name="saved_locations_delete_success">Location removed.</string>
+    <string name="saved_locations_load_error">Unable to load saved locations. Please try again later.</string>
+    <string name="saved_locations_save_error">Unable to save location. Please try again later.</string>
+    <string name="saved_locations_delete_error">Unable to delete location. Please try again later.</string>
+    <string name="add_icon_content">Add new location</string>
+    <string name="delete_icon_content">Delete location</string>
+    <string name="cancel_btn_txt">Cancel</string>
+    <string name="set_as_default_dialog_title">Use as weather location?</string>
+    <string name="set_as_default_dialog_body">Weather data will show for %1$s instead of your current GPS position.</string>
+    <string name="set_as_default_dialog_warning">Your live GPS location won\'t update while this is active.</string>
+    <string name="set_as_default_confirm_btn">Set as Default</string>
+    <!--Place Search Dialog-->
+    <string name="place_search_dialog_title">Search for a Place</string>
+    <string name="place_search_hint">Type a city or address…</string>
+    <string name="place_search_no_results">No places found for \'%1$s\'</string>
+    <string name="place_search_error">Unable to fetch places. Please try again.</string>
+</resources>

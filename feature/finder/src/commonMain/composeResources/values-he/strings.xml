@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_locations_title">מיקומים שמורים</string>
+    <string name="saved_locations_empty_txt">אין מיקומים שמורים עדיין. הקש + כדי להוסיף אחד.</string>
+    <string name="saved_locations_premium_title">תכונת פרימיום</string>
+    <string name="saved_locations_premium_desc">שמור וגש אל מיקומיך המועדפים באופן מיידי. שדרג לפרימיום כדי להשיג נעילת תכונה זו.</string>
+    <string name="saved_locations_save_success">מיקום נשמר בהצלחה.</string>
+    <string name="saved_locations_delete_success">מיקום הוסר.</string>
+    <string name="add_icon_content">הוסף מיקום חדש</string>
+    <string name="delete_icon_content">מחק מיקום</string>
+    <string name="cancel_btn_txt">ביטול</string>
+    <string name="set_as_default_dialog_title">להשתמש כמיקום מזג האוויר?</string>
+    <string name="set_as_default_dialog_body">נתוני מזג האוויר יוצגו עבור %1$s במקום מיקום ה-GPS הנוכחי שלך.</string>
+    <string name="set_as_default_dialog_warning">מיקום ה-GPS החי שלך לא יתעדכן כל עוד זה פעיל.</string>
+    <string name="set_as_default_confirm_btn">הגדר כברירת מחדל</string>
+    <string name="place_search_dialog_title">חפש מיקום</string>
+    <string name="place_search_hint">הקלד עיר או כתובת…</string>
+    <string name="place_search_no_results">לא נמצאו מיקומים עבור \'%1$s\'</string>
+</resources>

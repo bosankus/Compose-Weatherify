@@ -36,7 +36,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,38 +46,26 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bose.ankush.finder.domain.model.Location
 import bose.ankush.finder.domain.model.LocationSuggestion
+import bose.ankush.finder.generated.resources.Res
+import bose.ankush.finder.generated.resources.add_icon_content
+import bose.ankush.finder.generated.resources.cancel_btn_txt
+import bose.ankush.finder.generated.resources.delete_icon_content
+import bose.ankush.finder.generated.resources.saved_locations_empty_txt
+import bose.ankush.finder.generated.resources.saved_locations_premium_desc
+import bose.ankush.finder.generated.resources.saved_locations_premium_title
+import bose.ankush.finder.generated.resources.saved_locations_title
+import bose.ankush.finder.generated.resources.set_as_default_confirm_btn
+import bose.ankush.finder.generated.resources.set_as_default_dialog_body
+import bose.ankush.finder.generated.resources.set_as_default_dialog_title
+import bose.ankush.finder.generated.resources.set_as_default_dialog_warning
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.round
-
-@Immutable
-data class SavedLocationsStrings(
-    val title: String = "Saved Locations",
-    val premiumTitle: String = "Premium Feature",
-    val premiumDesc: String =
-        "Save your favorite locations to access them quickly. " +
-            "Upgrade to premium to unlock this feature.",
-    val emptyText: String = "No saved locations yet. Add one to get started!",
-    val searchHint: String = "Search for a place",
-    val searchDialogTitle: String = "Add Location",
-    val noResults: (String) -> String = { "No results found for \"$it\"" },
-    val deleteContentDesc: String = "Delete location",
-    val addContentDesc: String = "Add location",
-    val cancelBtn: String = "Cancel",
-    val saveSuccessMsg: String = "Location saved successfully",
-    val deleteSuccessMsg: String = "Location deleted successfully",
-    val setAsDefaultDialogTitle: String = "Use as weather location?",
-    val setAsDefaultDialogBody: (
-        String,
-    ) -> String = { "Weather data will show for $it instead of your current GPS position." },
-    val setAsDefaultDialogWarning: String = "Your live GPS location won't update while this is active.",
-    val setAsDefaultConfirmBtn: String = "Set as Default",
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SavedLocationsScreen(
     state: SavedLocationsState,
     onIntent: (SavedLocationsIntent) -> Unit,
-    strings: SavedLocationsStrings = SavedLocationsStrings(),
     bottomBar: @Composable () -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -87,7 +74,6 @@ internal fun SavedLocationsScreen(
     pendingLocation.value?.let { location ->
         SetAsDefaultLocationDialog(
             locationName = location.name,
-            strings = strings,
             onConfirm = {
                 onIntent(SavedLocationsIntent.SelectLocation(location))
                 pendingLocation.value = null
@@ -109,7 +95,7 @@ internal fun SavedLocationsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = strings.title,
+                        text = stringResource(Res.string.saved_locations_title),
                         style = MaterialTheme.typography.headlineSmall,
                     )
                 },
@@ -128,7 +114,6 @@ internal fun SavedLocationsScreen(
                             ),
                         )
                     },
-                    strings = strings,
                 )
             }
         },
@@ -141,15 +126,14 @@ internal fun SavedLocationsScreen(
                     .padding(innerPadding),
         ) {
             when {
-                !state.isPremium -> PremiumGate(strings)
+                !state.isPremium -> PremiumGate()
                 state.isLoading && state.locations.isEmpty() -> ShowLoading()
-                state.locations.isEmpty() -> EmptyLocations(strings)
+                state.locations.isEmpty() -> EmptyLocations()
                 else ->
                     LocationList(
                         locations = state.locations,
                         onDelete = { onIntent(SavedLocationsIntent.Delete(it)) },
                         onLocationClick = { pendingLocation.value = it },
-                        strings = strings,
                     )
             }
         }
@@ -157,7 +141,7 @@ internal fun SavedLocationsScreen(
 }
 
 @Composable
-private fun PremiumGate(strings: SavedLocationsStrings) {
+private fun PremiumGate() {
     Column(
         modifier =
             Modifier
@@ -167,13 +151,13 @@ private fun PremiumGate(strings: SavedLocationsStrings) {
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = strings.premiumTitle,
+            text = stringResource(Res.string.saved_locations_premium_title),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,
         )
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = strings.premiumDesc,
+            text = stringResource(Res.string.saved_locations_premium_desc),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -192,13 +176,13 @@ private fun ShowLoading(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun EmptyLocations(strings: SavedLocationsStrings) {
+private fun EmptyLocations() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = strings.emptyText,
+            text = stringResource(Res.string.saved_locations_empty_txt),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -212,7 +196,6 @@ private fun LocationList(
     locations: List<Location>,
     onDelete: (String) -> Unit,
     onLocationClick: (Location) -> Unit,
-    strings: SavedLocationsStrings,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -227,7 +210,6 @@ private fun LocationList(
                 location = location,
                 onClick = { onLocationClick(location) },
                 onDelete = { onDelete(location.id) },
-                strings = strings,
             )
         }
     }
@@ -238,7 +220,6 @@ private fun LocationCard(
     location: Location,
     onClick: () -> Unit,
     onDelete: () -> Unit,
-    strings: SavedLocationsStrings,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -283,7 +264,7 @@ private fun LocationCard(
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = strings.deleteContentDesc,
+                    contentDescription = stringResource(Res.string.delete_icon_content),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(20.dp),
                 )
@@ -302,16 +283,13 @@ private fun formatCoordinates(
 }
 
 @Composable
-private fun AddLocationFab(
-    onPlaceSelected: (LocationSuggestion) -> Unit,
-    strings: SavedLocationsStrings,
-) {
+private fun AddLocationFab(onPlaceSelected: (LocationSuggestion) -> Unit) {
     val showDialog = remember { mutableStateOf(false) }
 
     FloatingActionButton(onClick = { showDialog.value = true }) {
         Icon(
             imageVector = Icons.Default.Add,
-            contentDescription = strings.addContentDesc,
+            contentDescription = stringResource(Res.string.add_icon_content),
         )
     }
 
@@ -322,7 +300,6 @@ private fun AddLocationFab(
                 showDialog.value = false
                 onPlaceSelected(place)
             },
-            strings = strings,
         )
     }
 }
@@ -330,7 +307,6 @@ private fun AddLocationFab(
 @Composable
 private fun SetAsDefaultLocationDialog(
     locationName: String,
-    strings: SavedLocationsStrings,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -345,44 +321,33 @@ private fun SetAsDefaultLocationDialog(
         },
         title = {
             Text(
-                text = strings.setAsDefaultDialogTitle,
+                text = stringResource(Res.string.set_as_default_dialog_title),
                 style = MaterialTheme.typography.titleLarge,
             )
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
-                    text = strings.setAsDefaultDialogBody(locationName),
+                    text = stringResource(Res.string.set_as_default_dialog_body, locationName),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 HorizontalDivider()
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.LocationOn,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.tertiary,
-                    )
-                    Text(
-                        text = strings.setAsDefaultDialogWarning,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.tertiary,
-                    )
-                }
+                Text(
+                    text = stringResource(Res.string.set_as_default_dialog_warning),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
             }
         },
         confirmButton = {
             Button(onClick = onConfirm) {
-                Text(strings.setAsDefaultConfirmBtn)
+                Text(stringResource(Res.string.set_as_default_confirm_btn))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(strings.cancelBtn)
+                Text(stringResource(Res.string.cancel_btn_txt))
             }
         },
     )

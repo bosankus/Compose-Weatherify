@@ -40,9 +40,15 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import bose.ankush.finder.domain.model.LocationSuggestion
+import bose.ankush.finder.generated.resources.Res
+import bose.ankush.finder.generated.resources.cancel_btn_txt
+import bose.ankush.finder.generated.resources.place_search_dialog_title
+import bose.ankush.finder.generated.resources.place_search_hint
+import bose.ankush.finder.generated.resources.place_search_no_results
 import bose.ankush.finder.presentation.placesearch.PlaceSearchIntent
 import bose.ankush.finder.presentation.placesearch.PlaceSearchState
 import bose.ankush.finder.presentation.placesearch.PlaceSearchViewModel
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -54,7 +60,6 @@ import org.koin.compose.viewmodel.koinViewModel
 internal fun PlaceSearchDialog(
     onDismiss: () -> Unit,
     onPlaceSelected: (LocationSuggestion) -> Unit,
-    strings: SavedLocationsStrings,
 ) {
     val dialogVmOwner =
         remember {
@@ -79,7 +84,6 @@ internal fun PlaceSearchDialog(
                 viewModel.processIntent(PlaceSearchIntent.Clear)
                 onPlaceSelected(place)
             },
-            strings = strings,
         )
     }
 }
@@ -90,13 +94,12 @@ private fun PlaceSearchDialogContent(
     onQueryChanged: (String) -> Unit,
     onDismiss: () -> Unit,
     onPlaceSelected: (LocationSuggestion) -> Unit,
-    strings: SavedLocationsStrings,
 ) {
     val focusRequester = remember { FocusRequester() }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(strings.searchDialogTitle) },
+        title = { Text(stringResource(Res.string.place_search_dialog_title)) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -105,7 +108,7 @@ private fun PlaceSearchDialogContent(
                 OutlinedTextField(
                     value = state.searchQuery,
                     onValueChange = onQueryChanged,
-                    placeholder = { Text(strings.searchHint) },
+                    placeholder = { Text(stringResource(Res.string.place_search_hint)) },
                     singleLine = true,
                     modifier =
                         Modifier
@@ -170,7 +173,11 @@ private fun PlaceSearchDialogContent(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = strings.noResults(state.searchQuery),
+                            text =
+                                stringResource(
+                                    Res.string.place_search_no_results,
+                                    state.searchQuery,
+                                ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
@@ -203,7 +210,7 @@ private fun PlaceSearchDialogContent(
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(strings.cancelBtn)
+                Text(stringResource(Res.string.cancel_btn_txt))
             }
         },
     )

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Login Screen-->
+    <string name="login_welcome_back_title">Welcome Back</string>
+    <string name="login_create_account_title">Create Account</string>
+    <string name="login_signin_subtitle">Sign in to continue</string>
+    <string name="login_join_community_subtitle">Join our community</string>
+    <string name="login_email_label">Email address</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_hide_btn">Hide</string>
+    <string name="login_password_show_btn">Show</string>
+    <string name="login_signin_btn">Sign In</string>
+    <string name="login_toggle_to_register_txt">Don\'t have an account? Register</string>
+    <string name="login_toggle_to_login_txt">Already registered? Login</string>
+    <string name="login_terms_agreement_txt">By continuing, you agree to our %1$s &amp; %2$s</string>
+    <string name="login_terms_link_txt">Terms &amp; Conditions</string>
+    <string name="login_privacy_link_txt">Privacy Policy</string>
+    <string name="login_error_email_empty">Email cannot be empty</string>
+    <string name="login_error_email_invalid">Please enter a valid email address</string>
+    <string name="login_error_password_empty">Password cannot be empty</string>
+    <string name="login_error_password_short">Password must be at least 6 characters</string>
+</resources>

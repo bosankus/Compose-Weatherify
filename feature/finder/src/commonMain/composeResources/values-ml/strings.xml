@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_locations_title">സംരക്ഷിത സ്ഥാനങ്ങൾ</string>
+    <string name="saved_locations_empty_txt">ഇതുവരെ സംരക്ഷിത സ്ഥാനങ്ങൾ ഇല്ല. ഒന്ന് ചേർക്കാൻ + ടാപ്പ് ചെയ്യുക.</string>
+    <string name="saved_locations_premium_title">പ്രിമിയം ഫീച്ചർ</string>
+    <string name="saved_locations_premium_desc">നിങ്ങളുടെ പ്രിയപ്പെട്ട സ്ഥാനങ്ങൾ സംരക്ഷിക്കുക കൂടാതെ ഉടനടി ആക്സസ് ചെയ്യുക. ഈ ഫീച്ചർ അൺലോക്ക് ചെയ്യാൻ പ്രിമിയമായി അപ്‌ഗ്രേഡ് ചെയ്യുക.</string>
+    <string name="saved_locations_save_success">സ്ഥാനം വിജയകരമായി സംരക്ഷിക്കപ്പെട്ടു.</string>
+    <string name="saved_locations_delete_success">സ്ഥാനം നീക്കം ചെയ്യപ്പെട്ടു.</string>
+    <string name="add_icon_content">പുതിയ സ്ഥാനം ചേർക്കുക</string>
+    <string name="delete_icon_content">സ്ഥാനം ഇല്ലാതാക്കുക</string>
+    <string name="cancel_btn_txt">റദ്ദാക്കുക</string>
+    <string name="set_as_default_dialog_title">കാലാവസ്ഥ സ്ഥാനമായി ഉപയോഗിക്കണോ?</string>
+    <string name="set_as_default_dialog_body">നിങ്ങളുടെ നിലവിലെ GPS സ്ഥാനത്തിന് പകരം %1$s-ന്റെ കാലാവസ്ഥ ഡാറ്റ കാണിക്കും.</string>
+    <string name="set_as_default_dialog_warning">ഇത് സജീവമായിരിക്കുമ്പോൾ നിങ്ങളുടെ ലൈവ് GPS സ്ഥാനം അപ്‌ഡേറ്റ് ആകില്ല.</string>
+    <string name="set_as_default_confirm_btn">ഡിഫോൾട്ടായി സജ്ജമാക്കുക</string>
+    <string name="place_search_dialog_title">ഒരു സ്ഥാനം തിരയുക</string>
+    <string name="place_search_hint">നഗരം അല്ലെങ്കിൽ വിലാസം ടൈപ്പ് ചെയ്യുക…</string>
+    <string name="place_search_no_results">\'%1$s\'ക്കായി ഒരു സ്ഥാനവും കണ്ടെത്തിയില്ല</string>
+</resources>

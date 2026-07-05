@@ -3,6 +3,8 @@ package bose.ankush.finder.presentation.placesearch
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.finder.domain.usecase.SearchPlacesUseCase
+import bose.ankush.finder.generated.resources.Res
+import bose.ankush.finder.generated.resources.place_search_error
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val MIN_QUERY_LENGTH = 2
@@ -65,12 +68,8 @@ internal class PlaceSearchViewModel(
             },
             onFailure = { e ->
                 if (e !is CancellationException) {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            error = "Unable to fetch places. Please try again.",
-                        )
-                    }
+                    val message = getString(Res.string.place_search_error)
+                    _state.update { it.copy(isLoading = false, error = message) }
                 }
             },
         )

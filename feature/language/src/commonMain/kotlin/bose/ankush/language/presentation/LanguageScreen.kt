@@ -1,5 +1,3 @@
-@file:Suppress("MatchingDeclarationName")
-
 package bose.ankush.language.presentation
 
 import androidx.compose.animation.AnimatedVisibility
@@ -50,24 +48,22 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import bose.ankush.language.generated.resources.Res
+import bose.ankush.language.generated.resources.language_navigate_back
+import bose.ankush.language.generated.resources.language_screen_subtitle
+import bose.ankush.language.generated.resources.language_screen_title
+import bose.ankush.language.generated.resources.language_selected
 import bose.ankush.language.util.LocaleHelper.changeLanguageTo
 import bose.ankush.language.util.LocaleHelper.getCountryFlag
 import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
 import bose.ankush.language.util.LocaleHelper.getDisplayName
+import org.jetbrains.compose.resources.stringResource
 
 private const val ITEM_STAGGER_DELAY_MS = 100L
-
-data class LanguageScreenStrings(
-    val screenTitle: String,
-    val screenSubtitle: String,
-    val navigateBack: String,
-    val languageSelected: (String) -> String,
-)
 
 @Composable
 fun LanguageScreen(
     languages: List<String>,
-    strings: LanguageScreenStrings,
     navAction: () -> Unit,
 ) {
     val screenTransitionState = remember { MutableTransitionState(false) }
@@ -83,27 +79,26 @@ fun LanguageScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         Scaffold(
-            topBar = { ScreenHeader(strings.navigateBack, rememberedNavAction) },
+            topBar = { ScreenHeader(rememberedNavAction) },
             content = { innerPadding ->
                 AnimatedVisibility(
                     visibleState = screenTransitionState,
                     enter =
                         fadeIn(animationSpec = tween(durationMillis = 400)) +
-                                slideInVertically(
-                                    animationSpec = tween(durationMillis = 500),
-                                    initialOffsetY = { it / 3 },
-                                ),
+                            slideInVertically(
+                                animationSpec = tween(durationMillis = 500),
+                                initialOffsetY = { it / 3 },
+                            ),
                     exit = fadeOut(),
                 ) {
                     Column(modifier = Modifier.padding(innerPadding)) {
-                        LanguageScreenHeader(strings.screenTitle, strings.screenSubtitle)
+                        LanguageScreenHeader()
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         ShowUI(
                             languages = languages,
                             changedLanguage = changedLanguage,
-                            languageSelectedLabel = strings.languageSelected,
                         )
                     }
                 }
@@ -113,10 +108,7 @@ fun LanguageScreen(
 }
 
 @Composable
-private fun LanguageScreenHeader(
-    title: String,
-    subtitle: String,
-) {
+private fun LanguageScreenHeader() {
     Column(
         modifier =
             Modifier
@@ -124,7 +116,7 @@ private fun LanguageScreenHeader(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
     ) {
         Text(
-            text = title,
+            text = stringResource(Res.string.language_screen_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
@@ -133,7 +125,7 @@ private fun LanguageScreenHeader(
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = subtitle,
+            text = stringResource(Res.string.language_screen_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
         )
@@ -142,10 +134,7 @@ private fun LanguageScreenHeader(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScreenHeader(
-    navigateBackDesc: String,
-    navAction: () -> Unit,
-) {
+private fun ScreenHeader(navAction: () -> Unit) {
     val headerTransitionState = remember { MutableTransitionState(false) }
 
     LaunchedEffect(Unit) {
@@ -156,10 +145,10 @@ private fun ScreenHeader(
         visibleState = headerTransitionState,
         enter =
             fadeIn(animationSpec = tween(durationMillis = 300)) +
-                    slideInVertically(
-                        animationSpec = tween(durationMillis = 300),
-                        initialOffsetY = { -it / 2 },
-                    ),
+                slideInVertically(
+                    animationSpec = tween(durationMillis = 300),
+                    initialOffsetY = { -it / 2 },
+                ),
         exit = fadeOut(),
     ) {
         TopAppBar(
@@ -178,7 +167,7 @@ private fun ScreenHeader(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         tint = MaterialTheme.colorScheme.onSurface,
-                        contentDescription = navigateBackDesc,
+                        contentDescription = stringResource(Res.string.language_navigate_back),
                         modifier = Modifier.padding(8.dp),
                     )
                 }
@@ -196,7 +185,6 @@ private fun ScreenHeader(
 private fun ShowUI(
     languages: List<String>,
     changedLanguage: androidx.compose.runtime.MutableState<String>,
-    languageSelectedLabel: (String) -> String,
 ) {
     val listState = rememberLazyListState()
 
@@ -214,7 +202,6 @@ private fun ShowUI(
             LanguageItem(
                 language = language,
                 isSelected = changedLanguage.value == language,
-                languageSelectedLabel = languageSelectedLabel,
                 onLanguageSelected =
                     remember(language) {
                         {
@@ -230,7 +217,6 @@ private fun ShowUI(
 private fun LanguageItem(
     language: String,
     isSelected: Boolean,
-    languageSelectedLabel: (String) -> String,
     onLanguageSelected: () -> Unit,
 ) {
     val displayName = remember(language) { language.getDisplayName() }
@@ -287,7 +273,7 @@ private fun LanguageItem(
             }
 
             if (isSelected) {
-                SelectionCheckmark(language, languageSelectedLabel)
+                SelectionCheckmark(language)
             }
         }
     }
@@ -310,10 +296,7 @@ private fun LanguageFlag(countryFlag: String) {
 }
 
 @Composable
-private fun SelectionCheckmark(
-    language: String,
-    languageSelectedLabel: (String) -> String,
-) {
+private fun SelectionCheckmark(language: String) {
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.primary,
@@ -322,7 +305,7 @@ private fun SelectionCheckmark(
         Icon(
             imageVector = Icons.Filled.Check,
             tint = MaterialTheme.colorScheme.onPrimary,
-            contentDescription = languageSelectedLabel(language),
+            contentDescription = stringResource(Res.string.language_selected, language),
             modifier = Modifier.padding(6.dp),
         )
     }

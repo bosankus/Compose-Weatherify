@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_locations_title">सहेजे गए स्थान</string>
+    <string name="saved_locations_empty_txt">कोई सहेजा गया स्थान नहीं है। जोड़ने के लिए + टैप करें।</string>
+    <string name="saved_locations_premium_title">प्रीमियम सुविधा</string>
+    <string name="saved_locations_premium_desc">अपने पसंदीदा स्थानों को सहेजें और तुरंत एक्सेस करें। इस सुविधा को अनलॉक करने के लिए प्रीमियम में अपग्रेड करें।</string>
+    <string name="saved_locations_save_success">स्थान सफलतापूर्वक सहेजा गया।</string>
+    <string name="saved_locations_delete_success">स्थान हटा दिया गया।</string>
+    <string name="add_icon_content">नया स्थान जोड़ें</string>
+    <string name="delete_icon_content">स्थान हटाएं</string>
+    <string name="cancel_btn_txt">रद्द करें</string>
+    <string name="set_as_default_dialog_title">मौसम स्थान के रूप में उपयोग करें?</string>
+    <string name="set_as_default_dialog_body">आपकी वर्तमान GPS स्थिति के बजाय %1$s का मौसम डेटा दिखाया जाएगा।</string>
+    <string name="set_as_default_dialog_warning">इस दौरान आपकी लाइव GPS स्थान अपडेट नहीं होगी।</string>
+    <string name="set_as_default_confirm_btn">डिफ़ॉल्ट के रूप में सेट करें</string>
+    <string name="place_search_dialog_title">किसी स्थान को खोजें</string>
+    <string name="place_search_hint">शहर या पता टाइप करें…</string>
+    <string name="place_search_no_results">\'%1$s\' के लिए कोई स्थान नहीं मिला</string>
+</resources>

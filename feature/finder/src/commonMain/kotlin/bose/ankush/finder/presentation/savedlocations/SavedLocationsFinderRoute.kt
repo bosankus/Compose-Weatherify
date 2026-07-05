@@ -10,15 +10,15 @@ import org.koin.compose.viewmodel.koinViewModel
  * Public entry point for the saved-locations / place-search feature.
  *
  * [SavedLocationsViewModel], [PlaceSearchViewModel], and all MVI Intent/State/Effect
- * types are `internal` to this module — callers only see this composable and
- * [SavedLocationsStrings]. The ViewModel is resolved here via Koin, so its lifetime
- * is scoped to wherever this composable is placed in composition (e.g. a single
- * navigation entry), not shared globally with the host app.
+ * types are `internal` to this module — callers only see this composable. All UI
+ * strings are owned by this module's Compose Multiplatform resources. The ViewModel
+ * is resolved here via Koin, so its lifetime is scoped to wherever this composable
+ * is placed in composition (e.g. a single navigation entry), not shared globally
+ * with the host app.
  */
 @Composable
 fun SavedLocationsFinderRoute(
     onLocationSelected: (lat: Double, lon: Double, name: String) -> Unit,
-    strings: SavedLocationsStrings = SavedLocationsStrings(),
     bottomBar: @Composable () -> Unit = {},
 ) {
     val viewModel = koinViewModel<SavedLocationsViewModel>()
@@ -35,7 +35,6 @@ fun SavedLocationsFinderRoute(
     SavedLocationsScreen(
         state = state,
         onIntent = viewModel::processIntent,
-        strings = strings,
         bottomBar = bottomBar,
     )
 }

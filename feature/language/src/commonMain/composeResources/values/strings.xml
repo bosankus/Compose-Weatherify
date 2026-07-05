@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="language_screen_title">Select Your Language</string>
+    <string name="language_screen_subtitle">Choose your preferred language for a personalized experience</string>
+    <string name="language_selected">%1$s selected</string>
+    <string name="language_navigate_back">Navigate back</string>
+</resources>

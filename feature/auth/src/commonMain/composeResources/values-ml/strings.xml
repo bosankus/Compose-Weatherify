@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="login_welcome_back_title">തിരികെ സ്വാഗതം</string>
+    <string name="login_create_account_title">അക്കൗണ്ട് സൃഷ്ടിക്കുക</string>
+    <string name="login_signin_subtitle">തുടരാൻ സൈൻ ഇൻ ചെയ്യുക</string>
+    <string name="login_join_community_subtitle">ഞങ്ങളുടെ കമ്മ്യൂണിറ്റിയിൽ ചേരുക</string>
+    <string name="login_email_label">ഇമെയിൽ വിലാസം</string>
+    <string name="login_password_label">പാസ്‌വേഡ്</string>
+    <string name="login_password_hide_btn">മറയ്ക്കുക</string>
+    <string name="login_password_show_btn">കാണിക്കുക</string>
+    <string name="login_signin_btn">സൈൻ ഇൻ</string>
+    <string name="login_toggle_to_register_txt">അക്കൗണ്ട് ഇല്ലേ? രജിസ്റ്റർ ചെയ്യുക</string>
+    <string name="login_toggle_to_login_txt">ഇതിനകം രജിസ്റ്റർ ചെയ്തിട്ടുണ്ടോ? ലോഗിൻ ചെയ്യുക</string>
+    <string name="login_terms_agreement_txt">തുടരുന്നതിലൂടെ, നിങ്ങൾ ഞങ്ങളുടെ %1$s ഉം %2$s ഉം അംഗീകരിക്കുന്നു</string>
+    <string name="login_terms_link_txt">നിബന്ധനകളും വ്യവസ്ഥകളും</string>
+    <string name="login_privacy_link_txt">സ്വകാര്യതാ നയം</string>
+    <string name="login_error_email_empty">ഇമെയിൽ ശൂന്യമായിരിക്കരുത്</string>
+    <string name="login_error_email_invalid">ദയവായി സാധുവായ ഇമെയിൽ വിലാസം നൽകുക</string>
+    <string name="login_error_password_empty">പാസ്‌വേഡ് ശൂന്യമായിരിക്കരുത്</string>
+    <string name="login_error_password_short">പാസ്‌വേഡ് കുറഞ്ഞത് 6 അക്ഷരങ്ങളെങ്കിലും ഉണ്ടായിരിക്കണം</string>
+</resources>

@@ -94,38 +94,12 @@
     <string name="premium_activated_msg_txt">आपकी प्रीमियम सदस्यता अब सक्रिय है!</string>
 
     <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_screen">सहेजे गए स्थान</string>
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_title">सहेजे गए स्थान</string>
-    <string name="saved_locations_empty_txt">कोई सहेजा गया स्थान नहीं है। जोड़ने के लिए + टैप करें।</string>
-    <string name="saved_locations_add_btn">स्थान जोड़ें</string>
-    <string name="saved_locations_delete_btn">हटाएं</string>
-    <string name="saved_locations_save_btn">सहेजें</string>
-    <string name="saved_locations_name_hint">स्थान का नाम (जैसे घर)</string>
-    <string name="saved_locations_premium_title">प्रीमियम सुविधा</string>
-    <string name="saved_locations_premium_desc">अपने पसंदीदा स्थानों को सहेजें और तुरंत एक्सेस करें। इस सुविधा को अनलॉक करने के लिए प्रीमियम में अपग्रेड करें।</string>
-    <string name="saved_locations_error_txt">सहेजे गए स्थान लोड करने में विफल।</string>
-    <string name="saved_locations_save_success">स्थान सफलतापूर्वक सहेजा गया।</string>
-    <string name="saved_locations_delete_success">स्थान हटा दिया गया।</string>
     <string name="saved_locations_icon_content">सहेजे गए स्थान</string>
-    <string name="add_icon_content">नया स्थान जोड़ें</string>
-    <string name="delete_icon_content">स्थान हटाएं</string>
 
-    <!--Place Search Dialog-->
-    <string name="place_search_dialog_title">किसी स्थान को खोजें</string>
-    <string name="place_search_hint">शहर या पता टाइप करें…</string>
-    <string name="place_search_no_results">\'%1$s\' के लिए कोई स्थान नहीं मिला</string>
-    <string name="set_as_default_dialog_title">मौसम स्थान के रूप में उपयोग करें?</string>
-    <string name="set_as_default_dialog_body">आपकी वर्तमान GPS स्थिति के बजाय %1$s का मौसम डेटा दिखाया जाएगा।</string>
-    <string name="set_as_default_dialog_warning">इस दौरान आपकी लाइव GPS स्थान अपडेट नहीं होगी।</string>
-    <string name="set_as_default_confirm_btn">डिफ़ॉल्ट के रूप में सेट करें</string>
     <string name="location_override_chip_label">%1$s का उपयोग हो रहा है</string>
     <string name="location_override_reset_btn">GPS पर रीसेट करें</string>
     <string name="location_override_chip_content_desc">वर्तमान में %1$s का मौसम दिखाया जा रहा है। GPS पर रीसेट करने के लिए टैप करें।</string>
     <string name="language_lib_screen_header">भाषा चुनें</string>
     <string name="language_back_content_description">वापस जाओ</string>
-    <string name="language_screen_title">अपनी भाषा चुनें</string>
-    <string name="language_screen_subtitle">व्यक्तिगत अनुभव के लिए अपनी पसंदीदा भाषा चुनें</string>
-    <string name="language_selected">%s चयनित</string>
-    <string name="language_navigate_back">वापस जाएं</string>
 </resources>
