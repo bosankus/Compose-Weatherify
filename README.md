@@ -38,35 +38,35 @@ The project is split into clearly bounded Gradle modules. Everything except `:ap
 ```mermaid
 graph TD
     subgraph APP["🟦 :app  (Android, Hilt)"]
-        A[WeatherifyApplication\nMainActivity\nAppNavigation (Nav3)\nMainViewModel / SettingsViewModel / CitiesViewModel]
+        A["WeatherifyApplication\nMainActivity\nAppNavigation - Nav3\nMainViewModel / SettingsViewModel / CitiesViewModel"]
     end
 
     subgraph COMMON["🟩 :common-ui  (KMP, Koin)"]
-        B[SettingsScreen\nInAppWebView\nSunrise/Sunset Canvas Animation\nPermissionDialog\nDateFormatter]
+        B["SettingsScreen\nInAppWebView\nSunrise/Sunset Canvas Animation\nPermissionDialog\nDateFormatter"]
     end
 
     subgraph AUTH["🟦 :feature:auth  (KMP, Koin)"]
-        H[LoginScreen\nAuthViewModel\nDeviceInfoProvider\n(domain-only, no data layer)]
+        H["LoginScreen\nAuthViewModel\nDeviceInfoProvider\ndomain-only, no data layer"]
     end
 
     subgraph PAYMENT["🟨 :feature:payment  (KMP, Koin)"]
-        C[PaymentViewModel\nCreateOrderUseCase\nVerifyPaymentUseCase\nPremiumStore\nRazorpay checkout]
+        C["PaymentViewModel\nCreateOrderUseCase\nVerifyPaymentUseCase\nPremiumStore\nRazorpay checkout"]
     end
 
     subgraph NETWORK["🟧 :network  (KMP, Koin)"]
-        D[Ktor Client\nWeatherApi\nKotlinx Serialization]
+        D["Ktor Client\nWeatherApi\nKotlinx Serialization"]
     end
 
     subgraph STORAGE["🟥 :storage  (KMP, Koin)"]
-        E[Room Database\nDataStore Preferences\nWeatherDao]
+        E["Room Database\nDataStore Preferences\nWeatherDao"]
     end
 
     subgraph LANGUAGE["🟪 :feature:language  (KMP, Koin)"]
-        F[LanguageScreen\nLocaleHelper]
+        F["LanguageScreen\nLocaleHelper"]
     end
 
     subgraph FINDER["🔍 :feature:finder (KMP, Koin)"]
-        G[SavedLocationsScreen\nPlaceSearchDialog\nGetSavedLocationsUseCase\nFinderRepository / Impl]
+        G["SavedLocationsScreen\nPlaceSearchDialog\nGetSavedLocationsUseCase\nFinderRepository / Impl"]
     end
 
     APP --> COMMON
