@@ -35,7 +35,6 @@ import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
 import bose.ankush.weatherify.presentation.MainViewModel
 import bose.ankush.weatherify.presentation.SettingsEvent
 import bose.ankush.weatherify.presentation.SettingsViewModel
-import bose.ankush.weatherify.presentation.cities.CitiesListScreen
 import bose.ankush.weatherify.presentation.home.HomeScreen
 
 @SuppressLint("NewApi")
@@ -54,7 +53,6 @@ fun AppNavigation(
             navigationState.toEntries(
                 entryProvider {
                     entry<HomeRoute> { HomeScreen(viewModel, navigator, toastAnchorState) }
-                    entry<CitiesListRoute> { CitiesListScreen(navigator) }
                     entry<SavedLocationsRoute> {
                         SavedLocationsFinderRoute(
                             onLocationSelected = { lat, lon, name ->
