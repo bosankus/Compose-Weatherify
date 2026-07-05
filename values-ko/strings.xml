@@ -3,5 +3,5 @@
         
     <string name="offline_toast_title_txt">오프라인 상태입니다</string>
     
-    <string name="confirm_btn_txt">확인</string>
+    <string name="settings_language_txt">언어</string>
 </resources>
