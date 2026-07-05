@@ -89,10 +89,10 @@ fun LanguageScreen(
                     visibleState = screenTransitionState,
                     enter =
                         fadeIn(animationSpec = tween(durationMillis = 400)) +
-                                slideInVertically(
-                                    animationSpec = tween(durationMillis = 500),
-                                    initialOffsetY = { it / 3 },
-                                ),
+                            slideInVertically(
+                                animationSpec = tween(durationMillis = 500),
+                                initialOffsetY = { it / 3 },
+                            ),
                     exit = fadeOut(),
                 ) {
                     Column(modifier = Modifier.padding(innerPadding)) {
@@ -156,10 +156,10 @@ private fun ScreenHeader(
         visibleState = headerTransitionState,
         enter =
             fadeIn(animationSpec = tween(durationMillis = 300)) +
-                    slideInVertically(
-                        animationSpec = tween(durationMillis = 300),
-                        initialOffsetY = { -it / 2 },
-                    ),
+                slideInVertically(
+                    animationSpec = tween(durationMillis = 300),
+                    initialOffsetY = { -it / 2 },
+                ),
         exit = fadeOut(),
     ) {
         TopAppBar(
