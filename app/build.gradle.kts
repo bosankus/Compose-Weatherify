@@ -101,6 +101,7 @@ dependencies {
     api(project(":feature:language"))
     api(project(":feature:payment"))
     api(project(":feature:finder"))
+    api(project(":feature:home"))
     api(project(":storage"))
     api(project(":network"))
 

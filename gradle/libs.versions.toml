@@ -78,6 +78,7 @@ lifecycleViewmodelNav3 = "2.11.0"
 # Miscellaneous
 timber = "5.0.1"
 coilCompose = "2.7.0"
+coilKmp = "3.4.0"
 
 # Memory leak
 leakCanary = "2.14"
@@ -97,6 +98,9 @@ koin = "4.2.2"
 # KMP — ViewModel (JetBrains port of AndroidX lifecycle-viewmodel)
 kmpLifecycleViewModel = "2.10.0"
 
+# KMP — Okio (file paths for multiplatform DataStore)
+okio = "3.16.0"
+
 [libraries]
 # AndroidX core
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
@@ -108,6 +112,7 @@ google-play-app-update-ktx = { module = "com.google.android.play:app-update-ktx"
 google-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "googlePlayLocation" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStore" }
+androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "dataStore" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashScreen" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
@@ -175,6 +180,13 @@ timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakCanary" }
 
+# KMP — Coil 3 (feature:home only, distinct from the app-wide Coil 2 usage above)
+coil3-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilKmp" }
+coil3-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilKmp" }
+
+# KMP — Okio
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+
 # Payment (Android-only — Razorpay checkout is launched from the app layer)
 razorpay-checkout = { module = "com.razorpay:checkout", version.ref = "razorpayCheckout" }
 
@@ -206,6 +218,7 @@ compose-multiplatform-material3 = { module = "org.jetbrains.compose.material3:ma
 compose-multiplatform-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "cmp-ui" }
 compose-multiplatform-materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "cmp-materialIconsExtended" }
 compose-multiplatform-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "cmp-foundation" }
+compose-multiplatform-ui-tooling-preview = { module = "org.jetbrains.compose.components:components-ui-tooling-preview", version.ref = "cmp-ui" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

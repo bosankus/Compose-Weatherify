@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="retry_btn_txt">വീണ്ടും ശ്രമിക്കുക</string>
+    <string name="hourly_forecast_heading_txt">മണിക്കൂർ തോറും പ്രവചനം</string>
+    <string name="daily_forecast_heading_txt">ദൈനംദിന പ്രവചനം</string>
+    <string name="unauthorised_access_txt">അനധികൃത ആക്സസ്!</string>
+    <string name="city_error_txt">നഗരം കണ്ടെത്തിയില്ല!</string>
+    <string name="server_error_txt">സർവർ പ്രശ്‌നം ഉള്ളതായി തോന്നുന്നു!</string>
+    <string name="network_unavailable_txt">ഇന്റർനെറ്റ് കണക്റ്റിവിറ്റി വീണ്ടും പരിശോധിക്കാമോ!</string>
+    <string name="network_timeout_txt">അഭ്യർഥനയുടെ സമയം കഴിഞ്ഞു. ദയവായി പിന്നീട് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="general_error_txt">അയ്യോ!.. എന്തോ തകരാർ സംഭവിച്ചു.</string>
+    <string name="gps_disabled_error_txt">ലൊക്കേഷൻ സേവനങ്ങൾ ഓഫ് ആണ്. പ്രാദേശിക കാലാവസ്ഥ ലഭിക്കാൻ GPS ഓൺ ചെയ്യുക.</string>
+    <string name="enable_gps_btn_txt">GPS ഓൺ ചെയ്യുക</string>
+    <string name="default_coordinates_txt">ലൊക്കേഷൻ കോർഡിനേറ്റുകൾ ഇതുവരെ അപ്‌ഡേറ്റ് ചെയ്തിട്ടില്ല.</string>
+    <string name="cancel_btn_txt">റദ്ദാക്കുക</string>
+    <string name="weather_icon_content">കാലാവസ്ഥ ഐക്കൺ</string>
+    <string name="error_icon_content">പിശക് ഐക്കൺ</string>
+    <string name="notification_permission_message">കാലാവസ്ഥ അലേർട്ടുകൾക്ക് അറിയിപ്പുകൾ ഓൺ ചെയ്യുക</string>
+    <string name="enable_notification_btn">ഓൺ ചെയ്യുക</string>
+    <string name="location_override_reset_btn">GPS-ലേക്ക് റീസെറ്റ് ചെയ്യുക</string>
+    <string name="location_override_chip_content_desc">നിലവിൽ %1$s-ന്റെ കാലാവസ്ഥ കാണിക്കുന്നു. GPS-ലേക്ക് റീസെറ്റ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക.</string>
+</resources>

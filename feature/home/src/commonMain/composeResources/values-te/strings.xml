@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="retry_btn_txt">మళ్ళీ ప్రయత్నించు</string>
+    <string name="hourly_forecast_heading_txt">గంటవారీ సూచన</string>
+    <string name="daily_forecast_heading_txt">రోజువారీ సూచన</string>
+    <string name="unauthorised_access_txt">అనధికార ప్రవేశం!</string>
+    <string name="city_error_txt">నగరం కనుగొనబడలేదు!</string>
+    <string name="server_error_txt">సర్వర్ సమస్య ఉన్నట్లు కనిపిస్తుంది!</string>
+    <string name="network_unavailable_txt">ఇంటర్నెట్ కనెక్టివిటీని మళ్ళీ తనిఖీ చేయగలరా!</string>
+    <string name="network_timeout_txt">అభ్యర్థన గడువు ముగిసింది. దయచేసి తర్వాత మళ్ళీ ప్రయత్నించండి.</string>
+    <string name="general_error_txt">అయ్యో!.. ఏదో తప్పు జరిగింది.</string>
+    <string name="gps_disabled_error_txt">లొకేషన్ సేవలు ఆఫ్ ఉన్నాయి. స్థానిక వాతావరణం పొందడానికి GPS ఆన్ చేయండి.</string>
+    <string name="enable_gps_btn_txt">GPS ఆన్ చేయండి</string>
+    <string name="default_coordinates_txt">లొకేషన్ కోఆర్డినేట్లు ఇంకా అప్‌డేట్ కాలేదు.</string>
+    <string name="cancel_btn_txt">రద్దు చేయండి</string>
+    <string name="weather_icon_content">వాతావరణ స్థితి చిహ్నం</string>
+    <string name="error_icon_content">లోపం చిహ్నం</string>
+    <string name="notification_permission_message">వాతావరణ హెచ్చరికల కోసం నోటిఫికేషన్లను ప్రారంభించండి</string>
+    <string name="enable_notification_btn">ప్రారంభించు</string>
+    <string name="location_override_reset_btn">GPS కి రీసెట్ చేయండి</string>
+    <string name="location_override_chip_content_desc">ప్రస్తుతం %1$s వాతావరణం చూపబడుతోంది. GPS కి రీసెట్ చేయడానికి నొక్కండి.</string>
+</resources>

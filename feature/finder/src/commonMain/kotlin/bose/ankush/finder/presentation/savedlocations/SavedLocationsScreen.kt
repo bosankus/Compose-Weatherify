@@ -1,12 +1,12 @@
 package bose.ankush.finder.presentation.savedlocations
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,7 +22,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -32,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -43,7 +43,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import bose.ankush.commonui.components.ShimmerEffect
 import bose.ankush.finder.domain.model.Location
 import bose.ankush.finder.domain.model.LocationSuggestion
 import bose.ankush.finder.generated.resources.Res
@@ -53,6 +55,7 @@ import bose.ankush.finder.generated.resources.delete_icon_content
 import bose.ankush.finder.generated.resources.saved_locations_empty_txt
 import bose.ankush.finder.generated.resources.saved_locations_premium_desc
 import bose.ankush.finder.generated.resources.saved_locations_premium_title
+import bose.ankush.finder.generated.resources.saved_locations_premium_upgrade_btn_txt
 import bose.ankush.finder.generated.resources.saved_locations_title
 import bose.ankush.finder.generated.resources.set_as_default_confirm_btn
 import bose.ankush.finder.generated.resources.set_as_default_dialog_body
@@ -162,16 +165,25 @@ private fun PremiumGate() {
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        Spacer(modifier = Modifier.height(24.dp))
+        Button(onClick = { /* TODO: Handle upgrade to premium */ }) {
+            Text(text = stringResource(Res.string.saved_locations_premium_upgrade_btn_txt))
+        }
     }
 }
 
 @Composable
 private fun ShowLoading(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        CircularProgressIndicator()
+        repeat(5) {
+            LocationCardSkeleton()
+        }
     }
 }
 
@@ -216,6 +228,41 @@ private fun LocationList(
 }
 
 @Composable
+private fun LocationCardSkeleton() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                ShimmerEffect(
+                    height = 20.dp,
+                    cornerRadius = 4.dp,
+                    modifier = Modifier.fillMaxWidth(0.8f),
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                ShimmerEffect(
+                    height = 12.dp,
+                    cornerRadius = 4.dp,
+                    modifier = Modifier.fillMaxWidth(0.4f),
+                )
+            }
+            ShimmerEffect(
+                modifier = Modifier.padding(8.dp).size(20.dp),
+                height = 20.dp, cornerRadius = 10.dp
+            )
+        }
+    }
+}
+
+@Composable
 private fun LocationCard(
     location: Location,
     onClick: () -> Unit,
@@ -224,25 +271,18 @@ private fun LocationCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
     ) {
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center,
             ) {
                 Text(
@@ -351,4 +391,81 @@ private fun SetAsDefaultLocationDialog(
             }
         },
     )
+}
+
+private val previewLocations =
+    listOf(
+        Location(id = "1", name = "San Francisco, USA", lat = 37.7749, lon = -122.4194),
+        Location(id = "2", name = "Kolkata, India", lat = 22.5726, lon = 88.3639),
+        Location(id = "3", name = "Tokyo, Japan", lat = 35.6762, lon = 139.6503),
+    )
+
+@Preview
+@Composable
+private fun SetAsDefaultLocationDialogPreview() {
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            SetAsDefaultLocationDialog(
+                locationName = previewLocations.first().name,
+                onConfirm = {},
+                onDismiss = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun SavedLocationsScreenPremiumGatePreview() {
+    SavedLocationsScreen(
+        state = SavedLocationsState(isPremium = false),
+        onIntent = {},
+    )
+}
+
+@Preview
+@Composable
+private fun SavedLocationsScreenEmptyPreview() {
+    SavedLocationsScreen(
+        state = SavedLocationsState(isPremium = true, isLoading = false, locations = emptyList()),
+        onIntent = {},
+    )
+}
+
+@Preview
+@Composable
+private fun SavedLocationsScreenLoadingPreview() {
+    SavedLocationsScreen(
+        state = SavedLocationsState(isPremium = true, isLoading = true),
+        onIntent = {},
+    )
+}
+
+@Preview
+@Composable
+private fun SavedLocationsScreenListPreview() {
+    SavedLocationsScreen(
+        state = SavedLocationsState(isPremium = true, locations = previewLocations),
+        onIntent = {},
+    )
+}
+
+@Preview
+@Composable
+private fun LocationCardSkeletonPreview() {
+    MaterialTheme {
+        LocationCardSkeleton()
+    }
+}
+
+@Preview
+@Composable
+private fun LocationCardPreview() {
+    MaterialTheme {
+        LocationCard(
+            location = previewLocations.first(),
+            onClick = {},
+            onDelete = {},
+        )
+    }
 }

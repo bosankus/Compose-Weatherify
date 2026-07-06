@@ -5,6 +5,7 @@
     <string name="saved_locations_empty_txt">No saved locations yet. Tap + to add one.</string>
     <string name="saved_locations_premium_title">Premium Feature</string>
     <string name="saved_locations_premium_desc">Save and access your favourite locations instantly. Upgrade to Premium to unlock this feature.</string>
+    <string name="saved_locations_premium_upgrade_btn_txt">Upgrade Now</string>
     <string name="saved_locations_save_success">Location saved successfully.</string>
     <string name="saved_locations_delete_success">Location removed.</string>
     <string name="saved_locations_load_error">Unable to load saved locations. Please try again later.</string>

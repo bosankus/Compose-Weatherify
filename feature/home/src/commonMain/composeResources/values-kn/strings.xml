@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="retry_btn_txt">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="hourly_forecast_heading_txt">ಗಂಟೆಗಟ್ಟಲೆ ಮುನ್ಸೂಚನೆ</string>
+    <string name="daily_forecast_heading_txt">ದೈನಂದಿನ ಮುನ್ಸೂಚನೆ</string>
+    <string name="unauthorised_access_txt">ಅನಧಿಕೃತ ಪ್ರವೇಶ!</string>
+    <string name="city_error_txt">ನಗರ ಕಂಡುಬರಲಿಲ್ಲ!</string>
+    <string name="server_error_txt">ಸರ್ವರ್ ಸಮಸ್ಯೆ ಕಂಡುಬರುತ್ತದೆ!</string>
+    <string name="network_unavailable_txt">ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಮರು-ಪರಿಶೀಲಿಸಬಹುದೇ!</string>
+    <string name="network_timeout_txt">ವಿನಂತಿಯ ಸಮಯ ಮೀರಿತು. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
+    <string name="general_error_txt">ಅಯ್ಯೋ!.. ಏನೋ ತಪ್ಪಾಗಿದೆ.</string>
+    <string name="gps_disabled_error_txt">ಸ್ಥಳ ಸೇವೆಗಳು ಆಫ್ ಆಗಿದೆ. ಸ್ಥಳೀಯ ಹವಾಮಾನ ಪಡೆಯಲು GPS ಆನ್ ಮಾಡಿ.</string>
+    <string name="enable_gps_btn_txt">GPS ಆನ್ ಮಾಡಿ</string>
+    <string name="default_coordinates_txt">ಸ್ಥಳ ನಿರ್ದೇಶಾಂಕಗಳನ್ನು ಇನ್ನೂ ನವೀಕರಿಸಲಾಗಿಲ್ಲ.</string>
+    <string name="cancel_btn_txt">ರದ್ದುಮಾಡಿ</string>
+    <string name="weather_icon_content">ಹವಾಮಾನ ಸ್ಥಿತಿ ಐಕಾನ್</string>
+    <string name="error_icon_content">ದೋಷ ಐಕಾನ್</string>
+    <string name="notification_permission_message">ಹವಾಮಾನ ಎಚ್ಚರಿಕೆಗಳಿಗಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ</string>
+    <string name="enable_notification_btn">ಸಕ್ರಿಯಗೊಳಿಸಿ</string>
+    <string name="location_override_reset_btn">GPS ಗೆ ರೀಸೆಟ್ ಮಾಡಿ</string>
+    <string name="location_override_chip_content_desc">ಪ್ರಸ್ತುತ %1$s ಗಾಗಿ ಹವಾಮಾನ ತೋರಿಸಲಾಗುತ್ತಿದೆ. GPS ಗೆ ರೀಸೆಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ.</string>
+</resources>

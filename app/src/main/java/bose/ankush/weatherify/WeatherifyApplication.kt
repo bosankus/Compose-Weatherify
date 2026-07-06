@@ -6,6 +6,9 @@ import bose.ankush.auth.di.authDomainModule
 import bose.ankush.auth.di.authViewModelModule
 import bose.ankush.finder.di.finderDomainModule
 import bose.ankush.finder.di.finderViewModelModule
+import bose.ankush.home.di.homeDomainModule
+import bose.ankush.home.di.homePlatformModule
+import bose.ankush.home.di.homeViewModelModule
 import bose.ankush.network.di.networkDomainModule
 import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
@@ -13,27 +16,21 @@ import bose.ankush.storage.di.storageDomainModule
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
 import bose.ankush.weatherify.di.appPaymentKoinModule
-import bose.ankush.weatherify.domain.remote_config.RemoteConfigService
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
-import javax.inject.Inject
 
 @HiltAndroidApp
 class WeatherifyApplication : WeatherifyApplicationCore() {
-    @Inject
-    lateinit var remoteConfigService: RemoteConfigService
-
     override fun onCreate() {
         super.onCreate()
         initKoin()
         enableTimber()
         initializeFirebase()
         createNotificationChannel()
-        initializeRemoteConfig()
         subscribeToTopics()
     }
 
@@ -51,6 +48,9 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
                     authDomainModule,
                     finderDomainModule,
                     finderViewModelModule,
+                    homePlatformModule,
+                    homeDomainModule,
+                    homeViewModelModule,
                 ),
             )
         }
@@ -71,10 +71,6 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
                     Timber.d("Successfully subscribed to weather_alerts topic")
                 }
             }
-    }
-
-    private fun initializeRemoteConfig() {
-        remoteConfigService.initialize()
     }
 
     private fun enableTimber() {

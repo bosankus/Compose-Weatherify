@@ -29,6 +29,7 @@ include(
     ":feature:language",
     ":feature:payment",
     ":feature:finder",
+    ":feature:home",
     ":network",
     ":storage"
 )

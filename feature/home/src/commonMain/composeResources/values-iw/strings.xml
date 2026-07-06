@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="retry_btn_txt">נסה שוב</string>
+    <string name="cancel_btn_txt">ביטול</string>
+    <string name="hourly_forecast_heading_txt">תחזיות לפי שעה</string>
+    <string name="daily_forecast_heading_txt">תחזית יומית</string>
+    <string name="not_available" translatable="false">--</string>
+    <string name="celsius" translatable="false">%1$s°C</string>
+    <string name="unauthorised_access_txt">גישה לא מורשית!</string>
+    <string name="city_error_txt">העיר לא נמצאה!</string>
+    <string name="server_error_txt">מתמודד עם בעיה בשרת</string>
+    <string name="network_unavailable_txt">האם תוכל לבדוק מחדש את חיבור האינטרנט!</string>
+    <string name="network_timeout_txt">פג הזמן הקצוב לבקשה. אנא נסה שוב מאוחר יותר.</string>
+    <string name="general_error_txt">אופס!..משהו השתבש.</string>
+    <string name="gps_disabled_error_txt">שירותי המיקום כבויים. הפעל GPS כדי לקבל את מזג האוויר המקומי.</string>
+    <string name="enable_gps_btn_txt">הפעל GPS</string>
+    <string name="default_coordinates_txt">קואורדינטות המיקום עדיין לא עודכנו.</string>
+    <string name="weather_icon_content">סמל מצב מזג האוויר</string>
+    <string name="error_icon_content">סמל שגיאה</string>
+    <string name="notification_permission_message">הפוך התראות חדשות מזג אוויר</string>
+    <string name="enable_notification_btn">הפוך</string>
+    <string name="location_override_reset_btn">אפס ל-GPS</string>
+    <string name="location_override_chip_content_desc">כרגע מוצג מזג האוויר עבור %1$s. הקש כדי לאפס ל-GPS.</string>
+</resources>

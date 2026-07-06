@@ -1,16 +1,23 @@
 package bose.ankush.weatherify.presentation.navigation
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
@@ -22,6 +29,9 @@ import bose.ankush.commonui.settings.SettingsScreen
 import bose.ankush.commonui.settings.SettingsScreenState
 import bose.ankush.commonui.settings.SettingsScreenStrings
 import bose.ankush.finder.presentation.savedlocations.SavedLocationsFinderRoute
+import bose.ankush.home.HomeLocationCoordinator
+import bose.ankush.home.HomeNotificationPermissionResult
+import bose.ankush.home.presentation.home.HomeFeatureRoute
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentStage
@@ -29,38 +39,71 @@ import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.LocaleConfigMapper
+import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
+import bose.ankush.weatherify.base.common.Extension.hasLocationPermission
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
-import bose.ankush.weatherify.presentation.MainViewModel
+import bose.ankush.weatherify.base.common.Extension.openLocationSettings
 import bose.ankush.weatherify.presentation.SettingsEvent
 import bose.ankush.weatherify.presentation.SettingsViewModel
-import bose.ankush.weatherify.presentation.home.HomeScreen
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @SuppressLint("NewApi")
 @Composable
 fun AppNavigation(
-    viewModel: MainViewModel,
     authViewModel: AuthViewModel,
     paymentViewModel: PaymentViewModel,
     toastAnchorState: ToastAnchorState? = null,
 ) {
     val navigationState = rememberAppNavigationState()
     val navigator = remember { AppNavigator(navigationState) }
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val homeLocationCoordinator = koinInject<HomeLocationCoordinator>()
+    val coroutineScope = rememberCoroutineScope()
+
+    var showNotificationPermissionRequest by remember { mutableStateOf(false) }
+    var notificationPermissionResult by remember { mutableStateOf<HomeNotificationPermissionResult?>(null) }
+
+    if (showNotificationPermissionRequest) {
+        RequestNotificationPermissionForHome(
+            onResult = { granted, permanentlyDeclined ->
+                notificationPermissionResult = HomeNotificationPermissionResult(granted, permanentlyDeclined)
+                showNotificationPermissionRequest = false
+            },
+        )
+    }
 
     NavDisplay(
         entries =
             navigationState.toEntries(
                 entryProvider {
-                    entry<HomeRoute> { HomeScreen(viewModel, navigator, toastAnchorState) }
+                    entry<HomeRoute> {
+                        BackHandler { activity?.finish() }
+                        HomeFeatureRoute(
+                            bottomBar = {
+                                AppBottomBar(
+                                    rememberSaveable { mutableStateOf(true) },
+                                    navigator,
+                                    toastAnchorState,
+                                )
+                            },
+                            toastAnchorState = toastAnchorState,
+                            hasLocationPermission = context.hasLocationPermission(),
+                            hasNotificationPermission = context.hasNotificationPermission(),
+                            notificationPermissionResult = notificationPermissionResult,
+                            onRequestNotificationPermission = { showNotificationPermissionRequest = true },
+                            onOpenLocationSettings = { context.openLocationSettings() },
+                        )
+                    }
                     entry<SavedLocationsRoute> {
                         SavedLocationsFinderRoute(
                             onLocationSelected = { lat, lon, name ->
-                                viewModel.setDefaultLocation(
-                                    lat,
-                                    lon,
-                                    name,
-                                )
+                                coroutineScope.launch {
+                                    homeLocationCoordinator.setDefaultLocation(lat, lon, name)
+                                }
                             },
                             bottomBar = {
                                 AppBottomBar(
@@ -73,11 +116,11 @@ fun AppNavigation(
                     }
                     entry<SettingsRoute> {
                         SettingsEntry(
-                            viewModel,
                             authViewModel,
                             paymentViewModel,
                             navigator,
                             toastAnchorState,
+                            onRequestNotificationPermission = { showNotificationPermissionRequest = true },
                         )
                     }
                     entry<LanguageRoute> { route ->
@@ -89,14 +132,35 @@ fun AppNavigation(
     )
 }
 
+/** Shared by Home's notification banner and the Settings screen's notification nav item — both
+ * just need the platform permission dialog launched; the result is optional to consume. */
+@Composable
+private fun RequestNotificationPermissionForHome(onResult: (granted: Boolean, permanentlyDeclined: Boolean) -> Unit) {
+    val activity = LocalContext.current as? Activity
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = { isGranted ->
+                val isPermanentlyDeclined =
+                    !isGranted &&
+                        activity != null &&
+                        !ActivityCompat.shouldShowRequestPermissionRationale(activity, ACCESS_NOTIFICATION)
+                onResult(isGranted, isPermanentlyDeclined)
+            },
+        )
+    LaunchedEffect(Unit) {
+        launcher.launch(ACCESS_NOTIFICATION)
+    }
+}
+
 @SuppressLint("NewApi")
 @Composable
 private fun SettingsEntry(
-    viewModel: MainViewModel,
     authViewModel: AuthViewModel,
     paymentViewModel: PaymentViewModel,
     navigator: AppNavigator,
     toastAnchorState: ToastAnchorState?,
+    onRequestNotificationPermission: () -> Unit,
 ) {
     val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
@@ -140,7 +204,7 @@ private fun SettingsEntry(
             }
         },
         onNotificationNavAction = {
-            if (!context.hasNotificationPermission()) viewModel.updateNotificationPermission(true)
+            if (!context.hasNotificationPermission()) onRequestNotificationPermission()
         },
         onStateChange = { settingsViewModel.handleScreenStateChange(it, settingsUiState) },
         onBottomBarVisibilityChange = { isBottomBarVisible.value = it },

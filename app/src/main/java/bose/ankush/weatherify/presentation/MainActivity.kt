@@ -2,9 +2,7 @@ package bose.ankush.weatherify.presentation
 
 import android.Manifest
 import android.content.Context
-import android.location.LocationManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -45,16 +43,16 @@ import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.commonui.web.InAppWebView
+import bose.ankush.home.HomeSessionCleaner
+import bose.ankush.payment.domain.store.PremiumStore
 import bose.ankush.payment.presentation.CheckoutParams
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
-import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
-import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
+import bose.ankush.weatherify.base.common.Extension.hasLocationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
-import bose.ankush.weatherify.base.location.LocationClient
 import bose.ankush.weatherify.base.permissions.CoarseLocationPermissionTextProvider
 import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvider
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
@@ -65,8 +63,8 @@ import com.razorpay.PaymentResultWithDataListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
+import org.koin.android.ext.android.inject
 import org.koin.compose.KoinContext
-import javax.inject.Inject
 import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 
 @ExperimentalCoroutinesApi
@@ -75,7 +73,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 class MainActivity :
     AppCompatActivity(),
     PaymentResultWithDataListener {
-    private val viewModel: MainViewModel by viewModels()
+    // Hilt-managed: first-launch location-permission dialog queue
+    private val permissionViewModel: AppPermissionViewModel by viewModels()
 
     // Koin-managed: owns auth state and session management
     private val authViewModel: AuthViewModel by koinViewModel()
@@ -83,9 +82,9 @@ class MainActivity :
     // Koin-managed: owns payment state and Razorpay flow
     private val paymentViewModel: PaymentViewModel by koinViewModel()
 
-    // Android-managed: owns location state
-    @Inject
-    lateinit var locationClient: LocationClient
+    // Koin-managed: cross-feature bridges into :feature:home
+    private val premiumStore: PremiumStore by inject()
+    private val homeSessionCleaner: HomeSessionCleaner by inject()
 
     // Hold a reference to the Checkout instance only during payment
     private var razorpayCheckout: Checkout? = null
@@ -178,9 +177,11 @@ class MainActivity :
             authViewModel.effect.collect { effect ->
                 when (effect) {
                     is AuthEffect.PremiumStatusChanged ->
-                        viewModel.updatePremiumStatus(effect.isPremium, effect.expiryMillis)
-                    AuthEffect.LoggedOut ->
-                        viewModel.handleLoggedOut()
+                        premiumStore.savePremiumStatus(effect.isPremium, effect.expiryMillis)
+                    AuthEffect.LoggedOut -> {
+                        homeSessionCleaner.clearOnLogout()
+                        premiumStore.savePremiumStatus(isPremium = false, expiryMillis = null)
+                    }
                 }
             }
         }
@@ -240,23 +241,10 @@ class MainActivity :
     @Composable
     private fun AuthorizedContent(toastAnchorState: ToastAnchorState) {
         val context = LocalContext.current
-        val launchNotificationPermissionState =
-            viewModel.launchNotificationPermission.collectAsState()
-        LaunchedEffect(true) {
-            if (locationClient.hasLocationPermission()) {
-                viewModel.fetchAndSaveLocationCoordinates()
-            }
-        }
-        if (!locationClient.hasLocationPermission()) {
+        if (!context.hasLocationPermission()) {
             RequestLocationPermission(context)
         }
-        if (launchNotificationPermissionState.value) {
-            RequestNotificationPermission(context)
-        }
-        LaunchedEffect(launchNotificationPermissionState.value) {
-            viewModel.updateShowNotificationBannerState(!context.hasNotificationPermission())
-        }
-        AppNavigation(viewModel, authViewModel, paymentViewModel, toastAnchorState)
+        AppNavigation(authViewModel, paymentViewModel, toastAnchorState)
     }
 
     @Composable
@@ -283,13 +271,13 @@ class MainActivity :
 
     @Composable
     fun RequestLocationPermission(context: Context) {
-        val permissionQueue = viewModel.permissionDialogQueue
+        val permissionQueue = permissionViewModel.permissionDialogQueue
         val locationPermissionsResultLauncher =
             rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestMultiplePermissions(),
                 onResult = { permissionMap ->
                     PERMISSIONS_TO_REQUEST.forEach { permission ->
-                        viewModel.onPermissionResult(
+                        permissionViewModel.onPermissionResult(
                             permission = permission,
                             isGranted = permissionMap[permission] == true,
                         )
@@ -317,7 +305,7 @@ class MainActivity :
                         { context.openAppSystemSettings() }
                     } else {
                         {
-                            viewModel.dismissDialog()
+                            permissionViewModel.dismissDialog()
                             locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
                         }
                     },
@@ -329,7 +317,7 @@ class MainActivity :
 
         // Launch initial permission request if missing and queue is empty (first-launch scenario)
         LaunchedEffect(Unit) {
-            if (permissionQueue.isEmpty() && !locationClient.hasLocationPermission()) {
+            if (permissionQueue.isEmpty() && !context.hasLocationPermission()) {
                 locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
             }
         }
@@ -344,55 +332,17 @@ class MainActivity :
         }
     }
 
-    @Composable
-    fun RequestNotificationPermission(context: Context) {
-        val notificationPermissionResultLauncher =
-            rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.RequestPermission(),
-                onResult = { isGranted ->
-                    viewModel.updateShowNotificationBannerState(!isGranted)
-                    if (isGranted) {
-                        Toast
-                            .makeText(
-                                context,
-                                "Notification permission granted",
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                    } else {
-                        val isPermanentlyDeclined =
-                            !shouldShowRequestPermissionRationale(ACCESS_NOTIFICATION)
-                        viewModel.updateNotificationPermissionPermanentlyDeclined(
-                            isPermanentlyDeclined,
-                        )
-                    }
-                },
-            )
-        LaunchedEffect(Unit) {
-            notificationPermissionResultLauncher.launch(ACCESS_NOTIFICATION)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         startInAppUpdate(this)
         authViewModel.processIntent(AuthIntent.RefreshToken)
         // If user granted a permission via system Settings and returned, clear it from the queue
         val granted =
-            viewModel.permissionDialogQueue.filter { permission ->
+            permissionViewModel.permissionDialogQueue.filter { permission ->
                 checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
             }
         if (granted.isNotEmpty()) {
-            viewModel.removeGrantedPermissions(granted)
-        }
-        // If GPS was disabled and user returned from location settings, retry location fetch
-        if (viewModel.uiState.value.isGpsDisabled && locationClient.hasLocationPermission()) {
-            val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-            val isLocationAvailable =
-                locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                    locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-            if (isLocationAvailable) {
-                viewModel.fetchAndSaveLocationCoordinates()
-            }
+            permissionViewModel.removeGrantedPermissions(granted)
         }
     }
 
