@@ -27,7 +27,11 @@ actual val homePlatformModule: Module =
         single<DataStore<Preferences>> {
             PreferenceDataStoreFactory.createWithPath(
                 produceFile = {
-                    androidContext().filesDir.resolve(HomeWeatherPreferences.FILE_NAME).absolutePath.toPath()
+                    androidContext()
+                        .filesDir
+                        .resolve(HomeWeatherPreferences.FILE_NAME)
+                        .absolutePath
+                        .toPath()
                 },
             )
         }

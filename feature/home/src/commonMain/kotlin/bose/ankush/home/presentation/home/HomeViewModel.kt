@@ -59,7 +59,8 @@ internal class HomeViewModel(
         CoroutineExceptionHandler { _, e ->
             if (e !is CancellationException) {
                 viewModelScope.launch {
-                    val message = if (e is Exception) errorMessageFromException(e) else getString(Res.string.general_error_txt)
+                    val message =
+                        if (e is Exception) errorMessageFromException(e) else getString(Res.string.general_error_txt)
                     _state.update { HomeState(error = message) }
                 }
             }
@@ -89,7 +90,11 @@ internal class HomeViewModel(
             HomeIntent.ResetLocationOverride -> resetLocationOverride()
             HomeIntent.EnableNotificationBanner -> _effect.trySend(HomeEffect.RequestNotificationPermission)
             HomeIntent.DismissNotificationBanner -> _state.update { it.copy(showNotificationBanner = false) }
-            is HomeIntent.UpdateNotificationPermissionState -> updateNotificationBannerVisibility(intent.hasPermission)
+            is HomeIntent.UpdateNotificationPermissionState ->
+                updateNotificationBannerVisibility(
+                    intent.hasPermission,
+                )
+
             is HomeIntent.NotificationPermissionResult -> handlePermissionResult(intent)
         }
     }
@@ -178,7 +183,9 @@ internal class HomeViewModel(
         dataLoadingJob =
             viewModelScope.launch(dataFetchExceptionHandler) {
                 val prefs = preferences.getUserPreferencesFlow().first()
-                val isOverridden = prefs.isLocationOverridden && prefs.overrideLat != null && prefs.overrideLon != null
+                val isOverridden =
+                    prefs.isLocationOverridden && prefs.overrideLat != null &&
+                        prefs.overrideLon != null
                 val lat = if (isOverridden) prefs.overrideLat else prefs.latitude
                 val lon = if (isOverridden) prefs.overrideLon else prefs.longitude
                 val overrideName = if (isOverridden) prefs.overrideLocationName else null
@@ -220,13 +227,19 @@ internal class HomeViewModel(
                 )
             }.catch { e ->
                 if (e is CancellationException) throw e
-                val error = if (e is Exception) errorMessageFromException(e) else getString(Res.string.general_error_txt)
+                val error =
+                    if (e is Exception) {
+                        errorMessageFromException(e)
+                    } else {
+                        getString(Res.string.general_error_txt)
+                    }
                 _state.update { it.copy(isLoading = false, isRefreshing = false, error = error) }
             }.collectLatest { newState ->
                 _state.update { current ->
                     newState.copy(
                         showNotificationBanner = current.showNotificationBanner,
-                        isNotificationPermissionPermanentlyDeclined = current.isNotificationPermissionPermanentlyDeclined,
+                        isNotificationPermissionPermanentlyDeclined =
+                            current.isNotificationPermissionPermanentlyDeclined,
                         isOffline = current.isOffline,
                     )
                 }

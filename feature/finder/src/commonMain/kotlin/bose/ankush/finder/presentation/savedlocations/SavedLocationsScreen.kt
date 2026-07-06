@@ -235,9 +235,10 @@ private fun LocationCardSkeleton() {
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -256,7 +257,8 @@ private fun LocationCardSkeleton() {
             }
             ShimmerEffect(
                 modifier = Modifier.padding(8.dp).size(20.dp),
-                height = 20.dp, cornerRadius = 10.dp
+                height = 20.dp,
+                cornerRadius = 10.dp,
             )
         }
     }
@@ -275,9 +277,10 @@ private fun LocationCard(
         border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outline),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {

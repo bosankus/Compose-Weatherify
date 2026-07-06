@@ -61,9 +61,9 @@ import bose.ankush.home.presentation.home.state.ErrorBackgroundAnimation
 import bose.ankush.home.presentation.home.state.ShowError
 import bose.ankush.home.presentation.home.state.ShowLoading
 import kotlinx.coroutines.delay
-import kotlin.time.Clock
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val ANIMATION_INITIAL_DELAY_MS = 100L
@@ -128,7 +128,10 @@ fun HomeFeatureRoute(
             )
         }
 
-        state.weatherData?.current?.weather?.isNotEmpty() == true || state.airQualityData != null -> {
+        state.weatherData
+            ?.current
+            ?.weather
+            ?.isNotEmpty() == true || state.airQualityData != null -> {
             ShowUIContainer(
                 state = state,
                 bottomBar = bottomBar,

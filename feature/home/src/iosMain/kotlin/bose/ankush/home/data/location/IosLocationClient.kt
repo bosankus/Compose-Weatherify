@@ -36,7 +36,9 @@ internal class IosLocationClient : LocationClient {
     override suspend fun getCurrentLocation(): Result<Coordinates> =
         suspendCancellableCoroutine { continuation ->
             if (!hasLocationPermission()) {
-                continuation.resume(Result.failure(LocationClient.LocationException("Location permission is not given.")))
+                continuation.resume(
+                    Result.failure(LocationClient.LocationException("Location permission is not given.")),
+                )
                 return@suspendCancellableCoroutine
             }
             if (!CLLocationManager.locationServicesEnabled()) {
