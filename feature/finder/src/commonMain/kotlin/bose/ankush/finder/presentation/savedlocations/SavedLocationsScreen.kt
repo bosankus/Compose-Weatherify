@@ -61,6 +61,7 @@ import bose.ankush.finder.generated.resources.set_as_default_confirm_btn
 import bose.ankush.finder.generated.resources.set_as_default_dialog_body
 import bose.ankush.finder.generated.resources.set_as_default_dialog_title
 import bose.ankush.finder.generated.resources.set_as_default_dialog_warning
+import bose.ankush.finder.presentation.placesearch.PlaceSearchDialog
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.round
 

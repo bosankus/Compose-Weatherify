@@ -46,6 +46,8 @@ kotlin {
             implementation(libs.compose.multiplatform.foundation)
             implementation(libs.compose.multiplatform.material3)
             implementation(libs.compose.multiplatform.ui)
+            implementation(libs.compose.multiplatform.ui.tooling.preview)
+            implementation(compose.preview)
             implementation(libs.compose.multiplatform.animation)
             implementation(libs.compose.multiplatform.materialIconsExtended)
             implementation(libs.koin.core)
@@ -67,6 +69,8 @@ kotlin {
             implementation(libs.google.play.services.location)
             implementation(libs.koin.android)
             implementation(libs.firebase.config)
+            implementation(libs.androidx.compose.ui.tooling)
+            implementation(libs.androidx.compose.ui.tooling.preview)
         }
 
         val iosMain by creating {

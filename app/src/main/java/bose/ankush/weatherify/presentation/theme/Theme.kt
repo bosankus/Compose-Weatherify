@@ -1,7 +1,7 @@
 package bose.ankush.weatherify.presentation.theme
 
-import android.app.Activity
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -25,6 +25,8 @@ fun WeatherifyTheme(
 ) {
     val dynamicColor = isDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     val context = LocalContext.current
+    val view = LocalView.current
+    val activity = LocalActivity.current
 
     val colors =
         remember(darkTheme, dynamicColor) {
@@ -36,10 +38,9 @@ fun WeatherifyTheme(
             }
         }
 
-    val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (!view.isInEditMode && activity != null) {
         DisposableEffect(darkTheme) {
-            val window = (view.context as Activity).window
+            val window = activity.window
             val controller = WindowCompat.getInsetsController(window, view)
             controller.isAppearanceLightStatusBars = !darkTheme
             controller.isAppearanceLightNavigationBars = !darkTheme

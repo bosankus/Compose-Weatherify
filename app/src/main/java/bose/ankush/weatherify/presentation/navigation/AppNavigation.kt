@@ -1,12 +1,13 @@
 package bose.ankush.weatherify.presentation.navigation
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +20,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import bose.ankush.auth.presentation.AuthIntent
@@ -31,7 +35,7 @@ import bose.ankush.commonui.settings.SettingsScreenStrings
 import bose.ankush.finder.presentation.savedlocations.SavedLocationsFinderRoute
 import bose.ankush.home.HomeLocationCoordinator
 import bose.ankush.home.HomeNotificationPermissionResult
-import bose.ankush.home.presentation.home.HomeFeatureRoute
+import bose.ankush.home.presentation.HomeFeatureRoute
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentStage
@@ -44,6 +48,7 @@ import bose.ankush.weatherify.base.common.Extension.hasLocationPermission
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
 import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
+import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.base.common.Extension.openLocationSettings
 import bose.ankush.weatherify.presentation.SettingsEvent
 import bose.ankush.weatherify.presentation.SettingsViewModel
@@ -60,20 +65,45 @@ fun AppNavigation(
     val navigationState = rememberAppNavigationState()
     val navigator = remember { AppNavigator(navigationState) }
     val context = LocalContext.current
-    val activity = context as? Activity
+    val activity = LocalActivity.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val homeLocationCoordinator = koinInject<HomeLocationCoordinator>()
     val coroutineScope = rememberCoroutineScope()
 
+    var hasLocationPermission by remember { mutableStateOf(context.hasLocationPermission()) }
+    var hasNotificationPermission by remember { mutableStateOf(context.hasNotificationPermission()) }
+
     var showNotificationPermissionRequest by remember { mutableStateOf(false) }
-    var notificationPermissionResult by remember { mutableStateOf<HomeNotificationPermissionResult?>(null) }
+    var notificationPermissionResult by remember {
+        mutableStateOf<HomeNotificationPermissionResult?>(null)
+    }
+
+    var isNotificationPermissionPermanentlyDeclined by remember { mutableStateOf(false) }
 
     if (showNotificationPermissionRequest) {
         RequestNotificationPermissionForHome(
             onResult = { granted, permanentlyDeclined ->
-                notificationPermissionResult = HomeNotificationPermissionResult(granted, permanentlyDeclined)
+                isNotificationPermissionPermanentlyDeclined = permanentlyDeclined
+                notificationPermissionResult =
+                    HomeNotificationPermissionResult(
+                        isGranted = granted,
+                        isPermanentlyDeclined = permanentlyDeclined,
+                    )
                 showNotificationPermissionRequest = false
             },
         )
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer =
+            LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    hasLocationPermission = context.hasLocationPermission()
+                    hasNotificationPermission = context.hasNotificationPermission()
+                }
+            }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     NavDisplay(
@@ -91,10 +121,13 @@ fun AppNavigation(
                                 )
                             },
                             toastAnchorState = toastAnchorState,
-                            hasLocationPermission = context.hasLocationPermission(),
-                            hasNotificationPermission = context.hasNotificationPermission(),
+                            hasLocationPermission = hasLocationPermission,
+                            hasNotificationPermission = hasNotificationPermission,
                             notificationPermissionResult = notificationPermissionResult,
-                            onRequestNotificationPermission = { showNotificationPermissionRequest = true },
+                            onRequestNotificationPermission = {
+                                showNotificationPermissionRequest = true
+                            },
+                            onOpenSettings = { context.openAppSystemSettings() },
                             onOpenLocationSettings = { context.openLocationSettings() },
                         )
                     }
@@ -120,7 +153,11 @@ fun AppNavigation(
                             paymentViewModel,
                             navigator,
                             toastAnchorState,
-                            onRequestNotificationPermission = { showNotificationPermissionRequest = true },
+                            isNotificationPermissionPermanentlyDeclined =
+                                isNotificationPermissionPermanentlyDeclined,
+                            onRequestNotificationPermission = {
+                                showNotificationPermissionRequest = true
+                            },
                         )
                     }
                     entry<LanguageRoute> { route ->
@@ -135,16 +172,21 @@ fun AppNavigation(
 /** Shared by Home's notification banner and the Settings screen's notification nav item — both
  * just need the platform permission dialog launched; the result is optional to consume. */
 @Composable
-private fun RequestNotificationPermissionForHome(onResult: (granted: Boolean, permanentlyDeclined: Boolean) -> Unit) {
-    val activity = LocalContext.current as? Activity
+private fun RequestNotificationPermissionForHome(
+    onResult: (isGranted: Boolean, isPermanentlyDeclined: Boolean) -> Unit,
+) {
+    val activity = LocalActivity.current
     val launcher =
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
             onResult = { isGranted ->
                 val isPermanentlyDeclined =
                     !isGranted &&
-                        activity != null &&
-                        !ActivityCompat.shouldShowRequestPermissionRationale(activity, ACCESS_NOTIFICATION)
+                            activity != null &&
+                            !ActivityCompat.shouldShowRequestPermissionRationale(
+                                activity,
+                                ACCESS_NOTIFICATION,
+                            )
                 onResult(isGranted, isPermanentlyDeclined)
             },
         )
@@ -161,6 +203,7 @@ private fun SettingsEntry(
     navigator: AppNavigator,
     toastAnchorState: ToastAnchorState?,
     onRequestNotificationPermission: () -> Unit,
+    isNotificationPermissionPermanentlyDeclined: Boolean,
 ) {
     val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
@@ -204,9 +247,17 @@ private fun SettingsEntry(
             }
         },
         onNotificationNavAction = {
-            if (!context.hasNotificationPermission()) onRequestNotificationPermission()
+            when {
+                isNotificationPermissionPermanentlyDeclined -> context.openAppSystemSettings()
+                !context.hasNotificationPermission() -> onRequestNotificationPermission()
+            }
         },
-        onStateChange = { settingsViewModel.handleScreenStateChange(it, settingsUiState) },
+        onStateChange = {
+            settingsViewModel.handleScreenStateChange(
+                newState = it,
+                current = settingsUiState
+            )
+        },
         onBottomBarVisibilityChange = { isBottomBarVisible.value = it },
         toastAnchorState = toastAnchorState,
         bottomBar = { AppBottomBar(isBottomBarVisible, navigator, toastAnchorState) },

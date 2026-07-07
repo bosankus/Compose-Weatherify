@@ -36,7 +36,7 @@
     <string name="no_internet_txt">क्या आप इंटरनेट कनेक्टिविटी की दोबारा जांच कर सकते हैं!</string>
     <string name="network_unavailable_txt">क्या आप इंटरनेट कनेक्टिविटी की दोबारा जांच कर सकते हैं!</string>
     <string name="network_timeout_txt">अनुरोध का समय समाप्त हो गया। कृपया बाद में पुनः प्रयास करें।</string>
-    <string name="general_error_txt">ओह! कुछ गलत हो गया है।</string>
+    <string name="general_error_txt">कुछ गलत हो गया है।</string>
     <string name="gps_disabled_error_txt">स्थान सेवाएं बंद हैं। अपना स्थानीय मौसम पाने के लिए GPS चालू करें।</string>
     <string name="enable_gps_btn_txt">GPS चालू करें</string>
     <string name="default_coordinates_txt">स्थान निर्देशांक अभी तक अपडेट नहीं किए गए हैं।</string>

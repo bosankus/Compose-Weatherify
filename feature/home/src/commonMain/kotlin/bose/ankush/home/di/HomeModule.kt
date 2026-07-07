@@ -10,7 +10,7 @@ import bose.ankush.home.domain.repository.WeatherRepository
 import bose.ankush.home.domain.usecase.GetAirQuality
 import bose.ankush.home.domain.usecase.GetWeatherReport
 import bose.ankush.home.domain.usecase.RefreshWeatherReport
-import bose.ankush.home.presentation.home.HomeViewModel
+import bose.ankush.home.presentation.HomeViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
