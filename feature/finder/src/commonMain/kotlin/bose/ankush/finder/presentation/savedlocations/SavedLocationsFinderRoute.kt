@@ -25,10 +25,10 @@ fun SavedLocationsFinderRoute(
         viewModel.effect
             .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
             .collect { effect ->
-            if (effect is SavedLocationsEffect.LocationSelected) {
-                onLocationSelected(effect.lat, effect.lon, effect.name)
+                if (effect is SavedLocationsEffect.LocationSelected) {
+                    onLocationSelected(effect.lat, effect.lon, effect.name)
+                }
             }
-        }
     }
 
     SavedLocationsScreen(

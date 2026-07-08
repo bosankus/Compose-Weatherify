@@ -8,7 +8,7 @@
 
 # Weatherify
 
-A production-grade Android weather app built with **Jetpack Compose**, **Clean Architecture**, and a **Kotlin Multiplatform** module structure. It shows real-time weather, 5-day forecasts, air quality data, and sunrise/sunset animations — with multi-language support and an in-app premium upgrade flow.
+A production-grade Android weather app built with **Jetpack Compose**, **Clean Architecture** (MVI in the home feature), and a **Kotlin Multiplatform** module structure. It shows real-time weather, air quality data, saved locations, and sunrise/sunset animations — with multi-language support and an in-app premium upgrade flow.
 
 [![Download APK](https://img.shields.io/badge/Download%20Latest%20APK-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)](https://github.com/bosankus/Compose-Weatherify/releases/latest)
 
@@ -18,15 +18,15 @@ A production-grade Android weather app built with **Jetpack Compose**, **Clean A
 
 | Category | Details |
 |---|---|
-| **Weather** | Current conditions, feels-like temp, humidity, wind speed |
-| **Forecast** | 5-day weather forecast with hourly breakdown |
-| **Air Quality** | Real-time AQI with pollutant details |
-| **Location** | GPS-based auto-detection, saved cities list, and place search (`:feature:finder`) |
+| **Weather** | Current conditions, feels-like temp, humidity, wind speed (`:feature:home`) |
+| **Air Quality** | Real-time AQI with pollutant details (`:feature:home`) |
+| **Location** | GPS-based auto-detection with fallback, saved locations list, and place search (`:feature:finder`) |
 | **Sunrise/Sunset** | Custom animated sunrise/sunset arc (`:common-ui` module) |
 | **Multi-language** | English, Bengali (বাংলা), Hindi (हिन्दी), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), Tamil (தமிழ்), Telugu (తెలుగు), Hebrew (עברית) via Per-App Language API (`:feature:language` KMP module) |
 | **Premium** | In-app purchase flow via Razorpay, surfaced as a bottom sheet inside Settings |
 | **Notifications** | Firebase Cloud Messaging (FCM) push notifications |
 | **In-App Updates** | Google Play in-app update prompts (`InAppUpdateManager`) |
+| **Remote Config** | Server-driven feature flags gating the home experience (Firebase Remote Config, iOS + Android) |
 | **Theming** | Material 3 + dynamic color + dark/light mode |
 
 ---
@@ -38,7 +38,11 @@ The project is split into clearly bounded Gradle modules. Everything except `:ap
 ```mermaid
 graph TD
     subgraph APP["🟦 :app  (Android, Hilt)"]
-        A["WeatherifyApplication\nMainActivity\nAppNavigation - Nav3\nMainViewModel / SettingsViewModel / CitiesViewModel"]
+        A["WeatherifyApplication\nMainActivity\nAppNavigation - Nav3\nAppPermissionViewModel / SettingsViewModel"]
+    end
+
+    subgraph HOME["🟨 :feature:home  (KMP, Koin, MVI)"]
+        I["HomeFeatureRoute / HomeViewModel\nHomeReducer / HomeIntent / HomeAction / HomeEffect\nGetWeatherReport / GetAirQuality / RefreshWeatherReport\nWeatherRepositoryImpl / LocationClient / HomeGeocoder"]
     end
 
     subgraph COMMON["🟩 :common-ui  (KMP, Koin)"]
@@ -58,7 +62,7 @@ graph TD
     end
 
     subgraph STORAGE["🟥 :storage  (KMP, Koin)"]
-        E["Room Database\nDataStore Preferences\nWeatherDao"]
+        E["Room Database\nDataStore Preferences (incl. location prefs)\nWeatherDao"]
     end
 
     subgraph LANGUAGE["🟪 :feature:language  (KMP, Koin)"]
@@ -69,6 +73,7 @@ graph TD
         G["SavedLocationsScreen\nPlaceSearchDialog\nGetSavedLocationsUseCase\nFinderRepository / Impl"]
     end
 
+    APP --> HOME
     APP --> COMMON
     APP --> AUTH
     APP --> PAYMENT
@@ -78,31 +83,31 @@ graph TD
     APP --> FINDER
 ```
 
-> **DI note:** `:app` uses Hilt for its own ViewModels (`SettingsViewModel`, `MainViewModel`, `CitiesViewModel`). Every KMP module (`:common-ui`, `:feature:*`, `:network`, `:storage`) uses Koin internally. `app/.../di/PaymentKoinModule.kt` bridges the two graphs so Hilt-managed code can resolve Koin-provided dependencies (e.g. `PaymentViewModel`).
+> **DI note:** `:app` uses Hilt for its own ViewModels (`SettingsViewModel`, `AppPermissionViewModel`). Every KMP module (`:feature:home`, `:common-ui`, `:feature:*`, `:network`, `:storage`) uses Koin internally. `app/.../di/PaymentKoinModule.kt` bridges the two graphs so Hilt-managed code can resolve Koin-provided dependencies (e.g. `PaymentViewModel`).
 
 ---
 
 ## Clean Architecture
 
-Each feature is structured across three layers, with dependency arrows pointing **inward** — the domain layer has zero Android or framework dependencies. `:feature:finder` and `:feature:payment` follow this strictly with a full `domain/` + `data/` split (repository interfaces vs. impls, use cases, mappers). `:feature:auth` is lighter-weight: it only defines a `domain/DeviceInfoProvider` interface with a platform-specific implementation wired directly through Koin — there is no separate `data/` package for auth.
+Each feature is structured across three layers, with dependency arrows pointing **inward** — the domain layer has zero Android or framework dependencies. `:feature:home`, `:feature:finder`, and `:feature:payment` follow this strictly with a full `domain/` + `data/` split (repository interfaces vs. impls, use cases, mappers). `:feature:home`'s presentation layer additionally follows an **MVI** pattern (`HomeIntent` → `HomeReducer` → `HomeState`/`HomeEffect`) rather than plain imperative state updates. `:feature:auth` is lighter-weight: it only defines a `domain/DeviceInfoProvider` interface with a platform-specific implementation wired directly through Koin — there is no separate `data/` package for auth.
 
 ```mermaid
 graph LR
     subgraph Presentation["🎨 Presentation Layer"]
-        UI["Compose Screens\n(HomeScreen, CitiesListScreen\nSavedLocationsScreen, SettingsScreen\nLoginScreen, LanguageScreen)"]
-        VM["ViewModels\n(MainViewModel, PaymentViewModel\nAuthViewModel, SettingsViewModel)"]
+        UI["Compose Screens\n(HomeFeatureRoute, SavedLocationsScreen\nSettingsScreen, LoginScreen, LanguageScreen)"]
+        VM["ViewModels\n(HomeViewModel [MVI], PaymentViewModel\nAuthViewModel, SettingsViewModel)"]
         UI -- "UI Events / Intents" --> VM
         VM -- "UI State (StateFlow)" --> UI
     end
 
     subgraph Domain["🧠 Domain Layer"]
-        UC["Use Cases\n(GetWeatherReports, GetForecastReports\nGetAirQuality, GetSavedLocationsUseCase\nCreateOrderUseCase, VerifyPaymentUseCase...)"]
-        REPO_IF["Repository Interfaces\n(FinderRepository, PaymentRepository...)"]
+        UC["Use Cases\n(GetWeatherReport, GetAirQuality, RefreshWeatherReport\nGetSavedLocationsUseCase\nCreateOrderUseCase, VerifyPaymentUseCase...)"]
+        REPO_IF["Repository Interfaces\n(WeatherRepository, FinderRepository, PaymentRepository...)"]
         UC --> REPO_IF
     end
 
     subgraph Data["💾 Data Layer"]
-        REPO_IMPL["Repository Impls\n(FinderRepositoryImpl, PaymentRepositoryImpl\nWeatherRepositoryImpl)"]
+        REPO_IMPL["Repository Impls\n(WeatherRepositoryImpl, FinderRepositoryImpl\nPaymentRepositoryImpl)"]
         MAPPER["Mappers\n(Network → Storage\nStorage → Domain)"]
         REPO_IMPL --> MAPPER
     end
@@ -125,12 +130,11 @@ graph LR
 
 ## Navigation (Navigation 3)
 
-The app runs on **Jetpack Navigation 3** (`androidx.navigation3`), not the older `NavHost`/`NavController` API. `AppNavigation.kt` builds an `entryProvider` and renders it through `NavDisplay`, driven by a custom `AppNavigator` / `rememberAppNavigationState()` wrapper around the Nav3 backstack. Routes are `@Serializable` `NavKey` objects defined in `Routes.kt`.
+The app runs on **Jetpack Navigation 3** (`androidx.navigation3`), not the older `NavHost`/`NavController` API. `AppNavigation.kt` builds an `entryProvider` and renders it through `NavDisplay`, driven by a custom `AppNavigator` / `rememberAppNavigationState()` wrapper around the Nav3 backstack. Routes are `@Serializable` `NavKey` objects defined in `Routes.kt`. The bottom bar (`AppBottomBar.kt`) drives three top-level tabs: Home, Saved Locations, and Settings.
 
 ```mermaid
 graph TD
-    Home["HomeRoute\n(HomeScreen)"] -->|bottom bar| Cities["CitiesListRoute\n(CitiesListScreen)"]
-    Home -->|bottom bar| Saved["SavedLocationsRoute\n(SavedLocationsFinderRoute — :feature:finder)"]
+    Home["HomeRoute\n(HomeFeatureRoute — :feature:home)"] -->|bottom bar| Saved["SavedLocationsRoute\n(SavedLocationsFinderRoute — :feature:finder)"]
     Home -->|bottom bar| Settings["SettingsRoute\n(SettingsScreen — :common-ui)"]
     Settings -->|language row, API 33+| Language["LanguageRoute(languages)\n(LanguageScreen — :feature:language)"]
     Settings -.->|API < 33| SystemSettings["System App Locale Settings"]
@@ -141,6 +145,7 @@ Notes:
 - There is no standalone `ProfileScreen` or `PaymentScreen` route — profile info and the premium upgrade flow are both embedded inside `SettingsScreen` (profile header + a `PremiumBottomSheet`).
 - `InAppWebView` is a composable (not a route) shown conditionally inside `SettingsScreen` for Terms/Privacy links.
 - On Android 13+ (`isDeviceSDKAndroid13OrAbove()`), language selection pushes `LanguageRoute`; below API 33 it deep-links to the system per-app language settings instead.
+- `Routes.kt` still declares a `CitiesListRoute`, but it is not wired into the `entryProvider` — the quick city switcher was superseded by `:feature:finder`'s saved-locations flow.
 
 ---
 
@@ -162,11 +167,10 @@ OpenWeatherMap API
                                   ▼
                             Domain Models
                                   │
-                           Use Cases (domain layer)
+                       Use Cases (:feature:home domain layer)
                                   │
                                   ▼
-                MainViewModel / CitiesListViewModel / SavedLocationsViewModel
-                          (StateFlow<UIState>)
+                    HomeViewModel — HomeIntent → HomeReducer → HomeState
                                   │
                                   ▼
                   Jetpack Compose UI (screens, via Nav3 NavDisplay)
@@ -185,7 +189,7 @@ OpenWeatherMap API
 | Material 3 | `1.9.0` | Design system + dynamic theming |
 | Navigation 3 (`androidx.navigation3`) | `1.1.4` | Type-safe backstack + `NavDisplay`/`entryProvider` |
 | Lifecycle ViewModel Nav3 | `2.11.0` | ViewModel scoping for Nav3 entries |
-| Coil Compose | `2.7.0` | Async image loading |
+| Coil Compose | `2.7.0` (Android) / Coil3 `3.4.0` (KMP modules) | Async image loading |
 | Splash Screen API | `1.2.0` | Android 12+ splash screen |
 
 ### Architecture & DI
@@ -193,7 +197,7 @@ OpenWeatherMap API
 | Library | Version | Purpose |
 |---|---|---|
 | Hilt | `2.59.2` | Dependency injection — `:app` module only |
-| Koin | `4.2.2` | DI in all KMP modules (`:common-ui`, `:feature:*`, `:network`, `:storage`) |
+| Koin | `4.2.2` | DI in all KMP modules (`:feature:home`, `:common-ui`, `:feature:*`, `:network`, `:storage`) |
 | Kotlin Coroutines | `1.11.0` | Async & structured concurrency |
 | StateFlow / Flow | — | Reactive UI state management |
 
@@ -210,7 +214,7 @@ OpenWeatherMap API
 | Library | Version | Purpose |
 |---|---|---|
 | Room | `2.8.4` | SQLite ORM (weather cache) — requires 2.7+ to emit Kotlin under the KMP Android library plugin |
-| DataStore Preferences | `1.2.1` | Key-value persistent settings |
+| DataStore Preferences | `1.2.1` | Key-value persistent settings, incl. location preferences |
 | Kotlinx DateTime | `0.8.0` | KMP-compatible date/time |
 
 ### Firebase
@@ -219,7 +223,7 @@ OpenWeatherMap API
 |---|---|
 | Firebase BOM `34.15.0` | BoM for consistent versions |
 | Analytics | Declared dependency; no explicit `logEvent` calls in code yet (auto-instrumentation only) |
-| Remote Config | Server-driven feature flags (`RemoteConfigModule`, `FirebaseRemoteConfigService`) |
+| Remote Config | Server-driven feature flags (`HomeRemoteConfigGate`, Android + iOS implementations) |
 | Performance Monitoring | Network + rendering metrics |
 | Cloud Messaging (FCM) | Push notifications (`WeatherifyMessagingService`) |
 
@@ -252,14 +256,13 @@ OpenWeatherMap API
 ```text
 MainActivity (Hilt entry point)
 └── AppNavigation (Nav3 NavDisplay + entryProvider)
-    ├── HomeScreen           — current weather + AQI card + hourly strip          (:app)
-    ├── CitiesListScreen     — quick city switcher shown from the bottom bar      (:app)
-    ├── SavedLocationsFinderRoute — manage saved cities & search new places       (:feature:finder)
-    ├── SettingsScreen       — profile header, language row, notification toggle, (:common-ui)
+    ├── HomeFeatureRoute     — current weather + AQI card, MVI-driven               (:feature:home)
+    ├── SavedLocationsFinderRoute — manage saved locations & search new places      (:feature:finder)
+    ├── SettingsScreen       — profile header, language row, notification toggle,   (:common-ui)
     │                          premium bottom sheet, and in-app Terms/Privacy web view
-    │   └── InAppWebView     — in-app browser composable, not a separate route    (:common-ui)
-    ├── LanguageScreen       — per-app language picker (Android 13+ only)         (:feature:language)
-    └── LoginScreen          — authentication entry point                        (:feature:auth)
+    │   └── InAppWebView     — in-app browser composable, not a separate route      (:common-ui)
+    ├── LanguageScreen       — per-app language picker (Android 13+ only)           (:feature:language)
+    └── LoginScreen          — authentication entry point                          (:feature:auth)
 ```
 
 > There is no standalone `ProfileScreen` or `PaymentScreen` — both live inside `SettingsScreen`.
@@ -311,6 +314,29 @@ This is a known gap, not a design choice — treat the Testing table above as th
 
 ---
 
+## Code Quality
+
+All style/lint versions and rules come from `gradle/libs.versions.toml` and `config/detekt.yml`, applied consistently across every subproject from the root `build.gradle.kts`.
+
+| Task | What it does |
+|---|---|
+| `spotlessCheckAll` | Checks Kotlin/ktlint formatting across all modules (no changes made) |
+| `detektAll` | Runs static analysis across all modules (no changes made) |
+| `codeCheck` | `spotlessCheckAll` + `detektAll` — the full audit, matches CI's `lint` job |
+| `spotlessApplyAll` | Auto-formats Kotlin/ktlint across all modules |
+| `detektAllAutoCorrect` | Auto-corrects the subset of detekt rules that support it |
+| `codeFormat` | `spotlessApplyAll` + `detektAllAutoCorrect` — the full auto-fix, matches CI's formatting step |
+
+Before opening a PR, run everything in one shot:
+
+```bash
+./gradlew spotlessApplyAll detektAllAutoCorrect codeFormat
+```
+
+`codeFormat` already depends on `spotlessApplyAll` and `detektAllAutoCorrect`, so this single command applies formatting once and detekt auto-corrections once (Gradle de-duplicates the shared tasks) — then verify cleanly with `./gradlew codeCheck`.
+
+---
+
 ## CI/CD
 
 `.github/workflows/ci.yml` runs on every PR:
@@ -328,11 +354,12 @@ Contributions are very welcome!
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit using the project convention:
+3. Run `./gradlew spotlessApplyAll detektAllAutoCorrect codeFormat` before committing (see [Code Quality](#code-quality))
+4. Commit using the project convention:
    ```text
    feat|fix|refactor|migrate|update: short description
    ```
-4. Push and open a Pull Request against **`develop`**
+5. Push and open a Pull Request against **`develop`**
 
 CI builds the project and runs Spotless/Detekt checks on every PR (see [CI/CD](#cicd)).
 
@@ -342,13 +369,14 @@ CI builds the project and runs Spotless/Detekt checks on every PR (see [CI/CD](#
 
 These are the planned improvements currently in progress or on the roadmap:
 
-- **iOS target** — the KMP foundation is in place across all non-`:app` modules (`commonMain`/`androidMain`/`iosMain`, with `:network`/`:storage` also building `iosX64`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
+- **iOS target** — the KMP foundation is in place across all non-`:app` modules (`commonMain`/`androidMain`/`iosMain`, with `:feature:home`/`:network`/`:storage` also building `iosX64`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
 - **Real test coverage** — close the gap described in [Testing Status](#testing-status): add `androidTest` instrumentation tests, exercise the already-declared Mockk/Turbine/MockWebServer dependencies, and populate the empty `commonTest`/`iosTest` source sets in `:storage`/`:network`.
 - **Offline-first strategy** — full read-from-cache-then-network flow using Room as the single source of truth, with explicit stale-data indicators in the UI.
 - **Widget support** — a Glance-based home screen widget showing current temperature and conditions.
 - **Wear OS companion** — lightweight Wear Compose screen for wrist-based weather glances.
 - **Release automation** — CI already builds and lints every PR; the next step is automated release builds and Play Store internal track deployments.
 - **Accessibility pass** — semantic descriptions, touch target sizing, and TalkBack compatibility audit.
+- **Dead code cleanup** — `CitiesListRoute` in `Routes.kt` is no longer wired into navigation and can likely be removed.
 
 ---
 

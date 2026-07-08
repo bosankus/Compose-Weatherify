@@ -11,9 +11,9 @@ import bose.ankush.storage.model.LocationPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-internal class LocationPreferencesStorageImpl(private val dataStore: DataStore<Preferences>) :
-    LocationPreferencesStorage {
-
+internal class LocationPreferencesStorageImpl(
+    private val dataStore: DataStore<Preferences>,
+) : LocationPreferencesStorage {
     override fun getLocationPreferencesFlow(): Flow<LocationPreferences> =
         dataStore.data.map { preferences ->
             LocationPreferences(

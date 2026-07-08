@@ -1,53 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Screen Name-->
-    <string name="splash_screen">स्प्लैश</string>
-    <string name="home_screen">मुख्य</string>
-    <string name="aq_screen">हवा गुणवत्ता</string>
-    <string name="city_screen">शहरों</string>
-    <string name="account_screen">प्रोफ़ाइल</string>
-    <string name="settings_screen">सेटिंग</string>
-
     <!--Nested NavGraph group name-->
     <string name="home_nested_nav">home_nested_nav</string>
     <string name="profile_nested_nav">profile_nested_nav</string>
 
     <!--General Texts-->
     <string name="app_name">मौसमify</string>
-    <string name="retry_btn_txt">पुन: प्रयास करें</string>
-    <string name="hourly_forecast_heading_txt">प्रति घंटा पूर्वानुमान</string>
-    <string name="not_available">--</string>
-    <string name="degree">%1$s°</string>
-    <string name="celsius">%1$s°C</string>
-    <string name="percent">%1$s%%</string>
-    <string name="speed">%1$sकिमी/घं</string>
-    <string name="angle">%1$s°</string>
-    <string name="feels_like">%1$s° की तरह लगता</string>
-    <string name="select_city">शहर चुनें</string>
-    <string name="air_quality">हवा की गुणवत्ता</string>
-    <string name="default_city">Kolkata</string>
-    <string name="go_back">वापस जाएं</string>
-    <string name="got_it">समझ गया</string>
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">अनधिकृत पहुंच!</string>
     <string name="city_error_txt">शहर नहीं मिला!</string>
     <string name="server_error_txt">लगता है सर्वर में समस्या है!</string>
-    <string name="no_internet_txt">क्या आप इंटरनेट कनेक्टिविटी की दोबारा जांच कर सकते हैं!</string>
     <string name="network_unavailable_txt">क्या आप इंटरनेट कनेक्टिविटी की दोबारा जांच कर सकते हैं!</string>
     <string name="network_timeout_txt">अनुरोध का समय समाप्त हो गया। कृपया बाद में पुनः प्रयास करें।</string>
     <string name="general_error_txt">कुछ गलत हो गया है।</string>
-    <string name="gps_disabled_error_txt">स्थान सेवाएं बंद हैं। अपना स्थानीय मौसम पाने के लिए GPS चालू करें।</string>
-    <string name="enable_gps_btn_txt">GPS चालू करें</string>
-    <string name="default_coordinates_txt">स्थान निर्देशांक अभी तक अपडेट नहीं किए गए हैं।</string>
-    <string name="empty_city_list_error_txt">ओह तेरी! इस समय कोई शहर नहीं मिला। बाद में जांचें</string>
-    <string name="empty_list">कोई विवरण नहीं मिला। कुछ देर बाद कोशिश करें।</string>
 
     <!--Settings Screen-->
     <string name="profile_title">प्रोफ़ाइल</string>
     <string name="logout_btn_txt">लॉगआउट</string>
     <string name="logout_confirmation_txt">क्या आप लॉगआउट करना चाहते हैं?</string>
-    <string name="logout_warning_txt">आपको अपने खाते को एक्सेस करने के लिए फिर से लॉगिन करना होगा।</string>
     <string name="confirm_btn_txt">पुष्टि करें</string>
     <string name="cancel_btn_txt">रद्द करें</string>
     <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
@@ -64,30 +35,12 @@
     <string name="legal_privacy_policy_txt">गोपनीयता नीति</string>
     <string name="legal_terms_of_use_txt">उपयोग की शर्तें</string>
     <string name="legal_app_version_txt">ऐप संस्करण</string>
-    <string name="settings_section_title">सेटिंग्स</string>
-    <string name="legal_section_title">कानूनी</string>
 
     <!--Content Descriptions-->
-    <string name="weather_icon_content">मौसम की स्थिति आइकन</string>
-    <string name="language_icon_content">भाषा परिवर्तन चिह्न</string>
-    <string name="menu_icon_content">मेनू आइकन</string>
-    <string name="wind_icon_content">पवन चिह्न</string>
-    <string name="humidity_icon_content">आर्द्रता चिह्न</string>
-    <string name="error_icon_content">त्रुटि चिह्</string>
     <string name="close_icon_content">बंद करें चिह्</string>
-    <string name="daily_forecast_heading_txt">दैनिक पूर्वानुमान</string>
     <string name="back_button_content">वापस बटन</string>
-    <string name="notification_icon_content">सूचना सेटिंग्स आइकन</string>
-    <string name="privacy_icon_content">गोपनीयता नीति आइकन</string>
-    <string name="terms_icon_content">उपयोग की शर्तें आइकन</string>
-    <string name="info_icon_content">जानकारी आइकन</string>
     <string name="arrow_right_icon_content">अगली स्क्रीन पर नेविगेट करें</string>
     <string name="locale_config_error_txt">भाषा कॉन्फ़िगरेशन लोड करने में विफल। डिफ़ॉल्ट भाषा का उपयोग कर रहे हैं।</string>
-
-    <!--Notification Permission Card-->
-    <string name="notification_permission_title">अपडेट रहें</string>
-    <string name="notification_permission_message">मौसम सतर्कता के लिए सूचनाएं सक्षम करें</string>
-    <string name="enable_notification_btn">सक्षम करें</string>
 
     <!-- Premium Subscription Additional Strings -->
     <string name="premium_activated_title_txt">प्रीमियम सक्रिय</string>
@@ -97,9 +50,4 @@
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
     <string name="saved_locations_icon_content">सहेजे गए स्थान</string>
 
-    <string name="location_override_chip_label">%1$s का उपयोग हो रहा है</string>
-    <string name="location_override_reset_btn">GPS पर रीसेट करें</string>
-    <string name="location_override_chip_content_desc">वर्तमान में %1$s का मौसम दिखाया जा रहा है। GPS पर रीसेट करने के लिए टैप करें।</string>
-    <string name="language_lib_screen_header">भाषा चुनें</string>
-    <string name="language_back_content_description">वापस जाओ</string>
 </resources>

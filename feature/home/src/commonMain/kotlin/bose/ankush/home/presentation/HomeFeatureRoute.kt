@@ -110,8 +110,8 @@ fun HomeFeatureRoute(
     LaunchedEffect(hasNotificationPermission) {
         viewModel.processIntent(
             HomeIntent.UpdateNotificationPermissionState(
-                hasNotificationPermission
-            )
+                hasNotificationPermission,
+            ),
         )
     }
 
@@ -344,10 +344,10 @@ private fun ShowUIContainer(
                                     visibleState = currentWeatherTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     CurrentWeatherReportLayout(
@@ -365,10 +365,10 @@ private fun ShowUIContainer(
                                     visibleState = alertsTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     WeatherAlertLayout(alerts = alerts)
@@ -382,10 +382,10 @@ private fun ShowUIContainer(
                                     visibleState = airQualityTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     BriefAirQualityReportCardLayout(aq)
@@ -399,10 +399,10 @@ private fun ShowUIContainer(
                                     visibleState = hourlyForecastTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     HourlyWeatherForecastReportLayout(it)
@@ -416,10 +416,10 @@ private fun ShowUIContainer(
                                     visibleState = dailyForecastTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                                slideInVertically(
-                                                    animationSpec = tween(durationMillis = 500),
-                                                    initialOffsetY = { it / 3 },
-                                                ),
+                                            slideInVertically(
+                                                animationSpec = tween(durationMillis = 500),
+                                                initialOffsetY = { it / 3 },
+                                            ),
                                     exit = fadeOut(),
                                 ) {
                                     DailyWeatherForecastReportLayout(list)

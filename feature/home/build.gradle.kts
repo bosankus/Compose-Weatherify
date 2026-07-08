@@ -72,7 +72,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.coil3.compose)
             implementation(libs.coil3.network.ktor)
-            implementation(libs.ktor.client.core)
         }
 
         androidMain.dependencies {

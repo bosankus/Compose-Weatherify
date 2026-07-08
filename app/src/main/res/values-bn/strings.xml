@@ -1,48 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Screen Name-->
-    <string name="splash_screen">স্প্ল্যাশ</string>
-    <string name="home_screen">হোম</string>
-    <string name="aq_screen">বায়ু মান</string>
-    <string name="city_screen">শহরগুলো</string>
-    <string name="account_screen">প্রোফাইল</string>
-    <string name="settings_screen">সেটিংস</string>
-
     <!--Nested NavGraph group name-->
     <string name="home_nested_nav">home_nested_nav</string>
     <string name="profile_nested_nav">profile_nested_nav</string>
 
     <!--General Texts-->
     <string name="app_name">Weatherify</string>
-    <string name="retry_btn_txt">পুনরায় চেষ্টা করুন</string>
-    <string name="hourly_forecast_heading_txt">ঘণ্টা অনুযায়ী পূর্বাভাস</string>
-    <string name="daily_forecast_heading_txt">দৈনিক পূর্বাভাস</string>
-    <string name="speed">%1$sকিমি/ঘ</string>
-    <string name="feels_like">%1$s° এর মতো মনে হচ্ছে</string>
-    <string name="select_city">শহর নির্বাচন করুন</string>
-    <string name="air_quality">বায়ু মান</string>
-    <string name="go_back">ফিরে যান</string>
-    <string name="got_it">বুঝেছি</string>
 
     <!--Error Texts-->
     <string name="unauthorised_access_txt">অননুমোদিত অ্যাক্সেস!</string>
     <string name="city_error_txt">শহর পাওয়া যায়নি!</string>
     <string name="server_error_txt">সার্ভারে সমস্যা হচ্ছে মনে হচ্ছে!</string>
-    <string name="no_internet_txt">ইন্টারনেট সংযোগ পুনরায় পরীক্ষা করতে পারবেন!</string>
     <string name="network_unavailable_txt">ইন্টারনেট সংযোগ পুনরায় পরীক্ষা করতে পারবেন!</string>
     <string name="network_timeout_txt">অনুরোধের সময় শেষ হয়ে গেছে। পরে আবার চেষ্টা করুন।</string>
     <string name="general_error_txt">কিছু একটা ভুল হয়েছে।</string>
-    <string name="gps_disabled_error_txt">লোকেশন সেবা বন্ধ আছে। স্থানীয় আবহাওয়া পেতে GPS চালু করুন।</string>
-    <string name="enable_gps_btn_txt">GPS চালু করুন</string>
-    <string name="default_coordinates_txt">অবস্থান স্থানাঙ্ক এখনো আপডেট হয়নি।</string>
-    <string name="empty_city_list_error_txt">এই মুহূর্তে কোনো শহর পাওয়া যায়নি। পরে দেখুন</string>
-    <string name="empty_list">কোনো বিবরণ পাওয়া যায়নি। কিছুক্ষণ পরে চেষ্টা করুন।</string>
 
     <!--Settings Screen-->
     <string name="profile_title">প্রোফাইল</string>
     <string name="logout_btn_txt">লগ আউট</string>
     <string name="logout_confirmation_txt">আপনি কি নিশ্চিতভাবে লগ আউট করতে চান?</string>
-    <string name="logout_warning_txt">আপনার অ্যাকাউন্ট অ্যাক্সেস করতে আবার লগইন করতে হবে।</string>
     <string name="confirm_btn_txt">নিশ্চিত করুন</string>
     <string name="cancel_btn_txt">বাতিল করুন</string>
     <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
@@ -59,29 +35,12 @@
     <string name="legal_privacy_policy_txt">গোপনীয়তা নীতি</string>
     <string name="legal_terms_of_use_txt">ব্যবহারের শর্তাবলী</string>
     <string name="legal_app_version_txt">অ্যাপ সংস্করণ</string>
-    <string name="settings_section_title">সেটিংস</string>
-    <string name="legal_section_title">আইনি</string>
 
     <!--Content Descriptions-->
-    <string name="weather_icon_content">আবহাওয়া অবস্থার আইকন</string>
-    <string name="language_icon_content">ভাষা আইকন</string>
-    <string name="menu_icon_content">মেনু আইকন</string>
-    <string name="wind_icon_content">বায়ু আইকন</string>
-    <string name="humidity_icon_content">আর্দ্রতা আইকন</string>
-    <string name="error_icon_content">ত্রুটি আইকন</string>
     <string name="close_icon_content">বন্ধ করুন আইকন</string>
     <string name="back_button_content">পেছনে বাটন</string>
-    <string name="notification_icon_content">বিজ্ঞপ্তি সেটিংস আইকন</string>
-    <string name="privacy_icon_content">গোপনীয়তা নীতি আইকন</string>
-    <string name="terms_icon_content">ব্যবহারের শর্তাবলী আইকন</string>
-    <string name="info_icon_content">তথ্য আইকন</string>
     <string name="arrow_right_icon_content">পরবর্তী স্ক্রিনে নেভিগেট করুন</string>
     <string name="locale_config_error_txt">ভাষা কনফিগারেশন লোড করতে ব্যর্থ হয়েছে। ডিফল্ট ভাষা ব্যবহার করা হচ্ছে।</string>
-
-    <!--Notification Permission Card-->
-    <string name="notification_permission_title">আপডেট থাকুন</string>
-    <string name="notification_permission_message">আবহাওয়া সতর্কতার জন্য বিজ্ঞপ্তি সক্রিয় করুন</string>
-    <string name="enable_notification_btn">সক্রিয় করুন</string>
 
     <!-- Premium Subscription Additional Strings -->
     <string name="premium_activated_title_txt">প্রিমিয়াম সক্রিয়</string>
@@ -91,9 +50,4 @@
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
     <string name="saved_locations_icon_content">সংরক্ষিত অবস্থান</string>
 
-    <string name="location_override_chip_label">%1$s ব্যবহার করা হচ্ছে</string>
-    <string name="location_override_reset_btn">GPS-এ রিসেট করুন</string>
-    <string name="location_override_chip_content_desc">বর্তমানে %1$s-এর আবহাওয়া দেখানো হচ্ছে। GPS-এ রিসেট করতে ট্যাপ করুন।</string>
-    <string name="language_lib_screen_header">ভাষা বেছে নিন</string>
-    <string name="language_back_content_description">ফিরে যান</string>
 </resources>

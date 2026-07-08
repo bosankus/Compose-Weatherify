@@ -27,10 +27,6 @@ kotlin {
     }
 }
 
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
 android {
     namespace = "bose.ankush.weatherify"
     compileSdk =
@@ -118,7 +114,6 @@ dependencies {
     implementation(libs.google.play.app.update)
     implementation(libs.google.play.app.update.ktx)
     implementation(libs.google.play.services.location)
-    implementation(libs.accompanist.permissions)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.core.splashscreen)
 
@@ -151,11 +146,6 @@ dependencies {
     // Networking
     implementation(libs.gson)
 
-    // Room runtime for providing WeatherDatabase from app DI
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-
     // Firebase - BOM
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.config)
@@ -178,7 +168,6 @@ dependencies {
 
     // Miscellaneous
     implementation(libs.timber)
-    implementation(libs.coil.compose)
 
     // Memory leak
     debugImplementation(libs.leakcanary.android)

@@ -154,7 +154,7 @@ fun AppNavigation(
                             navigator,
                             toastAnchorState,
                             isNotificationPermissionPermanentlyDeclined =
-                                isNotificationPermissionPermanentlyDeclined,
+                            isNotificationPermissionPermanentlyDeclined,
                             onRequestNotificationPermission = {
                                 showNotificationPermissionRequest = true
                             },
@@ -182,11 +182,11 @@ private fun RequestNotificationPermissionForHome(
             onResult = { isGranted ->
                 val isPermanentlyDeclined =
                     !isGranted &&
-                            activity != null &&
-                            !ActivityCompat.shouldShowRequestPermissionRationale(
-                                activity,
-                                ACCESS_NOTIFICATION,
-                            )
+                        activity != null &&
+                        !ActivityCompat.shouldShowRequestPermissionRationale(
+                            activity,
+                            ACCESS_NOTIFICATION,
+                        )
                 onResult(isGranted, isPermanentlyDeclined)
             },
         )
@@ -255,7 +255,7 @@ private fun SettingsEntry(
         onStateChange = {
             settingsViewModel.handleScreenStateChange(
                 newState = it,
-                current = settingsUiState
+                current = settingsUiState,
             )
         },
         onBottomBarVisibilityChange = { isBottomBarVisible.value = it },

@@ -90,13 +90,14 @@ internal class HomeViewModel(
                 fetchAndSaveLocationCoordinates(forceRefresh = true)
 
             HomeIntent.ResetLocationOverride -> resetLocationOverride()
-            HomeIntent.EnableNotificationBanner -> _effect.trySend(
-                if (_state.value.isNotificationPermissionPermanentlyDeclined) {
-                    HomeEffect.OpenSettings
-                } else {
-                    HomeEffect.RequestNotificationPermission
-                },
-            )
+            HomeIntent.EnableNotificationBanner ->
+                _effect.trySend(
+                    if (_state.value.isNotificationPermissionPermanentlyDeclined) {
+                        HomeEffect.OpenSettings
+                    } else {
+                        HomeEffect.RequestNotificationPermission
+                    },
+                )
 
             HomeIntent.DismissNotificationBanner ->
                 dispatch(HomeAction.DismissNotificationBanner)
@@ -124,7 +125,7 @@ internal class HomeViewModel(
             HomeAction.UpdateNotificationBanner(
                 show = !intent.isGranted,
                 isPermanentlyDeclined = intent.isPermanentlyDeclined,
-                resetDismissal = true
+                resetDismissal = true,
             ),
         )
     }
@@ -162,7 +163,7 @@ internal class HomeViewModel(
     ) {
         val isGpsDisabled =
             e is LocationClient.LocationException &&
-                    e.message?.contains("GPS is disabled", ignoreCase = true) == true
+                e.message?.contains("GPS is disabled", ignoreCase = true) == true
         val errorMessage =
             when {
                 isGpsDisabled -> getString(Res.string.gps_disabled_error_txt)
@@ -196,7 +197,7 @@ internal class HomeViewModel(
         val prefs = locationPreferencesStorage.getLocationPreferencesFlow().first()
         val isOverridden =
             prefs.isLocationOverridden && prefs.overrideLat != null &&
-                    prefs.overrideLon != null
+                prefs.overrideLon != null
         val lat = if (isOverridden) prefs.overrideLat else prefs.latitude
         val lon = if (isOverridden) prefs.overrideLon else prefs.longitude
         val overrideName = if (isOverridden) prefs.overrideLocationName else null

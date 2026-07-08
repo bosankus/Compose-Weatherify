@@ -6,9 +6,6 @@ import bose.ankush.home.domain.location.Coordinates
 import bose.ankush.home.domain.location.LocationClient
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.CoreLocation.CLLocation
 import platform.CoreLocation.CLLocationManager
@@ -75,37 +72,5 @@ internal class IosLocationClient : LocationClient {
             manager.requestLocation()
 
             continuation.invokeOnCancellation { manager.stopUpdatingLocation() }
-        }
-
-    override fun getLocationUpdates(interval: Long): Flow<Coordinates> =
-        callbackFlow {
-            if (!hasLocationPermission()) {
-                close(LocationClient.LocationException("Location permission is not given."))
-                return@callbackFlow
-            }
-
-            val delegate =
-                object : NSObject(), CLLocationManagerDelegateProtocol {
-                    override fun locationManager(
-                        manager: CLLocationManager,
-                        didUpdateLocations: List<*>,
-                    ) {
-                        val location = didUpdateLocations.lastOrNull() as? CLLocation ?: return
-                        val coordinates = location.coordinate.useContents { Coordinates(latitude, longitude) }
-                        trySend(coordinates)
-                    }
-
-                    override fun locationManager(
-                        manager: CLLocationManager,
-                        didFailWithError: NSError,
-                    ) {
-                        close(LocationClient.LocationException(didFailWithError.localizedDescription))
-                    }
-                }
-
-            manager.delegate = delegate
-            manager.startUpdatingLocation()
-
-            awaitClose { manager.stopUpdatingLocation() }
         }
 }

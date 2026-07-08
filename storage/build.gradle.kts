@@ -43,8 +43,6 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.koin.core)
-                implementation(libs.kotlinx.datetime)
-                implementation(libs.kotlinx.serialization.json)
                 implementation(libs.androidx.datastore.preferences.core)
                 implementation(libs.okio)
             }

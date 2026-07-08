@@ -5,22 +5,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.os.Looper
 import androidx.core.content.ContextCompat
 import bose.ankush.home.domain.location.Coordinates
 import bose.ankush.home.domain.location.LocationClient
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.Granularity
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -42,35 +32,6 @@ internal class DeviceLocationClient(
             throw LocationClient.LocationException("GPS is disabled")
         }
     }
-
-    @SuppressLint("MissingPermission")
-    override fun getLocationUpdates(interval: Long): Flow<Coordinates> =
-        callbackFlow {
-            checkLocationPermission()
-            checkGpsEnabled()
-
-            val request =
-                LocationRequest
-                    .Builder(Priority.PRIORITY_HIGH_ACCURACY, interval)
-                    .apply {
-                        setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-                        setWaitForAccurateLocation(true)
-                    }.build()
-
-            val locationCallback =
-                object : LocationCallback() {
-                    override fun onLocationResult(result: LocationResult) {
-                        super.onLocationResult(result)
-                        result.locations.lastOrNull()?.let { location ->
-                            launch { send(location) }
-                        }
-                    }
-                }
-
-            client.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
-
-            awaitClose { client.removeLocationUpdates(locationCallback) }
-        }.map { loc -> Coordinates(loc.latitude, loc.longitude) }
 
     @SuppressLint("MissingPermission")
     override suspend fun getCurrentLocation(): Result<Coordinates> =

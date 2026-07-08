@@ -53,7 +53,7 @@ private fun CurrentWeatherSkeleton() {
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column(
                     modifier = Modifier.padding(bottom = 16.dp),

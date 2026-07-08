@@ -53,7 +53,6 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
-                implementation(libs.kotlinx.coroutines.core)
                 // BackHandler support for InAppWebView
                 implementation(libs.androidx.activity.compose)
             }
