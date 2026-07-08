@@ -2,7 +2,6 @@ package bose.ankush.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bose.ankush.home.data.preferences.HomeWeatherPreferences
 import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.usecase.GetAirQuality
@@ -13,6 +12,7 @@ import bose.ankush.home.generated.resources.default_coordinates_txt
 import bose.ankush.home.generated.resources.general_error_txt
 import bose.ankush.home.generated.resources.gps_disabled_error_txt
 import bose.ankush.home.presentation.util.errorMessageFromException
+import bose.ankush.storage.api.LocationPreferencesStorage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 
 /**
- * Home's MVI ViewModel. Reactively observes [HomeWeatherPreferences] for location-override
+ * Home's MVI ViewModel. Reactively observes [LocationPreferencesStorage] for location-override
  * changes so a location pinned from a sibling tab (via [bose.ankush.home.HomeLocationCoordinator])
  * is picked up without a direct cross-module ViewModel reference.
  */
@@ -43,7 +43,7 @@ internal class HomeViewModel(
     private val getWeatherReport: GetWeatherReport,
     private val getAirQuality: GetAirQuality,
     private val locationClient: LocationClient,
-    private val preferences: HomeWeatherPreferences,
+    private val preferences: LocationPreferencesStorage,
     private val remoteConfigGate: HomeRemoteConfigGate,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
@@ -73,19 +73,19 @@ internal class HomeViewModel(
         // after this ViewModel started observing (e.g. a saved location pinned elsewhere).
         viewModelScope.launch {
             preferences
-                .getUserPreferencesFlow()
+                .getLocationPreferencesFlow()
                 .map { it.isLocationOverridden to (it.overrideLat to it.overrideLon) }
                 .distinctUntilChanged()
                 .drop(1)
                 .collect { fetchAndSaveLocationCoordinates(forceRefresh = true) }
         }
 
-        fetchAndSaveLocationCoordinates()
+        fetchAndSaveLocationCoordinates(false)
     }
 
     fun processIntent(intent: HomeIntent) {
         when (intent) {
-            HomeIntent.FetchLocation -> fetchAndSaveLocationCoordinates()
+            HomeIntent.FetchLocation -> fetchAndSaveLocationCoordinates(forceRefresh = true)
             HomeIntent.Refresh -> refreshWeatherData()
             HomeIntent.ResetLocationOverride -> resetLocationOverride()
             HomeIntent.EnableNotificationBanner -> _effect.trySend(
@@ -127,12 +127,12 @@ internal class HomeViewModel(
         )
     }
 
-    private fun fetchAndSaveLocationCoordinates(forceRefresh: Boolean = false) {
+    private fun fetchAndSaveLocationCoordinates(forceRefresh: Boolean) {
         dispatch(HomeAction.Loading(isRefreshing = forceRefresh))
         locationJob?.cancel()
         locationJob =
             viewModelScope.launch(dataFetchExceptionHandler) {
-                val prefs = preferences.getUserPreferencesFlow().first()
+                val prefs = preferences.getLocationPreferencesFlow().first()
                 if (prefs.isLocationOverridden) {
                     performInitialDataLoading(forceRefresh = forceRefresh)
                     return@launch
@@ -146,7 +146,7 @@ internal class HomeViewModel(
         locationJob?.cancel()
         locationJob =
             viewModelScope.launch(dataFetchExceptionHandler) {
-                val prefs = preferences.getUserPreferencesFlow().first()
+                val prefs = preferences.getLocationPreferencesFlow().first()
                 if (prefs.isLocationOverridden) {
                     performInitialDataLoading(forceRefresh = true)
                     return@launch
@@ -186,7 +186,7 @@ internal class HomeViewModel(
         dataLoadingJob?.cancel()
         dataLoadingJob =
             viewModelScope.launch(dataFetchExceptionHandler) {
-                val prefs = preferences.getUserPreferencesFlow().first()
+                val prefs = preferences.getLocationPreferencesFlow().first()
                 val isOverridden =
                     prefs.isLocationOverridden && prefs.overrideLat != null &&
                             prefs.overrideLon != null
@@ -252,7 +252,7 @@ internal class HomeViewModel(
     private fun resetLocationOverride() {
         viewModelScope.launch(dataFetchExceptionHandler) {
             preferences.clearLocationOverride()
-            fetchAndSaveLocationCoordinates()
+            fetchAndSaveLocationCoordinates(true)
         }
     }
 

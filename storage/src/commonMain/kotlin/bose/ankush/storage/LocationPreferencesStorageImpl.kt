@@ -1,4 +1,4 @@
-package bose.ankush.home.data.preferences
+package bose.ankush.storage
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -6,24 +6,17 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import bose.ankush.storage.api.LocationPreferencesStorage
+import bose.ankush.storage.model.LocationPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-internal data class HomeUserPreferences(
-    val latitude: Double? = null,
-    val longitude: Double? = null,
-    val isLocationOverridden: Boolean = false,
-    val overrideLat: Double? = null,
-    val overrideLon: Double? = null,
-    val overrideLocationName: String? = null,
-)
+internal class LocationPreferencesStorageImpl(private val dataStore: DataStore<Preferences>) :
+    LocationPreferencesStorage {
 
-internal class HomeWeatherPreferences(
-    private val dataStore: DataStore<Preferences>,
-) {
-    fun getUserPreferencesFlow(): Flow<HomeUserPreferences> =
+    override fun getLocationPreferencesFlow(): Flow<LocationPreferences> =
         dataStore.data.map { preferences ->
-            HomeUserPreferences(
+            LocationPreferences(
                 latitude = preferences[Keys.LATITUDE],
                 longitude = preferences[Keys.LONGITUDE],
                 isLocationOverridden = preferences[Keys.IS_LOCATION_OVERRIDDEN] ?: false,
@@ -33,14 +26,14 @@ internal class HomeWeatherPreferences(
             )
         }
 
-    suspend fun saveLocationPreferences(coordinates: Pair<Double, Double>) {
+    override suspend fun saveLocationPreferences(coordinates: Pair<Double, Double>) {
         dataStore.edit { preferences ->
             preferences[Keys.LATITUDE] = coordinates.first
             preferences[Keys.LONGITUDE] = coordinates.second
         }
     }
 
-    suspend fun saveLocationOverride(
+    override suspend fun saveLocationOverride(
         lat: Double,
         lon: Double,
         name: String,
@@ -53,7 +46,7 @@ internal class HomeWeatherPreferences(
         }
     }
 
-    suspend fun clearLocationOverride() {
+    override suspend fun clearLocationOverride() {
         dataStore.edit { preferences ->
             preferences.remove(Keys.OVERRIDE_LAT)
             preferences.remove(Keys.OVERRIDE_LON)
@@ -62,7 +55,7 @@ internal class HomeWeatherPreferences(
         }
     }
 
-    suspend fun clearAll() {
+    override suspend fun clearAll() {
         dataStore.edit { it.clear() }
     }
 
@@ -73,9 +66,5 @@ internal class HomeWeatherPreferences(
         val OVERRIDE_LON = doublePreferencesKey("home_override_lon")
         val OVERRIDE_LOCATION_NAME = stringPreferencesKey("home_override_location_name")
         val IS_LOCATION_OVERRIDDEN = booleanPreferencesKey("home_is_location_overridden")
-    }
-
-    companion object {
-        const val FILE_NAME = "home_weather.preferences_pb"
     }
 }

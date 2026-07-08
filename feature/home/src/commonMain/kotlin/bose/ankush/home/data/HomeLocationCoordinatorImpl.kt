@@ -1,10 +1,10 @@
 package bose.ankush.home.data
 
 import bose.ankush.home.HomeLocationCoordinator
-import bose.ankush.home.data.preferences.HomeWeatherPreferences
+import bose.ankush.storage.api.LocationPreferencesStorage
 
 internal class HomeLocationCoordinatorImpl(
-    private val preferences: HomeWeatherPreferences,
+    private val preferences: LocationPreferencesStorage,
 ) : HomeLocationCoordinator {
     override suspend fun setDefaultLocation(
         lat: Double,
