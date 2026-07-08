@@ -32,7 +32,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.flowWithLifecycle
 import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.components.ToastType
@@ -91,7 +94,8 @@ fun HomeFeatureRoute(
     onOpenLocationSettings: () -> Unit = {},
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
     var previousHasLocationPermission by remember { mutableStateOf(hasLocationPermission) }
     LaunchedEffect(hasLocationPermission) {
@@ -104,7 +108,11 @@ fun HomeFeatureRoute(
     }
 
     LaunchedEffect(hasNotificationPermission) {
-        viewModel.processIntent(HomeIntent.UpdateNotificationPermissionState(hasNotificationPermission))
+        viewModel.processIntent(
+            HomeIntent.UpdateNotificationPermissionState(
+                hasNotificationPermission
+            )
+        )
     }
 
     LaunchedEffect(notificationPermissionResult) {
@@ -116,14 +124,16 @@ fun HomeFeatureRoute(
     }
 
     LaunchedEffect(viewModel.effect) {
-        viewModel.effect.collect { effect ->
-            when (effect) {
-                HomeEffect.RequestNotificationPermission -> onRequestNotificationPermission()
-                HomeEffect.OpenSettings -> onOpenSettings()
-                HomeEffect.RequestGpsPermission -> TODO()
-                HomeEffect.RequestLocationPermission -> TODO()
+        viewModel.effect
+            .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+            .collect { effect ->
+                when (effect) {
+                    HomeEffect.RequestNotificationPermission -> onRequestNotificationPermission()
+                    HomeEffect.OpenSettings -> onOpenSettings()
+                    HomeEffect.RequestGpsPermission -> TODO()
+                    HomeEffect.RequestLocationPermission -> TODO()
+                }
             }
-        }
     }
 
     when {
@@ -263,7 +273,7 @@ private fun ShowUIContainer(
 
         NotificationToast(
             modifier = Modifier.align(Alignment.BottomCenter),
-            message = stringResource(Res.string.network_unavailable_txt),
+            message = state.offlineMessage ?: stringResource(Res.string.network_unavailable_txt),
             title = stringResource(Res.string.offline_toast_title_txt),
             type = ToastType.WARNING,
             isVisible = showOfflineToast,
@@ -334,10 +344,10 @@ private fun ShowUIContainer(
                                     visibleState = currentWeatherTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                            slideInVertically(
-                                                animationSpec = tween(durationMillis = 500),
-                                                initialOffsetY = { it / 3 },
-                                            ),
+                                                slideInVertically(
+                                                    animationSpec = tween(durationMillis = 500),
+                                                    initialOffsetY = { it / 3 },
+                                                ),
                                     exit = fadeOut(),
                                 ) {
                                     CurrentWeatherReportLayout(
@@ -355,10 +365,10 @@ private fun ShowUIContainer(
                                     visibleState = alertsTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                            slideInVertically(
-                                                animationSpec = tween(durationMillis = 500),
-                                                initialOffsetY = { it / 3 },
-                                            ),
+                                                slideInVertically(
+                                                    animationSpec = tween(durationMillis = 500),
+                                                    initialOffsetY = { it / 3 },
+                                                ),
                                     exit = fadeOut(),
                                 ) {
                                     WeatherAlertLayout(alerts = alerts)
@@ -372,10 +382,10 @@ private fun ShowUIContainer(
                                     visibleState = airQualityTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                            slideInVertically(
-                                                animationSpec = tween(durationMillis = 500),
-                                                initialOffsetY = { it / 3 },
-                                            ),
+                                                slideInVertically(
+                                                    animationSpec = tween(durationMillis = 500),
+                                                    initialOffsetY = { it / 3 },
+                                                ),
                                     exit = fadeOut(),
                                 ) {
                                     BriefAirQualityReportCardLayout(aq)
@@ -389,10 +399,10 @@ private fun ShowUIContainer(
                                     visibleState = hourlyForecastTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                            slideInVertically(
-                                                animationSpec = tween(durationMillis = 500),
-                                                initialOffsetY = { it / 3 },
-                                            ),
+                                                slideInVertically(
+                                                    animationSpec = tween(durationMillis = 500),
+                                                    initialOffsetY = { it / 3 },
+                                                ),
                                     exit = fadeOut(),
                                 ) {
                                     HourlyWeatherForecastReportLayout(it)
@@ -406,10 +416,10 @@ private fun ShowUIContainer(
                                     visibleState = dailyForecastTransitionState,
                                     enter =
                                         fadeIn(animationSpec = tween(durationMillis = 500)) +
-                                            slideInVertically(
-                                                animationSpec = tween(durationMillis = 500),
-                                                initialOffsetY = { it / 3 },
-                                            ),
+                                                slideInVertically(
+                                                    animationSpec = tween(durationMillis = 500),
+                                                    initialOffsetY = { it / 3 },
+                                                ),
                                     exit = fadeOut(),
                                 ) {
                                     DailyWeatherForecastReportLayout(list)

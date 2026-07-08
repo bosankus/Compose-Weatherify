@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import bose.ankush.finder.domain.model.LocationSuggestion
 import bose.ankush.finder.generated.resources.Res
@@ -68,7 +69,7 @@ internal fun PlaceSearchDialog(
 
     CompositionLocalProvider(LocalViewModelStoreOwner provides dialogVmOwner) {
         val viewModel = koinViewModel<PlaceSearchViewModel>()
-        val state by viewModel.state.collectAsState()
+        val state by viewModel.state.collectAsStateWithLifecycle()
 
         PlaceSearchDialogContent(
             state = state,

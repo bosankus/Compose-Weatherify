@@ -14,6 +14,7 @@ internal data class HomeState(
     val isLocationOverridden: Boolean = false,
     val activeLocationName: String? = null,
     val isOffline: Boolean = false,
+    val offlineMessage: String? = null,
     val showNotificationBanner: Boolean = false,
     val isNotificationPermissionPermanentlyDeclined: Boolean = false,
     val isNotificationBannerDismissed: Boolean = false,

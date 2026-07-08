@@ -41,11 +41,11 @@ data class WeatherForecast(
 
         @Serializable
         data class Alert(
-            val description: String?,
-            val end: Long?,
-            val event: String?,
-            @SerialName("senderName") val senderName: String?,
-            val start: Long?,
+            val description: String? = null,
+            val end: Long? = null,
+            val event: String? = null,
+            @SerialName("sender_name") val senderName: String? = null,
+            val start: Long? = null,
         )
 
         @Serializable
@@ -54,7 +54,7 @@ data class WeatherForecast(
             val clouds: Int? = null,
             @SerialName("dt")
             val dt: Long? = null,
-            @SerialName("feelsLike")
+            @SerialName("feels_like")
             val feelsLike: Double? = null,
             @SerialName("humidity")
             val humidity: Int? = null,
@@ -70,9 +70,9 @@ data class WeatherForecast(
             val uvi: Double? = null,
             @SerialName("weather")
             val weather: List<WeatherInfo?>? = null,
-            @SerialName("windGust")
+            @SerialName("wind_gust")
             val windGust: Double? = null,
-            @SerialName("windSpeed")
+            @SerialName("wind_speed")
             val windSpeed: Double? = null,
         )
 
@@ -80,7 +80,7 @@ data class WeatherForecast(
         data class Daily(
             @SerialName("clouds")
             val clouds: Int? = null,
-            @SerialName("dewPoint")
+            @SerialName("dew_point")
             val dewPoint: Double? = null,
             @SerialName("dt")
             val dt: Long? = null,
@@ -102,9 +102,9 @@ data class WeatherForecast(
             val uvi: Double? = null,
             @SerialName("weather")
             val weather: List<WeatherInfo?>? = null,
-            @SerialName("windGust")
+            @SerialName("wind_gust")
             val windGust: Double? = null,
-            @SerialName("windSpeed")
+            @SerialName("wind_speed")
             val windSpeed: Double? = null,
         ) {
             @Serializable
@@ -130,7 +130,7 @@ data class WeatherForecast(
             val clouds: Int? = null,
             @SerialName("dt")
             val dt: Long? = null,
-            @SerialName("feelsLike")
+            @SerialName("feels_like")
             val feelsLike: Double? = null,
             @SerialName("humidity")
             val humidity: Int? = null,

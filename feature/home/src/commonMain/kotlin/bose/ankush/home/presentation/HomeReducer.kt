@@ -27,6 +27,7 @@ internal object HomeReducer {
                     isRefreshing = false,
                     error = null,
                     isOffline = action.isOffline,
+                    offlineMessage = action.message,
                     isGpsDisabled = action.isGpsDisabled,
                 )
 
@@ -35,6 +36,8 @@ internal object HomeReducer {
                     isLoading = false,
                     isRefreshing = false,
                     error = null,
+                    isOffline = false,
+                    offlineMessage = null,
                     weatherData = action.weather,
                     airQualityData = action.airQuality,
                     userLocation = action.location,

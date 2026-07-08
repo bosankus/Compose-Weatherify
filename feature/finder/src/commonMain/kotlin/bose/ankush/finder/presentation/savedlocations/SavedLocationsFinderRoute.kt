@@ -2,9 +2,11 @@ package bose.ankush.finder.presentation.savedlocations
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.flowWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -17,9 +19,12 @@ fun SavedLocationsFinderRoute(
 ) {
     val viewModel = koinViewModel<SavedLocationsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-    LaunchedEffect(viewModel) {
-        viewModel.effect.collect { effect ->
+    LaunchedEffect(viewModel.effect) {
+        viewModel.effect
+            .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+            .collect { effect ->
             if (effect is SavedLocationsEffect.LocationSelected) {
                 onLocationSelected(effect.lat, effect.lon, effect.name)
             }

@@ -5,9 +5,22 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose.multiplatform)
+    id("org.jetbrains.kotlin.native.cocoapods")
 }
 
 kotlin {
+    cocoapods {
+        version = "1.0"
+        summary = "Weatherify Home feature module"
+        homepage = "https://github.com/bosankus/Compose-Weatherify"
+        ios.deploymentTarget = "15.0"
+
+        pod("FirebaseRemoteConfig") {
+            version = "12.4.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+    }
+
     android {
         namespace = "bose.ankush.home"
         compileSdk =
@@ -67,7 +80,6 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.firebase.config)
             implementation(libs.androidx.compose.ui.tooling)
-            implementation(libs.androidx.compose.ui.tooling.preview)
         }
 
         val iosMain by creating {

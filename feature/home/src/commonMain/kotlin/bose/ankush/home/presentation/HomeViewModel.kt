@@ -43,7 +43,7 @@ internal class HomeViewModel(
     private val getWeatherReport: GetWeatherReport,
     private val getAirQuality: GetAirQuality,
     private val locationClient: LocationClient,
-    private val preferences: LocationPreferencesStorage,
+    private val locationPreferencesStorage: LocationPreferencesStorage,
     private val remoteConfigGate: HomeRemoteConfigGate,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
@@ -52,8 +52,9 @@ internal class HomeViewModel(
     private val _effect = Channel<HomeEffect>(Channel.BUFFERED)
     val effect: Flow<HomeEffect> = _effect.receiveAsFlow()
 
-    private var locationJob: Job? = null
-    private var dataLoadingJob: Job? = null
+    // performInitialDataLoading/runLocationFetch always run inside this job's coroutine,
+    // so a single handle is enough to cancel an in-flight location+weather fetch.
+    private var dataFetchJob: Job? = null
 
     private val dataFetchExceptionHandler =
         CoroutineExceptionHandler { _, e ->
@@ -72,7 +73,7 @@ internal class HomeViewModel(
         // drop(1) skips the initial emission — only react to an actual override change made
         // after this ViewModel started observing (e.g. a saved location pinned elsewhere).
         viewModelScope.launch {
-            preferences
+            locationPreferencesStorage
                 .getLocationPreferencesFlow()
                 .map { it.isLocationOverridden to (it.overrideLat to it.overrideLon) }
                 .distinctUntilChanged()
@@ -85,8 +86,9 @@ internal class HomeViewModel(
 
     fun processIntent(intent: HomeIntent) {
         when (intent) {
-            HomeIntent.FetchLocation -> fetchAndSaveLocationCoordinates(forceRefresh = true)
-            HomeIntent.Refresh -> refreshWeatherData()
+            HomeIntent.FetchLocation, HomeIntent.Refresh ->
+                fetchAndSaveLocationCoordinates(forceRefresh = true)
+
             HomeIntent.ResetLocationOverride -> resetLocationOverride()
             HomeIntent.EnableNotificationBanner -> _effect.trySend(
                 if (_state.value.isNotificationPermissionPermanentlyDeclined) {
@@ -129,81 +131,85 @@ internal class HomeViewModel(
 
     private fun fetchAndSaveLocationCoordinates(forceRefresh: Boolean) {
         dispatch(HomeAction.Loading(isRefreshing = forceRefresh))
-        locationJob?.cancel()
-        locationJob =
+        dataFetchJob?.cancel()
+        dataFetchJob =
             viewModelScope.launch(dataFetchExceptionHandler) {
-                val prefs = preferences.getLocationPreferencesFlow().first()
+                val prefs = locationPreferencesStorage.getLocationPreferencesFlow().first()
                 if (prefs.isLocationOverridden) {
                     performInitialDataLoading(forceRefresh = forceRefresh)
-                    return@launch
+                } else {
+                    runLocationFetch(forceRefresh = forceRefresh)
                 }
-                runLocationFetch(forceRefresh = forceRefresh)
-            }
-    }
-
-    private fun refreshWeatherData() {
-        dispatch(HomeAction.Loading(isRefreshing = true))
-        locationJob?.cancel()
-        locationJob =
-            viewModelScope.launch(dataFetchExceptionHandler) {
-                val prefs = preferences.getLocationPreferencesFlow().first()
-                if (prefs.isLocationOverridden) {
-                    performInitialDataLoading(forceRefresh = true)
-                    return@launch
-                }
-                runLocationFetch(forceRefresh = true)
             }
     }
 
     private suspend fun runLocationFetch(forceRefresh: Boolean) {
         locationClient.getCurrentLocation().fold(
             onSuccess = { loc ->
-                preferences.saveLocationPreferences(loc.latitude to loc.longitude)
+                locationPreferencesStorage.saveLocationPreferences(loc.latitude to loc.longitude)
                 performInitialDataLoading(forceRefresh = forceRefresh)
             },
-            onFailure = { e ->
-                val isGpsDisabled =
-                    e is LocationClient.LocationException &&
-                            e.message?.contains("GPS is disabled", ignoreCase = true) == true
-                val errorMessage =
-                    when {
-                        isGpsDisabled -> getString(Res.string.gps_disabled_error_txt)
-                        e is Exception -> errorMessageFromException(e)
-                        else -> getString(Res.string.general_error_txt)
-                    }
-                dispatch(
-                    HomeAction.SetOffline(
-                        message = errorMessage,
-                        isOffline = true,
-                        isGpsDisabled = isGpsDisabled
-                    ),
-                )
-            },
+            onFailure = { e -> handleLocationFailure(e, forceRefresh) },
         )
     }
 
-    private fun performInitialDataLoading(forceRefresh: Boolean = false) {
-        dataLoadingJob?.cancel()
-        dataLoadingJob =
-            viewModelScope.launch(dataFetchExceptionHandler) {
-                val prefs = preferences.getLocationPreferencesFlow().first()
-                val isOverridden =
-                    prefs.isLocationOverridden && prefs.overrideLat != null &&
-                            prefs.overrideLon != null
-                val lat = if (isOverridden) prefs.overrideLat else prefs.latitude
-                val lon = if (isOverridden) prefs.overrideLon else prefs.longitude
-                val overrideName = if (isOverridden) prefs.overrideLocationName else null
-
-                if (lat != null && lon != null) {
-                    fetchWeatherData(lat, lon, isOverridden, overrideName, forceRefresh)
-                } else {
-                    dispatch(
-                        HomeAction.Error(
-                            getString(Res.string.default_coordinates_txt),
-                        ),
-                    )
-                }
+    // A fresh GPS fix can fail transiently (cold start, indoors, brief permission race). Rather
+    // than blocking the whole screen, fall back to the last known (non-override) coordinates so
+    // weather still loads, and surface the failure as a dismissible banner instead.
+    private suspend fun handleLocationFailure(
+        e: Throwable,
+        forceRefresh: Boolean,
+    ) {
+        val isGpsDisabled =
+            e is LocationClient.LocationException &&
+                    e.message?.contains("GPS is disabled", ignoreCase = true) == true
+        val errorMessage =
+            when {
+                isGpsDisabled -> getString(Res.string.gps_disabled_error_txt)
+                e is Exception -> errorMessageFromException(e)
+                else -> getString(Res.string.general_error_txt)
             }
+
+        dispatch(
+            HomeAction.SetOffline(
+                message = errorMessage,
+                isOffline = true,
+                isGpsDisabled = isGpsDisabled,
+            ),
+        )
+
+        val prefs = locationPreferencesStorage.getLocationPreferencesFlow().first()
+        val lastKnownLat = prefs.latitude
+        val lastKnownLon = prefs.longitude
+        if (!prefs.isLocationOverridden && lastKnownLat != null && lastKnownLon != null) {
+            fetchWeatherData(
+                lat = lastKnownLat,
+                lon = lastKnownLon,
+                isOverridden = false,
+                overrideName = null,
+                forceRefresh = forceRefresh,
+            )
+        }
+    }
+
+    private suspend fun performInitialDataLoading(forceRefresh: Boolean) {
+        val prefs = locationPreferencesStorage.getLocationPreferencesFlow().first()
+        val isOverridden =
+            prefs.isLocationOverridden && prefs.overrideLat != null &&
+                    prefs.overrideLon != null
+        val lat = if (isOverridden) prefs.overrideLat else prefs.latitude
+        val lon = if (isOverridden) prefs.overrideLon else prefs.longitude
+        val overrideName = if (isOverridden) prefs.overrideLocationName else null
+
+        if (lat != null && lon != null) {
+            fetchWeatherData(lat, lon, isOverridden, overrideName, forceRefresh)
+        } else {
+            dispatch(
+                HomeAction.Error(
+                    getString(Res.string.default_coordinates_txt),
+                ),
+            )
+        }
     }
 
     private suspend fun fetchWeatherData(
@@ -251,14 +257,13 @@ internal class HomeViewModel(
 
     private fun resetLocationOverride() {
         viewModelScope.launch(dataFetchExceptionHandler) {
-            preferences.clearLocationOverride()
-            fetchAndSaveLocationCoordinates(true)
+            locationPreferencesStorage.clearLocationOverride()
+            fetchAndSaveLocationCoordinates(forceRefresh = true)
         }
     }
 
     override fun onCleared() {
-        locationJob?.cancel()
-        dataLoadingJob?.cancel()
+        dataFetchJob?.cancel()
         super.onCleared()
     }
 }

@@ -218,7 +218,7 @@ compose-multiplatform-material3 = { module = "org.jetbrains.compose.material3:ma
 compose-multiplatform-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "cmp-ui" }
 compose-multiplatform-materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "cmp-materialIconsExtended" }
 compose-multiplatform-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "cmp-foundation" }
-compose-multiplatform-ui-tooling-preview = { module = "org.jetbrains.compose.components:components-ui-tooling-preview", version.ref = "cmp-ui" }
+compose-multiplatform-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "cmp-ui" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
