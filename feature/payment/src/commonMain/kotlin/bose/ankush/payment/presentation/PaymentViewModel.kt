@@ -45,9 +45,6 @@ class PaymentViewModel(
     private val _effect = Channel<PaymentEffect>(Channel.BUFFERED)
     val effect: Flow<PaymentEffect> = _effect.receiveAsFlow()
 
-    private val _checkoutParams = Channel<CheckoutParams>(Channel.BUFFERED)
-    val checkoutParams: Flow<CheckoutParams> = _checkoutParams.receiveAsFlow()
-
     init {
         observePremiumStatus()
     }

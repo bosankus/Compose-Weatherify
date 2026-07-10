@@ -11,8 +11,6 @@ import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
 
 object Extension {
-    fun Double.toCelsius() = (this - KELVIN_OFFSET).roundToInt().toString()
-
     fun isDeviceSDKAndroid13OrAbove() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
     fun Context.openAppSystemSettings() =

@@ -2,8 +2,6 @@ package bose.ankush.weatherify.base.common
 
 import android.annotation.SuppressLint
 
-const val WEATHER_IMG_URL = "https://openweathermap.org/img/wn/"
-
 const val APP_UPDATE_REQ_CODE = 111
 
 const val ACCESS_FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -18,4 +16,3 @@ val PERMISSIONS_TO_REQUEST =
         ACCESS_COARSE_LOCATION,
     )
 
-const val KELVIN_OFFSET = 273
