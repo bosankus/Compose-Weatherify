@@ -44,6 +44,8 @@ import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.home.HomeSessionCleaner
+import bose.ankush.home.presentation.permission.LocationPermissionKind
+import bose.ankush.home.presentation.permission.locationPermissionDescription
 import bose.ankush.payment.domain.store.PremiumStore
 import bose.ankush.payment.presentation.CheckoutParams
 import bose.ankush.payment.presentation.PaymentEffect
@@ -53,8 +55,6 @@ import bose.ankush.weatherify.base.common.Extension.hasLocationPermission
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
-import bose.ankush.weatherify.base.permissions.CoarseLocationPermissionTextProvider
-import bose.ankush.weatherify.base.permissions.FineLocationPermissionTextProvider
 import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import com.razorpay.Checkout
@@ -287,10 +287,10 @@ class MainActivity :
 
         permissionQueue.reversed().forEach { permission ->
             val isPermanentlyDeclined = !shouldShowRequestPermissionRationale(permission)
-            val textProvider =
+            val permissionKind =
                 when (permission) {
-                    Manifest.permission.ACCESS_FINE_LOCATION -> FineLocationPermissionTextProvider()
-                    Manifest.permission.ACCESS_COARSE_LOCATION -> CoarseLocationPermissionTextProvider()
+                    Manifest.permission.ACCESS_FINE_LOCATION -> LocationPermissionKind.FINE
+                    Manifest.permission.ACCESS_COARSE_LOCATION -> LocationPermissionKind.COARSE
                     else -> return@forEach
                 }
 
@@ -298,7 +298,7 @@ class MainActivity :
             BackHandler(enabled = isPermanentlyDeclined) { finish() }
 
             PermissionAlertDialog(
-                descriptionText = textProvider.getDescription(isPermanentlyDeclined),
+                descriptionText = locationPermissionDescription(permissionKind, isPermanentlyDeclined),
                 isPermanentlyDeclined = isPermanentlyDeclined,
                 onPositiveAction =
                     if (isPermanentlyDeclined) {
