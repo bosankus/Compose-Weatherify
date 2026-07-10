@@ -33,12 +33,12 @@ import bose.ankush.home.HomeLocationCoordinator
 import bose.ankush.home.HomeNotificationPermissionResult
 import bose.ankush.home.presentation.HomeFeatureRoute
 import bose.ankush.language.presentation.LanguageScreen
+import bose.ankush.language.util.LanguageCatalog
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.settings.presentation.SettingsFeatureRoute
 import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.R
-import bose.ankush.weatherify.base.LocaleConfigMapper
 import bose.ankush.weatherify.base.common.ACCESS_NOTIFICATION
 import bose.ankush.weatherify.base.common.Extension.hasLocationPermission
 import bose.ankush.weatherify.base.common.Extension.hasNotificationPermission
@@ -240,15 +240,16 @@ private fun rememberLanguageList(): Array<String> {
     val context = LocalContext.current
     val showError = remember { mutableStateOf(false) }
     val errorMessage = stringResource(R.string.locale_config_error_txt)
-    val list =
-        remember(context) {
+    var list by remember { mutableStateOf(emptyArray<String>()) }
+    LaunchedEffect(Unit) {
+        list =
             runCatching {
-                LocaleConfigMapper.getAvailableLanguagesFromJson("countryConfig.json", context)
+                LanguageCatalog.getAvailableLanguages().toTypedArray()
             }.getOrElse {
                 showError.value = true
                 emptyArray()
             }
-        }
+    }
     LaunchedEffect(showError.value) {
         if (showError.value) {
             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()

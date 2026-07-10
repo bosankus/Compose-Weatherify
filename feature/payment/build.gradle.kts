@@ -41,6 +41,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":network"))
+            implementation(project(":storage"))
             implementation(libs.compose.multiplatform.resources)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.koin.core)

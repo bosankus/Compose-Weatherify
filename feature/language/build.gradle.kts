@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -47,6 +48,7 @@ kotlin {
             implementation(libs.compose.multiplatform.ui)
             implementation(libs.compose.multiplatform.animation)
             implementation(libs.compose.multiplatform.materialIconsExtended)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         androidMain.dependencies {
