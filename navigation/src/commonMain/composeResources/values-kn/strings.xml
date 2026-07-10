@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_locations_icon_content">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳು</string>
+    <string name="locale_config_error_txt">ಭಾಷಾ ಸಂರಚನೆ ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ. ಡಿಫಾಲ್ಟ್ ಭಾಷೆ ಬಳಸಲಾಗುತ್ತಿದೆ.</string>
+</resources>

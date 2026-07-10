@@ -47,7 +47,7 @@ internal class DeviceLocationClient(
             val cts = CancellationTokenSource()
 
             client
-                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
+                .getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, cts.token)
                 .addOnSuccessListener { location ->
                     if (location != null) {
                         continuation.resume(Result.success(Coordinates(location.latitude, location.longitude)))

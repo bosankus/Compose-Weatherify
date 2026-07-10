@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.navigation
+package bose.ankush.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -15,8 +15,27 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.savedstate.serialization.SavedStateConfiguration
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 
 private val TAB_ROUTES: List<NavKey> = listOf(HomeRoute, SavedLocationsRoute, SettingsRoute)
+
+// rememberNavBackStack's reflection-based, SavedStateConfiguration-free overload is Android-only;
+// commonMain code must supply a SerializersModule that registers every NavKey subtype explicitly.
+private val navKeySavedStateConfiguration =
+    SavedStateConfiguration {
+        serializersModule =
+            SerializersModule {
+                polymorphic(NavKey::class) {
+                    subclass(HomeRoute::class)
+                    subclass(SavedLocationsRoute::class)
+                    subclass(SettingsRoute::class)
+                    subclass(LanguageRoute::class)
+                }
+            }
+    }
 
 private val TabRouteSaver =
     Saver<MutableState<NavKey>, Int>(
@@ -43,9 +62,9 @@ fun rememberAppNavigationState(): AppNavigationState {
         rememberSaveable(saver = TabRouteSaver) {
             mutableStateOf(HomeRoute)
         }
-    val homeStack = rememberNavBackStack(HomeRoute)
-    val savedLocationsStack = rememberNavBackStack(SavedLocationsRoute)
-    val settingsStack = rememberNavBackStack(SettingsRoute)
+    val homeStack = rememberNavBackStack(navKeySavedStateConfiguration, HomeRoute)
+    val savedLocationsStack = rememberNavBackStack(navKeySavedStateConfiguration, SavedLocationsRoute)
+    val settingsStack = rememberNavBackStack(navKeySavedStateConfiguration, SettingsRoute)
 
     return remember {
         AppNavigationState(

@@ -1,5 +1,6 @@
 package bose.ankush.weatherify
 
+import android.app.Application
 import bose.ankush.auth.di.authDomainModule
 import bose.ankush.auth.di.authViewModelModule
 import bose.ankush.finder.di.finderDomainModule
@@ -21,7 +22,7 @@ import org.koin.core.context.startKoin
 import timber.log.Timber
 
 @HiltAndroidApp
-class WeatherifyApplication : WeatherifyApplicationCore() {
+class WeatherifyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         initKoin()
@@ -93,5 +94,4 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
             )
         }
     }
-
 }

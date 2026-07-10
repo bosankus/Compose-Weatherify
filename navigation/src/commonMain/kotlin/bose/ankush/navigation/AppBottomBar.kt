@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.navigation
+package bose.ankush.navigation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -22,24 +22,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.components.toastAnchor
-import bose.ankush.weatherify.R
+import bose.ankush.navigation.generated.resources.Res
+import bose.ankush.navigation.generated.resources.home_nested_nav
+import bose.ankush.navigation.generated.resources.ic_home
+import bose.ankush.navigation.generated.resources.ic_profile
+import bose.ankush.navigation.generated.resources.profile_nested_nav
+import bose.ankush.navigation.generated.resources.saved_locations_icon_content
+import bose.ankush.navigation.generated.resources.saved_locations_nested_nav
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 private data class TabItem(
     val route: NavKey,
-    val labelResId: Int,
+    val labelRes: StringResource,
 )
 
 private val TAB_ITEMS =
     listOf(
-        TabItem(HomeRoute, R.string.home_nested_nav),
-        TabItem(SavedLocationsRoute, R.string.saved_locations_nested_nav),
-        TabItem(SettingsRoute, R.string.profile_nested_nav),
+        TabItem(HomeRoute, Res.string.home_nested_nav),
+        TabItem(SavedLocationsRoute, Res.string.saved_locations_nested_nav),
+        TabItem(SettingsRoute, Res.string.profile_nested_nav),
     )
 
 @Composable
@@ -81,20 +88,20 @@ fun AppBottomBar(
                         when (tab.route) {
                             HomeRoute ->
                                 Icon(
-                                    painter = painterResource(id = R.drawable.ic_home),
-                                    contentDescription = stringResource(id = tab.labelResId),
+                                    painter = painterResource(Res.drawable.ic_home),
+                                    contentDescription = stringResource(tab.labelRes),
                                 )
 
                             SavedLocationsRoute ->
                                 Icon(
                                     imageVector = Icons.Outlined.BookmarkBorder,
-                                    contentDescription = stringResource(id = R.string.saved_locations_icon_content),
+                                    contentDescription = stringResource(Res.string.saved_locations_icon_content),
                                 )
 
                             SettingsRoute ->
                                 Icon(
-                                    painter = painterResource(id = R.drawable.ic_profile),
-                                    contentDescription = stringResource(id = tab.labelResId),
+                                    painter = painterResource(Res.drawable.ic_profile),
+                                    contentDescription = stringResource(tab.labelRes),
                                 )
                         }
                     },

@@ -1,30 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Nested NavGraph group name-->
-    <string name="home_nested_nav">home_nested_nav</string>
-    <string name="profile_nested_nav">profile_nested_nav</string>
-
-    <!--General Texts-->
     <string name="app_name">Weatherify</string>
 
-    <!--Error Texts-->
     <string name="unauthorised_access_txt">అనధికార ప్రవేశం!</string>
     <string name="city_error_txt">నగరం కనుగొనబడలేదు!</string>
     <string name="server_error_txt">సర్వర్ సమస్య ఉన్నట్లు కనిపిస్తుంది!</string>
     <string name="network_unavailable_txt">ఇంటర్నెట్ కనెక్టివిటీని మళ్ళీ తనిఖీ చేయగలరా!</string>
     <string name="network_timeout_txt">అభ్యర్థన గడువు ముగిసింది. దయచేసి తర్వాత మళ్ళీ ప్రయత్నించండి.</string>
     <string name="general_error_txt">అయ్యో!.. ఏదో తప్పు జరిగింది.</string>
-
-    <!--Settings Screen-->
-
-    <!--Content Descriptions-->
-    <string name="close_icon_content">మూసివేయి చిహ్నం</string>
-    <string name="locale_config_error_txt">భాషా కాన్ఫిగరేషన్ లోడ్ చేయడంలో విఫలమైంది. డిఫాల్ట్ భాష ఉపయోగిస్తున్నారు.</string>
-
-    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-
-    <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_icon_content">సేవ్ చేసిన ప్రదేశాలు</string>
-
 </resources>

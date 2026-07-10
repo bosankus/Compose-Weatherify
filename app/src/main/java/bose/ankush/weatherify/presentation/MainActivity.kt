@@ -46,16 +46,16 @@ import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.home.HomeSessionCleaner
 import bose.ankush.home.presentation.permission.LocationPermissionKind
 import bose.ankush.home.presentation.permission.locationPermissionDescription
+import bose.ankush.navigation.AppNavigation
+import bose.ankush.navigation.platform.rememberPlatformPermissions
 import bose.ankush.payment.domain.store.PremiumStore
 import bose.ankush.payment.presentation.CheckoutParams
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
-import bose.ankush.weatherify.base.common.Extension.hasLocationPermission
-import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
+import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
-import bose.ankush.weatherify.presentation.navigation.AppNavigation
 import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
@@ -126,7 +126,7 @@ class MainActivity :
             toastVisible = true
         }
 
-        ObserveAuthState(authState = authState, context = context, onShowToast = ::showToast)
+        ObserveAuthState(authState = authState, onShowToast = ::showToast)
         ObserveAuthEffect()
         ObservePaymentEffect(context = context)
 
@@ -134,7 +134,11 @@ class MainActivity :
             isAuthInitialized = isAuthInitialized,
             isLoggedIn = isLoggedIn,
             authState = authState,
-            toastAnchorState = toastAnchorState,
+            toastController =
+                ToastController(
+                    anchorState = toastAnchorState,
+                    onShowToast = { message -> showToast(message) },
+                ),
             toastState =
                 ToastDisplayState(
                     visible = toastVisible,
@@ -149,7 +153,6 @@ class MainActivity :
     @Composable
     private fun ObserveAuthState(
         authState: AuthState,
-        context: Context,
         onShowToast: (String, String, ToastType) -> Unit,
     ) {
         LaunchedEffect(authState) {
@@ -203,7 +206,7 @@ class MainActivity :
         isAuthInitialized: Boolean,
         isLoggedIn: Boolean,
         authState: AuthState,
-        toastAnchorState: ToastAnchorState,
+        toastController: ToastController,
         toastState: ToastDisplayState,
     ) {
         Box(
@@ -223,7 +226,7 @@ class MainActivity :
                     ) { CircularProgressIndicator() }
                 }
 
-                isLoggedIn -> AuthorizedContent(toastAnchorState = toastAnchorState)
+                isLoggedIn -> AuthorizedContent(toastController = toastController)
                 else -> UnauthorizedContent(authState = authState)
             }
             NotificationToast(
@@ -233,18 +236,24 @@ class MainActivity :
                 type = toastState.type,
                 isVisible = toastState.visible,
                 onDismiss = toastState.onDismiss,
-                anchorState = toastAnchorState,
+                anchorState = toastController.anchorState,
             )
         }
     }
 
     @Composable
-    private fun AuthorizedContent(toastAnchorState: ToastAnchorState) {
-        val context = LocalContext.current
-        if (!context.hasLocationPermission()) {
-            RequestLocationPermission(context)
+    private fun AuthorizedContent(toastController: ToastController) {
+        val platformPermissions = rememberPlatformPermissions()
+        if (!platformPermissions.hasLocationPermission()) {
+            RequestLocationPermission()
         }
-        AppNavigation(authViewModel, paymentViewModel, toastAnchorState)
+        AppNavigation(
+            authViewModel = authViewModel,
+            paymentViewModel = paymentViewModel,
+            versionName = BuildConfig.VERSION_NAME,
+            onShowToast = toastController.onShowToast,
+            toastAnchorState = toastController.anchorState,
+        )
     }
 
     @Composable
@@ -270,7 +279,8 @@ class MainActivity :
     }
 
     @Composable
-    fun RequestLocationPermission(context: Context) {
+    fun RequestLocationPermission() {
+        val platformPermissions = rememberPlatformPermissions()
         val permissionQueue = permissionViewModel.permissionDialogQueue
         val locationPermissionsResultLauncher =
             rememberLauncherForActivityResult(
@@ -302,7 +312,7 @@ class MainActivity :
                 isPermanentlyDeclined = isPermanentlyDeclined,
                 onPositiveAction =
                     if (isPermanentlyDeclined) {
-                        { context.openAppSystemSettings() }
+                        { platformPermissions.openAppSystemSettings() }
                     } else {
                         {
                             permissionViewModel.dismissDialog()
@@ -317,7 +327,7 @@ class MainActivity :
 
         // Launch initial permission request if missing and queue is empty (first-launch scenario)
         LaunchedEffect(Unit) {
-            if (permissionQueue.isEmpty() && !context.hasLocationPermission()) {
+            if (permissionQueue.isEmpty() && !platformPermissions.hasLocationPermission()) {
                 locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
             }
         }
@@ -433,4 +443,9 @@ private data class ToastDisplayState(
     val title: String,
     val type: ToastType,
     val onDismiss: () -> Unit,
+)
+
+private data class ToastController(
+    val anchorState: ToastAnchorState,
+    val onShowToast: (String) -> Unit,
 )

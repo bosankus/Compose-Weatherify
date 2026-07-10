@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_locations_icon_content">מיקומים שמורים</string>
+    <string name="locale_config_error_txt">כישלון בטעינת תצורת שפה. שימוש בשפה ברירת מחדל.</string>
+</resources>

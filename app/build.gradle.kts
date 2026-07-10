@@ -9,7 +9,6 @@ plugins {
     alias(libs.plugins.secrets.gradle.plugin)
     alias(libs.plugins.ben.manes.versions)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 secrets {
@@ -99,6 +98,7 @@ dependencies {
     api(project(":feature:finder"))
     api(project(":feature:home"))
     api(project(":feature:settings"))
+    api(project(":navigation"))
     api(project(":storage"))
     api(project(":network"))
 
@@ -107,14 +107,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
 
-    // Navigation 3
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.google.play.app.update)
     implementation(libs.google.play.app.update.ktx)
-    implementation(libs.google.play.services.location)
-    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.core.splashscreen)
 
     // Compose

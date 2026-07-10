@@ -1,31 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Nested NavGraph group name-->
-    <string name="home_nested_nav">home_nested_nav</string>
-    <string name="profile_nested_nav">profile_nested_nav</string>
-
-    <!--General Texts-->
     <string name="app_name">Weatherify</string>
 
-    <!--Error Texts-->
     <string name="unauthorised_access_txt">অননুমোদিত অ্যাক্সেস!</string>
     <string name="city_error_txt">শহর পাওয়া যায়নি!</string>
     <string name="server_error_txt">সার্ভারে সমস্যা হচ্ছে মনে হচ্ছে!</string>
     <string name="network_unavailable_txt">ইন্টারনেট সংযোগ পুনরায় পরীক্ষা করতে পারবেন!</string>
     <string name="network_timeout_txt">অনুরোধের সময় শেষ হয়ে গেছে। পরে আবার চেষ্টা করুন।</string>
     <string name="general_error_txt">কিছু একটা ভুল হয়েছে।</string>
-
-    <!--Settings Screen-->
-    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-
-    <!--Content Descriptions-->
-    <string name="close_icon_content">বন্ধ করুন আইকন</string>
-    <string name="locale_config_error_txt">ভাষা কনফিগারেশন লোড করতে ব্যর্থ হয়েছে। ডিফল্ট ভাষা ব্যবহার করা হচ্ছে।</string>
-
-    <!-- Premium Subscription Additional Strings -->
-
-    <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_icon_content">সংরক্ষিত অবস্থান</string>
-
 </resources>

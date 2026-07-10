@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="saved_locations_icon_content">സംരക്ഷിത സ്ഥാനങ്ങൾ</string>
+    <string name="locale_config_error_txt">ഭാഷ കോൺഫിഗറേഷൻ ലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു. ഡിഫോൾട്ട് ഭാഷ ഉപയോഗിക്കുന്നു.</string>
+</resources>

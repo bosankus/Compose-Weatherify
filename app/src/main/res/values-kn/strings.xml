@@ -1,30 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Nested NavGraph group name-->
-    <string name="home_nested_nav">home_nested_nav</string>
-    <string name="profile_nested_nav">profile_nested_nav</string>
-
-    <!--General Texts-->
     <string name="app_name">Weatherify</string>
 
-    <!--Error Texts-->
     <string name="unauthorised_access_txt">ಅನಧಿಕೃತ ಪ್ರವೇಶ!</string>
     <string name="city_error_txt">ನಗರ ಕಂಡುಬರಲಿಲ್ಲ!</string>
     <string name="server_error_txt">ಸರ್ವರ್ ಸಮಸ್ಯೆ ಕಂಡುಬರುತ್ತದೆ!</string>
     <string name="network_unavailable_txt">ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಮರು-ಪರಿಶೀಲಿಸಬಹುದೇ!</string>
     <string name="network_timeout_txt">ವಿನಂತಿಯ ಸಮಯ ಮೀರಿತು. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
     <string name="general_error_txt">ಅಯ್ಯೋ!.. ಏನೋ ತಪ್ಪಾಗಿದೆ.</string>
-
-    <!--Settings Screen-->
-
-    <!--Content Descriptions-->
-    <string name="close_icon_content">ಮುಚ್ಚಿ ಐಕಾನ್</string>
-    <string name="locale_config_error_txt">ಭಾಷಾ ಸಂರಚನೆ ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ. ಡಿಫಾಲ್ಟ್ ಭಾಷೆ ಬಳಸಲಾಗುತ್ತಿದೆ.</string>
-
-    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-
-    <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_icon_content">ಉಳಿಸಲಾದ ಸ್ಥಳಗಳು</string>
-
 </resources>

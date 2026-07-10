@@ -12,7 +12,8 @@ private data class CountryConfig(
 /** Reads the bundled country/language config, identically on Android and iOS via Compose Resources. */
 object LanguageCatalog {
     suspend fun getAvailableLanguages(fileName: String = "countryConfig.json"): List<String> =
-        Json.decodeFromString<CountryConfig>(
-            Res.readBytes("files/$fileName").decodeToString(),
-        ).languages
+        Json
+            .decodeFromString<CountryConfig>(
+                Res.readBytes("files/$fileName").decodeToString(),
+            ).languages
 }

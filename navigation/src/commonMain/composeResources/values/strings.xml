@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_nested_nav">Home</string>
+    <string name="saved_locations_nested_nav">Saved locations</string>
+    <string name="profile_nested_nav">Profile</string>
+    <string name="saved_locations_icon_content">Saved locations</string>
+    <string name="locale_config_error_txt">Failed to load language configuration. Using default language.</string>
+</resources>

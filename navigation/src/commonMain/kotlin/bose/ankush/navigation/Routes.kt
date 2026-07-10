@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.navigation
+package bose.ankush.navigation
 
 import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable

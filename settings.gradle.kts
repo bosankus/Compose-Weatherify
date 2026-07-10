@@ -31,6 +31,7 @@ include(
     ":feature:finder",
     ":feature:home",
     ":feature:settings",
+    ":navigation",
     ":network",
     ":storage"
 )

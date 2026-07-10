@@ -1,30 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Nested NavGraph group name-->
-    <string name="home_nested_nav">home_nested_nav</string>
-    <string name="profile_nested_nav">profile_nested_nav</string>
-
-    <!--General Texts-->
     <string name="app_name">וות\'ריפי</string>
 
-    <!--Error Texts-->
     <string name="unauthorised_access_txt">גישה לא מורשית!</string>
     <string name="city_error_txt">העיר לא נמצאה!</string>
     <string name="server_error_txt">מתמודד עם בעיה בשרת</string>
     <string name="network_unavailable_txt">האם תוכל לבדוק מחדש את חיבור האינטרנט!</string>
     <string name="network_timeout_txt">פג הזמן הקצוב לבקשה. אנא נסה שוב מאוחר יותר.</string>
     <string name="general_error_txt">אופס!..משהו השתבש.</string>
-
-    <!--Settings Screen-->
-
-    <!--Content Descriptions-->
-    <string name="close_icon_content">סמל סגירה</string>
-    <string name="locale_config_error_txt">כישלון בטעינת תצורת שפה. שימוש בשפה ברירת מחדל.</string>
-
-    <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-
-    <!--Saved Locations (Premium Feature)-->
-    <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>
-    <string name="saved_locations_icon_content">מיקומים שמורים</string>
-
 </resources>
