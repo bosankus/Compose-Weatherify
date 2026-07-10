@@ -5,15 +5,21 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import bose.ankush.storage.EncryptedTokenStorageImpl
 import bose.ankush.storage.LocationPreferencesStorageImpl
+import bose.ankush.storage.PremiumStorageImpl
 import bose.ankush.storage.WeatherStorageImpl
 import bose.ankush.storage.api.LocationPreferencesStorage
+import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.storage.api.TokenStorage
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.common.LOCATION_PREFERENCES_FILE_NAME
+import bose.ankush.storage.common.PREMIUM_PREFERENCES_FILE_NAME
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import platform.Foundation.NSHomeDirectory
+
+private val premiumPreferencesQualifier = named("premiumPreferencesDataStore")
 
 actual val storageDomainModule: Module =
     module {
@@ -25,4 +31,10 @@ actual val storageDomainModule: Module =
             )
         }
         single<LocationPreferencesStorage> { LocationPreferencesStorageImpl(get()) }
+        single<DataStore<Preferences>>(premiumPreferencesQualifier) {
+            PreferenceDataStoreFactory.createWithPath(
+                produceFile = { (NSHomeDirectory() + "/" + PREMIUM_PREFERENCES_FILE_NAME).toPath() },
+            )
+        }
+        single<PremiumStorage> { PremiumStorageImpl(get(premiumPreferencesQualifier)) }
     }

@@ -6,11 +6,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import bose.ankush.storage.EncryptedTokenStorageImpl
 import bose.ankush.storage.LocationPreferencesStorageImpl
+import bose.ankush.storage.PremiumStorageImpl
 import bose.ankush.storage.WeatherStorageImpl
 import bose.ankush.storage.api.LocationPreferencesStorage
+import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.storage.api.TokenStorage
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.common.LOCATION_PREFERENCES_FILE_NAME
+import bose.ankush.storage.common.PREMIUM_PREFERENCES_FILE_NAME
 import bose.ankush.storage.common.WEATHER_DATABASE_NAME
 import bose.ankush.storage.room.JsonParser
 import bose.ankush.storage.room.Parser
@@ -21,7 +24,10 @@ import com.google.gson.Gson
 import okio.Path.Companion.toPath
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.Module
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
+
+private val premiumPreferencesQualifier = named("premiumPreferencesDataStore")
 
 actual val storageDomainModule: Module =
     module {
@@ -55,4 +61,17 @@ actual val storageDomainModule: Module =
             )
         }
         single<LocationPreferencesStorage> { LocationPreferencesStorageImpl(get()) }
+        single<DataStore<Preferences>>(premiumPreferencesQualifier) {
+            PreferenceDataStoreFactory.createWithPath(
+                produceFile = {
+                    androidContext()
+                        .filesDir
+                        .resolve("datastore")
+                        .resolve(PREMIUM_PREFERENCES_FILE_NAME)
+                        .absolutePath
+                        .toPath()
+                },
+            )
+        }
+        single<PremiumStorage> { PremiumStorageImpl(get(premiumPreferencesQualifier)) }
     }

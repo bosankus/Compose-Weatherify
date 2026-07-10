@@ -211,7 +211,7 @@ internal fun SettingsScreenContent(
                         title = {
                             Text(
                                 stringResource(Res.string.profile_title),
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             )
                         },
                         navigationIcon = {
@@ -374,10 +374,10 @@ internal fun SettingsScreenContent(
 
 private val enterFromBottom =
     fadeIn(animationSpec = tween(durationMillis = 500)) +
-            slideInVertically(
-                animationSpec = tween(durationMillis = 500),
-                initialOffsetY = { it / 3 },
-            )
+        slideInVertically(
+            animationSpec = tween(durationMillis = 500),
+            initialOffsetY = { it / 3 },
+        )
 
 internal object SettingsAnimationState {
     var hasPlayedIntroAnimation = false

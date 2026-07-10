@@ -106,7 +106,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // Navigation 3
     implementation(libs.androidx.navigation3.runtime)
@@ -129,27 +128,13 @@ dependencies {
     // Unit Testing
     testImplementation(libs.junit)
     testImplementation(libs.truth)
-    testImplementation(libs.turbine)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.androidx.arch.core.testing)
-    testImplementation(libs.mockito.inline)
-    testImplementation(libs.mockito.kotlin)
-    testImplementation(libs.okhttp.mockwebserver)
     testImplementation(libs.mockk)
-
-    // UI Testing
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.espresso.core)
-    androidTestImplementation(libs.androidx.test.espresso.contrib)
-    androidTestImplementation(libs.google.dagger.hilt.android.testing)
-    kspAndroidTest(libs.google.dagger.hilt.android.compiler)
 
     // Networking
     implementation(libs.gson)
 
     // Firebase - BOM
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.config)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.perf)
     implementation(libs.firebase.messaging)
@@ -163,7 +148,6 @@ dependencies {
 
     // Dependency Injection
     implementation(libs.google.dagger.hilt.android)
-    implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.google.dagger.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
 
@@ -178,7 +162,6 @@ dependencies {
 
     // Koin — bridges the feature-payment Koin module with Hilt-managed singletons
     implementation(libs.koin.android)
-    implementation(libs.koin.androidx.compose)
     // Koin Compose Multiplatform — needed to host KoinContext for feature modules
     // (e.g. :feature:finder) that resolve ViewModels via koinViewModel() in commonMain.
     implementation(libs.koin.compose)

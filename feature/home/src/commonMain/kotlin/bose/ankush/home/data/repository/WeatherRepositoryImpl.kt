@@ -9,6 +9,7 @@ import bose.ankush.home.domain.repository.WeatherRepository
 import bose.ankush.storage.api.WeatherStorage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -18,7 +19,7 @@ import bose.ankush.network.repository.WeatherRepository as NetworkWeatherReposit
 internal class WeatherRepositoryImpl(
     private val networkRepository: NetworkWeatherRepository,
     private val weatherStorage: WeatherStorage,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : WeatherRepository {
     override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality> =
         weatherStorage.getAirQualityReport(coordinates).map { data ->
@@ -46,7 +47,8 @@ internal class WeatherRepositoryImpl(
             if (isDataStale) {
                 networkRepository.refreshWeatherData(coordinates).fold(
                     onSuccess = {
-                        val weatherStorageData = NetworkToStorageMapper.mapWeatherToStorageEntity(it)
+                        val weatherStorageData =
+                            NetworkToStorageMapper.mapWeatherToStorageEntity(it)
                         val airQualityStorageData =
                             NetworkToStorageMapper.mapAirQualityToStorageEntity(it.data?.airQuality)
                         weatherStorage.saveWeatherData(weatherStorageData, airQualityStorageData)

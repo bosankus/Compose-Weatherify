@@ -13,10 +13,6 @@ import kotlin.math.roundToInt
 object Extension {
     fun Double.toCelsius() = (this - KELVIN_OFFSET).roundToInt().toString()
 
-    fun String.getIconUrl(size: String = "@2x.png") = "$WEATHER_IMG_URL$this$size"
-
-    fun String.formatTextCapitalization() = replaceFirstChar { it.uppercaseChar() }
-
     fun isDeviceSDKAndroid13OrAbove() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
 
     fun Context.openAppSystemSettings() =
@@ -84,13 +80,4 @@ object Extension {
             this,
             ACCESS_NOTIFICATION,
         ) == PackageManager.PERMISSION_GRANTED
-
-    fun String.wrapText(): String {
-        val words = this.split(" ")
-        return if (words.size == 2) {
-            "${words[0]}\n${words[1]}"
-        } else {
-            this
-        }
-    }
 }

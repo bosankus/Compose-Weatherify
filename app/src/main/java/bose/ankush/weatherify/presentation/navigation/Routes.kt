@@ -7,9 +7,6 @@ import kotlinx.serialization.Serializable
 data object HomeRoute : NavKey
 
 @Serializable
-data object CitiesListRoute : NavKey
-
-@Serializable
 data object SavedLocationsRoute : NavKey
 
 @Serializable

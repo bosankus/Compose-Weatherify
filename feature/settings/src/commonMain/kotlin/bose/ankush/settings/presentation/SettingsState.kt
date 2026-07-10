@@ -10,4 +10,3 @@ internal data class SettingsState(
     val currentWebUrl: String? = null,
     val serviceSubscription: ServiceSubscriptionState = ServiceSubscriptionState(),
 )
-

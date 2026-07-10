@@ -17,6 +17,7 @@
     <string name="gps_disabled_error_txt">Location services are turned off. Enable GPS to get your local weather.</string>
     <string name="enable_gps_btn_txt">Enable GPS</string>
     <string name="default_coordinates_txt">Location coordinates not yet updated.</string>
+    <string name="location_permission_denied_txt">Location permission not granted. Enable it to get your local weather.</string>
     <string name="weather_icon_content">weather condition</string>
     <string name="error_icon_content">Error icon</string>
     <string name="notification_permission_message">Enable notifications for weather alerts</string>

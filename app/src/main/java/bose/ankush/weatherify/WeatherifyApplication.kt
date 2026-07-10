@@ -1,7 +1,5 @@
 package bose.ankush.weatherify
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import bose.ankush.auth.di.authDomainModule
 import bose.ankush.auth.di.authViewModelModule
 import bose.ankush.finder.di.finderDomainModule
@@ -14,8 +12,6 @@ import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
 import bose.ankush.settings.di.settingsViewModelModule
 import bose.ankush.storage.di.storageDomainModule
-import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
-import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
 import bose.ankush.weatherify.di.appPaymentKoinModule
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
@@ -31,7 +27,6 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
         initKoin()
         enableTimber()
         initializeFirebase()
-        createNotificationChannel()
         subscribeToTopics()
     }
 
@@ -99,20 +94,4 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
         }
     }
 
-    private fun createNotificationChannel() {
-        val channel =
-            NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                NOTIFICATION_NAME,
-                NotificationManager.IMPORTANCE_HIGH,
-            ).apply {
-                description = "Channel for weather alerts and updates"
-                enableVibration(true)
-            }
-
-        val notificationManager =
-            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-        Timber.d("Notification channel created: $NOTIFICATION_CHANNEL_ID")
-    }
 }
