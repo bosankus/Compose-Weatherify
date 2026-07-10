@@ -8,7 +8,7 @@
 
 # Weatherify
 
-A production-grade Android weather app built with **Jetpack Compose**, **Clean Architecture** (MVI in the home feature), and a **Kotlin Multiplatform** module structure. It shows real-time weather, air quality data, saved locations, and sunrise/sunset animations — with multi-language support and an in-app premium upgrade flow.
+A production-grade Android weather app built with **Jetpack Compose**, **Clean Architecture** (MVI in the home and settings features), and a **Kotlin Multiplatform** module structure. It shows real-time weather, air quality data, saved locations, and sunrise/sunset animations — with multi-language support and an in-app premium upgrade flow.
 
 [![Download APK](https://img.shields.io/badge/Download%20Latest%20APK-22272E.svg?style=for-the-badge&logo=android&logoColor=47954A)](https://github.com/bosankus/Compose-Weatherify/releases/latest)
 
@@ -38,15 +38,19 @@ The project is split into clearly bounded Gradle modules. Everything except `:ap
 ```mermaid
 graph TD
     subgraph APP["🟦 :app  (Android, Hilt)"]
-        A["WeatherifyApplication\nMainActivity\nAppNavigation - Nav3\nAppPermissionViewModel / SettingsViewModel"]
+        A["WeatherifyApplication\nMainActivity\nAppNavigation - Nav3\nAppPermissionViewModel"]
     end
 
     subgraph HOME["🟨 :feature:home  (KMP, Koin, MVI)"]
         I["HomeFeatureRoute / HomeViewModel\nHomeReducer / HomeIntent / HomeAction / HomeEffect\nGetWeatherReport / GetAirQuality / RefreshWeatherReport\nWeatherRepositoryImpl / LocationClient / HomeGeocoder"]
     end
 
+    subgraph SETTINGS["⚙️ :feature:settings  (KMP, Koin, MVI)"]
+        J["SettingsFeatureRoute / SettingsViewModel (internal)\nSettingsReducer / SettingsIntent / SettingsAction\nOwn composeResources strings (8 locales)"]
+    end
+
     subgraph COMMON["🟩 :common-ui  (KMP, Koin)"]
-        B["SettingsScreen\nInAppWebView\nSunrise/Sunset Canvas Animation\nPermissionDialog\nDateFormatter"]
+        B["InAppWebView\nServiceSubscriptionBottomSheet\nSunrise/Sunset Canvas Animation\nPermissionDialog\nDateFormatter"]
     end
 
     subgraph AUTH["🟦 :feature:auth  (KMP, Koin)"]
@@ -74,6 +78,7 @@ graph TD
     end
 
     APP --> HOME
+    APP --> SETTINGS
     APP --> COMMON
     APP --> AUTH
     APP --> PAYMENT
@@ -81,21 +86,24 @@ graph TD
     APP --> STORAGE
     APP --> LANGUAGE
     APP --> FINDER
+    SETTINGS --> COMMON
+    SETTINGS --> PAYMENT
+    SETTINGS --> NETWORK
 ```
 
-> **DI note:** `:app` uses Hilt for its own ViewModels (`SettingsViewModel`, `AppPermissionViewModel`). Every KMP module (`:feature:home`, `:common-ui`, `:feature:*`, `:network`, `:storage`) uses Koin internally. `app/.../di/PaymentKoinModule.kt` bridges the two graphs so Hilt-managed code can resolve Koin-provided dependencies (e.g. `PaymentViewModel`).
+> **DI note:** `:app` uses Hilt only for `AppPermissionViewModel`. Every KMP module (`:feature:home`, `:feature:settings`, `:common-ui`, `:feature:*`, `:network`, `:storage`) uses Koin internally, registered in `WeatherifyApplication.initKoin()`. `app/.../di/PaymentKoinModule.kt` bridges the two graphs so Hilt-managed code can resolve Koin-provided dependencies (e.g. `PaymentViewModel`).
 
 ---
 
 ## Clean Architecture
 
-Each feature is structured across three layers, with dependency arrows pointing **inward** — the domain layer has zero Android or framework dependencies. `:feature:home`, `:feature:finder`, and `:feature:payment` follow this strictly with a full `domain/` + `data/` split (repository interfaces vs. impls, use cases, mappers). `:feature:home`'s presentation layer additionally follows an **MVI** pattern (`HomeIntent` → `HomeReducer` → `HomeState`/`HomeEffect`) rather than plain imperative state updates. `:feature:auth` is lighter-weight: it only defines a `domain/DeviceInfoProvider` interface with a platform-specific implementation wired directly through Koin — there is no separate `data/` package for auth.
+Each feature is structured across three layers, with dependency arrows pointing **inward** — the domain layer has zero Android or framework dependencies. `:feature:home`, `:feature:finder`, and `:feature:payment` follow this strictly with a full `domain/` + `data/` split (repository interfaces vs. impls, use cases, mappers). `:feature:home` and `:feature:settings` additionally follow an **MVI** pattern in their presentation layer (`Intent` → `Reducer` → `State`/`Effect`) rather than plain imperative state updates; in both, the `ViewModel`/`Reducer`/`Action`/`State` types are `internal` and only a single public `*FeatureRoute` composable is exposed. `:feature:auth` is lighter-weight: it only defines a `domain/DeviceInfoProvider` interface with a platform-specific implementation wired directly through Koin — there is no separate `data/` package for auth.
 
 ```mermaid
 graph LR
     subgraph Presentation["🎨 Presentation Layer"]
-        UI["Compose Screens\n(HomeFeatureRoute, SavedLocationsScreen\nSettingsScreen, LoginScreen, LanguageScreen)"]
-        VM["ViewModels\n(HomeViewModel [MVI], PaymentViewModel\nAuthViewModel, SettingsViewModel)"]
+        UI["Compose Screens\n(HomeFeatureRoute, SavedLocationsScreen\nSettingsFeatureRoute, LoginScreen, LanguageScreen)"]
+        VM["ViewModels (internal)\n(HomeViewModel [MVI], PaymentViewModel\nAuthViewModel, SettingsViewModel [MVI])"]
         UI -- "UI Events / Intents" --> VM
         VM -- "UI State (StateFlow)" --> UI
     end
@@ -135,15 +143,15 @@ The app runs on **Jetpack Navigation 3** (`androidx.navigation3`), not the older
 ```mermaid
 graph TD
     Home["HomeRoute\n(HomeFeatureRoute — :feature:home)"] -->|bottom bar| Saved["SavedLocationsRoute\n(SavedLocationsFinderRoute — :feature:finder)"]
-    Home -->|bottom bar| Settings["SettingsRoute\n(SettingsScreen — :common-ui)"]
+    Home -->|bottom bar| Settings["SettingsRoute\n(SettingsFeatureRoute — :feature:settings)"]
     Settings -->|language row, API 33+| Language["LanguageRoute(languages)\n(LanguageScreen — :feature:language)"]
     Settings -.->|API < 33| SystemSettings["System App Locale Settings"]
     Settings -->|premium bottom sheet| Payment["Razorpay checkout\n(PaymentViewModel, in-place sheet — no route)"]
 ```
 
 Notes:
-- There is no standalone `ProfileScreen` or `PaymentScreen` route — profile info and the premium upgrade flow are both embedded inside `SettingsScreen` (profile header + a `PremiumBottomSheet`).
-- `InAppWebView` is a composable (not a route) shown conditionally inside `SettingsScreen` for Terms/Privacy links.
+- There is no standalone `ProfileScreen` or `PaymentScreen` route — profile info and the premium upgrade flow are both embedded inside `SettingsFeatureRoute` (profile header + a premium bottom sheet), and `SettingsViewModel` is `internal` to `:feature:settings` (Koin-resolved), not exposed to `:app`.
+- `InAppWebView` (`:common-ui`) is a composable (not a route) shown conditionally inside `SettingsFeatureRoute` for Terms/Privacy links.
 - On Android 13+ (`isDeviceSDKAndroid13OrAbove()`), language selection pushes `LanguageRoute`; below API 33 it deep-links to the system per-app language settings instead.
 - `Routes.kt` still declares a `CitiesListRoute`, but it is not wired into the `entryProvider` — the quick city switcher was superseded by `:feature:finder`'s saved-locations flow.
 
@@ -196,8 +204,8 @@ OpenWeatherMap API
 
 | Library | Version | Purpose |
 |---|---|---|
-| Hilt | `2.59.2` | Dependency injection — `:app` module only |
-| Koin | `4.2.2` | DI in all KMP modules (`:feature:home`, `:common-ui`, `:feature:*`, `:network`, `:storage`) |
+| Hilt | `2.59.2` | Dependency injection — `:app` module only (`AppPermissionViewModel`) |
+| Koin | `4.2.2` | DI in all KMP modules (`:feature:home`, `:feature:settings`, `:common-ui`, `:feature:*`, `:network`, `:storage`) |
 | Kotlin Coroutines | `1.11.0` | Async & structured concurrency |
 | StateFlow / Flow | — | Reactive UI state management |
 
@@ -258,14 +266,14 @@ MainActivity (Hilt entry point)
 └── AppNavigation (Nav3 NavDisplay + entryProvider)
     ├── HomeFeatureRoute     — current weather + AQI card, MVI-driven               (:feature:home)
     ├── SavedLocationsFinderRoute — manage saved locations & search new places      (:feature:finder)
-    ├── SettingsScreen       — profile header, language row, notification toggle,   (:common-ui)
-    │                          premium bottom sheet, and in-app Terms/Privacy web view
+    ├── SettingsFeatureRoute — profile header, language row, notification toggle,   (:feature:settings)
+    │                          premium bottom sheet, and in-app Terms/Privacy web view; MVI-driven
     │   └── InAppWebView     — in-app browser composable, not a separate route      (:common-ui)
     ├── LanguageScreen       — per-app language picker (Android 13+ only)           (:feature:language)
     └── LoginScreen          — authentication entry point                          (:feature:auth)
 ```
 
-> There is no standalone `ProfileScreen` or `PaymentScreen` — both live inside `SettingsScreen`.
+> There is no standalone `ProfileScreen` or `PaymentScreen` — both live inside `SettingsFeatureRoute`.
 
 ---
 
@@ -369,7 +377,7 @@ CI builds the project and runs Spotless/Detekt checks on every PR (see [CI/CD](#
 
 These are the planned improvements currently in progress or on the roadmap:
 
-- **iOS target** — the KMP foundation is in place across all non-`:app` modules (`commonMain`/`androidMain`/`iosMain`, with `:feature:home`/`:network`/`:storage` also building `iosX64`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
+- **iOS target** — the KMP foundation is in place across all non-`:app` modules (`commonMain`/`androidMain`/`iosMain`, with `:network`/`:storage` also building `iosX64`, and `:feature:home`/`:feature:settings` building `iosArm64`/`iosSimulatorArm64`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
 - **Real test coverage** — close the gap described in [Testing Status](#testing-status): add `androidTest` instrumentation tests, exercise the already-declared Mockk/Turbine/MockWebServer dependencies, and populate the empty `commonTest`/`iosTest` source sets in `:storage`/`:network`.
 - **Offline-first strategy** — full read-from-cache-then-network flow using Room as the single source of truth, with explicit stale-data indicators in the UI.
 - **Widget support** — a Glance-based home screen widget showing current temperature and conditions.

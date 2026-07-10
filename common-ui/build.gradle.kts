@@ -39,15 +39,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":feature:payment"))
-                implementation(project(":network"))
                 implementation(libs.compose.multiplatform.runtime)
                 implementation(libs.compose.multiplatform.foundation)
                 implementation(libs.compose.multiplatform.material3)
                 implementation(libs.compose.multiplatform.ui)
                 implementation(libs.compose.multiplatform.materialIconsExtended)
-                implementation(libs.kotlinx.datetime)
-                implementation(libs.androidx.lifecycle.viewmodel.kmp)
             }
         }
 

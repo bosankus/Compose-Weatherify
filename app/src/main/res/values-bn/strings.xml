@@ -16,35 +16,13 @@
     <string name="general_error_txt">কিছু একটা ভুল হয়েছে।</string>
 
     <!--Settings Screen-->
-    <string name="profile_title">প্রোফাইল</string>
-    <string name="logout_btn_txt">লগ আউট</string>
-    <string name="logout_confirmation_txt">আপনি কি নিশ্চিতভাবে লগ আউট করতে চান?</string>
-    <string name="confirm_btn_txt">নিশ্চিত করুন</string>
-    <string name="cancel_btn_txt">বাতিল করুন</string>
     <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-    <string name="premium_get_txt">প্রিমিয়াম পান</string>
-    <string name="premium_processing_txt">প্রক্রিয়া চলছে…</string>
-    <string name="premium_processing_desc_txt">আপনার প্রিমিয়াম সাবস্ক্রিপশন সক্রিয় করার সময় অনুগ্রহ করে অপেক্ষা করুন।</string>
-    <string name="premium_unlock_desc_txt">সমস্ত ফিচার আনলক করুন এবং বিজ্ঞাপন-মুক্ত অভিজ্ঞতা উপভোগ করুন।</string>
-    <string name="premium_upgrade_btn_txt">এখনই আপগ্রেড করুন</string>
-    <string name="premium_active_txt">আপনি একজন প্রিমিয়াম ব্যবহারকারী</string>
-    <string name="premium_expires_txt">%1$s-এ মেয়াদ শেষ</string>
-    <string name="premium_active_status_txt">সক্রিয়</string>
-    <string name="settings_notifications_txt">বিজ্ঞপ্তি</string>
-    <string name="settings_language_txt">ভাষা</string>
-    <string name="legal_privacy_policy_txt">গোপনীয়তা নীতি</string>
-    <string name="legal_terms_of_use_txt">ব্যবহারের শর্তাবলী</string>
-    <string name="legal_app_version_txt">অ্যাপ সংস্করণ</string>
 
     <!--Content Descriptions-->
     <string name="close_icon_content">বন্ধ করুন আইকন</string>
-    <string name="back_button_content">পেছনে বাটন</string>
-    <string name="arrow_right_icon_content">পরবর্তী স্ক্রিনে নেভিগেট করুন</string>
     <string name="locale_config_error_txt">ভাষা কনফিগারেশন লোড করতে ব্যর্থ হয়েছে। ডিফল্ট ভাষা ব্যবহার করা হচ্ছে।</string>
 
     <!-- Premium Subscription Additional Strings -->
-    <string name="premium_activated_title_txt">প্রিমিয়াম সক্রিয়</string>
-    <string name="premium_activated_msg_txt">আপনার প্রিমিয়াম সাবস্ক্রিপশন এখন সক্রিয়!</string>
 
     <!--Saved Locations (Premium Feature)-->
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>

@@ -1,4 +1,4 @@
-package bose.ankush.commonui.components
+package bose.ankush.settings.presentation
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -40,14 +40,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import bose.ankush.commonui.viewmodel.ServiceSubscriptionUiState
+import bose.ankush.commonui.components.ShimmerBottomSheetSkeleton
 import bose.ankush.network.model.Feature
 import bose.ankush.network.model.PricingTier
 import bose.ankush.network.model.Service
+import bose.ankush.settings.generated.resources.Res
+import bose.ankush.settings.generated.resources.cancel_btn_txt
+import bose.ankush.settings.generated.resources.close_button_content
+import bose.ankush.settings.generated.resources.features_txt
+import bose.ankush.settings.generated.resources.more_features_txt
+import bose.ankush.settings.generated.resources.oops_txt
+import bose.ankush.settings.generated.resources.plan_duration_txt
+import bose.ankush.settings.generated.resources.retry_btn_txt
+import bose.ankush.settings.generated.resources.select_duration_txt
+import bose.ankush.settings.generated.resources.select_plan_txt
+import bose.ankush.settings.generated.resources.subscribe_now_btn_txt
+import bose.ankush.settings.generated.resources.unknown_error_txt
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun ServiceSubscriptionBottomSheet(
-    uiState: ServiceSubscriptionUiState,
+internal fun ServiceSubscriptionBottomSheet(
+    uiState: ServiceSubscriptionState,
     loadService: () -> Unit,
     onServiceSelected: (Service) -> Unit,
     onTierSelected: (PricingTier) -> Unit,
@@ -85,7 +98,7 @@ fun ServiceSubscriptionBottomSheet(
             exit = fadeOut(),
         ) {
             ErrorContent(
-                error = uiState.error ?: "Unknown error",
+                error = uiState.error ?: stringResource(Res.string.unknown_error_txt),
                 onDismiss = onDismiss,
                 onRetry = loadService,
             )
@@ -151,7 +164,7 @@ fun ServiceSubscriptionBottomSheet(
                         shape = RoundedCornerShape(12.dp),
                     ) {
                         Text(
-                            text = "Subscribe Now",
+                            text = stringResource(Res.string.subscribe_now_btn_txt),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White,
@@ -175,7 +188,7 @@ private fun CloseButton(onClose: () -> Unit) {
         IconButton(onClick = onClose, modifier = Modifier.size(40.dp)) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Close",
+                contentDescription = stringResource(Res.string.close_button_content),
                 tint = MaterialTheme.colorScheme.onSurface,
             )
         }
@@ -211,7 +224,7 @@ private fun PlanHeader(
         )
 
         Text(
-            text = "for ${tier.getDisplayDuration()}",
+            text = stringResource(Res.string.plan_duration_txt, tier.getDisplayDuration()),
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -233,7 +246,7 @@ private fun ServiceSelector(
                 .padding(horizontal = 24.dp),
     ) {
         Text(
-            text = "Select Plan",
+            text = stringResource(Res.string.select_plan_txt),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -316,7 +329,7 @@ private fun FeaturesSection(features: List<Feature>) {
                 .padding(horizontal = 24.dp),
     ) {
         Text(
-            text = "Features",
+            text = stringResource(Res.string.features_txt),
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -354,7 +367,7 @@ private fun FeaturesSection(features: List<Feature>) {
 
         if (features.size > 8) {
             Text(
-                text = "+ ${features.size - 8} more features",
+                text = stringResource(Res.string.more_features_txt, features.size - 8),
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
@@ -379,7 +392,7 @@ private fun TierSelector(
                 .padding(horizontal = 24.dp),
     ) {
         Text(
-            text = "Select Duration",
+            text = stringResource(Res.string.select_duration_txt),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -465,7 +478,7 @@ private fun ErrorContent(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            text = "Oops!",
+            text = stringResource(Res.string.oops_txt),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.error,
@@ -494,11 +507,11 @@ private fun ErrorContent(
                 ),
             shape = RoundedCornerShape(8.dp),
         ) {
-            Text("Retry")
+            Text(stringResource(Res.string.retry_btn_txt))
         }
 
         Text(
-            text = "Cancel",
+            text = stringResource(Res.string.cancel_btn_txt),
             fontSize = 14.sp,
             color = MaterialTheme.colorScheme.primary,
             modifier =

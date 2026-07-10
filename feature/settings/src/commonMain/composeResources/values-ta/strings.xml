@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_title">சுயவிவரம்</string>
+    <string name="logout_btn_txt">வெளியேறு</string>
+    <string name="logout_confirmation_txt">நீங்கள் நிச்சயமாக வெளியேற விரும்புகிறீர்களா?</string>
+    <string name="confirm_btn_txt">உறுதிப்படுத்து</string>
+    <string name="cancel_btn_txt">ரத்து செய்</string>
+    <string name="settings_notifications_txt">அறிவிப்புகள்</string>
+    <string name="settings_language_txt">மொழி</string>
+    <string name="legal_privacy_policy_txt">தனியுரிமைக் கொள்கை</string>
+    <string name="legal_terms_of_use_txt">பயன்பாட்டு விதிமுறைகள்</string>
+    <string name="legal_app_version_txt">ஆப் பதிப்பு</string>
+    <string name="back_button_content">பின்னால் பொத்தான்</string>
+    <string name="arrow_right_icon_content">அடுத்த திரைக்கு செல்லவும்</string>
+    <string name="premium_get_txt">பிரீமியம் பெறுங்கள்</string>
+    <string name="premium_processing_txt">செயல்பாட்டில்…</string>
+    <string name="premium_processing_desc_txt">உங்கள் பிரீமியம் சந்தாவை செயல்படுத்தும் போது தயவு செய்து காத்திருங்கள்.</string>
+    <string name="premium_unlock_desc_txt">அனைத்து বৈশিষ্ট্যগুলு திறந்து விளம்பரம் இல்லாத அভিজ্ঞতা ভொகியுங்கள்.</string>
+    <string name="premium_upgrade_btn_txt">இப்போது அப்கிரேட் செய்யுங்கள்</string>
+    <string name="premium_active_txt">நீங்கள் ஒரு பிரீமியம் பயனர்</string>
+    <string name="premium_expires_txt">%1$s இல் முடிவடையும்</string>
+    <string name="premium_active_status_txt">செயலில்</string>
+    <string name="premium_activated_title_txt">பிரீமியம் செயல்படுத்தப்பட்டது</string>
+    <string name="premium_activated_msg_txt">உங்கள் பிரீமியம் சந்தா இப்போது செயலில் உள்ளது!</string>
+    <string name="premium_icon_content_desc">பிரீமியம் சந்தா ஐகான்</string>
+    <string name="close_button_content">மூடு</string>
+    <string name="plan_duration_txt">%1$s காலத்திற்கு</string>
+    <string name="select_plan_txt">திட்டத்தைத் தேர்ந்தெடுக்கவும்</string>
+    <string name="features_txt">அம்சங்கள்</string>
+    <string name="more_features_txt">+ %1$d கூடுதல் அம்சங்கள்</string>
+    <string name="select_duration_txt">கால அளவைத் தேர்ந்தெடுக்கவும்</string>
+    <string name="subscribe_now_btn_txt">இப்போது குழுசேரவும்</string>
+    <string name="oops_txt">அய்யோ!</string>
+    <string name="retry_btn_txt">மீண்டும் முயற்சிக்கவும்</string>
+    <string name="unknown_error_txt">அறியப்படாத பிழை</string>
+</resources>

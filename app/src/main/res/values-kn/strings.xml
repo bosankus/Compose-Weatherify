@@ -16,34 +16,12 @@
     <string name="general_error_txt">ಅಯ್ಯೋ!.. ಏನೋ ತಪ್ಪಾಗಿದೆ.</string>
 
     <!--Settings Screen-->
-    <string name="profile_title">ಪ್ರೊಫೈಲ್</string>
-    <string name="logout_btn_txt">ಲಾಗ್ ಔಟ್</string>
-    <string name="logout_confirmation_txt">ನೀವು ಖಚಿತವಾಗಿ ಲಾಗ್ ಔಟ್ ಮಾಡಲು ಬಯಸುವಿರಾ?</string>
-    <string name="confirm_btn_txt">ದೃಢೀಕರಿಸಿ</string>
-    <string name="cancel_btn_txt">ರದ್ದುಮಾಡಿ</string>
-    <string name="settings_notifications_txt">ಅಧಿಸೂಚನೆಗಳು</string>
-    <string name="settings_language_txt">ಭಾಷೆ</string>
-    <string name="legal_privacy_policy_txt">ಗೋಪ್ಯತಾ ನೀತಿ</string>
-    <string name="legal_terms_of_use_txt">ಬಳಕೆ ನಿಯಮಗಳು</string>
-    <string name="legal_app_version_txt">ಆ್ಯಪ್ ಆವೃತ್ತಿ</string>
 
     <!--Content Descriptions-->
     <string name="close_icon_content">ಮುಚ್ಚಿ ಐಕಾನ್</string>
-    <string name="back_button_content">ಹಿಂದೆ ಬಟನ್</string>
-    <string name="arrow_right_icon_content">ಮುಂದಿನ ಪರದೆಗೆ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ</string>
     <string name="locale_config_error_txt">ಭಾಷಾ ಸಂರಚನೆ ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ. ಡಿಫಾಲ್ಟ್ ಭಾಷೆ ಬಳಸಲಾಗುತ್ತಿದೆ.</string>
 
     <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-    <string name="premium_get_txt">ಪ್ರೀಮಿಯಂ ಪಡೆಯಿರಿ</string>
-    <string name="premium_processing_txt">ಸಂಸ್ಕರಣೆಯಲ್ಲಿ…</string>
-    <string name="premium_processing_desc_txt">ಆಪ್ತ ಪ್ರೀಮಿಯಂ ಗ್ರಾಹಕತ್ವವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವಾಗ ದಯವಿಟ್ಟು ತಡೆದುಕೊಳ್ಳಿ.</string>
-    <string name="premium_unlock_desc_txt">ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ ಮತ್ತು ವಿಜ್ಞಾಪನ-ಮುಕ್ತ ಅನುಭವವನ್ನು ಆನಂದಿಸಿ.</string>
-    <string name="premium_upgrade_btn_txt">ಈಗ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ</string>
-    <string name="premium_active_txt">ನೀವು ಪ್ರೀಮಿಯಂ ಬಳಕೆದಾರ</string>
-    <string name="premium_expires_txt">%1$s ಗಾಗಿ ಮುಕ್ತಾಯ</string>
-    <string name="premium_active_status_txt">ಸಕ್ರಿಯ</string>
-    <string name="premium_activated_title_txt">ಪ್ರೀಮಿಯಂ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ</string>
-    <string name="premium_activated_msg_txt">ನಿಮ್ಮ ಪ್ರೀಮಿಯಂ ಗ್ರಾಹಕತ್ವ ಈಗ ಸಕ್ರಿಯವಾಗಿದೆ!</string>
 
     <!--Saved Locations (Premium Feature)-->
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>

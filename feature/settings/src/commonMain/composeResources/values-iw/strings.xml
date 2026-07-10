@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_title">פרופיל</string>
+    <string name="logout_btn_txt">התנתקות</string>
+    <string name="logout_confirmation_txt">האם אתה בטוח שברצונך להתנתק?</string>
+    <string name="confirm_btn_txt">אישור</string>
+    <string name="cancel_btn_txt">ביטול</string>
+    <string name="settings_notifications_txt">הודעות</string>
+    <string name="settings_language_txt">שפה</string>
+    <string name="legal_privacy_policy_txt">מדיניות פרטיות</string>
+    <string name="legal_terms_of_use_txt">תנאי שימוש</string>
+    <string name="legal_app_version_txt">גרסה אפליקציה</string>
+    <string name="back_button_content">כפתור חזרה</string>
+    <string name="arrow_right_icon_content">נווט למסך הבא</string>
+    <string name="premium_get_txt">קבל פרימיום</string>
+    <string name="premium_processing_txt">בעיבוד…</string>
+    <string name="premium_processing_desc_txt">אנא המתן בזמן שאנו מפעילים את מנוי הפרימיום שלך.</string>
+    <string name="premium_unlock_desc_txt">בטל את נעילת כל התכונות והנהנה מחוויה ללא מודעות.</string>
+    <string name="premium_upgrade_btn_txt">שדרג כעת</string>
+    <string name="premium_active_txt">אתה משתמש פרימיום</string>
+    <string name="premium_expires_txt">פג בתוקף %1$s</string>
+    <string name="premium_active_status_txt">פעיל</string>
+    <string name="premium_activated_title_txt">פרימיום הופעל</string>
+    <string name="premium_activated_msg_txt">מנוי הפרימיום שלך פעיל כעת!</string>
+    <string name="premium_icon_content_desc">סמל מנוי פרימיום</string>
+    <string name="close_button_content">סגור</string>
+    <string name="plan_duration_txt">למשך %1$s</string>
+    <string name="select_plan_txt">בחר תוכנית</string>
+    <string name="features_txt">תכונות</string>
+    <string name="more_features_txt">+ %1$d תכונות נוספות</string>
+    <string name="select_duration_txt">בחר משך זמן</string>
+    <string name="subscribe_now_btn_txt">הירשם עכשיו</string>
+    <string name="oops_txt">אופס!</string>
+    <string name="retry_btn_txt">נסה שוב</string>
+    <string name="unknown_error_txt">שגיאה לא ידועה</string>
+</resources>

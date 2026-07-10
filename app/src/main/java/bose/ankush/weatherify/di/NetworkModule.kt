@@ -3,7 +3,6 @@ package bose.ankush.weatherify.di
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.repository.FeedbackRepository
-import bose.ankush.network.repository.ServiceRepository
 import bose.ankush.network.repository.WeatherRepository
 import bose.ankush.network.util.NetworkConnectivity
 import dagger.Module
@@ -35,8 +34,4 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideFeedbackRepository(): FeedbackRepository = GlobalContext.get().get()
-
-    @Provides
-    @Singleton
-    fun provideServiceRepository(): ServiceRepository = GlobalContext.get().get()
 }

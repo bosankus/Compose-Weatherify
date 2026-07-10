@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalForeignApi::class)
 
-package bose.ankush.commonui.util
+package bose.ankush.settings.util
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSDate

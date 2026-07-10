@@ -19,7 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -29,17 +28,14 @@ import bose.ankush.auth.presentation.AuthIntent
 import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.commonui.components.ToastAnchorState
-import bose.ankush.commonui.settings.SettingsScreen
-import bose.ankush.commonui.settings.SettingsScreenState
-import bose.ankush.commonui.settings.SettingsScreenStrings
 import bose.ankush.finder.presentation.savedlocations.SavedLocationsFinderRoute
 import bose.ankush.home.HomeLocationCoordinator
 import bose.ankush.home.HomeNotificationPermissionResult
 import bose.ankush.home.presentation.HomeFeatureRoute
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.payment.presentation.PaymentIntent
-import bose.ankush.payment.presentation.PaymentStage
 import bose.ankush.payment.presentation.PaymentViewModel
+import bose.ankush.settings.presentation.SettingsFeatureRoute
 import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.R
 import bose.ankush.weatherify.base.LocaleConfigMapper
@@ -50,8 +46,6 @@ import bose.ankush.weatherify.base.common.Extension.isDeviceSDKAndroid13OrAbove
 import bose.ankush.weatherify.base.common.Extension.openAppLocaleSettings
 import bose.ankush.weatherify.base.common.Extension.openAppSystemSettings
 import bose.ankush.weatherify.base.common.Extension.openLocationSettings
-import bose.ankush.weatherify.presentation.SettingsEvent
-import bose.ankush.weatherify.presentation.SettingsViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -208,36 +202,19 @@ private fun SettingsEntry(
     val context = LocalContext.current
     val authState by authViewModel.authState.collectAsState()
     val paymentUiState by paymentViewModel.uiState.collectAsState()
-    val settingsViewModel = hiltViewModel<SettingsViewModel>()
-    val settingsUiState by settingsViewModel.uiState.collectAsState()
-    val serviceSubscriptionUiState by settingsViewModel.serviceSubscriptionViewModel.uiState.collectAsState()
     val isBottomBarVisible = rememberSaveable { mutableStateOf(true) }
-    val previousPaymentStage = remember { mutableStateOf(paymentUiState.stage) }
     val languageList = rememberLanguageList()
 
-    LaunchedEffect(paymentUiState.stage) {
-        if (paymentUiState.stage == PaymentStage.Success && previousPaymentStage.value != PaymentStage.Success) {
-            settingsViewModel.showPremiumActivationToast()
-        }
-        previousPaymentStage.value = paymentUiState.stage
-    }
-
-    SettingsScreen(
+    SettingsFeatureRoute(
         paymentUiState = paymentUiState,
         isLoggingOut = authState is AuthState.LogoutLoading,
         isLoggedOut = authState is AuthState.LoggedOut,
         versionName = BuildConfig.VERSION_NAME,
         shouldShowNotificationItem = isDeviceSDKAndroid13OrAbove() && !context.hasNotificationPermission(),
         languageList = languageList,
-        uiState = settingsUiState,
-        strings = rememberSettingsStrings(),
-        serviceSubscriptionBottomSheetUiState = serviceSubscriptionUiState,
         onLogout = { authViewModel.processIntent(AuthIntent.Logout) },
         onLoggedOutHandled = { authViewModel.processIntent(AuthIntent.Reset) },
         onStartPayment = { paymentViewModel.processIntent(PaymentIntent.StartPayment(it)) },
-        onLoadServices = { settingsViewModel.serviceSubscriptionViewModel.loadServices() },
-        onServiceSelected = { settingsViewModel.serviceSubscriptionViewModel.selectService(it) },
-        onTierSelected = { settingsViewModel.serviceSubscriptionViewModel.selectPricingTier(it) },
         onBackNavAction = navigator::goBack,
         onLanguageNavAction = { list ->
             if (isDeviceSDKAndroid13OrAbove()) {
@@ -251,12 +228,6 @@ private fun SettingsEntry(
                 isNotificationPermissionPermanentlyDeclined -> context.openAppSystemSettings()
                 !context.hasNotificationPermission() -> onRequestNotificationPermission()
             }
-        },
-        onStateChange = {
-            settingsViewModel.handleScreenStateChange(
-                newState = it,
-                current = settingsUiState,
-            )
         },
         onBottomBarVisibilityChange = { isBottomBarVisible.value = it },
         toastAnchorState = toastAnchorState,
@@ -285,67 +256,4 @@ private fun rememberLanguageList(): Array<String> {
         }
     }
     return list
-}
-
-@Composable
-private fun rememberSettingsStrings() =
-    SettingsScreenStrings(
-        profileTitle = stringResource(R.string.profile_title),
-        logout = stringResource(R.string.logout_btn_txt),
-        logoutConfirmation = stringResource(R.string.logout_confirmation_txt),
-        confirm = stringResource(R.string.confirm_btn_txt),
-        cancel = stringResource(R.string.cancel_btn_txt),
-        getPremium = stringResource(R.string.premium_get_txt),
-        processing = stringResource(R.string.premium_processing_txt),
-        processingDescription = stringResource(R.string.premium_processing_desc_txt),
-        unlockDescription = stringResource(R.string.premium_unlock_desc_txt),
-        upgradeNow = stringResource(R.string.premium_upgrade_btn_txt),
-        premiumActive = stringResource(R.string.premium_active_txt),
-        premiumExpires = stringResource(R.string.premium_expires_txt),
-        premiumActiveStatus = stringResource(R.string.premium_active_status_txt),
-        notificationsTitle = stringResource(R.string.settings_notifications_txt),
-        languageTitle = stringResource(R.string.settings_language_txt),
-        privacyPolicy = stringResource(R.string.legal_privacy_policy_txt),
-        termsOfUse = stringResource(R.string.legal_terms_of_use_txt),
-        appVersion = stringResource(R.string.legal_app_version_txt),
-        backButtonDesc = stringResource(R.string.back_button_content),
-        arrowRightDesc = stringResource(R.string.arrow_right_icon_content),
-        premiumActivatedTitle = stringResource(R.string.premium_activated_title_txt),
-        premiumActivatedMessage = stringResource(R.string.premium_activated_msg_txt),
-    )
-
-private fun SettingsViewModel.handleScreenStateChange(
-    newState: SettingsScreenState,
-    current: SettingsScreenState,
-) {
-    when {
-        newState.showPremiumBottomSheet != current.showPremiumBottomSheet -> {
-            if (!newState.showPremiumBottomSheet) serviceSubscriptionViewModel.resetState()
-            handleEvent(
-                if (newState.showPremiumBottomSheet) {
-                    SettingsEvent.OpenPremiumSheet
-                } else {
-                    SettingsEvent.ClosePremiumSheet
-                },
-            )
-        }
-
-        newState.showLogoutDialog != current.showLogoutDialog ->
-            handleEvent(
-                if (newState.showLogoutDialog) {
-                    SettingsEvent.OpenLogoutDialog
-                } else {
-                    SettingsEvent.CloseLogoutDialog
-                },
-            )
-
-        newState.showPremiumActivationToast != current.showPremiumActivationToast ->
-            if (!newState.showPremiumActivationToast) handleEvent(SettingsEvent.DismissPremiumToast)
-
-        newState.currentWebUrl != current.currentWebUrl ->
-            handleEvent(
-                newState.currentWebUrl?.let(SettingsEvent::OpenWebUrl)
-                    ?: SettingsEvent.CloseWebView,
-            )
-    }
 }

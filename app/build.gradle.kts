@@ -98,6 +98,7 @@ dependencies {
     api(project(":feature:payment"))
     api(project(":feature:finder"))
     api(project(":feature:home"))
+    api(project(":feature:settings"))
     api(project(":storage"))
     api(project(":network"))
 

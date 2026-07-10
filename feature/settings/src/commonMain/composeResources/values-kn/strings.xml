@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_title">ಪ್ರೊಫೈಲ್</string>
+    <string name="logout_btn_txt">ಲಾಗ್ ಔಟ್</string>
+    <string name="logout_confirmation_txt">ನೀವು ಖಚಿತವಾಗಿ ಲಾಗ್ ಔಟ್ ಮಾಡಲು ಬಯಸುವಿರಾ?</string>
+    <string name="confirm_btn_txt">ದೃಢೀಕರಿಸಿ</string>
+    <string name="cancel_btn_txt">ರದ್ದುಮಾಡಿ</string>
+    <string name="settings_notifications_txt">ಅಧಿಸೂಚನೆಗಳು</string>
+    <string name="settings_language_txt">ಭಾಷೆ</string>
+    <string name="legal_privacy_policy_txt">ಗೋಪ್ಯತಾ ನೀತಿ</string>
+    <string name="legal_terms_of_use_txt">ಬಳಕೆ ನಿಯಮಗಳು</string>
+    <string name="legal_app_version_txt">ಆ್ಯಪ್ ಆವೃತ್ತಿ</string>
+    <string name="back_button_content">ಹಿಂದೆ ಬಟನ್</string>
+    <string name="arrow_right_icon_content">ಮುಂದಿನ ಪರದೆಗೆ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ</string>
+    <string name="premium_get_txt">ಪ್ರೀಮಿಯಂ ಪಡೆಯಿರಿ</string>
+    <string name="premium_processing_txt">ಸಂಸ್ಕರಣೆಯಲ್ಲಿ…</string>
+    <string name="premium_processing_desc_txt">ಆಪ್ತ ಪ್ರೀಮಿಯಂ ಗ್ರಾಹಕತ್ವವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವಾಗ ದಯವಿಟ್ಟು ತಡೆದುಕೊಳ್ಳಿ.</string>
+    <string name="premium_unlock_desc_txt">ಎಲ್ಲಾ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ ಮತ್ತು ವಿಜ್ಞಾಪನ-ಮುಕ್ತ ಅನುಭವವನ್ನು ಆನಂದಿಸಿ.</string>
+    <string name="premium_upgrade_btn_txt">ಈಗ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ</string>
+    <string name="premium_active_txt">ನೀವು ಪ್ರೀಮಿಯಂ ಬಳಕೆದಾರ</string>
+    <string name="premium_expires_txt">%1$s ಗಾಗಿ ಮುಕ್ತಾಯ</string>
+    <string name="premium_active_status_txt">ಸಕ್ರಿಯ</string>
+    <string name="premium_activated_title_txt">ಪ್ರೀಮಿಯಂ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ</string>
+    <string name="premium_activated_msg_txt">ನಿಮ್ಮ ಪ್ರೀಮಿಯಂ ಗ್ರಾಹಕತ್ವ ಈಗ ಸಕ್ರಿಯವಾಗಿದೆ!</string>
+    <string name="premium_icon_content_desc">ಪ್ರೀಮಿಯಂ ಚಂದಾದಾರಿಕೆ ಐಕಾನ್</string>
+    <string name="close_button_content">ಮುಚ್ಚಿ</string>
+    <string name="plan_duration_txt">%1$s ಗಾಗಿ</string>
+    <string name="select_plan_txt">ಯೋಜನೆ ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="features_txt">ವೈಶಿಷ್ಟ್ಯಗಳು</string>
+    <string name="more_features_txt">+ %1$d ಹೆಚ್ಚಿನ ವೈಶಿಷ್ಟ್ಯಗಳು</string>
+    <string name="select_duration_txt">ಅವಧಿ ಆಯ್ಕೆಮಾಡಿ</string>
+    <string name="subscribe_now_btn_txt">ಈಗ ಚಂದಾದಾರರಾಗಿ</string>
+    <string name="oops_txt">ಅಯ್ಯೋ!</string>
+    <string name="retry_btn_txt">ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
+    <string name="unknown_error_txt">ಅಜ್ಞಾತ ದೋಷ</string>
+</resources>

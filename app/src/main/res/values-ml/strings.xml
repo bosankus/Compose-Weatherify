@@ -16,34 +16,12 @@
     <string name="general_error_txt">അയ്യോ!.. എന്തോ തകരാർ സംഭവിച്ചു.</string>
 
     <!--Settings Screen-->
-    <string name="profile_title">പ്രൊഫൈൽ</string>
-    <string name="logout_btn_txt">ലോഗ് ഔട്ട്</string>
-    <string name="logout_confirmation_txt">നിങ്ങൾക്ക് ഉറപ്പായും ലോഗ് ഔട്ട് ചെയ്യണോ?</string>
-    <string name="confirm_btn_txt">ഉറപ്പാക്കുക</string>
-    <string name="cancel_btn_txt">റദ്ദാക്കുക</string>
-    <string name="settings_notifications_txt">അറിയിപ്പുകൾ</string>
-    <string name="settings_language_txt">ഭാഷ</string>
-    <string name="legal_privacy_policy_txt">സ്വകാര്യതാ നയം</string>
-    <string name="legal_terms_of_use_txt">ഉപയോഗ നിബന്ധനകൾ</string>
-    <string name="legal_app_version_txt">ആപ്പ് പതിപ്പ്</string>
 
     <!--Content Descriptions-->
     <string name="close_icon_content">അടയ്‌ക്കുക ഐക്കൺ</string>
-    <string name="back_button_content">പിറകോട്ട് ബട്ടൺ</string>
-    <string name="arrow_right_icon_content">അടുത്ത സ്‌ക്രീനിലേക്ക് നാവിഗേറ്റ് ചെയ്യുക</string>
     <string name="locale_config_error_txt">ഭാഷ കോൺഫിഗറേഷൻ ലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു. ഡിഫോൾട്ട് ഭാഷ ഉപയോഗിക്കുന്നു.</string>
 
     <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-    <string name="premium_get_txt">പ്രിമിയം നേടുക</string>
-    <string name="premium_processing_txt">പ്രോസെസ്സിംഗ്…</string>
-    <string name="premium_processing_desc_txt">ഞങ്ങൾ നിങ്ങളുടെ പ്രിമിയം സബ്‌സ്ക്രിപ്ഷൻ സജ്ജമാക്കുന്നതിനായി ദയവായി കാത്തിരിക്കുക.</string>
-    <string name="premium_unlock_desc_txt">എല്ലാ ഫീച്ചറുകൾ അൺലോക്ക് ചെയ്യുക കൂടാതെ പരസ്യരഹിത അനുഭവം ആസ്വദിക്കുക.</string>
-    <string name="premium_upgrade_btn_txt">ഇപ്പോൾ അപ്‌ഗ്രേഡ് ചെയ്യുക</string>
-    <string name="premium_active_txt">നിങ്ങൾ പ്രിമിയം ഉപയോക്താവാണ്</string>
-    <string name="premium_expires_txt">%1$s ആയി സ്ഫുടിക്കുന്നു</string>
-    <string name="premium_active_status_txt">സജീവ</string>
-    <string name="premium_activated_title_txt">പ്രിമിയം സജീവമാണ്</string>
-    <string name="premium_activated_msg_txt">നിങ്ങളുടെ പ്രിമിയം സബ്‌സ്ക്രിപ്ഷൻ ഇപ്പോൾ സജീവമാണ്!</string>
 
     <!--Saved Locations (Premium Feature)-->
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>

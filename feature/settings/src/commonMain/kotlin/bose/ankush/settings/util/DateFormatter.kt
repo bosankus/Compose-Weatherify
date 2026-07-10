@@ -1,4 +1,4 @@
-package bose.ankush.commonui.util
+package bose.ankush.settings.util
 
 expect fun formatDate(
     millis: Long,

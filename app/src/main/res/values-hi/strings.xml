@@ -16,35 +16,13 @@
     <string name="general_error_txt">कुछ गलत हो गया है।</string>
 
     <!--Settings Screen-->
-    <string name="profile_title">प्रोफ़ाइल</string>
-    <string name="logout_btn_txt">लॉगआउट</string>
-    <string name="logout_confirmation_txt">क्या आप लॉगआउट करना चाहते हैं?</string>
-    <string name="confirm_btn_txt">पुष्टि करें</string>
-    <string name="cancel_btn_txt">रद्द करें</string>
     <!-- Premium Subscription Strings (Used in SettingsScreen Premium Card) -->
-    <string name="premium_get_txt">प्रीमियम प्राप्त करें</string>
-    <string name="premium_processing_txt">प्रक्रिया में…</string>
-    <string name="premium_processing_desc_txt">कृपया प्रतीक्षा करें जबकि हम आपकी प्रीमियम सदस्यता सक्रिय करते हैं।</string>
-    <string name="premium_unlock_desc_txt">सभी सुविधाओं को अनलॉक करें और विज्ञापन-मुक्त अनुभव का आनंद लें।</string>
-    <string name="premium_upgrade_btn_txt">अभी अपग्रेड करें</string>
-    <string name="premium_active_txt">आप प्रीमियम उपयोगकर्ता हैं</string>
-    <string name="premium_expires_txt">%1$s को समाप्त होता है</string>
-    <string name="premium_active_status_txt">सक्रिय</string>
-    <string name="settings_notifications_txt">सूचनाएं</string>
-    <string name="settings_language_txt">भाषा</string>
-    <string name="legal_privacy_policy_txt">गोपनीयता नीति</string>
-    <string name="legal_terms_of_use_txt">उपयोग की शर्तें</string>
-    <string name="legal_app_version_txt">ऐप संस्करण</string>
 
     <!--Content Descriptions-->
     <string name="close_icon_content">बंद करें चिह्</string>
-    <string name="back_button_content">वापस बटन</string>
-    <string name="arrow_right_icon_content">अगली स्क्रीन पर नेविगेट करें</string>
     <string name="locale_config_error_txt">भाषा कॉन्फ़िगरेशन लोड करने में विफल। डिफ़ॉल्ट भाषा का उपयोग कर रहे हैं।</string>
 
     <!-- Premium Subscription Additional Strings -->
-    <string name="premium_activated_title_txt">प्रीमियम सक्रिय</string>
-    <string name="premium_activated_msg_txt">आपकी प्रीमियम सदस्यता अब सक्रिय है!</string>
 
     <!--Saved Locations (Premium Feature)-->
     <string name="saved_locations_nested_nav">saved_locations_nested_nav</string>

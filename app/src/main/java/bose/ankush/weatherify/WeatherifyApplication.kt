@@ -12,6 +12,7 @@ import bose.ankush.home.di.homeViewModelModule
 import bose.ankush.network.di.networkDomainModule
 import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
+import bose.ankush.settings.di.settingsViewModelModule
 import bose.ankush.storage.di.storageDomainModule
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_CHANNEL_ID
 import bose.ankush.weatherify.base.location.LocationService.Companion.NOTIFICATION_NAME
@@ -51,6 +52,7 @@ class WeatherifyApplication : WeatherifyApplicationCore() {
                     homePlatformModule,
                     homeDomainModule,
                     homeViewModelModule,
+                    settingsViewModelModule,
                 ),
             )
         }

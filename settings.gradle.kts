@@ -30,6 +30,7 @@ include(
     ":feature:payment",
     ":feature:finder",
     ":feature:home",
+    ":feature:settings",
     ":network",
     ":storage"
 )
