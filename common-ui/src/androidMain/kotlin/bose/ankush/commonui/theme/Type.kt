@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.theme
+package bose.ankush.commonui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
@@ -6,7 +6,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import bose.ankush.weatherify.R
+import bose.ankush.commonui.R
 
 // App typography aligned to the design mock: clean, friendly sans-serif similar to the screenshot.
 // We use the bundled Inter font to achieve a modern look consistently across the app.

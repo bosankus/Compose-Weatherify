@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">मौसमify</string>
-
-    <string name="unauthorised_access_txt">अनधिकृत पहुंच!</string>
-    <string name="city_error_txt">शहर नहीं मिला!</string>
-    <string name="server_error_txt">लगता है सर्वर में समस्या है!</string>
-    <string name="network_unavailable_txt">क्या आप इंटरनेट कनेक्टिविटी की दोबारा जांच कर सकते हैं!</string>
-    <string name="network_timeout_txt">अनुरोध का समय समाप्त हो गया। कृपया बाद में पुनः प्रयास करें।</string>
-    <string name="general_error_txt">कुछ गलत हो गया है।</string>
 </resources>

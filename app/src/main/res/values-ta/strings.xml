@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Weatherify</string>
-
-    <string name="unauthorised_access_txt">அங்கீகரிக்கப்படாத அணுகல்!</string>
-    <string name="city_error_txt">நகரம் கண்டுபிடிக்கப்படவில்லை!</string>
-    <string name="server_error_txt">சர்வர் சிக்கல் இருப்பது போல் தெரிகிறது!</string>
-    <string name="network_unavailable_txt">இணைய இணைப்பை மீண்டும் சரிபார்க்க முடியுமா!</string>
-    <string name="network_timeout_txt">கோரிக்கை நேர வரம்பு மீறியது. பிறகு மீண்டும் முயற்சிக்கவும்.</string>
-    <string name="general_error_txt">அச்சோ!.. ஏதோ தவறு நடந்தது.</string>
 </resources>

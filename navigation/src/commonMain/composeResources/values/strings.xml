@@ -5,4 +5,8 @@
     <string name="profile_nested_nav">Profile</string>
     <string name="saved_locations_icon_content">Saved locations</string>
     <string name="locale_config_error_txt">Failed to load language configuration. Using default language.</string>
+    <string name="location_permission_rationale_txt">Weatherify needs location access to show weather for your area.</string>
+    <string name="location_permission_declined_txt">Location permission is required. Please grant it from Settings to continue.</string>
+    <string name="grant_permission_btn_txt">Grant Permission</string>
+    <string name="exit_btn_txt">Exit</string>
 </resources>

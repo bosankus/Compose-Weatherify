@@ -22,6 +22,8 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+
+        androidResources.enable = true
     }
 
     // iosX64 (Intel simulator) dropped: Compose Multiplatform stopped publishing artifacts for it
@@ -51,6 +53,8 @@ kotlin {
             dependencies {
                 // BackHandler support for InAppWebView
                 implementation(libs.androidx.activity.compose)
+                // WindowCompat/WindowInsetsControllerCompat for WeatherifyTheme system-bar styling
+                implementation(libs.androidx.core.ktx)
             }
         }
 

@@ -24,8 +24,4 @@
     <string name="enable_notification_btn">Enable</string>
     <string name="location_override_reset_btn">Reset to GPS</string>
     <string name="location_override_chip_content_desc">Currently showing weather for %1$s. Tap to reset to GPS.</string>
-    <string name="location_permission_fine_rationale_txt">Precise location is used to show the weather and air quality for your exact location.</string>
-    <string name="location_permission_fine_declined_txt">You\'ve permanently declined precise location permission. Go to app permission settings to enable it.</string>
-    <string name="location_permission_coarse_rationale_txt">Approximate location is used to show the weather and air quality near you.</string>
-    <string name="location_permission_coarse_declined_txt">You\'ve permanently declined approximate location permission. Go to app permission settings to enable it.</string>
 </resources>

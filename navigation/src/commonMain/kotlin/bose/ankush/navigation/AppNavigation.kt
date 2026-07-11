@@ -5,6 +5,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -18,6 +19,7 @@ import bose.ankush.auth.presentation.AuthIntent
 import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.commonui.components.ToastAnchorState
+import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.finder.presentation.savedlocations.SavedLocationsFinderRoute
 import bose.ankush.home.HomeLocationCoordinator
 import bose.ankush.home.HomeNotificationPermissionResult
@@ -25,9 +27,15 @@ import bose.ankush.home.presentation.HomeFeatureRoute
 import bose.ankush.language.presentation.LanguageScreen
 import bose.ankush.language.util.LanguageCatalog
 import bose.ankush.navigation.generated.resources.Res
+import bose.ankush.navigation.generated.resources.exit_btn_txt
+import bose.ankush.navigation.generated.resources.grant_permission_btn_txt
 import bose.ankush.navigation.generated.resources.locale_config_error_txt
+import bose.ankush.navigation.generated.resources.location_permission_declined_txt
+import bose.ankush.navigation.generated.resources.location_permission_rationale_txt
 import bose.ankush.navigation.platform.ExitAppOnBackPress
+import bose.ankush.navigation.platform.RequestLocationPermission
 import bose.ankush.navigation.platform.RequestNotificationPermission
+import bose.ankush.navigation.platform.rememberExitAppAction
 import bose.ankush.navigation.platform.rememberPlatformPermissions
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
@@ -60,6 +68,52 @@ fun AppNavigation(
     }
 
     var isNotificationPermissionPermanentlyDeclined by remember { mutableStateOf(false) }
+
+    var locationPermissionRequestId by remember { mutableStateOf(0) }
+    var showLocationPermissionRationale by remember { mutableStateOf(false) }
+    var isLocationPermissionPermanentlyDeclined by remember { mutableStateOf(false) }
+    val exitApp = rememberExitAppAction()
+
+    if (!hasLocationPermission) {
+        key(locationPermissionRequestId) {
+            RequestLocationPermission(
+                onResult = { granted, permanentlyDeclined ->
+                    hasLocationPermission = granted
+                    isLocationPermissionPermanentlyDeclined = permanentlyDeclined
+                    showLocationPermissionRationale = !granted
+                },
+            )
+        }
+        if (showLocationPermissionRationale) {
+            PermissionAlertDialog(
+                descriptionText =
+                    stringResource(
+                        if (isLocationPermissionPermanentlyDeclined) {
+                            Res.string.location_permission_declined_txt
+                        } else {
+                            Res.string.location_permission_rationale_txt
+                        },
+                    ),
+                isPermanentlyDeclined = isLocationPermissionPermanentlyDeclined,
+                onPositiveAction = {
+                    if (isLocationPermissionPermanentlyDeclined) {
+                        platformPermissions.openAppSystemSettings()
+                    } else {
+                        showLocationPermissionRationale = false
+                        locationPermissionRequestId++
+                    }
+                },
+                onNegativeAction = exitApp,
+                positiveButtonLabel =
+                    if (isLocationPermissionPermanentlyDeclined) {
+                        stringResource(Res.string.grant_permission_btn_txt)
+                    } else {
+                        "OK"
+                    },
+                negativeButtonLabel = stringResource(Res.string.exit_btn_txt),
+            )
+        }
+    }
 
     if (showNotificationPermissionRequest) {
         RequestNotificationPermission(

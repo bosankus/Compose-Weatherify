@@ -1,14 +1,9 @@
 package bose.ankush.weatherify.presentation
 
-import android.Manifest
 import android.content.Context
 import android.os.Bundle
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
@@ -41,22 +36,17 @@ import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
-import bose.ankush.commonui.permissions.PermissionAlertDialog
+import bose.ankush.commonui.theme.WeatherifyTheme
 import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.home.HomeSessionCleaner
-import bose.ankush.home.presentation.permission.LocationPermissionKind
-import bose.ankush.home.presentation.permission.locationPermissionDescription
 import bose.ankush.navigation.AppNavigation
-import bose.ankush.navigation.platform.rememberPlatformPermissions
 import bose.ankush.payment.domain.store.PremiumStore
 import bose.ankush.payment.presentation.CheckoutParams
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.weatherify.BuildConfig
-import bose.ankush.weatherify.base.common.PERMISSIONS_TO_REQUEST
 import bose.ankush.weatherify.base.common.startInAppUpdate
-import bose.ankush.weatherify.presentation.theme.WeatherifyTheme
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
@@ -64,7 +54,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
 import org.koin.android.ext.android.inject
-import org.koin.compose.KoinContext
 import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 
 @ExperimentalCoroutinesApi
@@ -73,9 +62,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 class MainActivity :
     AppCompatActivity(),
     PaymentResultWithDataListener {
-    // Hilt-managed: first-launch location-permission dialog queue
-    private val permissionViewModel: AppPermissionViewModel by viewModels()
-
     // Koin-managed: owns auth state and session management
     private val authViewModel: AuthViewModel by koinViewModel()
 
@@ -94,13 +80,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         startInAppUpdate(this)
-        setContent {
-            KoinContext {
-                WeatherifyTheme {
-                    AppContent()
-                }
-            }
-        }
+        setContent { WeatherifyTheme { AppContent() } }
     }
 
     @Composable
@@ -161,14 +141,17 @@ class MainActivity :
                     onShowToast(authState.message, "Error", ToastType.ERROR)
                     authViewModel.processIntent(AuthIntent.Reset)
                 }
+
                 is AuthState.Success -> {
                     onShowToast("Authentication successful", "Success", ToastType.SUCCESS)
                     authViewModel.processIntent(AuthIntent.Reset)
                 }
+
                 is AuthState.SessionExpired -> {
                     onShowToast(authState.message, "Session Expired", ToastType.WARNING)
                     authViewModel.processIntent(AuthIntent.Reset)
                 }
+
                 else -> Unit
             }
         }
@@ -181,6 +164,7 @@ class MainActivity :
                 when (effect) {
                     is AuthEffect.PremiumStatusChanged ->
                         premiumStore.savePremiumStatus(effect.isPremium, effect.expiryMillis)
+
                     AuthEffect.LoggedOut -> {
                         homeSessionCleaner.clearOnLogout()
                         premiumStore.savePremiumStatus(isPremium = false, expiryMillis = null)
@@ -243,10 +227,6 @@ class MainActivity :
 
     @Composable
     private fun AuthorizedContent(toastController: ToastController) {
-        val platformPermissions = rememberPlatformPermissions()
-        if (!platformPermissions.hasLocationPermission()) {
-            RequestLocationPermission()
-        }
         AppNavigation(
             authViewModel = authViewModel,
             paymentViewModel = paymentViewModel,
@@ -278,82 +258,10 @@ class MainActivity :
         }
     }
 
-    @Composable
-    fun RequestLocationPermission() {
-        val platformPermissions = rememberPlatformPermissions()
-        val permissionQueue = permissionViewModel.permissionDialogQueue
-        val locationPermissionsResultLauncher =
-            rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.RequestMultiplePermissions(),
-                onResult = { permissionMap ->
-                    PERMISSIONS_TO_REQUEST.forEach { permission ->
-                        permissionViewModel.onPermissionResult(
-                            permission = permission,
-                            isGranted = permissionMap[permission] == true,
-                        )
-                    }
-                },
-            )
-
-        permissionQueue.reversed().forEach { permission ->
-            val isPermanentlyDeclined = !shouldShowRequestPermissionRationale(permission)
-            val permissionKind =
-                when (permission) {
-                    Manifest.permission.ACCESS_FINE_LOCATION -> LocationPermissionKind.FINE
-                    Manifest.permission.ACCESS_COARSE_LOCATION -> LocationPermissionKind.COARSE
-                    else -> return@forEach
-                }
-
-            // Consumer owns back-press: exit the app when permanently declined
-            BackHandler(enabled = isPermanentlyDeclined) { finish() }
-
-            PermissionAlertDialog(
-                descriptionText = locationPermissionDescription(permissionKind, isPermanentlyDeclined),
-                isPermanentlyDeclined = isPermanentlyDeclined,
-                onPositiveAction =
-                    if (isPermanentlyDeclined) {
-                        { platformPermissions.openAppSystemSettings() }
-                    } else {
-                        {
-                            permissionViewModel.dismissDialog()
-                            locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
-                        }
-                    },
-                onNegativeAction = { finish() },
-                positiveButtonLabel = if (isPermanentlyDeclined) "Grant Permission" else "OK",
-                negativeButtonLabel = "Exit",
-            )
-        }
-
-        // Launch initial permission request if missing and queue is empty (first-launch scenario)
-        LaunchedEffect(Unit) {
-            if (permissionQueue.isEmpty() && !platformPermissions.hasLocationPermission()) {
-                locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
-            }
-        }
-
-        // Re-launch only when rationale should be shown (not permanently declined)
-        LaunchedEffect(permissionQueue.size) {
-            val hasRationalePermission =
-                permissionQueue.any { shouldShowRequestPermissionRationale(it) }
-            if (permissionQueue.isNotEmpty() && hasRationalePermission) {
-                locationPermissionsResultLauncher.launch(PERMISSIONS_TO_REQUEST)
-            }
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         startInAppUpdate(this)
         authViewModel.processIntent(AuthIntent.RefreshToken)
-        // If user granted a permission via system Settings and returned, clear it from the queue
-        val granted =
-            permissionViewModel.permissionDialogQueue.filter { permission ->
-                checkSelfPermission(permission) == android.content.pm.PackageManager.PERMISSION_GRANTED
-            }
-        if (granted.isNotEmpty()) {
-            permissionViewModel.removeGrantedPermissions(granted)
-        }
     }
 
     private fun launchCheckout(

@@ -8,3 +8,10 @@ import androidx.compose.runtime.Composable
  */
 @Composable
 expect fun ExitAppOnBackPress(enabled: Boolean = true)
+
+/**
+ * An action for a negative/decline choice on a mandatory permission gate (e.g. location).
+ * No-op on platforms where apps must not programmatically quit (e.g. iOS, per Apple's HIG).
+ */
+@Composable
+expect fun rememberExitAppAction(): () -> Unit

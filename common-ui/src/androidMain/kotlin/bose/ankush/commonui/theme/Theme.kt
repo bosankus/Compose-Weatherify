@@ -1,4 +1,4 @@
-package bose.ankush.weatherify.presentation.theme
+package bose.ankush.commonui.theme
 
 import android.os.Build
 import androidx.activity.compose.LocalActivity

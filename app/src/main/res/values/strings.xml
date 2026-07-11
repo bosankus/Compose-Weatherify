@@ -1,13 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--General Texts-->
     <string name="app_name">Weatherify</string>
-
-    <!--Error Texts-->
-    <string name="unauthorised_access_txt">Unauthorised access, Please log in!</string>
-    <string name="city_error_txt">City not found!</string>
-    <string name="server_error_txt">Umm… Looks like server issue!</string>
-    <string name="network_unavailable_txt">Please check your internet connectivity!</string>
-    <string name="network_timeout_txt">Request timed out. Please try again later.</string>
-    <string name="general_error_txt">Oops!..Something went wrong.</string>
 </resources>

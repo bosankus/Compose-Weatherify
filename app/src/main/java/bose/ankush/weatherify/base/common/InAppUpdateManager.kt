@@ -8,6 +8,8 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 
+private const val APP_UPDATE_REQ_CODE = 111
+
 @ExperimentalCoroutinesApi
 fun startInAppUpdate(activity: Activity) {
     val appUpdateManager = AppUpdateManagerFactory.create(activity)

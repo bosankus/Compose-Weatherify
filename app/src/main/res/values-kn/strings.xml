@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Weatherify</string>
-
-    <string name="unauthorised_access_txt">ಅನಧಿಕೃತ ಪ್ರವೇಶ!</string>
-    <string name="city_error_txt">ನಗರ ಕಂಡುಬರಲಿಲ್ಲ!</string>
-    <string name="server_error_txt">ಸರ್ವರ್ ಸಮಸ್ಯೆ ಕಂಡುಬರುತ್ತದೆ!</string>
-    <string name="network_unavailable_txt">ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಮರು-ಪರಿಶೀಲಿಸಬಹುದೇ!</string>
-    <string name="network_timeout_txt">ವಿನಂತಿಯ ಸಮಯ ಮೀರಿತು. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
-    <string name="general_error_txt">ಅಯ್ಯೋ!.. ಏನೋ ತಪ್ಪಾಗಿದೆ.</string>
 </resources>
