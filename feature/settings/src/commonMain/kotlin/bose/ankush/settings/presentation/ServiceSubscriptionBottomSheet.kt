@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.commonui.components.ShimmerBottomSheetSkeleton
+import bose.ankush.commonui.theme.CheckmarkGreen
 import bose.ankush.network.model.Feature
 import bose.ankush.network.model.PricingTier
 import bose.ankush.network.model.Service
@@ -348,7 +349,7 @@ private fun FeaturesSection(features: List<Feature>) {
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = Color(0xFF4CAF50),
+                    tint = CheckmarkGreen,
                     modifier =
                         Modifier
                             .size(16.dp)

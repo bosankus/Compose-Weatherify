@@ -29,7 +29,9 @@ actual fun RequestLocationPermission(onResult: (isGranted: Boolean, isPermanentl
 }
 
 /** Bridges CLLocationManager's delegate-based authorization callback into a single suspend call. */
-private class LocationPermissionRequester : NSObject(), CLLocationManagerDelegateProtocol {
+private class LocationPermissionRequester :
+    NSObject(),
+    CLLocationManagerDelegateProtocol {
     private val manager = CLLocationManager().apply { delegate = this@LocationPermissionRequester }
     private var continuation: CancellableContinuation<CLAuthorizationStatus>? = null
 

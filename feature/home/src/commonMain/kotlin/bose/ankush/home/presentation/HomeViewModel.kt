@@ -226,15 +226,10 @@ internal class HomeViewModel(
                 )
             },
             onFailure = { e ->
-                val isGpsDisabled =
-                    e is LocationClient.LocationException &&
-                        e.message?.contains("GPS is disabled", ignoreCase = true) == true
+                val isGpsDisabled = e is LocationClient.LocationException
                 val message =
-                    when {
-                        isGpsDisabled -> getString(Res.string.gps_disabled_error_txt)
-                        e is Exception -> errorMessageFromException(e)
-                        else -> getString(Res.string.general_error_txt)
-                    }
+                    (e as? Exception)?.let { errorMessageFromException(it) }
+                        ?: getString(Res.string.general_error_txt)
                 val fallback =
                     prefs.latitude?.let { lat ->
                         prefs.longitude?.let { lon ->

@@ -35,11 +35,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import bose.ankush.commonui.theme.ErrorRed
+import bose.ankush.commonui.theme.SuccessGreen
+import bose.ankush.commonui.theme.ToastOnWarning
+import bose.ankush.commonui.theme.WarningYellow
 import kotlinx.coroutines.delay
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class ToastType { SUCCESS, WARNING, ERROR }
 
@@ -89,38 +97,38 @@ fun NotificationToast(
     type: ToastType,
     isVisible: Boolean,
     onDismiss: () -> Unit,
-    durationMillis: Long = 3000,
+    duration: Duration = 3000.milliseconds,
     bottomOffset: Dp = 0.dp,
     anchorState: ToastAnchorState? = null,
 ) {
     LaunchedEffect(isVisible) {
         if (isVisible) {
-            delay(durationMillis)
+            delay(duration)
             onDismiss()
         }
     }
 
-    val (backgroundColor, icon, iconColor) =
+    val (backgroundColor, icon, contentColor) =
         when (type) {
             ToastType.SUCCESS ->
                 Triple(
-                    MaterialTheme.colorScheme.primaryContainer,
+                    SuccessGreen,
                     Icons.Filled.CheckCircle,
-                    MaterialTheme.colorScheme.primary,
+                    Color.White,
                 )
 
             ToastType.WARNING ->
                 Triple(
-                    MaterialTheme.colorScheme.tertiaryContainer,
+                    WarningYellow,
                     Icons.Filled.Warning,
-                    MaterialTheme.colorScheme.tertiary,
+                    ToastOnWarning,
                 )
 
             ToastType.ERROR ->
                 Triple(
-                    MaterialTheme.colorScheme.errorContainer,
+                    ErrorRed,
                     Icons.Filled.Close,
-                    MaterialTheme.colorScheme.error,
+                    Color.White,
                 )
         }
 
@@ -160,7 +168,7 @@ fun NotificationToast(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = iconColor,
+                    tint = contentColor,
                     modifier = Modifier.size(24.dp),
                 )
                 Spacer(modifier = Modifier.width(16.dp))
@@ -168,15 +176,57 @@ fun NotificationToast(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = contentColor,
                     )
                     Text(
                         text = message,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = contentColor.copy(alpha = 0.8f),
                     )
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+fun NotificationToastSuccessPreview() {
+    MaterialTheme {
+        NotificationToast(
+            message = "This is a success message",
+            title = "Success",
+            type = ToastType.SUCCESS,
+            isVisible = true,
+            onDismiss = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+fun NotificationToastWarningPreview() {
+    MaterialTheme {
+        NotificationToast(
+            message = "This is a warning message",
+            title = "Warning",
+            type = ToastType.WARNING,
+            isVisible = true,
+            onDismiss = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFFFFFFFF)
+@Composable
+fun NotificationToastErrorPreview() {
+    MaterialTheme {
+        NotificationToast(
+            message = "This is an error message",
+            title = "Error",
+            type = ToastType.ERROR,
+            isVisible = true,
+            onDismiss = {},
+        )
     }
 }

@@ -12,6 +12,11 @@ naming:
     parameterPattern: '[a-z][A-Za-z0-9_]*'
 
 complexity:
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 30  # Increase this value to allow more complexity
+    ignoreAnnotated:
+      - 'Composable' # Example: Ignore complexity in Compose functions
   LongMethod:
     # Raise ceiling for long Composable layout functions
     threshold: 80
@@ -37,6 +42,10 @@ style:
     ignoreAnnotated:
       - 'Composable'
       - 'Preview'
+    # Allow magic numbers in property declarations (like Color definitions)
+    ignorePropertyDeclaration: true
+    # Allow magic numbers in local variable declarations
+    ignoreLocalVariableDeclaration: true
     # Standard calendar/time integers are universally understood
     ignoreNumbers:
       - '-1'

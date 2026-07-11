@@ -2,6 +2,27 @@ package bose.ankush.home.presentation.constants
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import bose.ankush.commonui.theme.SunriseCloudDawnColor
+import bose.ankush.commonui.theme.SunriseCloudDayColor
+import bose.ankush.commonui.theme.SunriseCloudDuskColor
+import bose.ankush.commonui.theme.SunriseDawnGradientEnd
+import bose.ankush.commonui.theme.SunriseDawnGradientMid1
+import bose.ankush.commonui.theme.SunriseDawnGradientMid2
+import bose.ankush.commonui.theme.SunriseDawnGradientStart
+import bose.ankush.commonui.theme.SunriseDayGradientEnd
+import bose.ankush.commonui.theme.SunriseDayGradientMid1
+import bose.ankush.commonui.theme.SunriseDayGradientMid2
+import bose.ankush.commonui.theme.SunriseDayGradientStart
+import bose.ankush.commonui.theme.SunriseDuskGradientEnd
+import bose.ankush.commonui.theme.SunriseMoonColor
+import bose.ankush.commonui.theme.SunriseMoonPhaseColor
+import bose.ankush.commonui.theme.SunriseNightGradientEnd
+import bose.ankush.commonui.theme.SunriseNightGradientMid1
+import bose.ankush.commonui.theme.SunriseNightGradientMid2
+import bose.ankush.commonui.theme.SunriseNightGradientStart
+import bose.ankush.commonui.theme.SunriseSunEarlyMorning
+import bose.ankush.commonui.theme.SunriseSunMidday
+import bose.ankush.commonui.theme.SunriseSunMorning
 
 object SunriseConstants {
     object Durations {
@@ -47,57 +68,57 @@ object SunriseConstants {
     object Colors {
         val NIGHT_GRADIENT =
             listOf(
-                Color(0xFF000011).copy(alpha = 0.9f),
-                Color(0xFF0A1035).copy(alpha = 0.8f),
-                Color(0xFF0F1A4A).copy(alpha = 0.7f),
-                Color(0xFF162554).copy(alpha = 0.6f),
+                SunriseNightGradientStart.copy(alpha = 0.9f),
+                SunriseNightGradientMid1.copy(alpha = 0.8f),
+                SunriseNightGradientMid2.copy(alpha = 0.7f),
+                SunriseNightGradientEnd.copy(alpha = 0.6f),
             )
 
         val DAWN_GRADIENT =
             listOf(
-                Color(0xFF0A1035).copy(alpha = 0.8f),
-                Color(0xFF341C5D).copy(alpha = 0.7f),
-                Color(0xFF9A3A6A).copy(alpha = 0.6f),
-                Color(0xFFE67E45).copy(alpha = 0.5f),
+                SunriseDawnGradientStart.copy(alpha = 0.8f),
+                SunriseDawnGradientMid1.copy(alpha = 0.7f),
+                SunriseDawnGradientMid2.copy(alpha = 0.6f),
+                SunriseDawnGradientEnd.copy(alpha = 0.5f),
             )
 
         val DAY_GRADIENT =
             listOf(
-                Color(0xFF0E4C92).copy(alpha = 0.7f),
-                Color(0xFF1A75FF).copy(alpha = 0.6f),
-                Color(0xFF5D9EFF).copy(alpha = 0.5f),
-                Color(0xFF87CEEB).copy(alpha = 0.4f),
+                SunriseDayGradientStart.copy(alpha = 0.7f),
+                SunriseDayGradientMid1.copy(alpha = 0.6f),
+                SunriseDayGradientMid2.copy(alpha = 0.5f),
+                SunriseDayGradientEnd.copy(alpha = 0.4f),
             )
 
         val DUSK_GRADIENT =
             listOf(
-                Color(0xFF0A1035).copy(alpha = 0.8f),
-                Color(0xFF341C5D).copy(alpha = 0.7f),
-                Color(0xFF9A3A6A).copy(alpha = 0.6f),
-                Color(0xFFE05038).copy(alpha = 0.5f),
+                SunriseDawnGradientStart.copy(alpha = 0.8f),
+                SunriseDawnGradientMid1.copy(alpha = 0.7f),
+                SunriseDawnGradientMid2.copy(alpha = 0.6f),
+                SunriseDuskGradientEnd.copy(alpha = 0.5f),
             )
 
         val DEFAULT_GRADIENT =
             listOf(
-                Color(0xFF0E4C92).copy(alpha = 0.7f),
-                Color(0xFF1A75FF).copy(alpha = 0.6f),
-                Color(0xFF5D9EFF).copy(alpha = 0.5f),
-                Color(0xFF87CEEB).copy(alpha = 0.4f),
+                SunriseDayGradientStart.copy(alpha = 0.7f),
+                SunriseDayGradientMid1.copy(alpha = 0.6f),
+                SunriseDayGradientMid2.copy(alpha = 0.5f),
+                SunriseDayGradientEnd.copy(alpha = 0.4f),
             )
 
-        val MOON_COLOR = Color(0xFFF5F5DC)
-        val MOON_PHASE_COLOR = Color(0xFF0F0F23)
+        val MOON_COLOR = SunriseMoonColor
+        val MOON_PHASE_COLOR = SunriseMoonPhaseColor
         val STAR_COLOR = Color.White
 
-        val CLOUD_DAY_COLOR = Color(0xFFFFFFFF)
-        val CLOUD_DAWN_COLOR = Color(0xFFFAE3C6)
-        val CLOUD_DUSK_COLOR = Color(0xFFFFB8A0)
+        val CLOUD_DAY_COLOR = SunriseCloudDayColor
+        val CLOUD_DAWN_COLOR = SunriseCloudDawnColor
+        val CLOUD_DUSK_COLOR = SunriseCloudDuskColor
 
-        val SUN_EARLY_MORNING = Color(0xFFFF7E45)
-        val SUN_MORNING = Color(0xFFFFAA33)
-        val SUN_MIDDAY = Color(0xFFFFD700)
-        val SUN_EVENING = Color(0xFFFFAA33)
-        val SUN_LATE_EVENING = Color(0xFFFF7E45)
+        val SUN_EARLY_MORNING = SunriseSunEarlyMorning
+        val SUN_MORNING = SunriseSunMorning
+        val SUN_MIDDAY = SunriseSunMidday
+        val SUN_EVENING = SunriseSunMorning
+        val SUN_LATE_EVENING = SunriseSunEarlyMorning
     }
 
     object Positioning {

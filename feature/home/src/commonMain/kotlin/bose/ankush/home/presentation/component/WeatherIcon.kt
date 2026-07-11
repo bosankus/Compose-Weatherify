@@ -20,6 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import bose.ankush.commonui.theme.RainColorDark
+import bose.ankush.commonui.theme.RainColorLight
+import bose.ankush.commonui.theme.SunColorDark
+import bose.ankush.commonui.theme.SunColorLight
+import bose.ankush.commonui.theme.ThunderColorDark
+import bose.ankush.commonui.theme.ThunderColorLight
 import bose.ankush.home.presentation.constants.WeatherIconConstants
 
 class WeatherIconColors(
@@ -36,29 +42,29 @@ class WeatherIconColors(
         fun default(isDarkTheme: Boolean = isSystemInDarkTheme()): WeatherIconColors {
             val sunColor =
                 try {
-                    if (isDarkTheme) Color(0xFFFFD700) else Color(0xFFFF9800)
+                    if (isDarkTheme) SunColorDark else SunColorLight
                 } catch (_: Exception) {
-                    Color(0xFFFF9800)
+                    SunColorLight
                 }
 
             val sunGlowColor =
                 try {
                     if (isDarkTheme) {
-                        Color(0xFFFFD700).copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA)
+                        SunColorDark.copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA)
                     } else {
-                        Color(0xFFFF9800).copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA)
+                        SunColorLight.copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA)
                     }
                 } catch (_: Exception) {
-                    Color(0xFFFF9800).copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA)
+                    SunColorLight.copy(alpha = WeatherIconConstants.SUN_GLOW_ALPHA)
                 }
 
             return WeatherIconColors(
                 sunColor = sunColor,
                 sunGlowColor = sunGlowColor,
                 cloudColor = if (isDarkTheme) Color.White.copy(alpha = 0.9f) else Color.White,
-                rainColor = if (isDarkTheme) Color(0xFF64B5F6) else Color(0xFF2196F3),
+                rainColor = if (isDarkTheme) RainColorDark else RainColorLight,
                 snowColor = if (isDarkTheme) Color.White else Color.White.copy(alpha = 0.9f),
-                thunderColor = if (isDarkTheme) Color(0xFFFFEB3B) else Color(0xFFFFC107),
+                thunderColor = if (isDarkTheme) ThunderColorDark else ThunderColorLight,
                 fogColor =
                     if (isDarkTheme) {
                         Color.LightGray.copy(alpha = 0.7f)

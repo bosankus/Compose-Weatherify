@@ -1,5 +1,6 @@
 package bose.ankush.home.presentation.util
 
+import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.city_error_txt
 import bose.ankush.home.generated.resources.general_error_txt
@@ -10,8 +11,9 @@ import bose.ankush.home.generated.resources.unauthorised_access_txt
 import bose.ankush.network.util.NetworkException
 import org.jetbrains.compose.resources.getString
 
-internal suspend fun errorMessageFromException(exception: Exception): String =
+internal suspend fun errorMessageFromException(exception: Exception): String? =
     when (exception) {
+        is LocationClient.LocationException -> exception.message
         is NetworkException -> errorMessageForCode(exception.errorCode)
         else -> getString(Res.string.general_error_txt)
     }

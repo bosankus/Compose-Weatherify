@@ -143,7 +143,7 @@ graph LR
     end
 
     subgraph External["🌐 External Sources"]
-        NET[":network\nKtor + OpenWeatherMap API"]
+        NET[":network\nKtor + Androidplay Weather API"]
         DB[":storage\nRoom DB + DataStore"]
         PAY["Razorpay SDK"]
     end
@@ -184,7 +184,7 @@ Notes:
 ## Data Flow
 
 ```text
-OpenWeatherMap API
+Androidplay Weather API (https://data.androidplay.in)
        │  JSON (Ktor + Kotlinx Serialization)
        ▼
   :network module  ──────►  Network Models
@@ -319,7 +319,6 @@ This is a known gap, not a design choice — treat the Testing table above as th
 ### Prerequisites
 - Android Studio Narwhal or later
 - JDK 17 (JDK 21 is used by CI)
-- An [OpenWeatherMap](https://openweathermap.org/api) API key (free tier works)
 
 ### Steps
 
@@ -329,14 +328,9 @@ This is a known gap, not a design choice — treat the Testing table above as th
    cd Compose-Weatherify
    ```
 
-2. **Add your API key** to `local.properties` (create the file if it doesn't exist):
-   ```properties
-   OPEN_WEATHER_API_KEY=your_api_key_here
-   ```
+2. **Add `google-services.json`** to `app/` (from Firebase console — required for Analytics/FCM to compile).
 
-3. **Add `google-services.json`** to `app/` (from Firebase console — required for Analytics/FCM to compile).
-
-4. **Build & run**
+3. **Build & run**
    ```bash
    ./gradlew assembleDebug
    # or just hit Run in Android Studio

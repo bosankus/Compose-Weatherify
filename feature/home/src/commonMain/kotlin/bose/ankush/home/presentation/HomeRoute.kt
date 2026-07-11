@@ -214,10 +214,14 @@ private fun ShowUIContainer(
 ) {
     val weatherReports = state.weatherData
     val airQualityReports = state.airQualityData
-
     var showOfflineToast by remember { mutableStateOf(false) }
-    LaunchedEffect(state.isOffline) {
-        if (state.isOffline) showOfflineToast = true
+    var offlineToastMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(state.isOffline, state.offlineMessage) {
+        if (state.isOffline && state.offlineMessage != null) {
+            offlineToastMessage = state.offlineMessage
+            showOfflineToast = true
+        }
     }
 
     val pullToRefreshState = rememberPullToRefreshState()
@@ -270,16 +274,6 @@ private fun ShowUIContainer(
                 negativeButtonLabel = stringResource(Res.string.cancel_btn_txt),
             )
         }
-
-        NotificationToast(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            message = state.offlineMessage ?: stringResource(Res.string.network_unavailable_txt),
-            title = stringResource(Res.string.offline_toast_title_txt),
-            type = ToastType.WARNING,
-            isVisible = showOfflineToast,
-            onDismiss = { showOfflineToast = false },
-            anchorState = toastAnchorState,
-        )
 
         Scaffold(
             containerColor = Color.Transparent,
@@ -430,6 +424,16 @@ private fun ShowUIContainer(
                 }
             },
             bottomBar = { bottomBar() },
+        )
+
+        NotificationToast(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            message = offlineToastMessage ?: stringResource(Res.string.network_unavailable_txt),
+            title = stringResource(Res.string.offline_toast_title_txt),
+            type = ToastType.WARNING,
+            isVisible = showOfflineToast,
+            onDismiss = { showOfflineToast = false },
+            anchorState = toastAnchorState,
         )
     }
 }
