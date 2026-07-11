@@ -33,12 +33,16 @@ A production-grade Android weather app built with **Jetpack Compose**, **Clean A
 
 ## Module Architecture
 
-The project is split into clearly bounded Gradle modules. Everything except `:app` is a **Kotlin Multiplatform (KMP)** module (`org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library` plugins) with `commonMain`/`androidMain`/`iosMain` source sets — making the app iOS-portable without a full rewrite. `:app` stays a plain Android application module and is the only place Hilt is used; every KMP module uses **Koin**, bridged into `:app`'s Hilt graph via a Koin-Hilt adapter module.
+The project is split into clearly bounded Gradle modules. Everything except `:app` is a **Kotlin Multiplatform (KMP)** module (`org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library` plugins) with `commonMain`/`androidMain`/`iosMain` source sets — making the app iOS-portable without a full rewrite. `:app` stays a plain Android application module and is the only place Hilt is used; every KMP module uses **Koin**, bridged into `:app`'s Hilt graph via Koin-Hilt adapter modules. Navigation itself lives in its own KMP module, `:navigation`, which sits directly below `:app` and aggregates every feature module.
 
 ```mermaid
 graph TD
     subgraph APP["🟦 :app  (Android, Hilt)"]
-        A["WeatherifyApplication\nMainActivity\nAppNavigation - Nav3\nAppPermissionViewModel"]
+        A["WeatherifyApplication\nMainActivity\nAppPermissionViewModel"]
+    end
+
+    subgraph NAV["🟫 :navigation  (KMP, Koin)"]
+        N["AppNavigation / AppNavHost - Nav3\nAppNavigator / rememberAppNavigationState\nRoutes / AppBottomBar\nplatform/ (permissions, back-press) actuals"]
     end
 
     subgraph HOME["🟨 :feature:home  (KMP, Koin, MVI)"]
@@ -77,6 +81,7 @@ graph TD
         G["SavedLocationsScreen\nPlaceSearchDialog\nGetSavedLocationsUseCase\nFinderRepository / Impl"]
     end
 
+    APP --> NAV
     APP --> HOME
     APP --> SETTINGS
     APP --> COMMON
@@ -86,12 +91,29 @@ graph TD
     APP --> STORAGE
     APP --> LANGUAGE
     APP --> FINDER
+    NAV --> HOME
+    NAV --> SETTINGS
+    NAV --> COMMON
+    NAV --> AUTH
+    NAV --> PAYMENT
+    NAV --> LANGUAGE
+    NAV --> FINDER
     SETTINGS --> COMMON
     SETTINGS --> PAYMENT
     SETTINGS --> NETWORK
+    HOME --> NETWORK
+    HOME --> STORAGE
+    HOME --> COMMON
+    FINDER --> NETWORK
+    FINDER --> PAYMENT
+    FINDER --> COMMON
+    PAYMENT --> NETWORK
+    PAYMENT --> STORAGE
+    AUTH --> NETWORK
+    NETWORK --> STORAGE
 ```
 
-> **DI note:** `:app` uses Hilt only for `AppPermissionViewModel`. Every KMP module (`:feature:home`, `:feature:settings`, `:common-ui`, `:feature:*`, `:network`, `:storage`) uses Koin internally, registered in `WeatherifyApplication.initKoin()`. `app/.../di/PaymentKoinModule.kt` bridges the two graphs so Hilt-managed code can resolve Koin-provided dependencies (e.g. `PaymentViewModel`).
+> **DI note:** `:app` uses Hilt only for `AppPermissionViewModel`. Every KMP module (`:navigation`, `:feature:home`, `:feature:settings`, `:common-ui`, `:feature:*`, `:network`, `:storage`) uses Koin internally, registered in `WeatherifyApplication.initKoin()`. `app/.../di/NetworkModule.kt` and `di/StorageModule.kt` bridge Koin-registered network/storage dependencies into Hilt; `app/.../di/PaymentKoinModule.kt` is itself a **Koin** module (`appPaymentKoinModule`, despite the name) providing `PaymentConfig`.
 
 ---
 
@@ -138,7 +160,9 @@ graph LR
 
 ## Navigation (Navigation 3)
 
-The app runs on **Jetpack Navigation 3** (`androidx.navigation3`), not the older `NavHost`/`NavController` API. `AppNavigation.kt` builds an `entryProvider` and renders it through `NavDisplay`, driven by a custom `AppNavigator` / `rememberAppNavigationState()` wrapper around the Nav3 backstack. Routes are `@Serializable` `NavKey` objects defined in `Routes.kt`. The bottom bar (`AppBottomBar.kt`) drives three top-level tabs: Home, Saved Locations, and Settings.
+Navigation lives in its own KMP module, **`:navigation`** (package `bose.ankush.navigation`), not inside `:app`. It runs on **Jetpack Navigation 3** (`androidx.navigation3`), not the older `NavHost`/`NavController` API. `AppNavigation.kt` builds an `entryProvider`, and `AppNavHost.kt` renders it through `NavDisplay` on Android (via an `expect`/`actual` — the Android `actual` in `AppNavHost.android.kt` uses `navigation3-ui` directly, since it has no iOS artifact yet; iOS gets a minimal custom renderer in `AppNavHost.ios.kt`). Backstack state is driven by a custom `AppNavigator` class / `rememberAppNavigationState()` wrapper, both in `AppNavigator.kt`. Routes are `@Serializable` `NavKey` objects defined in `Routes.kt`. The bottom bar (`AppBottomBar.kt`, also in `:navigation`) drives three top-level tabs: Home, Saved Locations, and Settings. `:app`'s `MainActivity` just calls `bose.ankush.navigation.AppNavigation(...)` inside its Hilt/Koin-composed `setContent`.
+
+`:navigation`'s `platform/` package holds `expect`/`actual` wrappers for permission requests and back-press handling (`PlatformPermissions`, `NotificationPermissionRequest`, `ExitAppOnBackPress`), each with Android and iOS actuals.
 
 ```mermaid
 graph TD
@@ -153,7 +177,7 @@ Notes:
 - There is no standalone `ProfileScreen` or `PaymentScreen` route — profile info and the premium upgrade flow are both embedded inside `SettingsFeatureRoute` (profile header + a premium bottom sheet), and `SettingsViewModel` is `internal` to `:feature:settings` (Koin-resolved), not exposed to `:app`.
 - `InAppWebView` (`:common-ui`) is a composable (not a route) shown conditionally inside `SettingsFeatureRoute` for Terms/Privacy links.
 - On Android 13+ (`isDeviceSDKAndroid13OrAbove()`), language selection pushes `LanguageRoute`; below API 33 it deep-links to the system per-app language settings instead.
-- `Routes.kt` still declares a `CitiesListRoute`, but it is not wired into the `entryProvider` — the quick city switcher was superseded by `:feature:finder`'s saved-locations flow.
+- The old quick city switcher (`CitiesListRoute`) has been fully removed from the codebase — superseded by `:feature:finder`'s saved-locations flow.
 
 ---
 
@@ -239,11 +263,11 @@ OpenWeatherMap API
 
 | Library | Purpose | Status |
 |---|---|---|
-| JUnit 4 + Truth | Unit assertions | 2 real test files in `app/src/test` |
+| JUnit 4 + Truth | Unit assertions | Declared; **`app/src/test` does not exist — zero unit tests** |
 | Turbine `1.2.1` | Flow/StateFlow testing | Declared, not yet exercised |
 | Mockk `1.14.11` | Kotlin-first mocking | Declared, not yet exercised |
 | Mockito + Nhaarman | Java-style mocking | Declared, not yet exercised |
-| Espresso `3.7.0` + Hilt Testing | Instrumentation UI tests | Declared; **no `androidTest` sources exist yet** |
+| Espresso `3.7.0` + Hilt Testing | Instrumentation UI tests | Declared; **no `androidTest` sources exist anywhere**; `app/build.gradle.kts` still points `testInstrumentationRunner` at `bose.ankush.weatherify.helper.HiltTestRunner`, a class that doesn't exist in the repo |
 
 > See [Testing Status](#testing-status) below — the test table above reflects declared dependencies, not actual coverage.
 
@@ -255,7 +279,7 @@ OpenWeatherMap API
 | LeakCanary `2.14` | Memory leak detection (debug) |
 | Razorpay `1.6.41` | In-app payment checkout |
 | Google Play In-App Update | Forced/flexible update prompts (`InAppUpdateManager`) |
-| Google Play Location `21.3.0` | FusedLocationProvider |
+| Google Play Location `21.4.0` | FusedLocationProvider |
 
 ---
 
@@ -263,7 +287,7 @@ OpenWeatherMap API
 
 ```text
 MainActivity (Hilt entry point)
-└── AppNavigation (Nav3 NavDisplay + entryProvider)
+└── AppNavigation (Nav3 NavDisplay + entryProvider — :navigation)
     ├── HomeFeatureRoute     — current weather + AQI card, MVI-driven               (:feature:home)
     ├── SavedLocationsFinderRoute — manage saved locations & search new places      (:feature:finder)
     ├── SettingsFeatureRoute — profile header, language row, notification toggle,   (:feature:settings)
@@ -279,11 +303,12 @@ MainActivity (Hilt entry point)
 
 ## Testing Status
 
-Test infrastructure (Espresso, Hilt Testing, MockWebServer, `commonTest`/`iosTest` source sets in `:storage`/`:network`) is declared in the build files, but real coverage today is minimal:
+Test infrastructure (Espresso, Hilt Testing, MockWebServer) is declared in the build files, but **there is currently no test coverage at all**:
 
-- `app/src/test/` — 2 unit tests (`common/ExtensionTest.kt`, `base/DateTimeUtilsTest.kt`)
-- No `androidTest` directory exists in any module
-- `:storage` and `:network` declare `commonTest`/`iosTest` source sets with no test files in them
+- No `app/src/test` directory exists — the unit tests it previously held have been removed
+- No `androidTest`/`androidInstrumentedTest` directory with content exists in any module (the placeholder `storage/src/androidInstrumentedTest/.../.gitkeep` is itself being deleted)
+- No `commonTest`/`iosTest` source sets with test files exist in `:storage` or `:network`
+- `app/build.gradle.kts` references a `HiltTestRunner` class as `testInstrumentationRunner` that doesn't exist anywhere in the repo — a dangling config left over from the removed tests
 
 This is a known gap, not a design choice — treat the Testing table above as the target stack, not current coverage.
 
@@ -377,14 +402,13 @@ CI builds the project and runs Spotless/Detekt checks on every PR (see [CI/CD](#
 
 These are the planned improvements currently in progress or on the roadmap:
 
-- **iOS target** — the KMP foundation is in place across all non-`:app` modules (`commonMain`/`androidMain`/`iosMain`, with `:network`/`:storage` also building `iosX64`, and `:feature:home`/`:feature:settings` building `iosArm64`/`iosSimulatorArm64`). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
-- **Real test coverage** — close the gap described in [Testing Status](#testing-status): add `androidTest` instrumentation tests, exercise the already-declared Mockk/Turbine/MockWebServer dependencies, and populate the empty `commonTest`/`iosTest` source sets in `:storage`/`:network`.
+- **iOS target** — the KMP foundation is in place across all non-`:app` modules (`commonMain`/`androidMain`/`iosMain`, including the new `:navigation` module which builds `iosArm64`/`iosSimulatorArm64` with a custom `AppNavHost` renderer since `navigation3-ui` has no iOS artifact yet). The next step is wiring up a SwiftUI host app and completing the remaining iOS-specific implementations.
+- **Real test coverage** — the codebase currently has zero tests (see [Testing Status](#testing-status)): add `androidTest` instrumentation tests, exercise the already-declared Mockk/Turbine/MockWebServer dependencies, populate `commonTest`/`iosTest` source sets in `:storage`/`:network`, and fix or remove the dangling `HiltTestRunner` reference in `app/build.gradle.kts`.
 - **Offline-first strategy** — full read-from-cache-then-network flow using Room as the single source of truth, with explicit stale-data indicators in the UI.
 - **Widget support** — a Glance-based home screen widget showing current temperature and conditions.
 - **Wear OS companion** — lightweight Wear Compose screen for wrist-based weather glances.
 - **Release automation** — CI already builds and lints every PR; the next step is automated release builds and Play Store internal track deployments.
 - **Accessibility pass** — semantic descriptions, touch target sizing, and TalkBack compatibility audit.
-- **Dead code cleanup** — `CitiesListRoute` in `Routes.kt` is no longer wired into navigation and can likely be removed.
 
 ---
 
