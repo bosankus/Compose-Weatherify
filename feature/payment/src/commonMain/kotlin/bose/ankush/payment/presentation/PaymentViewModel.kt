@@ -2,8 +2,11 @@ package bose.ankush.payment.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.payment.domain.config.PaymentConfig
 import bose.ankush.payment.domain.model.CreateOrderParams
+import bose.ankush.payment.domain.model.Order
 import bose.ankush.payment.domain.model.VerifyPaymentParams
 import bose.ankush.payment.domain.store.PremiumStore
 import bose.ankush.payment.domain.usecase.CreateOrderUseCase
@@ -38,12 +41,17 @@ class PaymentViewModel(
     private val verifyPaymentUseCase: VerifyPaymentUseCase,
     private val premiumStore: PremiumStore,
     private val paymentConfig: PaymentConfig,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PaymentUiState())
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
 
     private val _effect = Channel<PaymentEffect>(Channel.BUFFERED)
     val effect: Flow<PaymentEffect> = _effect.receiveAsFlow()
+
+    // Set when checkout opens, read back when the purchase is confirmed — VerifyPaymentParams
+    // only carries orderId/paymentId/signature, not the order amount.
+    private var pendingOrder: Order? = null
 
     init {
         observePremiumStatus()
@@ -110,6 +118,13 @@ class PaymentViewModel(
             createOrderUseCase(CreateOrderParams(amount = amountPaise, currency = currency))
                 .fold(
                     onSuccess = { order ->
+                        pendingOrder = order
+                        analyticsTracker.track(
+                            AnalyticsEvent.CheckoutOpened(
+                                value = order.amount / 100.0,
+                                currency = order.currency,
+                            ),
+                        )
                         _effect.trySend(
                             PaymentEffect.LaunchCheckout(
                                 CheckoutParams(
@@ -131,6 +146,7 @@ class PaymentViewModel(
                         }
                     },
                     onFailure = { e ->
+                        analyticsTracker.track(AnalyticsEvent.PaymentFailed(e.message))
                         _uiState.update {
                             it.copy(
                                 loading = false,
@@ -161,6 +177,7 @@ class PaymentViewModel(
                 .fold(
                     onSuccess = { result ->
                         if (!result.success) {
+                            trackPaymentFailure(result.message)
                             _uiState.update {
                                 it.copy(
                                     loading = false,
@@ -176,6 +193,15 @@ class PaymentViewModel(
                                 .plus(30.days)
                                 .toEpochMilliseconds()
                         premiumStore.savePremiumStatus(isPremium = true, expiryMillis = expiryMillis)
+                        val order = pendingOrder
+                        analyticsTracker.track(
+                            AnalyticsEvent.Purchase(
+                                transactionId = orderId,
+                                value = (order?.amount ?: 0L) / 100.0,
+                                currency = order?.currency ?: "INR",
+                                itemName = "premium_subscription",
+                            ),
+                        )
                         // _uiState auto-updates via observePremiumStatus() collecting the new value
                         _uiState.update {
                             it.copy(
@@ -186,6 +212,7 @@ class PaymentViewModel(
                         }
                     },
                     onFailure = { e ->
+                        trackPaymentFailure(e.message)
                         _uiState.update {
                             it.copy(
                                 loading = false,
@@ -200,6 +227,7 @@ class PaymentViewModel(
 
     private fun handlePaymentFailed(message: String) {
         viewModelScope.launch {
+            trackPaymentFailure(message)
             val friendlyMessage = friendlyServerMessage(message)
             _uiState.update {
                 it.copy(
@@ -209,6 +237,16 @@ class PaymentViewModel(
                 )
             }
         }
+    }
+
+    private fun trackPaymentFailure(reason: String?) {
+        val event =
+            if (reason?.lowercase()?.contains("cancel") == true) {
+                AnalyticsEvent.PaymentCancelled(reason)
+            } else {
+                AnalyticsEvent.PaymentFailed(reason)
+            }
+        analyticsTracker.track(event)
     }
 
     private suspend fun friendlyServerMessage(message: String?): String {

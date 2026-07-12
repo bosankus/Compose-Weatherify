@@ -20,6 +20,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.ComposeUIViewController
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.auth.presentation.AuthEffect
 import bose.ankush.auth.presentation.AuthIntent
 import bose.ankush.auth.presentation.AuthState
@@ -30,26 +32,37 @@ import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.home.HomeSessionCleaner
+import bose.ankush.iosapp.payment.RazorpayCheckoutBridge
+import bose.ankush.language.util.AppEnvironment
 import bose.ankush.navigation.AppNavigation
 import bose.ankush.payment.domain.store.PremiumStore
+import bose.ankush.payment.presentation.PaymentEffect
+import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
 import org.koin.compose.koinInject
 import platform.UIKit.UIViewController
 
 // Entry point called from Swift (iosApp/iosApp/iOSApp.swift).
-fun MainViewController(): UIViewController =
-    ComposeUIViewController {
-        MaterialTheme {
-            AppContent()
+fun MainViewController(): UIViewController {
+    lateinit var controller: UIViewController
+    controller =
+        ComposeUIViewController {
+            MaterialTheme {
+                AppEnvironment {
+                    AppContent(rootController = { controller })
+                }
+            }
         }
-    }
+    return controller
+}
 
 @Composable
-private fun AppContent() {
+private fun AppContent(rootController: () -> UIViewController) {
     val authViewModel = koinInject<AuthViewModel>()
     val paymentViewModel = koinInject<PaymentViewModel>()
     val homeSessionCleaner = koinInject<HomeSessionCleaner>()
     val premiumStore = koinInject<PremiumStore>()
+    val analyticsTracker = koinInject<AnalyticsTracker>()
 
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
     val authState by authViewModel.authState.collectAsState()
@@ -111,6 +124,26 @@ private fun AppContent() {
         authViewModel.processIntent(AuthIntent.RefreshToken)
     }
 
+    LaunchedEffect(Unit) {
+        paymentViewModel.effect.collect { effect ->
+            when (effect) {
+                is PaymentEffect.LaunchCheckout ->
+                    RazorpayCheckoutBridge().launch(
+                        controller = rootController(),
+                        params = effect.params,
+                        onSuccess = { orderId, paymentId, signature ->
+                            paymentViewModel.processIntent(
+                                PaymentIntent.VerifyPayment(orderId, paymentId, signature),
+                            )
+                        },
+                        onError = { message ->
+                            paymentViewModel.processIntent(PaymentIntent.PaymentFailed(message))
+                        },
+                    )
+            }
+        }
+    }
+
     Box(
         modifier =
             Modifier
@@ -146,6 +179,9 @@ private fun AppContent() {
                         onClose = { currentWebUrl = null },
                     )
                 } else {
+                    LaunchedEffect(Unit) {
+                        analyticsTracker.track(AnalyticsEvent.ScreenView("login", "LoginScreen"))
+                    }
                     LoginScreen(
                         onLoginClick = { email, password ->
                             authViewModel.processIntent(AuthIntent.Login(email, password))

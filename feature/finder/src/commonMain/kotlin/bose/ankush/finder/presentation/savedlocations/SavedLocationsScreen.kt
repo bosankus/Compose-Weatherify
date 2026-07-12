@@ -70,6 +70,7 @@ import kotlin.math.round
 internal fun SavedLocationsScreen(
     state: SavedLocationsState,
     onIntent: (SavedLocationsIntent) -> Unit,
+    onUpgradeClick: () -> Unit,
     bottomBar: @Composable () -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -130,7 +131,7 @@ internal fun SavedLocationsScreen(
                     .padding(innerPadding),
         ) {
             when {
-                !state.isPremium -> PremiumGate()
+                !state.isPremium -> PremiumGate(onUpgradeClick = onUpgradeClick)
                 state.isLoading && state.locations.isEmpty() -> ShowLoading()
                 state.locations.isEmpty() -> EmptyLocations()
                 else ->
@@ -145,7 +146,7 @@ internal fun SavedLocationsScreen(
 }
 
 @Composable
-private fun PremiumGate() {
+private fun PremiumGate(onUpgradeClick: () -> Unit) {
     Column(
         modifier =
             Modifier
@@ -167,7 +168,7 @@ private fun PremiumGate() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = { /* TODO: Handle upgrade to premium */ }) {
+        Button(onClick = onUpgradeClick) {
             Text(text = stringResource(Res.string.saved_locations_premium_upgrade_btn_txt))
         }
     }
@@ -424,6 +425,7 @@ private fun SavedLocationsScreenPremiumGatePreview() {
     SavedLocationsScreen(
         state = SavedLocationsState(isPremium = false),
         onIntent = {},
+        onUpgradeClick = {},
     )
 }
 
@@ -433,6 +435,7 @@ private fun SavedLocationsScreenEmptyPreview() {
     SavedLocationsScreen(
         state = SavedLocationsState(isPremium = true, isLoading = false, locations = emptyList()),
         onIntent = {},
+        onUpgradeClick = {},
     )
 }
 
@@ -442,6 +445,7 @@ private fun SavedLocationsScreenLoadingPreview() {
     SavedLocationsScreen(
         state = SavedLocationsState(isPremium = true, isLoading = true),
         onIntent = {},
+        onUpgradeClick = {},
     )
 }
 
@@ -451,6 +455,7 @@ private fun SavedLocationsScreenListPreview() {
     SavedLocationsScreen(
         state = SavedLocationsState(isPremium = true, locations = previewLocations),
         onIntent = {},
+        onUpgradeClick = {},
     )
 }
 

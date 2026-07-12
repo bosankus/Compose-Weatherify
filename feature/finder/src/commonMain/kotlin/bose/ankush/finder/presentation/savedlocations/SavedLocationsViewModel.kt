@@ -2,6 +2,8 @@ package bose.ankush.finder.presentation.savedlocations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.finder.domain.usecase.DeleteLocationUseCase
 import bose.ankush.finder.domain.usecase.GetSavedLocationsUseCase
 import bose.ankush.finder.domain.usecase.SaveLocationParams
@@ -29,6 +31,7 @@ internal class SavedLocationsViewModel(
     private val saveLocationUseCase: SaveLocationUseCase,
     private val deleteLocationUseCase: DeleteLocationUseCase,
     private val premiumStore: PremiumStore,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SavedLocationsState())
     val state: StateFlow<SavedLocationsState> = _state.asStateFlow()
@@ -87,6 +90,7 @@ internal class SavedLocationsViewModel(
             _state.update { it.copy(isLoading = true, error = null) }
             saveLocationUseCase(SaveLocationParams(name, lat, lon)).fold(
                 onSuccess = {
+                    analyticsTracker.track(AnalyticsEvent.LocationSaved("saved_locations_screen"))
                     val message = getString(Res.string.saved_locations_save_success)
                     _state.update { it.copy(isLoading = false, successMessage = message) }
                     loadSavedLocations()
@@ -129,6 +133,7 @@ internal class SavedLocationsViewModel(
         lon: Double,
         name: String,
     ) {
+        analyticsTracker.track(AnalyticsEvent.LocationSelected("saved_locations_list"))
         _effect.trySend(SavedLocationsEffect.LocationSelected(lat, lon, name))
     }
 }

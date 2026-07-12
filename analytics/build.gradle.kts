@@ -3,13 +3,24 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.compose.multiplatform)
+    id("org.jetbrains.kotlin.native.cocoapods")
 }
 
 kotlin {
+    cocoapods {
+        version = "1.0"
+        summary = "Weatherify Analytics module"
+        homepage = "https://github.com/bosankus/Compose-Weatherify"
+        ios.deploymentTarget = "16.0"
+
+        pod("FirebaseAnalytics") {
+            version = "12.4.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+    }
+
     android {
-        namespace = "bose.ankush.auth"
+        namespace = "bose.ankush.analytics"
         compileSdk =
             libs.versions.compileSdk
                 .get()
@@ -22,42 +33,26 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
-
-        androidResources.enable = true
     }
 
-    // iosX64 dropped: Compose Multiplatform stopped publishing artifacts for it
-    // starting at 1.11.0, following Apple's deprecation of the x86_64 iOS Simulator.
     iosArm64()
     iosSimulatorArm64()
 
     targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
         binaries.framework {
-            baseName = "feature_auth"
+            baseName = "analytics"
             isStatic = true
         }
     }
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":network"))
-            implementation(project(":analytics"))
-            implementation(libs.compose.multiplatform.resources)
-            implementation(libs.compose.multiplatform.runtime)
-            implementation(libs.compose.multiplatform.foundation)
-            implementation(libs.compose.multiplatform.material3)
-            implementation(libs.compose.multiplatform.ui)
             implementation(libs.koin.core)
-            implementation(libs.koin.core.viewmodel)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.androidx.lifecycle.viewmodel.kmp)
-            implementation(libs.kotlinx.datetime)
         }
 
         androidMain.dependencies {
             implementation(libs.koin.android)
-            implementation(project.dependencies.platform(libs.firebase.bom))
-            implementation(libs.firebase.messaging)
         }
 
         val iosMain by creating {
@@ -76,6 +71,7 @@ kotlin {
     }
 }
 
-compose.resources {
-    packageOfResClass = "bose.ankush.auth.generated.resources"
+dependencies {
+    add("androidMainImplementation", platform(libs.firebase.bom))
+    add("androidMainImplementation", libs.firebase.analytics)
 }

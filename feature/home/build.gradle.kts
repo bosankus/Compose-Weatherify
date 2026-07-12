@@ -58,6 +58,7 @@ kotlin {
             implementation(project(":network"))
             implementation(project(":storage"))
             implementation(project(":common-ui"))
+            implementation(project(":analytics"))
             implementation(libs.compose.multiplatform.resources)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)

@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.auth.presentation.AuthEffect
 import bose.ankush.auth.presentation.AuthIntent
 import bose.ankush.auth.presentation.AuthState
@@ -39,6 +41,7 @@ import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.theme.WeatherifyTheme
 import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.home.HomeSessionCleaner
+import bose.ankush.language.util.AppEnvironment
 import bose.ankush.navigation.AppNavigation
 import bose.ankush.payment.domain.store.PremiumStore
 import bose.ankush.payment.presentation.CheckoutParams
@@ -71,6 +74,7 @@ class MainActivity :
     // Koin-managed: cross-feature bridges into :feature:home
     private val premiumStore: PremiumStore by inject()
     private val homeSessionCleaner: HomeSessionCleaner by inject()
+    private val analyticsTracker: AnalyticsTracker by inject()
 
     // Hold a reference to the Checkout instance only during payment
     private var razorpayCheckout: Checkout? = null
@@ -80,7 +84,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         startInAppUpdate(this)
-        setContent { WeatherifyTheme { AppContent() } }
+        setContent { WeatherifyTheme { AppEnvironment { AppContent() } } }
     }
 
     @Composable
@@ -245,6 +249,9 @@ class MainActivity :
                 onClose = { currentWebUrl = null },
             )
         } else {
+            LaunchedEffect(Unit) {
+                analyticsTracker.track(AnalyticsEvent.ScreenView("login", "LoginScreen"))
+            }
             LoginScreen(
                 onLoginClick = { email, password ->
                     authViewModel.processIntent(AuthIntent.Login(email, password))

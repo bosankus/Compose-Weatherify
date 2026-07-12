@@ -57,6 +57,7 @@ import bose.ankush.language.util.LocaleHelper.changeLanguageTo
 import bose.ankush.language.util.LocaleHelper.getCountryFlag
 import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
 import bose.ankush.language.util.LocaleHelper.getDisplayName
+import bose.ankush.language.util.customAppLocale
 import org.jetbrains.compose.resources.stringResource
 
 private const val ITEM_STAGGER_DELAY_MS = 100L
@@ -69,7 +70,7 @@ fun LanguageScreen(
     val screenTransitionState = remember { MutableTransitionState(false) }
     val rememberedNavAction = remember { navAction }
     // Hoist the changedLanguage state to prevent recreation in ShowUI
-    val changedLanguage = remember { mutableStateOf(getDefaultLanguage()) }
+    val changedLanguage = remember { mutableStateOf(customAppLocale ?: getDefaultLanguage()) }
 
     LaunchedEffect(Unit) {
         screenTransitionState.targetState = true
@@ -206,6 +207,7 @@ private fun ShowUI(
                     remember(language) {
                         {
                             changedLanguage.value = changeLanguageTo(language)
+                            customAppLocale = language
                         }
                     },
             )

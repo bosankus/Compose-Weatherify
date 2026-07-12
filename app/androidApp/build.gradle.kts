@@ -101,6 +101,7 @@ dependencies {
     api(project(":navigation"))
     api(project(":storage"))
     api(project(":network"))
+    api(project(":analytics"))
 
     // Core
     implementation(libs.androidx.core.ktx)

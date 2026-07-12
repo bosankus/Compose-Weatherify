@@ -1,6 +1,7 @@
 package bose.ankush.weatherify
 
 import android.app.Application
+import bose.ankush.analytics.di.analyticsPlatformModule
 import bose.ankush.auth.di.authDomainModule
 import bose.ankush.auth.di.authViewModelModule
 import bose.ankush.finder.di.finderDomainModule
@@ -36,6 +37,7 @@ class WeatherifyApplication : Application() {
             androidContext(this@WeatherifyApplication)
             modules(
                 listOf(
+                    analyticsPlatformModule,
                     storageDomainModule,
                     networkDomainModule,
                     paymentDomainModule,

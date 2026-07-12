@@ -2,10 +2,13 @@ platform :ios, '16.0'
 use_frameworks!
 
 # Only pulls in the native pods the shared KMP modules actually cinterop against
-# (currently: feature/home's iOS FirebaseHomeRemoteConfigGate). Kotlin compilation
-# resolves this pod on its own via the Kotlin CocoaPods Gradle plugin's synthetic
-# project; this Podfile is what makes the *app link step* see FirebaseRemoteConfig.
+# (currently: feature/home's iOS FirebaseHomeRemoteConfigGate, and this app module's
+# RazorpayCheckoutBridge). Kotlin compilation resolves these pods on its own via the
+# Kotlin CocoaPods Gradle plugin's synthetic project; this Podfile is what makes the
+# *app link step* see FirebaseRemoteConfig / Razorpay.
 target 'iosApp' do
   pod 'FirebaseCore', '12.4.0'
   pod 'FirebaseRemoteConfig', '12.4.0'
+  pod 'FirebaseAnalytics', '12.4.0'
+  pod 'razorpay-pod', '~> 1.5'
 end

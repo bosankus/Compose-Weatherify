@@ -2,6 +2,8 @@ package bose.ankush.settings.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.network.repository.ServiceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,13 +17,17 @@ import kotlinx.coroutines.launch
  */
 internal class SettingsViewModel(
     private val serviceRepository: ServiceRepository,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state.asStateFlow()
 
     fun processIntent(intent: SettingsIntent) {
         when (intent) {
-            SettingsIntent.OpenPremiumSheet -> dispatch(SettingsAction.OpenPremiumSheet)
+            SettingsIntent.OpenPremiumSheet -> {
+                analyticsTracker.track(AnalyticsEvent.UpgradePromptShown)
+                dispatch(SettingsAction.OpenPremiumSheet)
+            }
 
             SettingsIntent.ClosePremiumSheet -> {
                 dispatch(SettingsAction.ClosePremiumSheet)
@@ -35,8 +41,15 @@ internal class SettingsViewModel(
             is SettingsIntent.OpenWebUrl -> dispatch(SettingsAction.OpenWebUrl(intent.url))
             SettingsIntent.CloseWebView -> dispatch(SettingsAction.CloseWebView)
             SettingsIntent.LoadServices -> loadServices()
-            is SettingsIntent.SelectService -> dispatch(SettingsAction.ServiceSelected(intent.service))
-            is SettingsIntent.SelectTier -> dispatch(SettingsAction.TierSelected(intent.tier))
+            is SettingsIntent.SelectService -> {
+                analyticsTracker.track(AnalyticsEvent.ServiceSelected(intent.service.id))
+                dispatch(SettingsAction.ServiceSelected(intent.service))
+            }
+            is SettingsIntent.SelectTier -> {
+                val serviceId = _state.value.serviceSubscription.selectedService?.id ?: ""
+                analyticsTracker.track(AnalyticsEvent.TierSelected(serviceId, intent.tier.id))
+                dispatch(SettingsAction.TierSelected(intent.tier))
+            }
         }
     }
 

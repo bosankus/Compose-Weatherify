@@ -15,6 +15,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation3.runtime.entryProvider
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.auth.presentation.AuthIntent
 import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
@@ -59,6 +61,7 @@ fun AppNavigation(
     val platformPermissions = rememberPlatformPermissions()
     val lifecycleOwner = LocalLifecycleOwner.current
     val homeLocationCoordinator = koinInject<HomeLocationCoordinator>()
+    val analyticsTracker = koinInject<AnalyticsTracker>()
     val coroutineScope = rememberCoroutineScope()
 
     var hasLocationPermission by remember { mutableStateOf(platformPermissions.hasLocationPermission()) }
@@ -86,6 +89,9 @@ fun AppNavigation(
                     hasLocationPermission = granted
                     isLocationPermissionPermanentlyDeclined = permanentlyDeclined
                     showLocationPermissionRationale = !granted
+                    analyticsTracker.track(
+                        AnalyticsEvent.PermissionResult("location", granted, permanentlyDeclined),
+                    )
                 },
             )
         }
@@ -171,6 +177,7 @@ fun AppNavigation(
             navigationState.toEntries(
                 entryProvider {
                     entry<HomeRoute> {
+                        TrackedScreen("home", "HomeScreen", analyticsTracker)
                         ExitAppOnBackPress()
                         HomeFeatureRoute(
                             bottomBar = {
@@ -197,12 +204,14 @@ fun AppNavigation(
                         )
                     }
                     entry<SavedLocationsRoute> {
+                        TrackedScreen("saved_locations", "SavedLocationsScreen", analyticsTracker)
                         SavedLocationsFinderRoute(
                             onLocationSelected = { lat, lon, name ->
                                 coroutineScope.launch {
                                     homeLocationCoordinator.setDefaultLocation(lat, lon, name)
                                 }
                             },
+                            onUpgradeClick = { navigator.navigate(SettingsRoute) },
                             bottomBar = {
                                 AppBottomBar(
                                     rememberSaveable { mutableStateOf(true) },
@@ -213,6 +222,7 @@ fun AppNavigation(
                         )
                     }
                     entry<SettingsRoute> {
+                        TrackedScreen("settings", "SettingsScreen", analyticsTracker)
                         SettingsEntry(
                             authViewModel,
                             paymentViewModel,
@@ -229,12 +239,27 @@ fun AppNavigation(
                         )
                     }
                     entry<LanguageRoute> { route ->
+                        TrackedScreen("language", "LanguageScreen", analyticsTracker)
                         LanguageScreen(languages = route.languages) { navigator.goBack() }
                     }
                 },
             ),
         onBack = navigator::goBack,
     )
+}
+
+/** Fires once per navigation-in — [LaunchedEffect] re-runs each time this entry is recomposed
+ * fresh (nav3 tears down/rebuilds top-level tab entries on switch), matching Firebase's own
+ * `screen_view` semantics of firing again on tab re-selection. */
+@Composable
+private fun TrackedScreen(
+    screenName: String,
+    screenClass: String,
+    tracker: AnalyticsTracker,
+) {
+    LaunchedEffect(Unit) {
+        tracker.track(AnalyticsEvent.ScreenView(screenName, screenClass))
+    }
 }
 
 @Composable

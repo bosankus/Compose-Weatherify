@@ -48,6 +48,7 @@ kotlin {
             implementation(project(":feature:finder"))
             implementation(project(":feature:home"))
             implementation(project(":feature:settings"))
+            implementation(project(":analytics"))
             implementation(libs.compose.multiplatform.resources)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)

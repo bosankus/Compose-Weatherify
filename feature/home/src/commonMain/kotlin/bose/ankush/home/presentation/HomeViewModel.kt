@@ -2,6 +2,8 @@ package bose.ankush.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.usecase.GetAirQuality
@@ -51,6 +53,7 @@ internal class HomeViewModel(
     private val locationClient: LocationClient,
     private val locationPreferencesStorage: LocationPreferencesStorage,
     private val remoteConfigGate: HomeRemoteConfigGate,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
@@ -124,8 +127,10 @@ internal class HomeViewModel(
                         },
                 )
 
-            HomeIntent.DismissNotificationBanner ->
+            HomeIntent.DismissNotificationBanner -> {
+                analyticsTracker.track(AnalyticsEvent.NotificationBannerDismissed)
                 dispatch(action = HomeAction.DismissNotificationBanner)
+            }
 
             is HomeIntent.UpdateNotificationPermissionState ->
                 updateNotificationBannerVisibility(hasPermission = intent.hasPermission)
@@ -145,11 +150,22 @@ internal class HomeViewModel(
         notificationBannerVisibilityJob =
             viewModelScope.launch(dataFetchExceptionHandler) {
                 val enabled = remoteConfigGate.isNotificationBannerEnabled()
-                dispatch(HomeAction.UpdateNotificationBanner(show = enabled && !hasPermission))
+                val show = enabled && !hasPermission
+                if (show) {
+                    analyticsTracker.track(AnalyticsEvent.NotificationBannerShown("remote_config_enabled"))
+                }
+                dispatch(HomeAction.UpdateNotificationBanner(show = show))
             }
     }
 
     private fun handlePermissionResult(intent: HomeIntent.NotificationPermissionResult) {
+        analyticsTracker.track(
+            AnalyticsEvent.PermissionResult(
+                permissionType = "notification",
+                granted = intent.isGranted,
+                permanentlyDeclined = intent.isPermanentlyDeclined,
+            ),
+        )
         dispatch(
             HomeAction.UpdateNotificationBanner(
                 show = !intent.isGranted,

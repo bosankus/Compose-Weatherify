@@ -2,6 +2,8 @@ package bose.ankush.finder.presentation.placesearch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.finder.domain.usecase.SearchPlacesUseCase
 import bose.ankush.finder.generated.resources.Res
 import bose.ankush.finder.generated.resources.place_search_error
@@ -24,11 +26,13 @@ private const val MIN_QUERY_LENGTH = 2
 @OptIn(FlowPreview::class)
 internal class PlaceSearchViewModel(
     private val searchPlacesUseCase: SearchPlacesUseCase,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
     private val _state = MutableStateFlow(PlaceSearchState())
     val state: StateFlow<PlaceSearchState> = _state.asStateFlow()
 
     private val _queryFlow = MutableStateFlow("")
+    private var hasTrackedSearchStart = false
 
     init {
         viewModelScope.launch {
@@ -52,18 +56,23 @@ internal class PlaceSearchViewModel(
         _queryFlow.value = query
         if (query.length < MIN_QUERY_LENGTH) {
             _state.update { it.copy(results = emptyList(), isLoading = false) }
+        } else if (!hasTrackedSearchStart) {
+            hasTrackedSearchStart = true
+            analyticsTracker.track(AnalyticsEvent.LocationSearchStarted)
         }
     }
 
     private fun clear() {
         _state.value = PlaceSearchState()
         _queryFlow.value = ""
+        hasTrackedSearchStart = false
     }
 
     private suspend fun fetchPlaceSuggestions(query: String) {
         _state.update { it.copy(isLoading = true, error = null) }
         searchPlacesUseCase(query).fold(
             onSuccess = { suggestions ->
+                analyticsTracker.track(AnalyticsEvent.Search(query))
                 _state.update { it.copy(isLoading = false, results = suggestions) }
             },
             onFailure = { e ->

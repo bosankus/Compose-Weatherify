@@ -2,6 +2,8 @@ package bose.ankush.auth.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import bose.ankush.analytics.AnalyticsEvent
+import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.auth.domain.DeviceInfoProvider
 import bose.ankush.network.auth.events.AuthEvent
 import bose.ankush.network.auth.events.AuthEventBus
@@ -26,6 +28,7 @@ class AuthViewModel(
     private val authRepository: AuthRepository,
     private val tokenManager: TokenManager,
     private val deviceInfoProvider: DeviceInfoProvider,
+    private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -79,12 +82,12 @@ class AuthViewModel(
     private fun login(
         email: String,
         password: String,
-    ) = launchAuth("Login") { authRepository.login(email, password) }
+    ) = launchAuth("Login", AnalyticsEvent.Login()) { authRepository.login(email, password) }
 
     private fun register(
         email: String,
         password: String,
-    ) = launchAuth("Registration") {
+    ) = launchAuth("Registration", AnalyticsEvent.SignUp()) {
         authRepository.register(
             email = email,
             password = password,
@@ -100,11 +103,12 @@ class AuthViewModel(
 
     private fun launchAuth(
         actionName: String,
+        successEvent: AnalyticsEvent,
         block: suspend () -> AuthResponse,
     ) = viewModelScope.launch {
         _authState.value = AuthState.Loading
         try {
-            handleAuthResponse(block())
+            handleAuthResponse(block(), successEvent)
         } catch (_: CancellationException) {
             _authState.value = AuthState.Error("$actionName was cancelled")
         } catch (e: Exception) {
@@ -117,6 +121,7 @@ class AuthViewModel(
             _authState.value = AuthState.LogoutLoading
             authRepository.logout().fold(
                 onSuccess = {
+                    analyticsTracker.track(AnalyticsEvent.Logout)
                     _effect.trySend(AuthEffect.LoggedOut)
                     _authState.value = AuthState.LoggedOut
                 },
@@ -145,7 +150,10 @@ class AuthViewModel(
             }
         }
 
-    private fun handleAuthResponse(response: AuthResponse) {
+    private fun handleAuthResponse(
+        response: AuthResponse,
+        successEvent: AnalyticsEvent,
+    ) {
         val data =
             response.data
                 ?.takeIf { response.isSuccess() && it.token.isNotBlank() }
@@ -157,6 +165,7 @@ class AuthViewModel(
         val premiumActive = isPremiumActive(data.premiumExpiresAt)
         val expiryMillis = data.premiumExpiresAt?.let { parseIsoToMillis(it) }
 
+        analyticsTracker.track(successEvent)
         _effect.trySend(AuthEffect.PremiumStatusChanged(premiumActive, expiryMillis))
         _authState.value = AuthState.Success
     }

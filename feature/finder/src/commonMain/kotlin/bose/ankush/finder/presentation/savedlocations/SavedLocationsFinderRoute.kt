@@ -15,6 +15,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun SavedLocationsFinderRoute(
     onLocationSelected: (lat: Double, lon: Double, name: String) -> Unit,
+    onUpgradeClick: () -> Unit,
     bottomBar: @Composable () -> Unit = {},
 ) {
     val viewModel = koinViewModel<SavedLocationsViewModel>()
@@ -34,6 +35,7 @@ fun SavedLocationsFinderRoute(
     SavedLocationsScreen(
         state = state,
         onIntent = viewModel::processIntent,
+        onUpgradeClick = onUpgradeClick,
         bottomBar = bottomBar,
     )
 }
