@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1017382896100-m7om6uam1orul0pr7tqjq7gaos0fcmok.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC3Ws-ZpFeUIgY6n_o318Hyw5FujGOcodE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1017382896100</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>bose.ankush.weatherify.ios</string>
+	<key>PROJECT_ID</key>
+	<string>weatherify-mvvm</string>
+	<key>STORAGE_BUCKET</key>
+	<string>weatherify-mvvm.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1017382896100:ios:e9319f65076b11a47447f1</string>
+</dict>
+</plist>
