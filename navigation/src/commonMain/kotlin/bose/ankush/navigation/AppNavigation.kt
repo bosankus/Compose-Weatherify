@@ -103,7 +103,13 @@ fun AppNavigation(
                         locationPermissionRequestId++
                     }
                 },
-                onNegativeAction = exitApp,
+                onNegativeAction = {
+                    // exitApp() is a no-op on iOS (Apple's HIG forbids programmatic quitting), so
+                    // the dialog must dismiss itself here rather than relying solely on the app
+                    // exiting — otherwise it's stuck with no escape when permission is declined.
+                    showLocationPermissionRationale = false
+                    exitApp()
+                },
                 positiveButtonLabel =
                     if (isLocationPermissionPermanentlyDeclined) {
                         stringResource(Res.string.grant_permission_btn_txt)
@@ -118,6 +124,7 @@ fun AppNavigation(
     if (showNotificationPermissionRequest) {
         RequestNotificationPermission(
             onResult = { granted, permanentlyDeclined ->
+                hasNotificationPermission = granted
                 isNotificationPermissionPermanentlyDeclined = permanentlyDeclined
                 notificationPermissionResult =
                     HomeNotificationPermissionResult(
@@ -193,6 +200,7 @@ fun AppNavigation(
                             toastAnchorState,
                             versionName = versionName,
                             onShowToast = onShowToast,
+                            hasNotificationPermission = hasNotificationPermission,
                             isNotificationPermissionPermanentlyDeclined =
                             isNotificationPermissionPermanentlyDeclined,
                             onRequestNotificationPermission = {
@@ -218,6 +226,7 @@ private fun SettingsEntry(
     versionName: String,
     onShowToast: (String) -> Unit,
     onRequestNotificationPermission: () -> Unit,
+    hasNotificationPermission: Boolean,
     isNotificationPermissionPermanentlyDeclined: Boolean,
 ) {
     val platformPermissions = rememberPlatformPermissions()
@@ -233,7 +242,7 @@ private fun SettingsEntry(
         versionName = versionName,
         shouldShowNotificationItem =
             platformPermissions.requiresRuntimeNotificationPermission() &&
-                !platformPermissions.hasNotificationPermission(),
+                !hasNotificationPermission,
         languageList = languageList,
         onLogout = { authViewModel.processIntent(AuthIntent.Logout) },
         onLoggedOutHandled = { authViewModel.processIntent(AuthIntent.Reset) },
@@ -249,7 +258,8 @@ private fun SettingsEntry(
         onNotificationNavAction = {
             when {
                 isNotificationPermissionPermanentlyDeclined -> platformPermissions.openAppSystemSettings()
-                !platformPermissions.hasNotificationPermission() -> onRequestNotificationPermission()
+                !hasNotificationPermission -> onRequestNotificationPermission()
+                else -> Unit
             }
         },
         onBottomBarVisibilityChange = { isBottomBarVisible.value = it },

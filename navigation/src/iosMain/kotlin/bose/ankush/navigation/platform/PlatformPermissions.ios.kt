@@ -3,7 +3,10 @@
 package bose.ankush.navigation.platform
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
@@ -20,11 +23,7 @@ actual fun rememberPlatformPermissions(): PlatformPermissions = remember { IosPl
 
 private class IosPlatformPermissions : PlatformPermissions {
     private val locationManager = CLLocationManager()
-
-    // UNUserNotificationCenter's authorization status is only readable asynchronously; we kick off
-    // a refresh on every check and serve the last-known cached value synchronously in the meantime,
-    // rather than blocking the caller (there is no synchronous equivalent on iOS).
-    private var cachedHasNotificationPermission = false
+    private var cachedHasNotificationPermission by mutableStateOf(false)
 
     override fun hasLocationPermission(): Boolean {
         val status = locationManager.authorizationStatus
