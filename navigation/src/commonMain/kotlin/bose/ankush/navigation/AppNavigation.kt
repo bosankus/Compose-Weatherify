@@ -162,6 +162,9 @@ fun AppNavigation(
                             onRequestNotificationPermission = {
                                 showNotificationPermissionRequest = true
                             },
+                            onRequestLocationPermission = {
+                                locationPermissionRequestId++
+                            },
                             onOpenSettings = { platformPermissions.openAppSystemSettings() },
                             onOpenLocationSettings = { platformPermissions.openLocationSettings() },
                         )

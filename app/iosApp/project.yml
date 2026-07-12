@@ -1,0 +1,75 @@
+name: iosApp
+options:
+  bundleIdPrefix: bose.ankush.weatherify
+  deploymentTarget:
+    iOS: "16.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # KMP dropped iosX64 (x86_64 simulator) once Compose Multiplatform stopped
+    # publishing artifacts for it; without this, Xcode still builds x86_64 for
+    # the simulator SDK by default and syncComposeResourcesForIos rejects it.
+    EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
+
+projectReferences:
+  Pods:
+    path: Pods/Pods.xcodeproj
+
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosApp
+    configFiles:
+      Debug: Pods/Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig
+      Release: Pods/Target Support Files/Pods-iosApp/Pods-iosApp.release.xcconfig
+    dependencies:
+      # xcodegen regenerates iosApp.xcodeproj from scratch, so it doesn't retain the
+      # target dependency `pod install` normally wires up. Without this, Xcode builds
+      # the iosApp target without ever building Pods-iosApp, so Firebase's frameworks
+      # never land in Build/Products and the link step fails with "framework not found".
+      - target: Pods/Pods-iosApp
+    info:
+      path: iosApp/Info.plist
+      properties:
+        CADisableMinimumFrameDurationOnPhone: true
+        NSLocationWhenInUseUsageDescription: "Weatherify needs your location to show local weather conditions."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: bose.ankush.weatherify.ios
+        PRODUCT_NAME: iosApp
+        # embedAndSignAppleFrameworkForXcode (Run Script below) drops the built
+        # .framework into $TARGET_BUILD_DIR, which Xcode already searches — this
+        # flag is what actually links the static framework into the binary.
+        OTHER_LDFLAGS: $(inherited) -framework ComposeApp
+        ENABLE_BITCODE: NO
+    preBuildScripts:
+      - name: Compile Kotlin Framework (KMP :app:iosApp)
+        shell: /bin/sh
+        script: |
+          unset ANDROID_PREFS_ROOT
+          cd "$SRCROOT/../.."
+          ./gradlew :app:iosApp:embedAndSignAppleFrameworkForXcode
+        inputFiles:
+          - "$(SRCROOT)/../src/iosMain/**"
+        outputFiles:
+          - "$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ComposeApp.framework"
+    postBuildScripts:
+      # `pod install` normally wires this in as the "[CP] Embed Pods Frameworks"
+      # build phase on the app target directly inside iosApp.xcodeproj. Since
+      # xcodegen regenerates that project from scratch, the phase is lost on every
+      # `xcodegen generate`, so Firebase's transitive frameworks (e.g. FBLPromises)
+      # never get copied into the app bundle and the app crashes at launch with a
+      # dyld "Library not loaded" error. Re-declaring it here keeps it present.
+      - name: "[CP] Embed Pods Frameworks"
+        shell: /bin/sh
+        script: |
+          "${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks.sh"
+        inputFileLists:
+          - "${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks-${CONFIGURATION}-input-files.xcfilelist"
+        outputFileLists:
+          - "${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks-${CONFIGURATION}-output-files.xcfilelist"

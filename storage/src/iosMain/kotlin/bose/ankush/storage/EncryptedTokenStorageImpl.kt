@@ -1,5 +1,3 @@
-@file:Suppress("UNCHECKED_CAST", "CAST_NEVER_SUCCEEDS")
-
 package bose.ankush.storage
 
 import bose.ankush.storage.api.TokenStorage
@@ -12,11 +10,17 @@ import kotlinx.cinterop.value
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import platform.CoreFoundation.CFDictionaryAddValue
+import platform.CoreFoundation.CFDictionaryCreateMutable
 import platform.CoreFoundation.CFDictionaryRef
+import platform.CoreFoundation.CFMutableDictionaryRef
 import platform.CoreFoundation.CFTypeRefVar
+import platform.CoreFoundation.kCFBooleanTrue
+import platform.CoreFoundation.kCFTypeDictionaryKeyCallBacks
+import platform.CoreFoundation.kCFTypeDictionaryValueCallBacks
 import platform.Foundation.CFBridgingRelease
+import platform.Foundation.CFBridgingRetain
 import platform.Foundation.NSData
-import platform.Foundation.NSMutableDictionary
 import platform.Foundation.NSString
 import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.create
@@ -58,9 +62,9 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
         deleteTokenFromKeychain()
 
         val query = buildBaseQuery()
-        query.setObject(tokenData, forKey = kSecValueData as NSString)
+        CFDictionaryAddValue(query, kSecValueData, CFBridgingRetain(tokenData))
 
-        val status = SecItemAdd(query as CFDictionaryRef, null)
+        val status = SecItemAdd(query, null)
         if (status == 0) {
             hasTokenState.value = true
         } else {
@@ -79,12 +83,12 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
 
     private fun retrieveTokenFromKeychain(): String? {
         val query = buildBaseQuery()
-        query.setObject(true, forKey = kSecReturnData as NSString)
-        query.setObject(kSecMatchLimitOne, forKey = kSecMatchLimit as NSString)
+        CFDictionaryAddValue(query, kSecReturnData, kCFBooleanTrue)
+        CFDictionaryAddValue(query, kSecMatchLimit, kSecMatchLimitOne)
 
         return memScoped {
             val resultRef = alloc<CFTypeRefVar>()
-            val status = SecItemCopyMatching(query as CFDictionaryRef, resultRef.ptr)
+            val status = SecItemCopyMatching(query, resultRef.ptr)
             if (status == 0) {
                 val nsData = CFBridgingRelease(resultRef.value) as? NSData
                 nsData?.let {
@@ -98,23 +102,27 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
 
     private fun deleteTokenFromKeychain() {
         val query = buildBaseQuery()
-        val status = SecItemDelete(query as CFDictionaryRef)
+        val status = SecItemDelete(query)
         // errSecItemNotFound (-25300) is acceptable — nothing to delete
         if (status != 0 && status != -25300) {
             throw Exception("Failed to delete token from Keychain: error code $status")
         }
     }
 
-    private fun buildBaseQuery(): NSMutableDictionary =
-        NSMutableDictionary().apply {
-            setObject(kSecClassGenericPassword, forKey = kSecClass as NSString)
-            setObject(SERVICE_ID, forKey = kSecAttrService as NSString)
-            setObject(ACCOUNT_ID, forKey = kSecAttrAccount as NSString)
-            setObject(
-                kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-                forKey = kSecAttrAccessible as NSString,
-            )
-        }
+    private fun buildBaseQuery(): CFMutableDictionaryRef {
+        val dict =
+            CFDictionaryCreateMutable(
+                null,
+                4,
+                kCFTypeDictionaryKeyCallBacks.ptr,
+                kCFTypeDictionaryValueCallBacks.ptr,
+            ) ?: throw Exception("Failed to create CFMutableDictionary")
+        CFDictionaryAddValue(dict, kSecClass, kSecClassGenericPassword)
+        CFDictionaryAddValue(dict, kSecAttrService, CFBridgingRetain(SERVICE_ID as NSString))
+        CFDictionaryAddValue(dict, kSecAttrAccount, CFBridgingRetain(ACCOUNT_ID as NSString))
+        CFDictionaryAddValue(dict, kSecAttrAccessible, kSecAttrAccessibleWhenUnlockedThisDeviceOnly)
+        return dict
+    }
 
     companion object {
         private const val SERVICE_ID = "com.weatherify.auth"

@@ -90,6 +90,7 @@ fun HomeFeatureRoute(
     hasNotificationPermission: Boolean = true,
     notificationPermissionResult: HomeNotificationPermissionResult? = null,
     onRequestNotificationPermission: () -> Unit = {},
+    onRequestLocationPermission: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onOpenLocationSettings: () -> Unit = {},
 ) {
@@ -130,8 +131,8 @@ fun HomeFeatureRoute(
                 when (effect) {
                     HomeEffect.RequestNotificationPermission -> onRequestNotificationPermission()
                     HomeEffect.OpenSettings -> onOpenSettings()
-                    HomeEffect.RequestGpsPermission -> TODO()
-                    HomeEffect.RequestLocationPermission -> TODO()
+                    HomeEffect.RequestGpsPermission -> onOpenLocationSettings()
+                    HomeEffect.RequestLocationPermission -> onRequestLocationPermission()
                 }
             }
     }
@@ -157,8 +158,29 @@ fun HomeFeatureRoute(
                 errorText = state.error,
                 isLoading = state.isLoading,
                 isGpsDisabled = state.isGpsDisabled,
+                isLocationPermissionDenied = state.isLocationPermissionDenied,
                 onOpenLocationSettings = onOpenLocationSettings,
                 onRetry = { viewModel.processIntent(HomeIntent.FetchLocation) },
+                onRequestLocationPermission = {
+                    viewModel.processIntent(HomeIntent.RequestLocationPermission)
+                },
+            )
+        }
+
+        // No cached data to fall back on (e.g. a fresh install with location resolution
+        // failing) — SetOffline clears `error`, so without this branch the UI is stuck on
+        // the shimmer forever since no further actions get dispatched.
+        state.isOffline && !state.isLoading -> {
+            HandleScreenError(
+                errorText = state.offlineMessage,
+                isLoading = state.isLoading,
+                isGpsDisabled = state.isGpsDisabled,
+                isLocationPermissionDenied = state.isLocationPermissionDenied,
+                onOpenLocationSettings = onOpenLocationSettings,
+                onRetry = { viewModel.processIntent(HomeIntent.FetchLocation) },
+                onRequestLocationPermission = {
+                    viewModel.processIntent(HomeIntent.RequestLocationPermission)
+                },
             )
         }
 
@@ -177,8 +199,10 @@ private fun HandleScreenError(
     errorText: String?,
     isLoading: Boolean,
     isGpsDisabled: Boolean,
+    isLocationPermissionDenied: Boolean,
     onOpenLocationSettings: () -> Unit,
     onRetry: () -> Unit,
+    onRequestLocationPermission: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         ErrorBackgroundAnimation()
@@ -196,7 +220,12 @@ private fun HandleScreenError(
                     stringResource(Res.string.retry_btn_txt)
                 },
             isLoading = isLoading,
-            buttonAction = if (isGpsDisabled) onOpenLocationSettings else onRetry,
+            buttonAction =
+                when {
+                    isGpsDisabled -> onOpenLocationSettings
+                    isLocationPermissionDenied -> onRequestLocationPermission
+                    else -> onRetry
+                },
         )
     }
 }

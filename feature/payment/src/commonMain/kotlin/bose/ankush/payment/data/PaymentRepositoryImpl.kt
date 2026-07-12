@@ -30,7 +30,7 @@ internal class PaymentRepositoryImpl(
                 )
             val response = apiService.createOrder(request)
             response.toOrder()
-                ?: error("Order data missing or invalid in server response")
+                ?: throw IllegalStateException("Order data missing or invalid in server response")
         }
     }
 

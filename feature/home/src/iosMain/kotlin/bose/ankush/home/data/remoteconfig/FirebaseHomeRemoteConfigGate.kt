@@ -7,18 +7,25 @@ import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
 internal class FirebaseHomeRemoteConfigGate : HomeRemoteConfigGate {
-    private val remoteConfig: FIRRemoteConfig = FIRRemoteConfig.remoteConfig()
+    private val remoteConfig: FIRRemoteConfig? by lazy {
+        try {
+            FIRRemoteConfig.remoteConfig()
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     override fun initialize() {
-        remoteConfig.configSettings =
+        val config = remoteConfig ?: return
+        config.configSettings =
             FIRRemoteConfigSettings().apply {
                 minimumFetchInterval = DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS
             }
-        remoteConfig.fetchAndActivateWithCompletionHandler { _, _ -> }
+        config.fetchAndActivateWithCompletionHandler { _, _ -> }
     }
 
     override fun isNotificationBannerEnabled(): Boolean =
-        remoteConfig.configValueForKey(ENABLE_NOTIFICATION_KEY).boolValue
+        remoteConfig?.configValueForKey(ENABLE_NOTIFICATION_KEY)?.boolValue ?: false
 
     companion object {
         private const val DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS = 3600.0

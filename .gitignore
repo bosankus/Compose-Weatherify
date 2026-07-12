@@ -1,3 +1,4 @@
+.gitignore
 # Built application files
 *.apk
 *.aar
@@ -19,6 +20,10 @@ out/
 .gradle/
 build/
 */build/
+
+# Kotlin compiler daemon/build cache
+.kotlin/
+*/.kotlin/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -43,6 +48,7 @@ captures/
 .idea/caches
 .idea/modules.xml
 .idea/navEditor.xml
+.idea/artifacts/
 
 # Keystore files
 *.jks
@@ -54,6 +60,18 @@ captures/
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+GoogleService-Info.plist
+
+# CocoaPods (installed via `pod install`; Podfile/Podfile.lock are the source of truth)
+Pods/
+
+# XcodeGen (regenerated from project.yml via `xcodegen generate`)
+*.xcodeproj/
+*.xcworkspace/
+
+# Xcode user-specific state
+xcuserdata/
+*.xcuserstate
 
 # Freeline
 freeline.py

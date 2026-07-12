@@ -9,6 +9,7 @@ Pod::Spec.new do |spec|
     spec.vendored_frameworks      = 'build/cocoapods/framework/home.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target    = '15.0'
+    spec.dependency 'FirebaseCore', '12.4.0'
     spec.dependency 'FirebaseRemoteConfig', '12.4.0'
     if !Dir.exist?('build/cocoapods/framework/home.framework') || Dir.empty?('build/cocoapods/framework/home.framework')
         raise "

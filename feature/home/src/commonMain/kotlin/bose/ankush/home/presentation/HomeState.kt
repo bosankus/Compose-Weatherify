@@ -11,6 +11,7 @@ internal data class HomeState(
     val airQualityData: AirQuality? = null,
     val error: String? = null,
     val isGpsDisabled: Boolean = false,
+    val isLocationPermissionDenied: Boolean = false,
     val isLocationOverridden: Boolean = false,
     val activeLocationName: String? = null,
     val isOffline: Boolean = false,

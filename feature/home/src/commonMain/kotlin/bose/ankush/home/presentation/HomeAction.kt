@@ -17,6 +17,7 @@ internal sealed interface HomeAction {
         val message: String?,
         val isOffline: Boolean = false,
         val isGpsDisabled: Boolean = false,
+        val isLocationPermissionDenied: Boolean = false,
     ) : HomeAction
 
     data class Success(

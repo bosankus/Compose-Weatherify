@@ -111,6 +111,8 @@ internal class HomeViewModel(
         when (intent) {
             HomeIntent.FetchLocation, HomeIntent.Refresh -> refreshTrigger.tryEmit(value = true)
             HomeIntent.ResetLocationOverride -> resetLocationOverride()
+            HomeIntent.RequestLocationPermission ->
+                _effect.trySend(element = HomeEffect.RequestLocationPermission)
             HomeIntent.EnableNotificationBanner ->
                 _effect.trySend(
                     element =
@@ -166,6 +168,7 @@ internal class HomeViewModel(
                         message = resolution.message,
                         isOffline = true,
                         isGpsDisabled = resolution.isGpsDisabled,
+                        isLocationPermissionDenied = resolution.isPermissionDenied,
                     ),
                 )
                 resolution.fallback?.let {
@@ -211,6 +214,7 @@ internal class HomeViewModel(
             return CoordinateResolution.LocationError(
                 message = getString(Res.string.location_permission_denied_txt),
                 isGpsDisabled = false,
+                isPermissionDenied = true,
                 fallback = fallback,
             )
         }
@@ -241,7 +245,7 @@ internal class HomeViewModel(
                             )
                         }
                     }
-                CoordinateResolution.LocationError(message, isGpsDisabled, fallback)
+                CoordinateResolution.LocationError(message, isGpsDisabled, fallback = fallback)
             },
         )
     }

@@ -6,8 +6,10 @@ import bose.ankush.home.domain.location.Coordinates
 import bose.ankush.home.domain.location.LocationClient
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.toKotlinInstant
 import platform.CoreLocation.CLLocation
@@ -24,14 +26,23 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 
 internal class IosLocationClient : LocationClient {
-    private val manager: CLLocationManager by lazy {
-        CLLocationManager().apply {
+    // CLLocationManager must be created and used on the main thread.
+    private var manager: CLLocationManager? = null
+
+    // CLLocationManager.delegate is a weak Obj-C property; without a strong Kotlin reference the
+    // delegate can be deallocated before didUpdateLocations/didFailWithError ever fires.
+    private var activeDelegate: CLLocationManagerDelegateProtocol? = null
+
+    private fun requireManager(): CLLocationManager =
+        manager ?: CLLocationManager().apply {
             desiredAccuracy = kCLLocationAccuracyBest
+            manager = this
         }
-    }
 
     override fun hasLocationPermission(): Boolean {
-        val status = manager.authorizationStatus
+        val status =
+            manager?.authorizationStatus
+                ?: CLLocationManager().authorizationStatus
         return status == kCLAuthorizationStatusAuthorizedAlways ||
             status == kCLAuthorizationStatusAuthorizedWhenInUse
     }
@@ -58,61 +69,75 @@ internal class IosLocationClient : LocationClient {
     }
 
     private suspend fun fetchOnce(): Result<Coordinates> {
+        // CLLocationManager APIs must be called on the main thread.
         val result =
-            withTimeoutOrNull(LOCATION_FETCH_TIMEOUT_MS) {
-                suspendCancellableCoroutine { continuation ->
-                    val delegate =
-                        object : NSObject(), CLLocationManagerDelegateProtocol {
-                            override fun locationManager(
-                                manager: CLLocationManager,
-                                didUpdateLocations: List<*>,
-                            ) {
-                                val location = didUpdateLocations.lastOrNull() as? CLLocation
-                                manager.stopUpdatingLocation()
-                                if (!continuation.isActive) return
+            withContext(Dispatchers.Main) {
+                withTimeoutOrNull(LOCATION_FETCH_TIMEOUT_MS) {
+                    suspendCancellableCoroutine { continuation ->
+                        val mgr = requireManager()
+                        val delegate =
+                            object : NSObject(), CLLocationManagerDelegateProtocol {
+                                fun clearIfCurrent() {
+                                    if (activeDelegate === this) activeDelegate = null
+                                }
 
-                                when {
-                                    location == null ->
+                                override fun locationManager(
+                                    manager: CLLocationManager,
+                                    didUpdateLocations: List<*>,
+                                ) {
+                                    val location = didUpdateLocations.lastOrNull() as? CLLocation
+                                    manager.stopUpdatingLocation()
+                                    clearIfCurrent()
+                                    if (!continuation.isActive) return
+
+                                    when {
+                                        location == null ->
+                                            continuation.resume(
+                                                Result.failure(
+                                                    LocationClient.LocationException("Coordinates are not present."),
+                                                ),
+                                            )
+
+                                        !isAcceptable(location) ->
+                                            continuation.resume(
+                                                Result.failure(
+                                                    LocationClient.LocationException("Coordinates are not updated!"),
+                                                ),
+                                            )
+
+                                        else -> {
+                                            val coordinates =
+                                                location.coordinate.useContents { Coordinates(latitude, longitude) }
+                                            continuation.resume(Result.success(coordinates))
+                                        }
+                                    }
+                                }
+
+                                override fun locationManager(
+                                    manager: CLLocationManager,
+                                    didFailWithError: NSError,
+                                ) {
+                                    manager.stopUpdatingLocation()
+                                    clearIfCurrent()
+                                    if (continuation.isActive) {
                                         continuation.resume(
                                             Result.failure(
-                                                LocationClient.LocationException("Coordinates are not present."),
+                                                LocationClient.LocationException(didFailWithError.localizedDescription),
                                             ),
                                         )
-
-                                    !isAcceptable(location) ->
-                                        continuation.resume(
-                                            Result.failure(
-                                                LocationClient.LocationException("Coordinates are not updated!"),
-                                            ),
-                                        )
-
-                                    else -> {
-                                        val coordinates =
-                                            location.coordinate.useContents { Coordinates(latitude, longitude) }
-                                        continuation.resume(Result.success(coordinates))
                                     }
                                 }
                             }
 
-                            override fun locationManager(
-                                manager: CLLocationManager,
-                                didFailWithError: NSError,
-                            ) {
-                                manager.stopUpdatingLocation()
-                                if (continuation.isActive) {
-                                    continuation.resume(
-                                        Result.failure(
-                                            LocationClient.LocationException(didFailWithError.localizedDescription),
-                                        ),
-                                    )
-                                }
-                            }
+                        activeDelegate = delegate
+                        mgr.delegate = delegate
+                        mgr.requestLocation()
+
+                        continuation.invokeOnCancellation {
+                            mgr.stopUpdatingLocation()
+                            delegate.clearIfCurrent()
                         }
-
-                    manager.delegate = delegate
-                    manager.requestLocation()
-
-                    continuation.invokeOnCancellation { manager.stopUpdatingLocation() }
+                    }
                 }
             }
         return result

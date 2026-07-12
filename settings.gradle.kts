@@ -23,7 +23,8 @@ dependencyResolutionManagement {
 rootProject.name = "Weatherify"
 
 include(
-    ":app",
+    ":app:androidApp",
+    ":app:iosApp",
     ":common-ui",
     ":feature:auth",
     ":feature:language",

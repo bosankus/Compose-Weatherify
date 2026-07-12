@@ -51,7 +51,7 @@ class AppNavigationState(
     var topLevelRoute: NavKey by topLevelRoute
 
     val currentStack: NavBackStack<NavKey>
-        get() = backStacks[topLevelRoute] ?: error("No back stack for $topLevelRoute")
+        get() = backStacks[topLevelRoute] ?: backStacks[startRoute] ?: backStacks.values.first()
 
     fun isTabRoute(route: NavKey): Boolean = route in backStacks.keys
 }
@@ -81,33 +81,18 @@ fun rememberAppNavigationState(): AppNavigationState {
 
 @Composable
 fun AppNavigationState.toEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): List<NavEntry<NavKey>> {
+    // Only decorate entries for the active tab to avoid duplicate NavKey registration
+    // in the saveable state holder (each tab root is a unique key, but composing all
+    // three simultaneously caused "Key was used multiple times" on iOS).
     val saveableDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
     val vmDecorator = rememberViewModelStoreNavEntryDecorator<NavKey>()
+    val decorators = listOf(saveableDecorator, vmDecorator)
 
-    val homeEntries =
-        rememberDecoratedNavEntries(
-            backStack = backStacks[HomeRoute]!!,
-            entryDecorators = listOf(saveableDecorator, vmDecorator),
-            entryProvider = entryProvider,
-        )
-    val savedLocationsEntries =
-        rememberDecoratedNavEntries(
-            backStack = backStacks[SavedLocationsRoute]!!,
-            entryDecorators = listOf(saveableDecorator, vmDecorator),
-            entryProvider = entryProvider,
-        )
-    val settingsEntries =
-        rememberDecoratedNavEntries(
-            backStack = backStacks[SettingsRoute]!!,
-            entryDecorators = listOf(saveableDecorator, vmDecorator),
-            entryProvider = entryProvider,
-        )
-
-    return when (topLevelRoute) {
-        SavedLocationsRoute -> savedLocationsEntries
-        SettingsRoute -> settingsEntries
-        else -> homeEntries
-    }
+    return rememberDecoratedNavEntries(
+        backStack = currentStack,
+        entryDecorators = decorators,
+        entryProvider = entryProvider,
+    )
 }
 
 class AppNavigator(

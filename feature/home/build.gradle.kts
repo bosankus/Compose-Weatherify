@@ -15,6 +15,10 @@ kotlin {
         homepage = "https://github.com/bosankus/Compose-Weatherify"
         ios.deploymentTarget = "15.0"
 
+        pod("FirebaseCore") {
+            version = "12.4.0"
+        }
+
         pod("FirebaseRemoteConfig") {
             version = "12.4.0"
             extraOpts += listOf("-compiler-option", "-fmodules")

@@ -29,6 +29,7 @@ internal object HomeReducer {
                     isOffline = action.isOffline,
                     offlineMessage = action.message,
                     isGpsDisabled = action.isGpsDisabled,
+                    isLocationPermissionDenied = action.isLocationPermissionDenied,
                 )
 
             is HomeAction.Success ->

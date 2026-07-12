@@ -1,0 +1,11 @@
+platform :ios, '16.0'
+use_frameworks!
+
+# Only pulls in the native pods the shared KMP modules actually cinterop against
+# (currently: feature/home's iOS FirebaseHomeRemoteConfigGate). Kotlin compilation
+# resolves this pod on its own via the Kotlin CocoaPods Gradle plugin's synthetic
+# project; this Podfile is what makes the *app link step* see FirebaseRemoteConfig.
+target 'iosApp' do
+  pod 'FirebaseCore', '12.4.0'
+  pod 'FirebaseRemoteConfig', '12.4.0'
+end
