@@ -30,9 +30,11 @@ import bose.ankush.navigation.generated.resources.Res
 import bose.ankush.navigation.generated.resources.exit_btn_txt
 import bose.ankush.navigation.generated.resources.grant_permission_btn_txt
 import bose.ankush.navigation.generated.resources.locale_config_error_txt
+import bose.ankush.navigation.generated.resources.location_permission_declined_ios_txt
 import bose.ankush.navigation.generated.resources.location_permission_declined_txt
 import bose.ankush.navigation.generated.resources.location_permission_rationale_txt
 import bose.ankush.navigation.platform.ExitAppOnBackPress
+import bose.ankush.navigation.platform.ObserveAppForeground
 import bose.ankush.navigation.platform.RequestLocationPermission
 import bose.ankush.navigation.platform.RequestNotificationPermission
 import bose.ankush.navigation.platform.rememberExitAppAction
@@ -60,7 +62,10 @@ fun AppNavigation(
     val coroutineScope = rememberCoroutineScope()
 
     var hasLocationPermission by remember { mutableStateOf(platformPermissions.hasLocationPermission()) }
-    var hasNotificationPermission by remember { mutableStateOf(platformPermissions.hasNotificationPermission()) }
+    var hasNotificationPermission by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        hasNotificationPermission = platformPermissions.hasNotificationPermission()
+    }
 
     var showNotificationPermissionRequest by remember { mutableStateOf(false) }
     var notificationPermissionResult by remember {
@@ -88,10 +93,11 @@ fun AppNavigation(
             PermissionAlertDialog(
                 descriptionText =
                     stringResource(
-                        if (isLocationPermissionPermanentlyDeclined) {
-                            Res.string.location_permission_declined_txt
-                        } else {
-                            Res.string.location_permission_rationale_txt
+                        when {
+                            !isLocationPermissionPermanentlyDeclined -> Res.string.location_permission_rationale_txt
+                            platformPermissions.requiresManualSettingsNavigationHint() ->
+                                Res.string.location_permission_declined_ios_txt
+                            else -> Res.string.location_permission_declined_txt
                         },
                     ),
                 isPermanentlyDeclined = isLocationPermissionPermanentlyDeclined,
@@ -136,17 +142,29 @@ fun AppNavigation(
         )
     }
 
+    val refreshPermissionState = {
+        hasLocationPermission = platformPermissions.hasLocationPermission()
+        coroutineScope.launch {
+            hasNotificationPermission = platformPermissions.hasNotificationPermission()
+        }
+        Unit
+    }
+
     DisposableEffect(lifecycleOwner) {
         val observer =
             LifecycleEventObserver { _, event ->
                 if (event == Lifecycle.Event.ON_RESUME) {
-                    hasLocationPermission = platformPermissions.hasLocationPermission()
-                    hasNotificationPermission = platformPermissions.hasNotificationPermission()
+                    refreshPermissionState()
                 }
             }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+
+    // Backstop for platforms (iOS) whose LocalLifecycleOwner doesn't fire ON_RESUME on an
+    // OS-level app foreground that isn't also a view-controller re-appear — see
+    // ObserveAppForeground's kdoc.
+    ObserveAppForeground(onForeground = refreshPermissionState)
 
     AppNavHost(
         entries =
@@ -166,6 +184,8 @@ fun AppNavigation(
                             hasLocationPermission = hasLocationPermission,
                             hasNotificationPermission = hasNotificationPermission,
                             notificationPermissionResult = notificationPermissionResult,
+                            requiresNotificationSettingsNavigationHint =
+                                platformPermissions.requiresManualSettingsNavigationHint(),
                             onRequestNotificationPermission = {
                                 showNotificationPermissionRequest = true
                             },

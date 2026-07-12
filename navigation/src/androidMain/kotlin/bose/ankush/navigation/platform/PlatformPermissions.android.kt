@@ -30,7 +30,7 @@ private class AndroidPlatformPermissions(
         }
 
     @SuppressLint("InlinedApi")
-    override fun hasNotificationPermission(): Boolean =
+    override suspend fun hasNotificationPermission(): Boolean =
         ContextCompat.checkSelfPermission(
             context,
             android.Manifest.permission.POST_NOTIFICATIONS,

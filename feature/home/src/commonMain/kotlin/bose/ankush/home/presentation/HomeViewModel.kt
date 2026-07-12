@@ -17,6 +17,7 @@ import bose.ankush.home.presentation.util.errorMessageFromException
 import bose.ankush.storage.api.LocationPreferencesStorage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -133,11 +134,19 @@ internal class HomeViewModel(
         }
     }
 
+    private var notificationBannerVisibilityJob: Job? = null
+
     private fun updateNotificationBannerVisibility(hasPermission: Boolean) {
-        viewModelScope.launch(dataFetchExceptionHandler) {
-            val enabled = remoteConfigGate.isNotificationBannerEnabled()
-            dispatch(HomeAction.UpdateNotificationBanner(show = enabled && !hasPermission))
-        }
+        // Cancel any in-flight update first: HomeRoute re-fires this on every permission-flag
+        // change (e.g. a stale `false` right before an up-to-date `true` after returning from
+        // Settings), and without cancellation the two launches can dispatch out of order, letting
+        // the stale one re-show the banner after the fresh one already hid it.
+        notificationBannerVisibilityJob?.cancel()
+        notificationBannerVisibilityJob =
+            viewModelScope.launch(dataFetchExceptionHandler) {
+                val enabled = remoteConfigGate.isNotificationBannerEnabled()
+                dispatch(HomeAction.UpdateNotificationBanner(show = enabled && !hasPermission))
+            }
     }
 
     private fun handlePermissionResult(intent: HomeIntent.NotificationPermissionResult) {

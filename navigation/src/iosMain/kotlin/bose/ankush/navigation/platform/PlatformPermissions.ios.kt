@@ -3,11 +3,9 @@
 package bose.ankush.navigation.platform
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
@@ -17,13 +15,13 @@ import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UserNotifications.UNAuthorizationStatusAuthorized
 import platform.UserNotifications.UNAuthorizationStatusProvisional
 import platform.UserNotifications.UNUserNotificationCenter
+import kotlin.coroutines.resume
 
 @Composable
 actual fun rememberPlatformPermissions(): PlatformPermissions = remember { IosPlatformPermissions() }
 
 private class IosPlatformPermissions : PlatformPermissions {
     private val locationManager = CLLocationManager()
-    private var cachedHasNotificationPermission by mutableStateOf(false)
 
     override fun hasLocationPermission(): Boolean {
         val status = locationManager.authorizationStatus
@@ -31,23 +29,34 @@ private class IosPlatformPermissions : PlatformPermissions {
             status == kCLAuthorizationStatusAuthorizedWhenInUse
     }
 
-    override fun hasNotificationPermission(): Boolean {
-        UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { settings ->
-            cachedHasNotificationPermission =
-                settings?.authorizationStatus == UNAuthorizationStatusAuthorized ||
-                settings?.authorizationStatus == UNAuthorizationStatusProvisional
+    // Queried fresh on every call — the status can change behind the app's back (e.g. the user
+    // flips it in Settings), so caching it previously caused the permission prompt/banner to
+    // reappear even after the user had granted it.
+    override suspend fun hasNotificationPermission(): Boolean =
+        suspendCancellableCoroutine { continuation ->
+            UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { settings ->
+                val granted =
+                    settings?.authorizationStatus == UNAuthorizationStatusAuthorized ||
+                        settings?.authorizationStatus == UNAuthorizationStatusProvisional
+                continuation.resume(granted)
+            }
         }
-        return cachedHasNotificationPermission
-    }
 
     override fun requiresRuntimeNotificationPermission(): Boolean = true
 
     // iOS has exposed per-app language via the general Settings page since iOS 13.
     override fun supportsPerAppLocaleSettings(): Boolean = true
 
+    // The Location/Notifications row lives inline on the app's settings page, but the user still
+    // has to tap into it (e.g. pick "While Using the App", or toggle "Allow Notifications") — no
+    // public API can land them past this point.
+    override fun requiresManualSettingsNavigationHint(): Boolean = true
+
     override fun openAppSystemSettings() {
         val url = NSURL.URLWithString(UIApplicationOpenSettingsURLString) ?: return
-        UIApplication.sharedApplication.openURL(url)
+        // The no-completion-handler openURL: overload is deprecated (iOS 10+) and unreliable through
+        // K/N's Obj-C interop; use the options/completionHandler overload Apple recommends instead.
+        UIApplication.sharedApplication.openURL(url, options = emptyMap<Any?, Any?>(), completionHandler = null)
     }
 
     // iOS has no location-specific deep link into Settings; the general app settings page is the

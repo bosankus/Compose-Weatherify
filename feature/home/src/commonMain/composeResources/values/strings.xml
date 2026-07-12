@@ -21,6 +21,7 @@
     <string name="weather_icon_content">weather condition</string>
     <string name="error_icon_content">Error icon</string>
     <string name="notification_permission_message">Enable notifications for weather alerts</string>
+    <string name="notification_permission_declined_ios_txt">Notifications are turned off. To fix it: open Settings, tap Apps, tap this app in the list, tap Notifications, then turn on Allow Notifications.</string>
     <string name="enable_notification_btn">Enable</string>
     <string name="location_override_reset_btn">Reset to GPS</string>
     <string name="location_override_chip_content_desc">Currently showing weather for %1$s. Tap to reset to GPS.</string>

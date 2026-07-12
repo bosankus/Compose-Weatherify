@@ -7,6 +7,7 @@
     <string name="locale_config_error_txt">Failed to load language configuration. Using default language.</string>
     <string name="location_permission_rationale_txt">Weatherify needs location access to show weather for your area.</string>
     <string name="location_permission_declined_txt">Location permission is required. Please grant it from Settings to continue.</string>
+    <string name="location_permission_declined_ios_txt">Location access is turned off. To fix it: open Settings, tap Apps, tap this app in the list, tap Location, then choose "While Using the App".</string>
     <string name="grant_permission_btn_txt">Grant Permission</string>
     <string name="exit_btn_txt">Exit</string>
 </resources>

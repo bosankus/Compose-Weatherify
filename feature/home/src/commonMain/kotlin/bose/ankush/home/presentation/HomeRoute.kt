@@ -56,6 +56,7 @@ import bose.ankush.home.generated.resources.enable_notification_btn
 import bose.ankush.home.generated.resources.location_override_chip_content_desc
 import bose.ankush.home.generated.resources.location_override_reset_btn
 import bose.ankush.home.generated.resources.network_unavailable_txt
+import bose.ankush.home.generated.resources.notification_permission_declined_ios_txt
 import bose.ankush.home.generated.resources.notification_permission_message
 import bose.ankush.home.generated.resources.offline_toast_title_txt
 import bose.ankush.home.generated.resources.retry_btn_txt
@@ -89,6 +90,7 @@ fun HomeFeatureRoute(
     hasLocationPermission: Boolean = true,
     hasNotificationPermission: Boolean = true,
     notificationPermissionResult: HomeNotificationPermissionResult? = null,
+    requiresNotificationSettingsNavigationHint: Boolean = false,
     onRequestNotificationPermission: () -> Unit = {},
     onRequestLocationPermission: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
@@ -150,6 +152,7 @@ fun HomeFeatureRoute(
                 onResetLocationOverride = { viewModel.processIntent(HomeIntent.ResetLocationOverride) },
                 onEnableNotifications = { viewModel.processIntent(HomeIntent.EnableNotificationBanner) },
                 onDismissNotificationBanner = { viewModel.processIntent(HomeIntent.DismissNotificationBanner) },
+                requiresNotificationSettingsNavigationHint = requiresNotificationSettingsNavigationHint,
             )
         }
 
@@ -240,6 +243,7 @@ private fun ShowUIContainer(
     onResetLocationOverride: () -> Unit,
     onEnableNotifications: () -> Unit,
     onDismissNotificationBanner: () -> Unit,
+    requiresNotificationSettingsNavigationHint: Boolean,
 ) {
     val weatherReports = state.weatherData
     val airQualityReports = state.airQualityData
@@ -295,7 +299,14 @@ private fun ShowUIContainer(
 
         if (state.showNotificationBanner) {
             PermissionAlertDialog(
-                descriptionText = stringResource(Res.string.notification_permission_message),
+                descriptionText =
+                    stringResource(
+                        if (state.isNotificationPermissionPermanentlyDeclined && requiresNotificationSettingsNavigationHint) {
+                            Res.string.notification_permission_declined_ios_txt
+                        } else {
+                            Res.string.notification_permission_message
+                        },
+                    ),
                 isPermanentlyDeclined = state.isNotificationPermissionPermanentlyDeclined,
                 onPositiveAction = onEnableNotifications,
                 onNegativeAction = onDismissNotificationBanner,
