@@ -73,6 +73,11 @@ coilKmp = "3.4.0"
 # Memory leak
 leakCanary = "2.14"
 
+# Wear OS
+wearComposeMaterial3 = "1.6.2"
+wearComposeFoundation = "1.6.2"
+wearToolingPreview = "1.0.0"
+
 # Payment module
 razorpayCheckout = "1.6.41"
 
@@ -152,6 +157,11 @@ androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecy
 # Miscellaneous
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakCanary" }
+
+# Wear OS
+androidx-wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", version.ref = "wearComposeMaterial3" }
+androidx-wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "wearComposeFoundation" }
+androidx-wear-tooling-preview = { module = "androidx.wear:wear-tooling-preview", version.ref = "wearToolingPreview" }
 
 # KMP — Coil 3 (feature:home only, distinct from the app-wide Coil 2 usage above)
 coil3-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilKmp" }

@@ -25,6 +25,7 @@ rootProject.name = "Weatherify"
 include(
     ":app:androidApp",
     ":app:iosApp",
+    ":app:wearApp",
     ":analytics",
     ":common-ui",
     ":feature:auth",

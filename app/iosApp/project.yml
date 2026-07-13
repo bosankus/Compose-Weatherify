@@ -38,6 +38,10 @@ targets:
       properties:
         CADisableMinimumFrameDurationOnPhone: true
         NSLocationWhenInUseUsageDescription: "Weatherify needs your location to show local weather conditions."
+        # Without this, xcodegen regenerates Info.plist from just this properties
+        # map on every `xcodegen generate` and silently drops UILaunchScreen,
+        # which causes iOS to fall back to legacy (non-full-screen) launch scaling.
+        UILaunchScreen: {}
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: bose.ankush.weatherify.ios
@@ -54,10 +58,13 @@ targets:
           unset ANDROID_PREFS_ROOT
           cd "$SRCROOT/../.."
           ./gradlew :app:iosApp:embedAndSignAppleFrameworkForXcode
-        inputFiles:
-          - "$(SRCROOT)/../src/iosMain/**"
-        outputFiles:
-          - "$(TARGET_BUILD_DIR)/$(FRAMEWORKS_FOLDER_PATH)/ComposeApp.framework"
+        # No inputFiles/outputFiles: this framework is linked from every shared
+        # KMP module (:common-ui, :feature:*, :network, :storage, ...), not just
+        # app/iosApp/src/iosMain. Declaring a narrow input glob here made Xcode
+        # skip this whole script (and silently reuse a stale ComposeApp.framework)
+        # whenever a change landed outside that glob. Gradle's own task-level
+        # up-to-date checks already make a no-op invocation fast, so it's safe to
+        # always run this phase and let Gradle decide what's stale.
     postBuildScripts:
       # `pod install` normally wires this in as the "[CP] Embed Pods Frameworks"
       # build phase on the app target directly inside iosApp.xcodeproj. Since
