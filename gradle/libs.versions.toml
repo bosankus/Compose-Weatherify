@@ -6,7 +6,7 @@ targetSdk = "37"
 
 # Kotlin / Compose
 kotlin = "2.3.21"
-composeBom = "2026.06.00"
+composeBom = "2026.06.01"
 composeMultiplatform = "1.12.0-beta01"
 cmp-runtime = "1.12.0-beta01"
 cmp-foundation = "1.12.0-beta01"
