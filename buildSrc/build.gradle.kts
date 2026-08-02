@@ -1,4 +1,3 @@
-import org.gradle.kotlin.dsl.`kotlin-dsl`
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -9,6 +8,10 @@ plugins {
 repositories {
     google()
     mavenCentral()
+}
+
+dependencies {
+    implementation(libs.spotless.plugin.gradle)
 }
 
 tasks.withType<KotlinCompile>().configureEach {

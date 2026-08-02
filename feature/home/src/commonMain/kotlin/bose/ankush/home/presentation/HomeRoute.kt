@@ -301,7 +301,9 @@ private fun ShowUIContainer(
             PermissionAlertDialog(
                 descriptionText =
                     stringResource(
-                        if (state.isNotificationPermissionPermanentlyDeclined && requiresNotificationSettingsNavigationHint) {
+                        if (state.isNotificationPermissionPermanentlyDeclined &&
+                            requiresNotificationSettingsNavigationHint
+                        ) {
                             Res.string.notification_permission_declined_ios_txt
                         } else {
                             Res.string.notification_permission_message

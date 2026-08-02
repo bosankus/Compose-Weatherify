@@ -112,6 +112,9 @@ dependencies {
     implementation(libs.google.play.app.update.ktx)
     implementation(libs.androidx.core.splashscreen)
 
+    // Wearable Data Layer API — phone<->watch messaging/data sync.
+    implementation(libs.google.play.services.wearable)
+
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -168,6 +171,6 @@ dependencies {
 // last version before the split.
 configurations.all {
     resolutionStrategy {
-        force("com.razorpay:standard-core:1.7.15")
+        force(libs.razorpay.standard.core)
     }
 }

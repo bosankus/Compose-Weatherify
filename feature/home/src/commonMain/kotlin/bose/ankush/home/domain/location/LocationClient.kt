@@ -13,5 +13,6 @@ internal interface LocationClient {
 
     class LocationException(
         message: String,
+        val isGpsDisabled: Boolean = false,
     ) : Exception(message)
 }

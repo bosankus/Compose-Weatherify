@@ -7,18 +7,8 @@ plugins {
 }
 
 kotlin {
-    cocoapods {
-        version = "1.0"
-        summary = "Weatherify Analytics module"
-        homepage = "https://github.com/bosankus/Compose-Weatherify"
-        ios.deploymentTarget = "16.0"
-
-        pod("FirebaseAnalytics") {
-            version = "12.4.0"
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
-    }
-
+    // AGP 9's com.android.kotlin.multiplatform.library plugin implies the Android target itself —
+    // androidTarget() is no longer needed (and conflicts with this plugin); configure it via android { }.
     android {
         namespace = "bose.ankush.analytics"
         compileSdk =
@@ -29,7 +19,6 @@ kotlin {
             libs.versions.minSdk
                 .get()
                 .toInt()
-
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -38,36 +27,42 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
-    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
-        binaries.framework {
+    cocoapods {
+        version = "1.0"
+        summary = "Weatherify Analytics module"
+        homepage = "https://github.com/bosankus/Compose-Weatherify"
+        ios.deploymentTarget = "16.0"
+        framework {
             baseName = "analytics"
             isStatic = true
+        }
+
+        pod("FirebaseAnalytics") {
+            version = "12.4.0"
+            extraOpts += listOf("-compiler-option", "-fmodules")
         }
     }
 
     sourceSets {
-        commonMain.dependencies {
-            implementation(libs.koin.core)
-            implementation(libs.kotlinx.coroutines.core)
+        val commonMain by getting {
+            dependencies {
+                implementation(libs.koin.core)
+                implementation(libs.kotlinx.coroutines.core)
+            }
         }
 
-        androidMain.dependencies {
-            implementation(libs.koin.android)
+        val androidMain by getting {
+            dependencies {
+                implementation(libs.koin.android)
+            }
         }
 
         val iosMain by creating {
-            dependsOn(commonMain.get())
+            dependsOn(commonMain)
         }
 
-        @Suppress("UNUSED_VARIABLE")
-        val iosArm64Main by getting {
-            dependsOn(iosMain)
-        }
-
-        @Suppress("UNUSED_VARIABLE")
-        val iosSimulatorArm64Main by getting {
-            dependsOn(iosMain)
-        }
+        iosArm64Main.get().dependsOn(iosMain)
+        iosSimulatorArm64Main.get().dependsOn(iosMain)
     }
 }
 

@@ -52,7 +52,12 @@ internal class IosLocationClient : LocationClient {
             return Result.failure(LocationClient.LocationException("Location permission is not given."))
         }
         if (!CLLocationManager.locationServicesEnabled()) {
-            return Result.failure(LocationClient.LocationException("GPS is disabled"))
+            return Result.failure(
+                LocationClient.LocationException(
+                    message = "GPS is disabled",
+                    isGpsDisabled = true,
+                ),
+            )
         }
 
         repeat(MAX_ATTEMPTS) { attempt ->

@@ -36,14 +36,16 @@ internal class DeviceLocationClient(
 
     private fun checkGpsEnabled() {
         if (!isLocationEnabled()) {
-            throw LocationClient.LocationException("GPS is disabled")
+            throw LocationClient.LocationException(
+                message = "GPS is disabled",
+                isGpsDisabled = true
+            )
         }
     }
 
     private fun isLocationEnabled(): Boolean {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        return locationManager.isLocationEnabled
     }
 
     override suspend fun getCurrentLocation(): Result<Coordinates> {
@@ -87,7 +89,14 @@ internal class DeviceLocationClient(
                         override fun onReceive(context: Context?, intent: Intent?) {
                             if (!isLocationEnabled()) {
                                 cts.cancel()
-                                resumeOnce(Result.failure(LocationClient.LocationException("GPS was disabled while fetching coordinates!")))
+                                resumeOnce(
+                                    Result.failure(
+                                        LocationClient.LocationException(
+                                            message = "GPS was disabled while fetching coordinates!",
+                                            isGpsDisabled = true
+                                        )
+                                    )
+                                )
                             }
                         }
                     }
@@ -100,7 +109,7 @@ internal class DeviceLocationClient(
                     )
 
                     client
-                        .getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, cts.token)
+                        .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
                         .addOnSuccessListener { location ->
                             when {
                                 location == null -> resumeOnce(
@@ -165,6 +174,6 @@ private fun Context.hasLocationPermission(): Boolean =
     listOf(
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_FINE_LOCATION,
-    ).all { permission ->
+    ).any { permission ->
         ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }

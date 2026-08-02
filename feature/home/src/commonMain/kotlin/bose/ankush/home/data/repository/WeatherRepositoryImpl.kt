@@ -3,9 +3,11 @@ package bose.ankush.home.data.repository
 import bose.ankush.home.data.mapper.AirQualityMapper
 import bose.ankush.home.data.mapper.NetworkToStorageMapper
 import bose.ankush.home.data.mapper.WeatherMapper
+import bose.ankush.home.domain.location.HomeGeocoder
 import bose.ankush.home.domain.model.AirQuality
 import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.domain.repository.WeatherRepository
+import bose.ankush.home.domain.repository.WeatherWearSync
 import bose.ankush.storage.api.WeatherStorage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +21,8 @@ import bose.ankush.network.repository.WeatherRepository as NetworkWeatherReposit
 internal class WeatherRepositoryImpl(
     private val networkRepository: NetworkWeatherRepository,
     private val weatherStorage: WeatherStorage,
+    private val weatherWearSync: WeatherWearSync,
+    private val homeGeocoder: HomeGeocoder,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : WeatherRepository {
     override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality> =
@@ -53,6 +57,10 @@ internal class WeatherRepositoryImpl(
                             NetworkToStorageMapper.mapAirQualityToStorageEntity(it.data?.airQuality)
                         weatherStorage.saveWeatherData(weatherStorageData, airQualityStorageData)
                         weatherStorage.saveLastWeatherUpdateTime(coordinates, currentTime)
+                        val locationName =
+                            homeGeocoder.reverseGeocode(coordinates.first, coordinates.second)
+                                ?: DEFAULT_LOCATION_NAME
+                        weatherWearSync.sync(locationName, it)
                     },
                     onFailure = {
                         // Keep serving the last cached snapshot; caller surfaces the flow's error state.
@@ -70,5 +78,6 @@ internal class WeatherRepositoryImpl(
 
     companion object {
         private const val ONE_HOUR_IN_MILLIS = 60 * 60 * 1000L
+        private const val DEFAULT_LOCATION_NAME = "Current Location"
     }
 }

@@ -22,7 +22,7 @@ expect val homePlatformModule: Module
  * `bose.ankush.storage.api.LocationPreferencesStorage`. */
 val homeDomainModule: Module =
     module {
-        single<WeatherRepository> { WeatherRepositoryImpl(get(), get()) }
+        single<WeatherRepository> { WeatherRepositoryImpl(get(), get(), get(), get()) }
         factory { GetWeatherReport(get()) }
         factory { RefreshWeatherReport(get()) }
         factory { GetAirQuality(get()) }

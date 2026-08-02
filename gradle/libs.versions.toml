@@ -5,21 +5,21 @@ minSdk = "28"
 targetSdk = "37"
 
 # Kotlin / Compose
-kotlin = "2.3.21"
-composeBom = "2026.06.00"
-composeMultiplatform = "1.12.0-beta01"
-cmp-runtime = "1.12.0-beta01"
-cmp-foundation = "1.12.0-beta01"
-cmp-animation = "1.12.0-beta01"
+kotlin = "2.4.10"
+composeBom = "2026.06.01"
+composeMultiplatform = "1.12.0-beta03"
+cmp-runtime = "1.12.0-beta03"
+cmp-foundation = "1.12.0-beta03"
+cmp-animation = "1.12.0-beta03"
 cmp-material3 = "1.9.0"
-cmp-ui = "1.12.0-beta01"
+cmp-ui = "1.12.0-beta03"
 cmp-materialIconsExtended = "1.7.3"
 
 # Gradle plugins
-agp = "9.3.0-rc01"
+agp = "9.3.1"
 secretsPlugin = "2.0.1"
-benManesVersions = "0.54.0"
-spotless = "8.8.0"
+benManesVersions = "0.58.0"
+spotless = "8.9.0"
 ksp = "2.3.9"
 ktlintGradle = "14.2.0"
 ktlintCli = "1.7.1"
@@ -38,6 +38,7 @@ androidMaterial = "1.14.0"
 lifecycle = "2.11.0"
 googlePlayCore = "2.1.0"
 googlePlayLocation = "21.4.0"
+googlePlayServicesWearable = "20.0.1"
 dataStore = "1.2.1"
 splashScreen = "1.2.0"
 securityCrypto = "1.1.0"
@@ -50,7 +51,7 @@ room = "2.8.4"
 gson = "2.14.0"
 
 # Firebase
-firebaseBom = "34.15.0"
+firebaseBom = "34.17.0"
 
 # Coroutines (also covers kotlinx-coroutines-test)
 coroutines = "1.11.0"
@@ -59,16 +60,16 @@ coroutines = "1.11.0"
 kotlinxDatetime = "0.8.0"
 
 # Dependency Injection
-hilt = "2.59.2"
-hiltCompose = "1.3.0"
+hilt = "2.60.1"
+hiltCompose = "1.4.0"
 
 # Navigation 3
-nav3 = "1.1.4"
+nav3 = "1.1.5"
 lifecycleViewmodelNav3 = "2.11.0"
 
 # Miscellaneous
 timber = "5.0.1"
-coilKmp = "3.4.0"
+coilKmp = "3.5.0"
 
 # Memory leak
 leakCanary = "2.14"
@@ -76,13 +77,16 @@ leakCanary = "2.14"
 # Wear OS
 wearComposeMaterial3 = "1.6.2"
 wearComposeFoundation = "1.6.2"
+wearComposeNavigation3 = "1.6.2"
 wearToolingPreview = "1.0.0"
+lottieCompose = "6.7.1"
 
 # Payment module
 razorpayCheckout = "1.6.41"
+razorpayStandardCore = "1.7.17"
 
 # KMP — Ktor
-ktor = "3.5.1"
+ktor = "3.5.2"
 
 # KMP — Serialization
 kotlinxSerialization = "1.11.0"
@@ -91,12 +95,16 @@ kotlinxSerialization = "1.11.0"
 koin = "4.2.2"
 
 # KMP — ViewModel (JetBrains port of AndroidX lifecycle-viewmodel)
-kmpLifecycleViewModel = "2.10.0"
+kmpLifecycleViewModel = "2.11.0"
 
 # KMP — Okio (file paths for multiplatform DataStore)
-okio = "3.16.0"
+okio = "3.18.1"
 
 [libraries]
+# buildSrc convention-plugin dependencies (applied by Gradle-plugin-id, not version catalog alias,
+# since they're consumed from buildSrc's own build.gradle.kts rather than a project's plugins {} block)
+spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+
 # AndroidX core
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appCompat" }
@@ -105,6 +113,7 @@ androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-
 google-play-app-update = { module = "com.google.android.play:app-update", version.ref = "googlePlayCore" }
 google-play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "googlePlayCore" }
 google-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "googlePlayLocation" }
+google-play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "googlePlayServicesWearable" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "dataStore" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashScreen" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
@@ -141,6 +150,7 @@ firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 # Coroutines / Date-time
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
+kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "coroutines" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
@@ -161,7 +171,9 @@ leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", ve
 # Wear OS
 androidx-wear-compose-material3 = { module = "androidx.wear.compose:compose-material3", version.ref = "wearComposeMaterial3" }
 androidx-wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "wearComposeFoundation" }
+androidx-wear-compose-navigation3 = { module = "androidx.wear.compose:compose-navigation3", version.ref = "wearComposeNavigation3" }
 androidx-wear-tooling-preview = { module = "androidx.wear:wear-tooling-preview", version.ref = "wearToolingPreview" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottieCompose" }
 
 # KMP — Coil 3 (feature:home only, distinct from the app-wide Coil 2 usage above)
 coil3-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilKmp" }
@@ -172,6 +184,7 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 # Payment (Android-only — Razorpay checkout is launched from the app layer)
 razorpay-checkout = { module = "com.razorpay:checkout", version.ref = "razorpayCheckout" }
+razorpay-standard-core = { module = "com.razorpay:standard-core", version.ref = "razorpayStandardCore" }
 
 # KMP — Ktor
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -217,5 +230,5 @@ secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secret
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradle" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "benManesVersions" }
+ben-manes-versions = { id = "io.github.ben-manes.versions", version.ref = "benManesVersions" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

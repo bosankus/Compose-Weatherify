@@ -12,7 +12,6 @@ import bose.ankush.home.domain.usecase.RefreshWeatherReport
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.default_coordinates_txt
 import bose.ankush.home.generated.resources.general_error_txt
-import bose.ankush.home.generated.resources.gps_disabled_error_txt
 import bose.ankush.home.generated.resources.location_permission_denied_txt
 import bose.ankush.home.presentation.util.CoordinateResolution
 import bose.ankush.home.presentation.util.errorMessageFromException
@@ -255,7 +254,7 @@ internal class HomeViewModel(
                 )
             },
             onFailure = { e ->
-                val isGpsDisabled = e is LocationClient.LocationException
+                val isGpsDisabled = (e as? LocationClient.LocationException)?.isGpsDisabled == true
                 val message =
                     (e as? Exception)?.let { errorMessageFromException(it) }
                         ?: getString(Res.string.general_error_txt)
