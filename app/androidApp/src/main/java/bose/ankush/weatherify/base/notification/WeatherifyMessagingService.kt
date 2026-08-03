@@ -1,5 +1,6 @@
 package bose.ankush.weatherify.base.notification
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
@@ -13,6 +14,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import timber.log.Timber
 import javax.inject.Inject
 
+@SuppressLint("MissingFirebaseInstanceTokenRefresh")
 @AndroidEntryPoint
 class WeatherifyMessagingService : FirebaseMessagingService() {
     @Inject
@@ -22,9 +24,9 @@ class WeatherifyMessagingService : FirebaseMessagingService() {
         getSystemService(NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        Timber.d("Refreshed FCM token: $token")
+    override fun onRegistered(installationId: String) {
+        super.onRegistered(installationId)
+        Timber.d("Refreshed FCM token: $installationId")
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {

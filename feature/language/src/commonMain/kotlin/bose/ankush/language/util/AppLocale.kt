@@ -20,13 +20,13 @@ expect object LocalAppLocale {
         @Composable get
 
     @Composable
-    infix fun provides(value: String?): ProvidedValue<*>
+    infix fun provides(value: String?): Array<ProvidedValue<*>>
 }
 
 /** Wrap the app root with this so [customAppLocale] changes take effect without restarting the app. */
 @Composable
 fun AppEnvironment(content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalAppLocale provides customAppLocale) {
+    CompositionLocalProvider(*(LocalAppLocale provides customAppLocale)) {
         key(customAppLocale) {
             content()
         }

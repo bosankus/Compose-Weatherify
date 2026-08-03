@@ -63,6 +63,12 @@ allprojects {
 }
 
 subprojects {
+    // expect/actual classes are Beta in Kotlin; this repo relies on them across every KMP module
+    // (e.g. LocalAppLocale), so opt in globally instead of suppressing per-module.
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+        compilerOptions.freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
     extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension>("detekt") {

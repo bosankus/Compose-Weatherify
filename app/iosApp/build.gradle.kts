@@ -89,7 +89,8 @@ kotlin {
     }
 
     sourceSets {
-        val iosMain by creating {
+        val iosMain = create("iosMain") {
+            dependsOn(commonMain.get())
             kotlin.srcDir(generatedIosSecretsRoot)
             dependencies {
                 api(project(":common-ui"))
@@ -111,13 +112,11 @@ kotlin {
             }
         }
 
-        @Suppress("UNUSED_VARIABLE")
-        val iosArm64Main by getting {
+        getByName("iosArm64Main") {
             dependsOn(iosMain)
         }
 
-        @Suppress("UNUSED_VARIABLE")
-        val iosSimulatorArm64Main by getting {
+        getByName("iosSimulatorArm64Main") {
             dependsOn(iosMain)
         }
     }
