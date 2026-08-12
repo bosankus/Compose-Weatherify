@@ -40,7 +40,7 @@ jobs:
         run: cat build/dependencyUpdates/dependency_update_report.txt
 
       - name: Save report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dependency-update-reports
           path: build/dependencyUpdates
