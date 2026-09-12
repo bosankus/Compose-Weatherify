@@ -7,7 +7,7 @@ use_frameworks!
 # Kotlin CocoaPods Gradle plugin's synthetic project; this Podfile is what makes the
 # *app link step* see FirebaseRemoteConfig / Razorpay.
 target 'iosApp' do
-  pod 'FirebaseCore', '12.4.0'
+  pod 'FirebaseCore', '12.19.0'
   pod 'FirebaseRemoteConfig', '12.4.0'
   pod 'FirebaseAnalytics', '12.4.0'
   pod 'razorpay-pod', '~> 1.5'
