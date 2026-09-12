@@ -9,6 +9,6 @@ use_frameworks!
 target 'iosApp' do
   pod 'FirebaseCore', '12.4.0'
   pod 'FirebaseRemoteConfig', '12.4.0'
-  pod 'FirebaseAnalytics', '12.4.0'
+  pod 'FirebaseAnalytics', '12.19.0'
   pod 'razorpay-pod', '~> 1.5'
 end
