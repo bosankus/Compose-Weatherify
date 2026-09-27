@@ -41,10 +41,21 @@ tasks.register("deepClean") {
     dependsOn(subprojects.map { "${it.path}:clean" })
 
     doLast {
-        val dirsToDelete = mutableSetOf<File>().apply {
-            allprojects.forEach { add(it.layout.buildDirectory.get().asFile) }
-            add(rootProject.layout.projectDirectory.dir(".gradle").asFile)
-        }
+        val dirsToDelete =
+            mutableSetOf<File>().apply {
+                allprojects.forEach {
+                    add(
+                        it.layout.buildDirectory
+                            .get()
+                            .asFile,
+                    )
+                }
+                add(
+                    rootProject.layout.projectDirectory
+                        .dir(".gradle")
+                        .asFile,
+                )
+            }
         delete(dirsToDelete)
     }
 }
@@ -73,9 +84,10 @@ subprojects {
 
     // Per-module baselines (Detekt does not merge a single shared file across modules).
     // Path uses the Gradle project path so :feature:home → feature-home.xml.
-    val detektBaselineFile = file(
-        "${rootProject.projectDir}/config/detekt-baselines/${path.removePrefix(":").replace(':', '-')}.xml"
-    )
+    val detektBaselineFile =
+        file(
+            "${rootProject.projectDir}/config/detekt-baselines/${path.removePrefix(":").replace(':', '-')}.xml",
+        )
 
     extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension>("detekt") {
         buildUponDefaultConfig = true
@@ -92,18 +104,19 @@ subprojects {
     // :detektBaseline tasks with empty inputs (NO-SOURCE). CI's detektAll / codeCheck depend
     // on those plain tasks, so re-attach the module's hand-written sources here. Keep
     // generated Compose/Room output out so baselines stay reviewable.
-    val detektSourceDirs = listOf(
-        "src/main/java",
-        "src/main/kotlin",
-        "src/commonMain/kotlin",
-        "src/androidMain/kotlin",
-        "src/iosMain/kotlin",
-        "src/jvmMain/kotlin",
-        "src/commonTest/kotlin",
-        "src/androidUnitTest/kotlin",
-        "src/test/java",
-        "src/test/kotlin",
-    ).map { file(it) }.filter { it.exists() }
+    val detektSourceDirs =
+        listOf(
+            "src/main/java",
+            "src/main/kotlin",
+            "src/commonMain/kotlin",
+            "src/androidMain/kotlin",
+            "src/iosMain/kotlin",
+            "src/jvmMain/kotlin",
+            "src/commonTest/kotlin",
+            "src/androidUnitTest/kotlin",
+            "src/test/java",
+            "src/test/kotlin",
+        ).map { file(it) }.filter { it.exists() }
 
     tasks.named<io.gitlab.arturbosch.detekt.Detekt>("detekt").configure {
         if (detektSourceDirs.isNotEmpty()) {

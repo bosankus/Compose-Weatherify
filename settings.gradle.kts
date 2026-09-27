@@ -37,5 +37,5 @@ include(
     ":navigation",
     ":network",
     ":storage",
-    ":token-storage-api"
+    ":token-storage-api",
 )
