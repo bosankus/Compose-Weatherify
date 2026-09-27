@@ -3,6 +3,7 @@ package bose.ankush.network.repository
 import bose.ankush.network.api.WeatherApiService
 import bose.ankush.network.model.WeatherForecast
 import bose.ankush.network.util.NetworkConnectivity
+import bose.ankush.network.util.NetworkException
 import bose.ankush.network.utils.NetworkUtils
 
 class WeatherRemoteSourceImpl(
@@ -23,7 +24,7 @@ class WeatherRemoteSourceImpl(
                     )
                 }
             Result.success(data)
-        } catch (e: Exception) {
+        } catch (e: NetworkException) {
             Result.failure(e)
         }
     }

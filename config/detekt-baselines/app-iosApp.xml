@@ -2,7 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>FunctionNaming:MainViewController.kt$fun MainViewController(): UIViewController</ID>
+    <ID>FunctionNaming:MainViewController.kt$@Suppress("ktlint:standard:function-naming") fun MainViewController(): UIViewController</ID>
     <ID>TooGenericExceptionCaught:RazorpayCheckoutBridge.kt$RazorpayCheckoutBridge$e: Throwable</ID>
   </CurrentIssues>
 </SmellBaseline>
