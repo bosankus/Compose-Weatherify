@@ -26,7 +26,16 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platforms;android-37 build-tools;37.0.0 platform-tools'
+          packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
+
+      - name: Symlink android-37 platform dir for AGP
+        run: |
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Android/Sdk}}"
+          PLATFORM_DIR="$SDK_ROOT/platforms"
+          if [ -d "$PLATFORM_DIR/android-37.0" ] && [ ! -e "$PLATFORM_DIR/android-37" ]; then
+            ln -s android-37.0 "$PLATFORM_DIR/android-37"
+          fi
+          ls -la "$PLATFORM_DIR"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -69,7 +78,16 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platforms;android-37 build-tools;37.0.0 platform-tools'
+          packages: 'platforms;android-37.0 build-tools;37.0.0 platform-tools'
+
+      - name: Symlink android-37 platform dir for AGP
+        run: |
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/Android/Sdk}}"
+          PLATFORM_DIR="$SDK_ROOT/platforms"
+          if [ -d "$PLATFORM_DIR/android-37.0" ] && [ ! -e "$PLATFORM_DIR/android-37" ]; then
+            ln -s android-37.0 "$PLATFORM_DIR/android-37"
+          fi
+          ls -la "$PLATFORM_DIR"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
