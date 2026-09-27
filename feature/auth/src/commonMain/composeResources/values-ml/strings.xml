@@ -18,4 +18,11 @@
     <string name="login_error_email_invalid">ദയവായി സാധുവായ ഇമെയിൽ വിലാസം നൽകുക</string>
     <string name="login_error_password_empty">പാസ്‌വേഡ് ശൂന്യമായിരിക്കരുത്</string>
     <string name="login_error_password_short">പാസ്‌വേഡ് കുറഞ്ഞത് 6 അക്ഷരങ്ങളെങ്കിലും ഉണ്ടായിരിക്കണം</string>
+
+    <!--Auth error messages-->
+    <string name="auth_error_network">ഇന്റർനെറ്റ് കണക്ഷൻ ഇല്ല. കണക്ഷൻ പരിശോധിച്ച് വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="auth_error_timeout">സെർവർ പ്രതികരിക്കാൻ ഏറെ സമയം എടുക്കുന്നു. വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="auth_error_server">ഞങ്ങളുടെ ഭാഗത്ത് ഒരു പ്രശ്നമുണ്ട്. കുറച്ച് മിനിറ്റുകൾക്ക് ശേഷം ശ്രമിക്കുക.</string>
+    <string name="auth_error_credentials">ഇമെയിലോ പാസ്‌വേഡോ തെറ്റാണ്.</string>
+    <string name="auth_error_generic">എന്തോ കുഴപ്പം സംഭവിച്ചു. വീണ്ടും ശ്രമിക്കുക.</string>
 </resources>

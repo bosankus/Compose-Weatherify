@@ -18,4 +18,11 @@
     <string name="login_error_email_invalid">దయచేసి చెల్లుబాటు అయ్యే ఇమెయిల్ చిరునామాను నమోదు చేయండి</string>
     <string name="login_error_password_empty">పాస్‌వర్డ్ ఖాళీగా ఉండకూడదు</string>
     <string name="login_error_password_short">పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి</string>
+
+    <!--Auth error messages-->
+    <string name="auth_error_network">ఇంటర్నెట్ కనెక్షన్ లేదు. మీ కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.</string>
+    <string name="auth_error_timeout">సర్వర్ స్పందించడానికి ఎక్కువ సమయం తీసుకుంటోంది. మళ్లీ ప్రయత్నించండి.</string>
+    <string name="auth_error_server">మా వైపు సమస్య ఉంది. కొన్ని నిమిషాల తర్వాత ప్రయత్నించండి.</string>
+    <string name="auth_error_credentials">ఇమెయిల్ లేదా పాస్‌వర్డ్ తప్పు.</string>
+    <string name="auth_error_generic">ఏదో పొరపాటు జరిగింది. మళ్లీ ప్రయత్నించండి.</string>
 </resources>

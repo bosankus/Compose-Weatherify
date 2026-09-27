@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
+import bose.ankush.analytics.ErrorReporter
 import bose.ankush.payment.domain.config.PaymentConfig
 import bose.ankush.payment.domain.model.CreateOrderParams
 import bose.ankush.payment.domain.model.Order
@@ -42,6 +43,7 @@ class PaymentViewModel(
     private val premiumStorage: PremiumStorage,
     private val paymentConfig: PaymentConfig,
     private val analyticsTracker: AnalyticsTracker,
+    private val errorReporter: ErrorReporter,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PaymentUiState())
     val uiState: StateFlow<PaymentUiState> = _uiState.asStateFlow()
@@ -148,6 +150,11 @@ class PaymentViewModel(
                     },
                     onFailure = { e ->
                         analyticsTracker.track(AnalyticsEvent.PaymentFailed(e.message))
+                        errorReporter.recordError(
+                            e,
+                            "Order creation failed",
+                            mapOf("amount_paise" to amountPaise.toString(), "currency" to currency),
+                        )
                         _uiState.update {
                             it.copy(
                                 loading = false,
@@ -179,6 +186,15 @@ class PaymentViewModel(
                     onSuccess = { result ->
                         if (!result.success) {
                             trackPaymentFailure(result.message)
+                            // The user has been charged at this point — the server rejected the
+                            // signature afterwards. Every one of these is a refund conversation.
+                            errorReporter.recordError(
+                                IllegalStateException(
+                                    "Payment verification rejected: ${result.message ?: "no message"}",
+                                ),
+                                "Charged but not verified",
+                                mapOf("order_id" to orderId, "payment_id" to paymentId),
+                            )
                             _uiState.update {
                                 it.copy(
                                     loading = false,
@@ -214,6 +230,13 @@ class PaymentViewModel(
                     },
                     onFailure = { e ->
                         trackPaymentFailure(e.message)
+                        // Same exposure as the rejection branch above: money taken, entitlement
+                        // not granted, and the client has no retry path.
+                        errorReporter.recordError(
+                            e,
+                            "Payment verification call failed after charge",
+                            mapOf("order_id" to orderId, "payment_id" to paymentId),
+                        )
                         _uiState.update {
                             it.copy(
                                 loading = false,

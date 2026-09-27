@@ -25,6 +25,7 @@ ktlintGradle = "14.2.0"
 ktlintCli = "1.7.1"
 detekt = "1.23.8"
 googleServices = "4.5.0"
+firebaseCrashlyticsPlugin = "3.0.8"
 
 # Testing
 junit = "4.13.2"
@@ -148,6 +149,7 @@ firebase-config = { module = "com.google.firebase:firebase-config" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-perf = { module = "com.google.firebase:firebase-perf" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 
 # Coroutines / Date-time
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -235,3 +237,4 @@ ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintGradle" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ben-manes-versions = { id = "io.github.ben-manes.versions", version.ref = "benManesVersions" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }

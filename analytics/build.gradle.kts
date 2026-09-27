@@ -69,4 +69,5 @@ kotlin {
 dependencies {
     add("androidMainImplementation", platform(libs.firebase.bom))
     add("androidMainImplementation", libs.firebase.analytics)
+    add("androidMainImplementation", libs.firebase.crashlytics)
 }

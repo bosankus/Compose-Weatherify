@@ -18,4 +18,11 @@
     <string name="login_error_email_invalid">אנא הזן כתובת אימייל תקינה</string>
     <string name="login_error_password_empty">הסיסמה לא יכולה להיות ריקה</string>
     <string name="login_error_password_short">הסיסמה חייבת להכיל לפחות 6 תווים</string>
+
+    <!--Auth error messages-->
+    <string name="auth_error_network">אין חיבור לאינטרנט. בדקו את החיבור ונסו שוב.</string>
+    <string name="auth_error_timeout">השרת מגיב לאט מדי. נסו שוב.</string>
+    <string name="auth_error_server">יש תקלה אצלנו. נסו שוב בעוד כמה דקות.</string>
+    <string name="auth_error_credentials">האימייל או הסיסמה שגויים.</string>
+    <string name="auth_error_generic">משהו השתבש. נסו שוב.</string>
 </resources>
