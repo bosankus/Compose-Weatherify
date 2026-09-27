@@ -8,7 +8,7 @@ import bose.ankush.payment.domain.config.PaymentConfig
 import bose.ankush.payment.domain.model.CreateOrderParams
 import bose.ankush.payment.domain.model.Order
 import bose.ankush.payment.domain.model.VerifyPaymentParams
-import bose.ankush.payment.domain.store.PremiumStore
+import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.payment.domain.usecase.CreateOrderUseCase
 import bose.ankush.payment.domain.usecase.VerifyPaymentUseCase
 import bose.ankush.payment.generated.resources.Res
@@ -39,7 +39,7 @@ import kotlin.time.Duration.Companion.days
 class PaymentViewModel(
     private val createOrderUseCase: CreateOrderUseCase,
     private val verifyPaymentUseCase: VerifyPaymentUseCase,
-    private val premiumStore: PremiumStore,
+    private val premiumStorage: PremiumStorage,
     private val paymentConfig: PaymentConfig,
     private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
@@ -76,7 +76,7 @@ class PaymentViewModel(
 
     private fun observePremiumStatus() {
         viewModelScope.launch {
-            premiumStore.observePremiumStatus().collect { status ->
+            premiumStorage.observePremiumStatus().collect { status ->
                 val now = Clock.System.now().toEpochMilliseconds()
                 val isActive = status.expiryMillis != null && status.expiryMillis > now
                 _uiState.update {
@@ -192,7 +192,7 @@ class PaymentViewModel(
                                 .now()
                                 .plus(30.days)
                                 .toEpochMilliseconds()
-                        premiumStore.savePremiumStatus(isPremium = true, expiryMillis = expiryMillis)
+                        premiumStorage.savePremiumStatus(isPremium = true, expiryMillis = expiryMillis)
                         val order = pendingOrder
                         analyticsTracker.track(
                             AnalyticsEvent.Purchase(

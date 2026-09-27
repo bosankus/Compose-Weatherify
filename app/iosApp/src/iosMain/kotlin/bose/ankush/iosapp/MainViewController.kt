@@ -35,7 +35,7 @@ import bose.ankush.home.HomeSessionCleaner
 import bose.ankush.iosapp.payment.RazorpayCheckoutBridge
 import bose.ankush.language.util.AppEnvironment
 import bose.ankush.navigation.AppNavigation
-import bose.ankush.payment.domain.store.PremiumStore
+import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
@@ -61,7 +61,7 @@ private fun AppContent(rootController: () -> UIViewController) {
     val authViewModel = koinInject<AuthViewModel>()
     val paymentViewModel = koinInject<PaymentViewModel>()
     val homeSessionCleaner = koinInject<HomeSessionCleaner>()
-    val premiumStore = koinInject<PremiumStore>()
+    val premiumStorage = koinInject<PremiumStorage>()
     val analyticsTracker = koinInject<AnalyticsTracker>()
 
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
@@ -110,11 +110,11 @@ private fun AppContent(rootController: () -> UIViewController) {
         authViewModel.effect.collect { effect ->
             when (effect) {
                 is AuthEffect.PremiumStatusChanged ->
-                    premiumStore.savePremiumStatus(effect.isPremium, effect.expiryMillis)
+                    premiumStorage.savePremiumStatus(effect.isPremium, effect.expiryMillis)
 
                 AuthEffect.LoggedOut -> {
                     homeSessionCleaner.clearOnLogout()
-                    premiumStore.savePremiumStatus(isPremium = false, expiryMillis = null)
+                    premiumStorage.savePremiumStatus(isPremium = false, expiryMillis = null)
                 }
             }
         }

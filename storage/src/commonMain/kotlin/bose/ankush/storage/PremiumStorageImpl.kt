@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.map
 internal class PremiumStorageImpl(
     private val dataStore: DataStore<Preferences>,
 ) : PremiumStorage {
-    override fun getPremiumStatusFlow(): Flow<PremiumStatus> =
+    override fun observePremiumStatus(): Flow<PremiumStatus> =
         dataStore.data.map { preferences ->
             PremiumStatus(
                 isPremium = preferences[Keys.IS_PREMIUM] ?: false,
-                premiumExpiry = preferences[Keys.PREMIUM_EXPIRY],
+                expiryMillis = preferences[Keys.PREMIUM_EXPIRY],
             )
         }
 
