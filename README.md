@@ -1,9 +1,10 @@
 [![CI](https://github.com/bosankus/Compose-Weatherify/actions/workflows/ci.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/ci.yml)
 [![Dependency Updates](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependency-updates.yml/badge.svg)](https://github.com/bosankus/Compose-Weatherify/actions/workflows/check-dependency-updates.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/dda6430161e146518704730d9916dba7)](https://www.codacy.com/gh/bosankus/Compose-Weatherify/dashboard?utm_source=github.com&utm_medium=referral&utm_content=bosankus/Compose-Weatherify&utm_campaign=Badge_Grade)
-![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?style=flat&logo=kotlin&logoColor=white)
-![AGP](https://img.shields.io/badge/AGP-9.3.0--rc01-3DDC84?style=flat&logo=android&logoColor=white)
-![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.12.0--beta01-4285F4?style=flat&logo=jetpackcompose&logoColor=white)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-7F52FF?style=flat&logo=kotlin&logoColor=white)
+![AGP](https://img.shields.io/badge/AGP-9.3.1-3DDC84?style=flat&logo=android&logoColor=white)
+![Gradle](https://img.shields.io/badge/Gradle-9.6.1-02303A?style=flat&logo=gradle&logoColor=white)
+![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.12.0--beta03-4285F4?style=flat&logo=jetpackcompose&logoColor=white)
 ![Android](https://img.shields.io/badge/Min%20SDK-28%20(Pie)-3DDC84?style=flat&logo=android&logoColor=white)
 ![iOS](https://img.shields.io/badge/iOS-arm64%20%2B%20Simulator-000000?style=flat&logo=apple&logoColor=white)
 ![Version](https://img.shields.io/badge/Version-1.1-0078D4?style=flat)
@@ -37,12 +38,13 @@ A production-grade **Kotlin Multiplatform** weather app built with **Compose Mul
 
 ## Module Architecture
 
-The project is split into clearly bounded Gradle modules. Everything except `:app:androidApp` and `:app:iosApp` is a **Kotlin Multiplatform (KMP)** module (`org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library` plugins) with `commonMain`/`androidMain`/`iosMain` source sets — every shared module compiles for both `iosArm64` and `iosSimulatorArm64` (no `iosX64`; Compose Multiplatform dropped Intel-simulator artifacts at 1.11.0). `:app` used to be a single Android module; it's now two thin platform hosts sitting on top of the same KMP module graph:
+The project is split into clearly bounded Gradle modules. Everything except `:app:androidApp`, `:app:iosApp`, and `:app:wearApp` is a **Kotlin Multiplatform (KMP)** module (`org.jetbrains.kotlin.multiplatform` + `com.android.kotlin.multiplatform.library` plugins) with `commonMain`/`androidMain`/`iosMain` source sets — every shared module compiles for both `iosArm64` and `iosSimulatorArm64` (no `iosX64`; Compose Multiplatform dropped Intel-simulator artifacts at 1.11.0). `:app` used to be a single Android module; it's now two thin platform hosts sitting on top of the same KMP module graph:
 
 - **`:app:androidApp`** — plain Android application module, the only place **Hilt** is used (for `AppPermissionViewModel`). `WeatherifyApplication` boots Koin via `initKoin()`, and `MainActivity` hosts the shared UI through `AppNavigation(...)`.
 - **`:app:iosApp`** — a KMP module (Android/Hilt-free) that builds a static Kotlin/Native framework named `ComposeApp`, plus an Xcode project (`iosApp.xcodeproj`/`.xcworkspace`, CocoaPods `Podfile`, `project.yml` for XcodeGen). `Koin.kt`'s `startWeatherifyKoin()` (Swift sees it as `KoinKt.startWeatherifyKoin()` — Kotlin/Native's Obj-C exporter renames `init*` functions to avoid clashing with Obj-C's `init` convention) boots the same Koin module graph as Android, minus Hilt. `MainViewController.kt` is the Compose entry point (`ComposeUIViewController { ... }`), invoked from `iOSApp.swift`/`ContentView.swift` in the native `iosApp/` Swift package.
+- **`:app:wearApp`** — Wear OS companion application module (Wear Compose Material3 + Nav3). Present in the Gradle graph and source tree; product scope / store readiness is still TBD — see [What's Next](#whats-next).
 
-Both app hosts depend on the exact same set of KMP modules — `:common-ui`, `:navigation`, `:storage`, `:network`, and every `:feature:*` module — so nearly all app logic (including the entire `AppContent`/toast/auth/navigation composition) is shared, not duplicated; only the platform shell (Activity vs. `UIViewController`, Hilt vs. none, Razorpay checkout which is Android-only) differs. Every KMP module uses **Koin**; only `:app:androidApp` additionally uses Hilt, bridged in via Koin-Hilt adapter modules. Navigation itself lives in its own KMP module, `:navigation`, which sits directly below both app hosts and aggregates every feature module.
+The phone/tablet hosts (`:app:androidApp` and `:app:iosApp`) depend on the exact same set of KMP modules — `:common-ui`, `:navigation`, `:storage`, `:network`, and every `:feature:*` module — so nearly all app logic (including the entire `AppContent`/toast/auth/navigation composition) is shared, not duplicated; only the platform shell (Activity vs. `UIViewController`, Hilt vs. none, Razorpay checkout which is Android-only) differs. Every KMP module uses **Koin**; only `:app:androidApp` additionally uses Hilt, bridged in via Koin-Hilt adapter modules. Navigation itself lives in its own KMP module, `:navigation`, which sits directly below both app hosts and aggregates every feature module.
 
 ```mermaid
 graph TD
@@ -142,7 +144,7 @@ graph TD
 
 ## Project Structure
 
-The two app hosts live side by side under `app/`, each with its own Gradle build script:
+The app hosts live side by side under `app/`, each with its own Gradle build script:
 
 ```text
 app/
@@ -182,6 +184,10 @@ app/
         ├── GoogleService-Info.plist        — Firebase config (Remote Config), not committed
         ├── Info.plist
         └── Assets.xcassets/
+
+└── wearApp/                                — Wear OS companion module (Wear Compose; product scope TBD)
+    ├── build.gradle.kts
+    └── src/main/                           — WeatherifyWearApplication, Wear screens, Data Layer sync
 ```
 
 > `iosApp/Pods/`, both app modules' `build/`, and `androidApp/release/` are build outputs — not checked in. See [Setup & Installation](#setup--installation) for how to regenerate the iOS project (`xcodegen generate` + `pod install`).
@@ -284,23 +290,35 @@ Androidplay Weather API (https://data.androidplay.in)
 
 ## Tech Stack
 
+Versions below are taken from `gradle/libs.versions.toml` (and the Gradle Wrapper for the Gradle distribution) as of `develop`.
+
+### Build
+
+| Tool | Version | Purpose |
+|---|---|---|
+| Kotlin | `2.4.10` | Language + KMP / Compose compiler plugins |
+| Android Gradle Plugin | `9.3.1` | Android / KMP Android library builds |
+| Gradle | `9.6.1` | Build system (Wrapper) |
+| KSP | `2.3.9` | Kotlin Symbol Processing (Room, Hilt) |
+| Compose Multiplatform plugin | `1.12.0-beta03` | Shared Compose UI plugin |
+
 ### UI
 
 | Library | Version | Purpose |
 |---|---|---|
-| Jetpack Compose BOM | `2026.06.00` | Declarative UI framework |
-| Compose Multiplatform | `1.12.0-beta01` | Shared Compose UI for KMP modules, incl. `:app:iosApp`'s `ComposeUIViewController` |
-| Material 3 | `1.9.0` | Design system + dynamic theming |
-| Navigation 3 (`androidx.navigation3`) | `1.1.4` | Type-safe backstack + `NavDisplay`/`entryProvider` |
+| Jetpack Compose BOM | `2026.06.01` | Declarative UI framework |
+| Compose Multiplatform | `1.12.0-beta03` | Shared Compose UI for KMP modules, incl. `:app:iosApp`'s `ComposeUIViewController` |
+| Material 3 (CMP) | `1.9.0` | Design system + dynamic theming (`cmp-material3`) |
+| Navigation 3 (`androidx.navigation3`) | `1.1.5` | Type-safe backstack + `NavDisplay`/`entryProvider` |
 | Lifecycle ViewModel Nav3 | `2.11.0` | ViewModel scoping for Nav3 entries |
-| Coil Compose | `2.7.0` (Android) / Coil3 `3.4.0` (KMP modules) | Async image loading |
+| Coil 3 Compose | `3.5.0` | Async image loading in `:feature:home` (KMP) |
 | Splash Screen API | `1.2.0` | Android 12+ splash screen |
 
 ### Architecture & DI
 
 | Library | Version | Purpose |
 |---|---|---|
-| Hilt | `2.59.2` | Dependency injection — `:app:androidApp` only (`AppPermissionViewModel`) |
+| Hilt | `2.60.1` | Dependency injection — `:app:androidApp` only (`AppPermissionViewModel`) |
 | Koin | `4.2.2` | DI in all KMP modules (`:navigation`, `:feature:home`, `:feature:settings`, `:common-ui`, `:feature:*`, `:network`, `:storage`, `:app:iosApp`) |
 | Kotlin Coroutines | `1.11.0` | Async & structured concurrency |
 | StateFlow / Flow | — | Reactive UI state management |
@@ -309,9 +327,8 @@ Androidplay Weather API (https://data.androidplay.in)
 
 | Library | Version | Purpose |
 |---|---|---|
-| Ktor Client | `3.5.1` | KMP-compatible HTTP client |
+| Ktor Client | `3.5.2` | KMP-compatible HTTP client |
 | Kotlinx Serialization | `1.11.0` | JSON parsing |
-| OkHttp MockWebServer | `4.12.0` | Network mocking (declared; not yet exercised by tests — see Testing) |
 
 ### Local Storage
 
@@ -326,7 +343,7 @@ Androidplay Weather API (https://data.androidplay.in)
 
 | SDK | Purpose |
 |---|---|
-| Firebase BOM `34.15.0` (Android) / CocoaPods (iOS) | BoM / pod versions for consistent Firebase SDKs across platforms |
+| Firebase BOM `34.17.0` (Android) / CocoaPods (iOS) | BoM / pod versions for consistent Firebase SDKs across platforms |
 | Analytics | Declared dependency (Android); no explicit `logEvent` calls in code yet (auto-instrumentation only) |
 | Remote Config | Server-driven feature flags (`HomeRemoteConfigGate`); `initializeFirebase()` runs on both Android (`WeatherifyApplication`) and iOS (`:feature:home`'s `di`, invoked from `Koin.kt`'s `startWeatherifyKoin()` and `iOSApp.swift`'s `FirebaseApp.configure()`) |
 | Performance Monitoring | Network + rendering metrics (Android) |
@@ -336,12 +353,12 @@ Androidplay Weather API (https://data.androidplay.in)
 
 ### Testing
 
-| Library | Purpose | Status |
-|---|---|---|
-| JUnit 4 + Truth | Unit assertions | Declared; **`app/androidApp/src/test` does not exist — zero unit tests** |
-| Turbine `1.2.1` | Flow/StateFlow testing | Declared, not yet exercised |
-| Mockk `1.14.11` | Kotlin-first mocking | Declared, not yet exercised |
-| Espresso + Hilt Testing | Instrumentation UI tests | Removed from the version catalog (along with Mockito-Inline and `accompanist-permissions`) during the iOS module split; `app/androidApp/build.gradle.kts` still points `testInstrumentationRunner` at `bose.ankush.weatherify.helper.HiltTestRunner`, a class that doesn't exist in the repo |
+| Library | Version | Purpose | Status |
+|---|---|---|---|
+| JUnit 4 | `4.13.2` | Unit assertions | Declared; **`app/androidApp/src/test` does not exist — zero unit tests on `develop`** |
+| Truth | `1.4.5` | Fluent assertions | Declared, not yet exercised |
+| Mockk | `1.14.11` | Kotlin-first mocking | Declared, not yet exercised |
+| Espresso / Hilt Testing / Turbine / MockWebServer | — | Formerly declared helpers | Removed from `gradle/libs.versions.toml`; `app/androidApp/build.gradle.kts` still points `testInstrumentationRunner` at `bose.ankush.weatherify.helper.HiltTestRunner`, a class that doesn't exist in the repo |
 
 > See [Testing Status](#testing-status) below — the test table above reflects declared dependencies, not actual coverage.
 
@@ -377,7 +394,7 @@ MainActivity (Android, Hilt entry point) / MainViewController (iOS, ComposeUIVie
 
 ## Testing Status
 
-Test infrastructure (MockWebServer, Turbine, Mockk) is declared in the build files, but **there is currently no test coverage at all**:
+Test libraries currently declared in `gradle/libs.versions.toml` are JUnit, Truth, and Mockk, but **there is currently no test coverage on `develop`**:
 
 - No `app/androidApp/src/test` directory exists — the unit tests it previously held have been removed
 - No `androidTest`/`androidInstrumentedTest` directory with content exists in any module
@@ -503,15 +520,28 @@ CI builds the project and runs Spotless/Detekt checks on every PR (see [CI/CD](#
 These are the planned improvements currently in progress or on the roadmap:
 
 - **iOS parity polish** — the app now builds and runs on iOS (`:app:iosApp`, SwiftUI host + shared Compose UI), but premium purchase (Razorpay is Android-only), push notifications (FCM), in-app updates, and Analytics/Performance Monitoring have no iOS equivalent yet. There's also no macOS/iOS CI job — `.github/workflows/ci.yml` only builds/lints Android.
-- **Real test coverage** — the codebase currently has zero tests (see [Testing Status](#testing-status)): add `androidTest` instrumentation tests, exercise the already-declared Mockk/Turbine/MockWebServer dependencies, populate `commonTest`/`iosTest` source sets in `:storage`/`:network`, add an XCTest target for `:app:iosApp`, and fix or remove the dangling `HiltTestRunner` reference in `app/androidApp/build.gradle.kts`.
+- **Real test coverage** — the codebase currently has zero tests on `develop` (see [Testing Status](#testing-status)): add instrumentation/`commonTest` coverage, exercise the declared Mockk/Truth/JUnit dependencies, add an XCTest target for `:app:iosApp`, and fix or remove the dangling `HiltTestRunner` reference in `app/androidApp/build.gradle.kts`.
 - **Offline-first strategy** — full read-from-cache-then-network flow using Room as the single source of truth, with explicit stale-data indicators in the UI.
 - **Widget support** — a Glance-based home screen widget (Android) / WidgetKit extension (iOS) showing current temperature and conditions.
-- **Wear OS companion** — lightweight Wear Compose screen for wrist-based weather glances.
+- **Wear OS companion** — `:app:wearApp` is already present (Wear Compose Material3 screens + Data Layer sync scaffolding); product scope and store readiness are still TBD.
 - **Release automation** — CI already builds and lints every PR; the next step is automated release builds, Play Store internal track deployments, and a TestFlight pipeline for iOS.
 - **Accessibility pass** — semantic descriptions, touch target sizing, and TalkBack/VoiceOver compatibility audit on both platforms.
+
+### In flight (open PRs against `develop`)
+
+Themes currently open upstream (merge order not assumed — check the PR list for status):
+
+- Home `commonTest` coverage (reducer / refresh policy)
+- Durable iOS weather cache via Room KMP
+- Android app DI: Hilt → Koin-only migration
+- Premium status extraction out of `:feature:payment`
+- Shared `WeatherifyTheme` across Android and iOS (`:common-ui`)
+- Network naming / layering cleanups (e.g. remote-source rename, `TokenStorage` API module)
+- Dead AuthToken Room surface removal
+- Detekt baseline enforcement per module
 
 ---
 
 ## License
 
-This project intends to use the MIT License; a `LICENSE` file has not yet been added to the repository.
+This project is licensed under the [MIT License](LICENSE).

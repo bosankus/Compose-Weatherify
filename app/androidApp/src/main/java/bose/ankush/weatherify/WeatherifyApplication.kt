@@ -14,15 +14,14 @@ import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
 import bose.ankush.settings.di.settingsViewModelModule
 import bose.ankush.storage.di.storageDomainModule
+import bose.ankush.weatherify.di.appNotificationKoinModule
 import bose.ankush.weatherify.di.appPaymentKoinModule
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
-import dagger.hilt.android.HiltAndroidApp
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import timber.log.Timber
 
-@HiltAndroidApp
 class WeatherifyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
@@ -43,6 +42,7 @@ class WeatherifyApplication : Application() {
                     paymentDomainModule,
                     paymentViewModelModule,
                     appPaymentKoinModule,
+                    appNotificationKoinModule,
                     authViewModelModule,
                     authDomainModule,
                     finderDomainModule,

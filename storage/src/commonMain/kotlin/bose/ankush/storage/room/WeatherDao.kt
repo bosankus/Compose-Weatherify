@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface WeatherDao {
     @Transaction
-    fun refreshWeather(
+    suspend fun refreshWeather(
         weather: WeatherEntity,
         airQuality: AirQualityEntity,
     ) {
@@ -23,10 +23,10 @@ interface WeatherDao {
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertWeather(weather: WeatherEntity)
+    suspend fun insertWeather(weather: WeatherEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAirQuality(airQuality: AirQualityEntity)
+    suspend fun insertAirQuality(airQuality: AirQualityEntity)
 
     @Query("SELECT * from $WEATHER_DATABASE_NAME")
     fun getWeather(): Flow<WeatherEntity?>
@@ -35,13 +35,13 @@ interface WeatherDao {
     fun getAirQuality(): Flow<AirQualityEntity?>
 
     @Query("DELETE from $WEATHER_DATABASE_NAME")
-    fun deleteAllWeatherDetails()
+    suspend fun deleteAllWeatherDetails()
 
     @Query("DELETE from $AQ_DATABASE_NAME")
-    fun deleteAllAirQualityDetails()
+    suspend fun deleteAllAirQualityDetails()
 
     @Transaction
-    fun clearAll() {
+    suspend fun clearAll() {
         deleteAllWeatherDetails()
         deleteAllAirQualityDetails()
     }

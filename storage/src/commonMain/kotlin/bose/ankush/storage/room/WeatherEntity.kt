@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import bose.ankush.storage.common.WEATHER_DATABASE_NAME
+import kotlinx.serialization.Serializable
 
 @Entity(tableName = WEATHER_DATABASE_NAME)
 data class WeatherEntity(
@@ -14,8 +15,9 @@ data class WeatherEntity(
     @Embedded val current: Current? = null,
     @field:TypeConverters(WeatherDataModelConverters::class) val daily: List<Daily?>? = listOf(),
     @field:TypeConverters(WeatherDataModelConverters::class) val hourly: List<Hourly?>? = listOf(),
-    @ColumnInfo(defaultValue = "0") val lastUpdated: Long = System.currentTimeMillis(),
+    @ColumnInfo(defaultValue = "0") val lastUpdated: Long = 0L,
 ) {
+    @Serializable
     data class Alert(
         val description: String?,
         val end: Long?,
@@ -39,6 +41,7 @@ data class WeatherEntity(
         val wind_speed: Double?,
     )
 
+    @Serializable
     data class Daily(
         val clouds: Int?,
         val dew_point: Double?,
@@ -55,6 +58,7 @@ data class WeatherEntity(
         val wind_gust: Double?,
         val wind_speed: Double?,
     ) {
+        @Serializable
         data class Temp(
             val day: Double?,
             val eve: Double?,
@@ -65,6 +69,7 @@ data class WeatherEntity(
         )
     }
 
+    @Serializable
     data class Hourly(
         val clouds: Int?,
         val dt: Long?,
@@ -75,6 +80,7 @@ data class WeatherEntity(
     )
 }
 
+@Serializable
 data class Weather(
     val description: String? = null,
     val icon: String? = null,

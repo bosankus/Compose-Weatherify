@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>UnusedPrivateMember:SavedLocationsScreen.kt$@Preview @Composable private fun LocationCardPreview()</ID>
+    <ID>UnusedPrivateMember:SavedLocationsScreen.kt$@Preview @Composable private fun LocationCardSkeletonPreview()</ID>
+    <ID>UnusedPrivateMember:SavedLocationsScreen.kt$@Preview @Composable private fun SavedLocationsScreenEmptyPreview()</ID>
+    <ID>UnusedPrivateMember:SavedLocationsScreen.kt$@Preview @Composable private fun SavedLocationsScreenListPreview()</ID>
+    <ID>UnusedPrivateMember:SavedLocationsScreen.kt$@Preview @Composable private fun SavedLocationsScreenLoadingPreview()</ID>
+    <ID>UnusedPrivateMember:SavedLocationsScreen.kt$@Preview @Composable private fun SavedLocationsScreenPremiumGatePreview()</ID>
+    <ID>UnusedPrivateMember:SavedLocationsScreen.kt$@Preview @Composable private fun SetAsDefaultLocationDialogPreview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

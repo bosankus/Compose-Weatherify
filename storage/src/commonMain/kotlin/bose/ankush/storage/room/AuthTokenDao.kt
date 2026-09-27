@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AuthTokenDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun saveToken(token: AuthToken): Long
+    suspend fun saveToken(token: AuthToken): Long
 
     @Query("SELECT * FROM auth_tokens WHERE id = 1 LIMIT 1")
-    fun getToken(): AuthToken?
+    suspend fun getToken(): AuthToken?
 
     @Query("SELECT EXISTS(SELECT 1 FROM auth_tokens WHERE id = 1 LIMIT 1)")
     fun hasToken(): Flow<Boolean>
 
     @Query("DELETE FROM auth_tokens")
-    fun clearTokens(): Int
+    suspend fun clearTokens(): Int
 }

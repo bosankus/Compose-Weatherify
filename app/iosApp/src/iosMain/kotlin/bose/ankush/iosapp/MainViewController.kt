@@ -28,6 +28,7 @@ import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.auth.presentation.LoginScreen
 import bose.ankush.commonui.components.NotificationToast
+import bose.ankush.commonui.theme.WeatherifyTheme
 import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.web.InAppWebView
@@ -35,7 +36,7 @@ import bose.ankush.home.HomeSessionCleaner
 import bose.ankush.iosapp.payment.RazorpayCheckoutBridge
 import bose.ankush.language.util.AppEnvironment
 import bose.ankush.navigation.AppNavigation
-import bose.ankush.payment.domain.store.PremiumStore
+import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
@@ -47,7 +48,7 @@ fun MainViewController(): UIViewController {
     lateinit var controller: UIViewController
     controller =
         ComposeUIViewController {
-            MaterialTheme {
+            WeatherifyTheme {
                 AppEnvironment {
                     AppContent(rootController = { controller })
                 }
@@ -61,7 +62,7 @@ private fun AppContent(rootController: () -> UIViewController) {
     val authViewModel = koinInject<AuthViewModel>()
     val paymentViewModel = koinInject<PaymentViewModel>()
     val homeSessionCleaner = koinInject<HomeSessionCleaner>()
-    val premiumStore = koinInject<PremiumStore>()
+    val premiumStorage = koinInject<PremiumStorage>()
     val analyticsTracker = koinInject<AnalyticsTracker>()
 
     val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
@@ -110,11 +111,11 @@ private fun AppContent(rootController: () -> UIViewController) {
         authViewModel.effect.collect { effect ->
             when (effect) {
                 is AuthEffect.PremiumStatusChanged ->
-                    premiumStore.savePremiumStatus(effect.isPremium, effect.expiryMillis)
+                    premiumStorage.savePremiumStatus(effect.isPremium, effect.expiryMillis)
 
                 AuthEffect.LoggedOut -> {
                     homeSessionCleaner.clearOnLogout()
-                    premiumStore.savePremiumStatus(isPremium = false, expiryMillis = null)
+                    premiumStorage.savePremiumStatus(isPremium = false, expiryMillis = null)
                 }
             }
         }

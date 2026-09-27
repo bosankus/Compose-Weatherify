@@ -9,8 +9,8 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.kotlin.serialization) apply false
-    alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.androidx.room) apply false
     alias(libs.plugins.secrets.gradle.plugin) apply false
     alias(libs.plugins.ktlint) apply false
     // Declared here (not just via buildSrc) so it shares the same portal-resolved classloader as
@@ -71,17 +71,59 @@ subprojects {
 
     apply(plugin = "io.gitlab.arturbosch.detekt")
 
+    // Per-module baselines (Detekt does not merge a single shared file across modules).
+    // Path uses the Gradle project path so :feature:home → feature-home.xml.
+    val detektBaselineFile = file(
+        "${rootProject.projectDir}/config/detekt-baselines/${path.removePrefix(":").replace(':', '-')}.xml"
+    )
+
     extensions.configure<io.gitlab.arturbosch.detekt.extensions.DetektExtension>("detekt") {
         buildUponDefaultConfig = true
         allRules = false
-        ignoreFailures = true
+        // Enforce new findings; existing debt is grandfathered per-module under config/detekt-baselines/
+        ignoreFailures = false
         autoCorrect = false
         parallel = true
         config.setFrom(rootProject.layout.projectDirectory.file("config/detekt.yml"))
+        baseline = detektBaselineFile
+    }
+
+    // KMP registers source-set-specific Detekt tasks and leaves the plain :detekt /
+    // :detektBaseline tasks with empty inputs (NO-SOURCE). CI's detektAll / codeCheck depend
+    // on those plain tasks, so re-attach the module's hand-written sources here. Keep
+    // generated Compose/Room output out so baselines stay reviewable.
+    val detektSourceDirs = listOf(
+        "src/main/java",
+        "src/main/kotlin",
+        "src/commonMain/kotlin",
+        "src/androidMain/kotlin",
+        "src/iosMain/kotlin",
+        "src/jvmMain/kotlin",
+        "src/commonTest/kotlin",
+        "src/androidUnitTest/kotlin",
+        "src/test/java",
+        "src/test/kotlin",
+    ).map { file(it) }.filter { it.exists() }
+
+    tasks.named<io.gitlab.arturbosch.detekt.Detekt>("detekt").configure {
+        if (detektSourceDirs.isNotEmpty()) {
+            setSource(files(detektSourceDirs))
+            include("**/*.kt", "**/*.kts")
+            exclude("**/build/**", "**/generated/**", "**/res/**", "**/resources/**")
+        }
+    }
+
+    tasks.named<io.gitlab.arturbosch.detekt.DetektCreateBaselineTask>("detektBaseline").configure {
+        if (detektSourceDirs.isNotEmpty()) {
+            setSource(files(detektSourceDirs))
+            include("**/*.kt", "**/*.kts")
+            exclude("**/build/**", "**/generated/**", "**/res/**", "**/resources/**")
+        }
     }
 
     tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
         jvmTarget = "17"
+        exclude("**/build/**", "**/generated/**")
         reports {
             xml.required.set(false)
             txt.required.set(false)
@@ -97,11 +139,13 @@ subprojects {
         autoCorrect = true
         buildUponDefaultConfig = true
         config.setFrom(rootProject.layout.projectDirectory.file("config/detekt.yml"))
+        baseline.set(detektBaselineFile)
+        // Auto-correct remains best-effort; enforcement happens on the regular detekt task
         ignoreFailures = true
         parallel = true
         setSource(files("src"))
         include("**/*.kt", "**/*.kts")
-        exclude("**/build/**")
+        exclude("**/build/**", "**/generated/**")
     }
 
     tasks.named("detektAutoCorrect") { mustRunAfter("spotlessApply") }
@@ -125,6 +169,12 @@ tasks.register("detektAll") {
     group = "verification"
     description = "Runs detekt in all subprojects"
     dependsOn(subprojects.map { "${it.path}:detekt" })
+}
+
+tasks.register("detektBaselineAll") {
+    group = "verification"
+    description = "Regenerates per-module Detekt baselines under config/detekt-baselines/"
+    dependsOn(subprojects.map { "${it.path}:detektBaseline" })
 }
 
 tasks.register("detektAllAutoCorrect") {

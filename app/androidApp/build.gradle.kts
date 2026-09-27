@@ -2,9 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
-    alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets.gradle.plugin)
     alias(libs.plugins.ben.manes.versions)
@@ -46,7 +44,7 @@ android {
         versionCode = ConfigData.versionCode
         versionName = ConfigData.versionName
         multiDexEnabled = ConfigData.multiDexEnabled
-        testInstrumentationRunner = "bose.ankush.weatherify.helper.HiltTestRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     @Suppress("UnstableApiUsage")
@@ -144,11 +142,6 @@ dependencies {
     // Date/Time (KMP-compatible, replaces java.time)
     implementation(libs.kotlinx.datetime)
 
-    // Dependency Injection
-    implementation(libs.google.dagger.hilt.android)
-    ksp(libs.google.dagger.hilt.android.compiler)
-    ksp(libs.androidx.hilt.compiler)
-
     // Miscellaneous
     implementation(libs.timber)
 
@@ -158,7 +151,7 @@ dependencies {
     // Payment SDK (Android-only — Razorpay checkout is launched from the app layer)
     implementation(libs.razorpay.checkout)
 
-    // Koin — bridges the feature-payment Koin module with Hilt-managed singletons
+    // Koin — app and feature DI graph
     implementation(libs.koin.android)
     // Koin Compose Multiplatform — needed to host KoinContext for feature modules
     // (e.g. :feature:finder) that resolve ViewModels via koinViewModel() in commonMain.

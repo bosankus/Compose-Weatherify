@@ -13,6 +13,9 @@ import bose.ankush.tokenstorage.api.TokenStorage
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.common.LOCATION_PREFERENCES_FILE_NAME
 import bose.ankush.storage.common.PREMIUM_PREFERENCES_FILE_NAME
+import bose.ankush.storage.room.WeatherDataModelConverters
+import bose.ankush.storage.room.WeatherDatabase
+import bose.ankush.storage.room.createWeatherDatabase
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named
@@ -24,7 +27,9 @@ private val premiumPreferencesQualifier = named("premiumPreferencesDataStore")
 actual val storageDomainModule: Module =
     module {
         single<TokenStorage> { EncryptedTokenStorageImpl() }
-        single<WeatherStorage> { WeatherStorageImpl() }
+        single<WeatherDataModelConverters> { WeatherDataModelConverters() }
+        single<WeatherDatabase> { createWeatherDatabase(converters = get()) }
+        single<WeatherStorage> { WeatherStorageImpl(get()) }
         single<DataStore<Preferences>> {
             PreferenceDataStoreFactory.createWithPath(
                 produceFile = { (NSHomeDirectory() + "/" + LOCATION_PREFERENCES_FILE_NAME).toPath() },

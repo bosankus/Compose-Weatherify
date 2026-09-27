@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF000000</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF071426</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0A1116</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0A1413</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0C0817</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0D0F11</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0D161D</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0E0B09</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0E1417</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0F0D08</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0F1213</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF0F1B24</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF100B08</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF100C0A</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF101E3C</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF120714</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF120B08</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF12201E</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF130D10</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF141618</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF14202B</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF1565C0</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF170905</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF171D22</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF191C1D</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF1B0F2E</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF3B5361</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF3E7C74</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF45338F</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF4A545C</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF4E7FA0</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF56707E</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF5C4438</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF5E6B70</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF6A2E63</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF6B5A3C</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF6E4A3A</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF6E5648</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF7A4A33</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF8A5A66</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFF9C4A14</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFB2DFDB</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFB3E5FC</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFC8E6E2</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFC9E4F5</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFCFD8DC</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFD6E4FF</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFD8DDDF</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFDCC8EE</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFDCE3E8</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFDDE1E4</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFE1BEE7</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFEAF4FA</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFECEFF1</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFF0D5F5</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFF0E4DA</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFF5DCC8</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFF5EBD0</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFFFE0B2</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFFFE8D6</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFFFEBEE</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFFFF9C4</ID>
+    <ID>MagicNumber:WeatherScreen.kt$0xFFFFFFFF</ID>
+    <ID>MagicNumber:WeatherUiMapper.kt$WeatherUiMapper$17</ID>
+    <ID>MagicNumber:WeatherUiMapper.kt$WeatherUiMapper$18</ID>
+    <ID>MagicNumber:WeatherUiMapper.kt$WeatherUiMapper$8</ID>
+    <ID>ReturnCount:WeatherSyncStore.kt$WeatherSyncStore$fun parse(item: DataItem): SyncedWeather?</ID>
+    <ID>ReturnCount:WeatherUiMapper.kt$WeatherUiMapper$private fun mapHourly(item: WeatherForecast.Data.Hourly): HourlyUiState?</ID>
+    <ID>TopLevelPropertyNaming:MockWeather.kt$/** * Fallback shown until a forecast has synced from the phone via the Wearable Data Layer API * (see [bose.ankush.weatherify.wear.data.WeatherSyncStore]) — e.g. right after a fresh install, * before the paired phone has pushed anything yet. */ internal const val mockLocationName = "London, UK"</ID>
+    <ID>UnusedPrivateMember:WeatherScreen.kt$@Preview(device = WearDevices.SMALL_ROUND) @Preview(device = WearDevices.LARGE_ROUND) @Preview(device = WearDevices.SQUARE) @Composable private fun WeatherScreenPreview()</ID>
+  </CurrentIssues>
+</SmellBaseline>
