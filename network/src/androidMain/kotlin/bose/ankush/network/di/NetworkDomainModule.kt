@@ -34,7 +34,7 @@ import org.koin.dsl.module
 actual val networkDomainModule: Module =
     module {
         single<NetworkConnectivity> { AndroidNetworkConnectivity(androidContext()) }
-        single<HttpClient> { createHttpClient() }
+        single<HttpClient> { createHttpClient(get(), get()) }
         single<AuthApiService> { KtorAuthApiService(get(), NetworkConstants.WEATHER_BASE_URL) }
         single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
         single<TokenManager> { TokenManager(get(), get()) }

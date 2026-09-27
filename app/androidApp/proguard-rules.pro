@@ -12,13 +12,13 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Required for readable Crashlytics stack traces: without these, a deobfuscated release
+# trace still has no line numbers, which makes most crash reports undiagnosable.
+# -renamesourcefileattribute hides the real file name while keeping the attribute R8 needs
+# to emit line numbers at all. Declared explicitly rather than relying on whatever the
+# bundled proguard-android-optimize.txt happens to contain; -keepattributes is additive.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 
 # Keep WeatherForecast classes to prevent class casting issues

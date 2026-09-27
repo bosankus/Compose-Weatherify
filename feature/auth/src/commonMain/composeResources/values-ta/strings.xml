@@ -18,4 +18,11 @@
     <string name="login_error_email_invalid">சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்</string>
     <string name="login_error_password_empty">கடவுச்சொல் காலியாக இருக்கக்கூடாது</string>
     <string name="login_error_password_short">கடவுச்சொல் குறைந்தது 6 எழுத்துகள் இருக்க வேண்டும்</string>
+
+    <!--Auth error messages-->
+    <string name="auth_error_network">இணைய இணைப்பு இல்லை. இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="auth_error_timeout">சேவையகம் பதிலளிக்க அதிக நேரம் எடுக்கிறது. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="auth_error_server">எங்கள் பக்கத்தில் சிக்கல் உள்ளது. சில நிமிடங்கள் கழித்து முயற்சிக்கவும்.</string>
+    <string name="auth_error_credentials">மின்னஞ்சல் அல்லது கடவுச்சொல் தவறானது.</string>
+    <string name="auth_error_generic">ஏதோ தவறு நடந்தது. மீண்டும் முயற்சிக்கவும்.</string>
 </resources>

@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
+import bose.ankush.analytics.ErrorReporter
 import bose.ankush.auth.domain.DeviceInfoProvider
+import bose.ankush.auth.generated.resources.Res
+import bose.ankush.auth.generated.resources.auth_error_generic
 import bose.ankush.network.auth.events.AuthEvent
 import bose.ankush.network.auth.events.AuthEventBus
 import bose.ankush.network.auth.events.AuthEventBus.emit
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import kotlin.time.Instant
 
 class AuthViewModel(
@@ -29,6 +33,7 @@ class AuthViewModel(
     private val tokenManager: TokenManager,
     private val deviceInfoProvider: DeviceInfoProvider,
     private val analyticsTracker: AnalyticsTracker,
+    private val errorReporter: ErrorReporter,
 ) : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
@@ -112,7 +117,9 @@ class AuthViewModel(
         } catch (_: CancellationException) {
             _authState.value = AuthState.Error("$actionName was cancelled")
         } catch (e: Exception) {
-            _authState.value = AuthState.Error(e.message ?: "$actionName failed")
+            // The exception's own message is for the crash report only — the user gets mapped copy.
+            errorReporter.recordError(e, "$actionName failed", mapOf("action" to actionName))
+            _authState.value = AuthState.Error(authErrorMessage(e))
         }
     }
 
@@ -126,7 +133,8 @@ class AuthViewModel(
                     _authState.value = AuthState.LoggedOut
                 },
                 onFailure = { e ->
-                    _authState.value = AuthState.Error(e.message ?: "Logout failed")
+                    errorReporter.recordError(e, "Logout failed")
+                    _authState.value = AuthState.Error(authErrorMessage(e))
                 },
             )
         }
@@ -140,17 +148,21 @@ class AuthViewModel(
                     val active = isPremiumActive(response.data?.premiumExpiresAt)
                     _effect.trySend(AuthEffect.PremiumStatusChanged(active, expiryMillis))
                 } else {
+                    errorReporter.recordError(
+                        IllegalStateException(
+                            "Forced logout on foreground refresh: ${response.message ?: "no message"}",
+                        ),
+                        "Session ended by refresh-token response",
+                    )
                     tokenManager.forceLogout()
                     emit(AuthEvent.Unauthorized("Your session has expired. Please log in again."))
                 }
-            } catch (_: CancellationException) {
-                // No implementation required
-            } catch (_: Exception) {
-                // No implementation required
+            } catch (e: Exception) {
+                errorReporter.recordError(e, "Foreground token refresh failed")
             }
         }
 
-    private fun handleAuthResponse(
+    private suspend fun handleAuthResponse(
         response: AuthResponse,
         successEvent: AnalyticsEvent,
     ) {
@@ -158,7 +170,12 @@ class AuthViewModel(
             response.data
                 ?.takeIf { response.isSuccess() && it.token.isNotBlank() }
                 ?: run {
-                    _authState.value = AuthState.Error(response.message ?: "Authentication failed")
+                    // The API's own message is written for users; only its absence needs copy here.
+                    _authState.value =
+                        AuthState.Error(
+                            response.message?.takeIf { it.isNotBlank() }
+                                ?: getString(Res.string.auth_error_generic),
+                        )
                     return
                 }
 
@@ -173,7 +190,8 @@ class AuthViewModel(
     private fun parseIsoToMillis(isoDate: String): Long? =
         try {
             Instant.parse(isoDate).toEpochMilliseconds()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            errorReporter.recordError(e, "Unparseable premiumExpiresAt", mapOf("value" to isoDate))
             null
         }
 }

@@ -19,4 +19,11 @@
     <string name="login_error_email_invalid">Please enter a valid email address</string>
     <string name="login_error_password_empty">Password cannot be empty</string>
     <string name="login_error_password_short">Password must be at least 6 characters</string>
+
+    <!--Auth error messages: shown instead of raw exception text, which goes to crash reports-->
+    <string name="auth_error_network">No internet connection. Check your connection and try again.</string>
+    <string name="auth_error_timeout">The server is taking too long to respond. Please try again.</string>
+    <string name="auth_error_server">We\'re having trouble on our end. Please try again in a few minutes.</string>
+    <string name="auth_error_credentials">Incorrect email or password.</string>
+    <string name="auth_error_generic">Something went wrong. Please try again.</string>
 </resources>

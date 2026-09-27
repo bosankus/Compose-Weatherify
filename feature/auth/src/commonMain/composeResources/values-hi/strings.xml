@@ -18,4 +18,11 @@
     <string name="login_error_email_invalid">कृपया एक मान्य ईमेल पता दर्ज करें</string>
     <string name="login_error_password_empty">पासवर्ड खाली नहीं हो सकता</string>
     <string name="login_error_password_short">पासवर्ड कम से कम 6 अक्षरों का होना चाहिए</string>
+
+    <!--Auth error messages-->
+    <string name="auth_error_network">इंटरनेट कनेक्शन नहीं है। कृपया अपना कनेक्शन जांचें और फिर से प्रयास करें।</string>
+    <string name="auth_error_timeout">सर्वर को जवाब देने में बहुत समय लग रहा है। कृपया फिर से प्रयास करें।</string>
+    <string name="auth_error_server">हमारी ओर से कुछ समस्या है। कृपया कुछ मिनटों बाद प्रयास करें।</string>
+    <string name="auth_error_credentials">ईमेल या पासवर्ड गलत है।</string>
+    <string name="auth_error_generic">कुछ गलत हो गया। कृपया फिर से प्रयास करें।</string>
 </resources>
