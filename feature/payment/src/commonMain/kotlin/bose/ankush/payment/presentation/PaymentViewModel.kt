@@ -78,11 +78,12 @@ class PaymentViewModel(
         viewModelScope.launch {
             premiumStorage.observePremiumStatus().collect { status ->
                 val now = Clock.System.now().toEpochMilliseconds()
-                val isActive = status.expiryMillis != null && status.expiryMillis > now
+                val expiryMillis = status.expiryMillis
+                val isActive = expiryMillis != null && expiryMillis > now
                 _uiState.update {
                     it.copy(
                         isPremiumActivated = isActive,
-                        expiryMillis = status.expiryMillis,
+                        expiryMillis = expiryMillis,
                         stage = if (isActive) PaymentStage.Success else it.stage,
                     )
                 }
