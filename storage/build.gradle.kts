@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 kotlin {
@@ -45,6 +46,9 @@ kotlin {
                 implementation(libs.koin.core)
                 implementation(libs.androidx.datastore.preferences.core)
                 implementation(libs.okio)
+                implementation(libs.androidx.room.runtime)
+                implementation(libs.androidx.sqlite.bundled)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {
@@ -56,14 +60,10 @@ kotlin {
         @Suppress("UNUSED_VARIABLE")
         val androidMain by getting {
             dependencies {
-                // Room dependencies
-                implementation(libs.androidx.room.runtime)
-                implementation(libs.androidx.room.ktx)
-                // Security: Encrypted token storage
-                implementation(libs.androidx.security.crypto)
-                // Gson for JSON serialization
+                // Gson-backed TypeConverters (Android keeps existing JSON wire format)
                 implementation(libs.gson)
                 implementation(libs.koin.android)
+                implementation(libs.androidx.security.crypto)
             }
         }
 
@@ -92,12 +92,14 @@ kotlin {
     }
 }
 
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
-// KSP configuration for Room annotation processing (Hilt moved to app module)
+// KSP for Room on every KMP target that compiles this module
 dependencies {
-    // Room annotation processor
     add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosX64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
 }

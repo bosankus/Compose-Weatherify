@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.androidx.room) apply false
     alias(libs.plugins.secrets.gradle.plugin) apply false
     alias(libs.plugins.ktlint) apply false
     // Declared here (not just via buildSrc) so it shares the same portal-resolved classloader as
