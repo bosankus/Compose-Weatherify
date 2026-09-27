@@ -28,6 +28,11 @@ build/
 # Local configuration file (sdk path, etc)
 local.properties
 
+# AGP release metadata / baseline profiles (never commit build outputs)
+app/androidApp/release/
+app/wearApp/release/
+
+
 # Developer-local secrets (RAZORPAY_KEY etc); secrets.defaults.properties is the
 # committed placeholder fallback both androidApp (secrets-gradle-plugin) and
 # iosApp (app/iosApp/build.gradle.kts) read from.

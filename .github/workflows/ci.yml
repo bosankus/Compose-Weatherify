@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ "**" ]
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "develop" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -51,7 +51,7 @@ jobs:
         with:
           name: debug-apk
           path: app/androidApp/build/outputs/apk/debug/*.apk
-          if-no-files-found: ignore
+          if-no-files-found: error
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
