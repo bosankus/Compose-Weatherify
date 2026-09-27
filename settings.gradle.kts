@@ -36,5 +36,5 @@ include(
     ":feature:settings",
     ":navigation",
     ":network",
-    ":storage"
+    ":storage",
 )
