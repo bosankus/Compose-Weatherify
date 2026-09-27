@@ -1,7 +1,7 @@
 package bose.ankush.analytics
 
-import swiftPMImport.bose.ankush.analytics.FIRAnalytics
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.bose.ankush.analytics.FIRAnalytics
 
 @OptIn(ExperimentalForeignApi::class)
 internal class FirebaseAnalyticsTracker : AnalyticsTracker {

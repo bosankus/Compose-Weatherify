@@ -16,7 +16,6 @@ plugins {
 // package via `compose.resources { packageOfResClass = ... }` below.
 group = "bose.ankush"
 
-
 kotlin {
     // AGP 9's com.android.kotlin.multiplatform.library plugin implies the Android target itself —
     // androidTarget() is no longer needed (and conflicts with this plugin); configure it via android { }.
@@ -40,7 +39,6 @@ kotlin {
 
     iosArm64()
     iosSimulatorArm64()
-
 
     // Firebase for iOS comes from the firebase-ios-sdk Swift package (the Kotlin CocoaPods plugin
     // is in maintenance mode). No framework {} is declared here: this module is linked into the
@@ -69,7 +67,6 @@ kotlin {
                 ),
         )
     }
-
 
     sourceSets {
         val commonMain by getting {
