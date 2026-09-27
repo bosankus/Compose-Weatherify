@@ -53,7 +53,6 @@ import bose.ankush.weatherify.base.common.startInAppUpdate
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
 import org.koin.android.ext.android.inject
@@ -61,7 +60,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
-@AndroidEntryPoint
 class MainActivity :
     AppCompatActivity(),
     PaymentResultWithDataListener {
