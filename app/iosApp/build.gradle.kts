@@ -1,11 +1,16 @@
+@file:OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
+
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose.multiplatform)
-    id("org.jetbrains.kotlin.native.cocoapods")
 }
+
+// Prefix of the `swiftPMImport.<group>.<module>.*` namespace the SwiftPM cinterop bindings are
+// generated under (see RazorpayCheckoutBridge.kt) — keep in sync with the imports there.
+group = "bose.ankush"
 
 // There's no iOS-native equivalent of the secrets-gradle-plugin androidApp uses to
 // expose RAZORPAY_KEY via BuildConfig, so this mirrors it by hand: read the same
@@ -44,37 +49,35 @@ run {
 }
 
 kotlin {
-    // Razorpay's iOS checkout SDK is only distributed via CocoaPods (no Maven/SPM
-    // artifact usable from Gradle), so it's cinterop'd here — the app-layer module,
-    // mirroring where the Razorpay Android SDK is called from (MainActivity.kt),
-    // not inside the platform-agnostic :feature:payment module.
-    cocoapods {
-        version = "1.0"
-        summary = "Weatherify iOS app"
-        homepage = "https://github.com/bosankus/Compose-Weatherify"
-        ios.deploymentTarget = "16.0"
+    // Razorpay's iOS checkout SDK is cinterop'd here — the app-layer module, mirroring where the
+    // Razorpay Android SDK is called from (MainActivity.kt), not inside the platform-agnostic
+    // :feature:payment module. The Firebase packages the shared modules need are inherited from
+    // :analytics and :feature:home; they must not be redeclared here or their Clang modules would
+    // be generated twice.
+    swiftPMDependencies {
+        iosMinimumDeploymentTarget = "16.0"
 
-        pod("razorpay-pod") {
-            version = "~> 1.5"
-            // The pod's CocoaPods name ("razorpay-pod") differs from the Objective-C
-            // modules its umbrella frameworks actually vend — without this, Kotlin's
-            // generated cinterop .def assumes `modules = razorpay_pod`, which doesn't
-            // exist and fails cinterop with "module 'razorpay_pod' not found".
-            //
-            // Both RazorpayStandard (RazorpayCheckout itself) and RazorpayCore (the
-            // delegate protocols, e.g. RazorpayPaymentCompletionProtocolWithData) are
-            // needed — without RazorpayCore, protocol types resolve to opaque,
-            // unimplementable `objcnames.protocols.*` placeholders, and RazorpayCheckout
-            // can't be constructed with a real delegate at all.
-            //
-            // RazorpayStandard is used here rather than the (functionally identical)
-            // Razorpay module: combining *Razorpay* + RazorpayCore in one cinterop pass
-            // hits a Kotlin/Native interop generator bug under the Xcode 26.3 SDK
-            // ("'char8_tVar' is going to be declared twice") — apparently triggered by
-            // Razorpay's extra WebKit-based initializers pulling in WKWebView headers.
-            // RazorpayStandard + RazorpayCore avoids it while exposing the same API.
-            moduleName = "RazorpayStandard RazorpayCore"
-        }
+        // The RazorpayCheckout product bundles four Clang modules, so auto-discovery is off and
+        // only the two the bridge needs are imported:
+        //
+        // RazorpayStandard vends RazorpayCheckout itself and RazorpayCore the delegate protocols
+        // (e.g. RazorpayPaymentCompletionProtocolWithData) — without RazorpayCore, protocol types
+        // resolve to opaque, unimplementable `objcnames.protocols.*` placeholders and
+        // RazorpayCheckout can't be constructed with a real delegate at all.
+        //
+        // RazorpayStandard is used rather than the (functionally identical) Razorpay module:
+        // combining *Razorpay* + RazorpayCore in one cinterop pass hits a Kotlin/Native interop
+        // generator bug under the Xcode 26.3 SDK ("'char8_tVar' is going to be declared twice") —
+        // apparently triggered by Razorpay's extra WebKit-based initializers pulling in WKWebView
+        // headers. RazorpayStandard + RazorpayCore avoids it while exposing the same API.
+        discoverClangModulesImplicitly = false
+
+        swiftPackage(
+            url = url("https://github.com/razorpay/razorpay-pod.git"),
+            version = from("1.5.4"),
+            products = listOf(product("RazorpayCheckout")),
+            importedClangModules = listOf("RazorpayStandard", "RazorpayCore"),
+        )
     }
 
     // iosX64 (Intel simulator) dropped: matches the rest of the shared modules —

@@ -1,3 +1,5 @@
+@file:OptIn(org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi::class)
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,8 +8,14 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.serialization)
-    id("org.jetbrains.kotlin.native.cocoapods")
 }
+
+// Prefix of the `swiftPMImport.<group>.<module>.*` namespace the SwiftPM cinterop bindings are
+// generated under (see HomePlatformModule.kt / FirebaseHomeRemoteConfigGate.kt) — keep in sync
+// with the imports there. Compose resource accessors are unaffected: this module pins its own
+// package via `compose.resources { packageOfResClass = ... }` below.
+group = "bose.ankush"
+
 
 kotlin {
     // AGP 9's com.android.kotlin.multiplatform.library plugin implies the Android target itself —
@@ -33,25 +41,35 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
 
-    cocoapods {
-        version = "1.0"
-        summary = "Weatherify Home feature module"
-        homepage = "https://github.com/bosankus/Compose-Weatherify"
-        ios.deploymentTarget = "15.0"
-        framework {
-            baseName = "feature_home"
-            isStatic = true
-        }
 
-        pod("FirebaseCore") {
-            version = "12.4.0"
-        }
+    // Firebase for iOS comes from the firebase-ios-sdk Swift package (the Kotlin CocoaPods plugin
+    // is in maintenance mode). No framework {} is declared here: this module is linked into the
+    // app through the :app:iosApp ComposeApp framework, never consumed as a standalone binary.
+    swiftPMDependencies {
+        iosMinimumDeploymentTarget = "16.0"
 
-        pod("FirebaseRemoteConfig") {
-            version = "12.4.0"
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
+        // Firebase pulls in C++ transitive modules (gRPC, abseil, leveldb, BoringSSL) whose Clang
+        // modules break cinterop generation, so auto-discovery is off and every module imported
+        // from Kotlin is listed explicitly. RemoteConfig's Objective-C headers are vended by
+        // FirebaseRemoteConfigInternal, not by the FirebaseRemoteConfig product module.
+        discoverClangModulesImplicitly = false
+
+        swiftPackage(
+            url = url("https://github.com/firebase/firebase-ios-sdk.git"),
+            version = exact("12.4.0"),
+            products =
+                listOf(
+                    product("FirebaseCore"),
+                    product("FirebaseRemoteConfig"),
+                ),
+            importedClangModules =
+                listOf(
+                    "FirebaseCore",
+                    "FirebaseRemoteConfigInternal",
+                ),
+        )
     }
+
 
     sourceSets {
         val commonMain by getting {

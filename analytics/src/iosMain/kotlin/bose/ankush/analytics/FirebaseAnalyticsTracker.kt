@@ -1,6 +1,6 @@
 package bose.ankush.analytics
 
-import cocoapods.FirebaseAnalytics.FIRAnalytics
+import swiftPMImport.bose.ankush.analytics.FIRAnalytics
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)

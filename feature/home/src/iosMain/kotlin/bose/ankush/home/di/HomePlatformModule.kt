@@ -8,8 +8,8 @@ import bose.ankush.home.domain.location.HomeGeocoder
 import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.repository.WeatherWearSync
-import cocoapods.FirebaseCore.FIRApp
-import cocoapods.FirebaseCore.FIROptions
+import swiftPMImport.bose.ankush.feature.home.FIRApp
+import swiftPMImport.bose.ankush.feature.home.FIROptions
 import kotlinx.cinterop.ExperimentalForeignApi
 import org.koin.core.module.Module
 import org.koin.dsl.module
