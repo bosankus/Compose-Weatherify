@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MatchingDeclarationName:AppLocale.android.kt$LocalAppLocale</ID>
+    <ID>MatchingDeclarationName:AppLocale.ios.kt$LocalAppLocale</ID>
+    <ID>MemberNameEqualsClassName:AppLocale.ios.kt$LocalAppLocale$private val LocalAppLocale = staticCompositionLocalOf { default }</ID>
+    <ID>SpreadOperator:AppLocale.kt$(*(LocalAppLocale provides customAppLocale))</ID>
+    <ID>UnusedPrivateProperty:LanguageScreen.kt$private const val ITEM_STAGGER_DELAY_MS = 100L</ID>
+  </CurrentIssues>
+</SmellBaseline>

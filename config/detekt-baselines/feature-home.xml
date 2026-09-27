@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:WeatherIconDrawing.kt$fun mapToWeatherCondition(description: String?): WeatherCondition</ID>
+    <ID>LongParameterList:HomeRoute.kt$( bottomBar: @Composable () -&gt; Unit = {}, toastAnchorState: ToastAnchorState? = null, hasLocationPermission: Boolean = true, hasNotificationPermission: Boolean = true, notificationPermissionResult: HomeNotificationPermissionResult? = null, requiresNotificationSettingsNavigationHint: Boolean = false, onRequestNotificationPermission: () -&gt; Unit = {}, onRequestLocationPermission: () -&gt; Unit = {}, onOpenSettings: () -&gt; Unit = {}, onOpenLocationSettings: () -&gt; Unit = {}, )</ID>
+    <ID>LongParameterList:HomeRoute.kt$( errorText: String?, isLoading: Boolean, isGpsDisabled: Boolean, isLocationPermissionDenied: Boolean, onOpenLocationSettings: () -&gt; Unit, onRetry: () -&gt; Unit, onRequestLocationPermission: () -&gt; Unit, )</ID>
+    <ID>LongParameterList:HomeRoute.kt$( state: HomeState, bottomBar: @Composable () -&gt; Unit, toastAnchorState: ToastAnchorState?, onRefresh: () -&gt; Unit, onResetLocationOverride: () -&gt; Unit, onEnableNotifications: () -&gt; Unit, onDismissNotificationBanner: () -&gt; Unit, requiresNotificationSettingsNavigationHint: Boolean, )</ID>
+    <ID>LongParameterList:WeatherAlertCard.kt$( title: String?, description: String?, startTime: Long?, endTime: Long?, source: String?, onReadMoreClick: (() -&gt; Unit)? = null, initiallyExpanded: Boolean = false, )</ID>
+    <ID>LongParameterList:WeatherHourCard.kt$( time: String, temperature: String, weatherDescription: String? = null, isSelected: Boolean = false, onClick: () -&gt; Unit = {}, iconContent: @Composable () -&gt; Unit, )</ID>
+    <ID>MagicNumber:WeatherIconDrawing.kt$0.2f</ID>
+    <ID>MagicNumber:WeatherIconDrawing.kt$0.3f</ID>
+    <ID>MagicNumber:WeatherIconDrawing.kt$0.6f</ID>
+    <ID>MagicNumber:WeatherIconDrawing.kt$0.95f</ID>
+    <ID>MagicNumber:WeatherIconDrawing.kt$0.98f</ID>
+    <ID>MatchingDeclarationName:WeatherIcon.kt$WeatherIconColors</ID>
+    <ID>MaxLineLength:HomeNotificationPermissionResult.kt$HomeNotificationPermissionResult$*</ID>
+    <ID>MaxLineLength:SunriseSunsetAnimation.kt$if (isBeforeSunrise) SunriseConstants.Opacity.STAR_BASE_BEFORE_SUNRISE else SunriseConstants.Opacity.STAR_BASE_AFTER_SUNSET</ID>
+    <ID>MaxLineLength:WeatherIconDrawing.kt$"broken" in lowerDesc || "51-84%" in lowerDesc || "mostly" in lowerDesc -&gt; WeatherCondition.BROKEN_CLOUDS</ID>
+    <ID>MaxLineLength:WeatherIconDrawing.kt$"heavy" in lowerDesc || "intense" in lowerDesc || "strong" in lowerDesc || "pouring" in lowerDesc -&gt; WeatherCondition.HEAVY_INTENSITY_RAIN</ID>
+    <ID>MaxLineLength:WeatherIconDrawing.kt$"heavy" in lowerDesc || "strong" in lowerDesc || "severe" in lowerDesc -&gt; WeatherCondition.HEAVY_THUNDERSTORM</ID>
+    <ID>MaxLineLength:WeatherIconDrawing.kt$"overcast" in lowerDesc || "85-100%" in lowerDesc || "full" in lowerDesc -&gt; WeatherCondition.OVERCAST_CLOUDS</ID>
+    <ID>NestedBlockDepth:WeatherIconDrawing.kt$fun DrawScope.drawRain( animationProgress: Float, intensity: Float, rainColor: Color, )</ID>
+    <ID>ReturnCount:DeviceLocationClient.kt$DeviceLocationClient$override suspend fun getCurrentLocation(): Result&lt;Coordinates&gt;</ID>
+    <ID>ReturnCount:HomePlatformModule.kt$@OptIn(ExperimentalForeignApi::class) fun initializeFirebase()</ID>
+    <ID>ReturnCount:HomeViewModel.kt$HomeViewModel$private suspend fun resolveCoordinates(): CoordinateResolution</ID>
+    <ID>ReturnCount:IosLocationClient.kt$IosLocationClient$override suspend fun getCurrentLocation(): Result&lt;Coordinates&gt;</ID>
+    <ID>ReturnCount:SunriseSunsetAnimation.kt$private fun createSoothingSkyGradient( progress: Float, isBeforeSunrise: Boolean, isAfterSunset: Boolean, ): Brush</ID>
+    <ID>ReturnCount:WeatherIconDrawing.kt$fun mapToWeatherCondition(description: String?): WeatherCondition</ID>
+    <ID>TooGenericExceptionCaught:HomePlatformModule.kt$e: Exception</ID>
+    <ID>UnusedPrivateMember:LoadingComponent.kt$@Preview @Composable private fun CurrentWeatherSkeletonPreview()</ID>
+    <ID>UnusedPrivateMember:LoadingComponent.kt$@Preview @Composable private fun DailyForecastSkeletonPreview()</ID>
+    <ID>UnusedPrivateMember:LoadingComponent.kt$@Preview @Composable private fun ShowLoadingPreview()</ID>
+  </CurrentIssues>
+</SmellBaseline>

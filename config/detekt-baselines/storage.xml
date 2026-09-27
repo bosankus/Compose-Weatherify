@@ -1,0 +1,12 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MagicNumber:EncryptedTokenStorageImpl.kt$EncryptedTokenStorageImpl$25300</ID>
+    <ID>TooGenericExceptionThrown:EncryptedTokenStorageImpl.kt$EncryptedTokenStorageImpl$throw Exception("Failed to create CFMutableDictionary")</ID>
+    <ID>TooGenericExceptionThrown:EncryptedTokenStorageImpl.kt$EncryptedTokenStorageImpl$throw Exception("Failed to delete token from Keychain: error code $status")</ID>
+    <ID>TooGenericExceptionThrown:EncryptedTokenStorageImpl.kt$EncryptedTokenStorageImpl$throw Exception("Failed to encode token to NSData")</ID>
+    <ID>TooGenericExceptionThrown:EncryptedTokenStorageImpl.kt$EncryptedTokenStorageImpl$throw Exception("Failed to save token to Keychain: error code $status")</ID>
+    <ID>UseCheckOrError:EncryptedTokenStorageImpl.kt$throw IllegalStateException( "Application context not initialized. Call setApplicationContext() in your Application.onCreate()", )</ID>
+  </CurrentIssues>
+</SmellBaseline>
