@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:AppNavigation.kt$( authViewModel: AuthViewModel, paymentViewModel: PaymentViewModel, navigator: AppNavigator, toastAnchorState: ToastAnchorState?, versionName: String, onShowToast: (String) -&gt; Unit, onRequestNotificationPermission: () -&gt; Unit, hasNotificationPermission: Boolean, isNotificationPermissionPermanentlyDeclined: Boolean, )</ID>
+    <ID>MaxLineLength:PlatformPermissions.ios.kt$IosPlatformPermissions$UNUserNotificationCenter.currentNotificationCenter()</ID>
+  </CurrentIssues>
+</SmellBaseline>

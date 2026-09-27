@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>LongParameterList:InAppWebView.kt$( view: WebView, onTitle: (String) -&gt; Unit, onProgress: (Int) -&gt; Unit, onExternalIntent: (Intent) -&gt; Unit, onError: (String) -&gt; Unit = {}, onPageFinished: () -&gt; Unit = {}, )</ID>
+    <ID>LongParameterList:NotificationToast.kt$( modifier: Modifier = Modifier, message: String, title: String, type: ToastType, isVisible: Boolean, onDismiss: () -&gt; Unit, duration: Duration = 3000.milliseconds, bottomOffset: Dp = 0.dp, anchorState: ToastAnchorState? = null, )</ID>
+    <ID>LongParameterList:PermissionAlertDialog.kt$( descriptionText: String, isPermanentlyDeclined: Boolean, onPositiveAction: () -&gt; Unit, onNegativeAction: () -&gt; Unit, positiveButtonLabel: String = "OK", negativeButtonLabel: String = "Cancel", )</ID>
+    <ID>ReturnCount:InAppWebView.kt$InAppWebViewDelegate$private fun isWhitelistedUrl(urlString: String): Boolean</ID>
+  </CurrentIssues>
+</SmellBaseline>

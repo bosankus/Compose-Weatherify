@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>InstanceOfCheckForException:NetworkUtils.kt$NetworkUtils$e is NetworkException</ID>
+    <ID>InstanceOfCheckForException:TokenManager.kt$TokenManager$e is CancellationException</ID>
+    <ID>LongParameterList:AuthRepository.kt$AuthRepository$( email: String, password: String, timestampOfRegistration: String? = null, deviceModel: String? = null, operatingSystem: String? = null, osVersion: String? = null, appVersion: String? = null, registrationSource: String? = null, firebaseToken: String? = null, )</ID>
+    <ID>MagicNumber:AndroidHttpClient.kt$60_000</ID>
+    <ID>MagicNumber:IOSHttpClient.kt$60.0</ID>
+    <ID>ReturnCount:AndroidNetworkConnectivity.kt$AndroidNetworkConnectivity$override fun isNetworkAvailable(): Boolean</ID>
+    <ID>ReturnCount:ServiceModels.kt$Service$private fun isWithinAvailabilityWindow(): Boolean</ID>
+    <ID>ThrowsCount:NetworkUtils.kt$NetworkUtils$suspend fun &lt;T&gt; retryWithExponentialBackoff( maxRetries: Int = NetworkConstants.MAX_RETRIES, initialDelayMillis: Long = NetworkConstants.INITIAL_BACKOFF_DELAY, maxDelayMillis: Long = NetworkConstants.MAX_BACKOFF_DELAY, block: suspend () -&gt; T, ): T</ID>
+    <ID>TooGenericExceptionCaught:AuthRepositoryImpl.kt$AuthRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:KtorServiceApiService.kt$KtorServiceApiService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:LocationRepositoryImpl.kt$LocationRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:NetworkUtils.kt$NetworkUtils$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:ServiceRepository.kt$ServiceRepositoryImpl$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:TokenManager.kt$TokenManager$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:WeatherRepositoryImpl.kt$WeatherRepositoryImpl$e: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>
