@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.net.http.SslError
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.CookieManager
@@ -11,26 +12,23 @@ import android.webkit.SslErrorHandler
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.OpenInBrowser
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,7 +37,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -52,7 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.net.toUri
@@ -68,8 +64,7 @@ actual fun InAppWebView(
 
     val pageTitle = remember { mutableStateOf("") }
     var progress by remember { mutableIntStateOf(0) }
-    var loadError by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    var loadError by remember { mutableStateOf<WebViewError?>(null) }
     var isInitialLoad by remember { mutableStateOf(true) }
     val currentUrl = remember { mutableStateOf(url) }
 
@@ -84,6 +79,14 @@ actual fun InAppWebView(
             }
         }
 
+    val openInBrowser = {
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, currentUrl.value.toUri()))
+        } catch (_: ActivityNotFoundException) {
+            // No browser available
+        }
+    }
+
     BackHandler(enabled = true) {
         if (webView.canGoBack()) webView.goBack() else onClose()
     }
@@ -92,10 +95,14 @@ actual fun InAppWebView(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = pageTitle.value.ifBlank { "Weatherify" },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    WebViewTitle(
+                        text =
+                            resolveWebViewTitle(
+                                error = loadError,
+                                pageTitle = pageTitle.value,
+                                currentUrl = currentUrl.value,
+                                fallback = "Weatherify",
+                            ),
                     )
                 },
                 navigationIcon = {
@@ -109,7 +116,11 @@ actual fun InAppWebView(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { webView.reload() }) {
+                    IconButton(onClick = {
+                        loadError = null
+                        isInitialLoad = true
+                        webView.reload()
+                    }) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
                             contentDescription = "Refresh page",
@@ -134,18 +145,7 @@ actual fun InAppWebView(
                             contentDescription = "Share page",
                         )
                     }
-                    IconButton(onClick = {
-                        try {
-                            context.startActivity(
-                                Intent(
-                                    Intent.ACTION_VIEW,
-                                    currentUrl.value.toUri(),
-                                ),
-                            )
-                        } catch (_: ActivityNotFoundException) {
-                            // No browser available
-                        }
-                    }) {
+                    IconButton(onClick = openInBrowser) {
                         Icon(
                             imageVector = Icons.Outlined.OpenInBrowser,
                             contentDescription = "Open in browser",
@@ -167,7 +167,7 @@ actual fun InAppWebView(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(paddingValues),
         ) {
-            if (progress in 1..99) {
+            if (progress in 1..99 && loadError == null) {
                 LinearProgressIndicator(
                     progress = { progress / 100f },
                     modifier =
@@ -199,9 +199,12 @@ actual fun InAppWebView(
                                         // No handler available
                                     }
                                 },
-                                onError = { message ->
-                                    loadError = true
-                                    errorMessage = message
+                                onError = { error ->
+                                    loadError = error
+                                    isInitialLoad = false
+                                },
+                                onNavigationStarted = {
+                                    loadError = null
                                 },
                                 onPageFinished = {
                                     isInitialLoad = false
@@ -217,7 +220,7 @@ actual fun InAppWebView(
                     },
                 )
 
-                if (isInitialLoad && progress < 100) {
+                if (isInitialLoad && progress < 100 && loadError == null) {
                     Box(
                         modifier =
                             Modifier
@@ -229,56 +232,16 @@ actual fun InAppWebView(
                     }
                 }
 
-                if (loadError) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f)),
-                    ) {
-                        Column(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.ErrorOutline,
-                                contentDescription = "Error",
-                                modifier =
-                                    Modifier
-                                        .size(64.dp)
-                                        .padding(bottom = 16.dp),
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                            Text(
-                                text = "Failed to load page",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(bottom = 8.dp),
-                            )
-                            if (errorMessage.isNotBlank()) {
-                                Text(
-                                    text = errorMessage,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                                    modifier = Modifier.padding(bottom = 24.dp),
-                                )
-                            }
-                            Button(
-                                onClick = {
-                                    loadError = false
-                                    errorMessage = ""
-                                    isInitialLoad = true
-                                    webView.reload()
-                                },
-                            ) {
-                                Text("Retry")
-                            }
-                        }
-                    }
+                loadError?.let { error ->
+                    WebViewErrorContent(
+                        error = error,
+                        onRetry = {
+                            loadError = null
+                            isInitialLoad = true
+                            webView.reload()
+                        },
+                        onOpenInBrowser = openInBrowser.takeIf { !error.isRetryable },
+                    )
                 }
             }
         }
@@ -303,7 +266,8 @@ private fun configureWebView(
     onTitle: (String) -> Unit,
     onProgress: (Int) -> Unit,
     onExternalIntent: (Intent) -> Unit,
-    onError: (String) -> Unit = {},
+    onError: (WebViewError) -> Unit = {},
+    onNavigationStarted: () -> Unit = {},
     onPageFinished: () -> Unit = {},
 ) {
     with(view.settings) {
@@ -331,12 +295,17 @@ private fun configureWebView(
 
     view.webViewClient =
         object : WebViewClient() {
+            // Note: the error state is deliberately NOT reset in onPageStarted. WebView delivers
+            // onReceivedHttpError with the response headers, i.e. *before* the error document
+            // commits and onPageStarted fires, so resetting there would wipe the error before it
+            // could ever render. A new navigation always passes through here instead.
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest?,
             ): Boolean {
                 val uri = request?.url ?: return false
                 val scheme = uri.scheme ?: ""
+                onNavigationStarted()
                 return handleUrl(view, uri, scheme, onExternalIntent)
             }
 
@@ -354,41 +323,62 @@ private fun configureWebView(
                 error: WebResourceError?,
             ) {
                 super.onReceivedError(view, request, error)
-                if (request?.isForMainFrame == true) {
-                    val errorDesc = error?.description?.toString() ?: "Unknown error"
-                    onError("Failed to load: $errorDesc")
-                }
+                if (request?.isForMainFrame != true) return
+                val detail = error?.description?.toString()?.takeIf { it.isNotBlank() }
+                onError(
+                    when (error?.errorCode) {
+                        ERROR_HOST_LOOKUP,
+                        ERROR_CONNECT,
+                        ERROR_IO,
+                        ERROR_PROXY_AUTHENTICATION,
+                        -> WebViewError.noInternet(detail)
+
+                        ERROR_TIMEOUT -> WebViewError.timeout(detail)
+
+                        ERROR_FAILED_SSL_HANDSHAKE -> WebViewError.secureConnection(detail)
+
+                        ERROR_FILE_NOT_FOUND -> WebViewError.fromHttpStatus(404)
+
+                        ERROR_AUTHENTICATION,
+                        ERROR_UNSUPPORTED_AUTH_SCHEME,
+                        -> WebViewError.fromHttpStatus(401)
+
+                        else -> WebViewError.generic(detail)
+                    },
+                )
             }
 
             override fun onReceivedHttpError(
                 view: WebView?,
                 request: WebResourceRequest?,
-                errorResponse: android.webkit.WebResourceResponse?,
+                errorResponse: WebResourceResponse?,
             ) {
                 super.onReceivedHttpError(view, request, errorResponse)
-                if (request?.isForMainFrame == true) {
-                    val statusCode = errorResponse?.statusCode ?: 0
-                    val reason = errorResponse?.reasonPhrase ?: "Unknown error"
-                    onError("HTTP Error $statusCode: $reason")
-                }
+                if (request?.isForMainFrame != true) return
+                onError(
+                    WebViewError.fromHttpStatus(
+                        statusCode = errorResponse?.statusCode ?: 0,
+                        reasonPhrase = errorResponse?.reasonPhrase,
+                    ),
+                )
             }
 
             override fun onReceivedSslError(
                 view: WebView?,
                 handler: SslErrorHandler?,
-                error: android.net.http.SslError?,
+                error: SslError?,
             ) {
                 super.onReceivedSslError(view, handler, error)
                 handler?.cancel()
-                val errorMsg =
+                val detail =
                     when (error?.primaryError) {
-                        android.net.http.SslError.SSL_EXPIRED -> "SSL certificate expired"
-                        android.net.http.SslError.SSL_IDMISMATCH -> "SSL certificate hostname mismatch"
-                        android.net.http.SslError.SSL_NOTYETVALID -> "SSL certificate not yet valid"
-                        android.net.http.SslError.SSL_UNTRUSTED -> "SSL certificate not trusted"
-                        else -> "SSL certificate error"
+                        SslError.SSL_EXPIRED -> "Certificate expired"
+                        SslError.SSL_IDMISMATCH -> "Certificate hostname mismatch"
+                        SslError.SSL_NOTYETVALID -> "Certificate not yet valid"
+                        SslError.SSL_UNTRUSTED -> "Certificate not trusted"
+                        else -> null
                     }
-                onError(errorMsg)
+                onError(WebViewError.secureConnection(detail))
             }
         }
 
