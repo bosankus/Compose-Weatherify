@@ -21,8 +21,8 @@ import bose.ankush.network.repository.LocationRepository
 import bose.ankush.network.repository.LocationRepositoryImpl
 import bose.ankush.network.repository.ServiceRepository
 import bose.ankush.network.repository.ServiceRepositoryImpl
-import bose.ankush.network.repository.WeatherRepository
-import bose.ankush.network.repository.WeatherRepositoryImpl
+import bose.ankush.network.repository.WeatherRemoteSource
+import bose.ankush.network.repository.WeatherRemoteSourceImpl
 import bose.ankush.network.util.IOSNetworkConnectivity
 import bose.ankush.network.util.NetworkConnectivity
 import bose.ankush.network.utils.NetworkConstants
@@ -44,7 +44,7 @@ actual val networkDomainModule: Module =
                 NetworkConstants.WEATHER_BASE_URL,
             )
         }
-        single<WeatherRepository> { WeatherRepositoryImpl(get(), get()) }
+        single<WeatherRemoteSource> { WeatherRemoteSourceImpl(get(), get()) }
         single<FeedbackApiService> {
             KtorFeedbackApiService(
                 get(),
