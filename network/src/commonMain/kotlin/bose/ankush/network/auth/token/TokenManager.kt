@@ -1,7 +1,7 @@
 package bose.ankush.network.auth.token
 
 import bose.ankush.network.auth.repository.AuthRepository
-import bose.ankush.storage.api.TokenStorage
+import bose.ankush.tokenstorage.api.TokenStorage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock

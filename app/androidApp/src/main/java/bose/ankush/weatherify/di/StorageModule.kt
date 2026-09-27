@@ -1,6 +1,6 @@
 package bose.ankush.weatherify.di
 
-import bose.ankush.storage.api.TokenStorage
+import bose.ankush.tokenstorage.api.TokenStorage
 import bose.ankush.storage.api.WeatherStorage
 import dagger.Module
 import dagger.Provides

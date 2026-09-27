@@ -36,5 +36,6 @@ include(
     ":feature:settings",
     ":navigation",
     ":network",
-    ":storage"
+    ":storage",
+    ":token-storage-api"
 )

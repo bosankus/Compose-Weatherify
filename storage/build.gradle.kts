@@ -41,6 +41,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                api(project(":token-storage-api"))
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.koin.core)
                 implementation(libs.androidx.datastore.preferences.core)
