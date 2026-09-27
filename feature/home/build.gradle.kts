@@ -23,6 +23,8 @@ kotlin {
                 .get()
                 .toInt()
         androidResources.enable = true
+        // Enables running commonTest on the Android host (JVM unit tests).
+        withHostTest {}
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -94,12 +96,26 @@ kotlin {
             }
         }
 
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+
         val iosMain by creating {
             dependsOn(commonMain)
         }
 
         iosArm64Main.get().dependsOn(iosMain)
         iosSimulatorArm64Main.get().dependsOn(iosMain)
+
+        val iosTest by creating {
+            dependsOn(commonTest)
+        }
+
+        iosArm64Test.get().dependsOn(iosTest)
+        iosSimulatorArm64Test.get().dependsOn(iosTest)
     }
 }
 

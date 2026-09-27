@@ -39,7 +39,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":network"))
-            implementation(project(":feature:payment"))
+            implementation(project(":storage"))
             implementation(project(":common-ui"))
             implementation(project(":analytics"))
             implementation(libs.compose.multiplatform.resources)
