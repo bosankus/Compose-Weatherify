@@ -1,9 +1,9 @@
 package bose.ankush.home.data.remoteconfig
 
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
+import kotlinx.cinterop.ExperimentalForeignApi
 import swiftPMImport.bose.ankush.feature.home.FIRRemoteConfig
 import swiftPMImport.bose.ankush.feature.home.FIRRemoteConfigSettings
-import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
 internal class FirebaseHomeRemoteConfigGate : HomeRemoteConfigGate {
