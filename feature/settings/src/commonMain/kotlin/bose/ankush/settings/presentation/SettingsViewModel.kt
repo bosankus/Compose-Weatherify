@@ -46,7 +46,9 @@ internal class SettingsViewModel(
                 dispatch(SettingsAction.ServiceSelected(intent.service))
             }
             is SettingsIntent.SelectTier -> {
-                val serviceId = _state.value.serviceSubscription.selectedService?.id ?: ""
+                val serviceId =
+                    _state.value.serviceSubscription.selectedService
+                        ?.id ?: ""
                 analyticsTracker.track(AnalyticsEvent.TierSelected(serviceId, intent.tier.id))
                 dispatch(SettingsAction.TierSelected(intent.tier))
             }

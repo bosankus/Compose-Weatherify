@@ -16,12 +16,10 @@ actual class WeatherDataModelConverters actual constructor() {
         }
 
     @TypeConverter
-    actual fun toAlertJson(alerts: List<WeatherEntity.Alert?>?): String? =
-        alerts?.let { json.encodeToString(it) }
+    actual fun toAlertJson(alerts: List<WeatherEntity.Alert?>?): String? = alerts?.let { json.encodeToString(it) }
 
     @TypeConverter
-    actual fun fromAlertJson(alertString: String): List<WeatherEntity.Alert?> =
-        decodeList(alertString) ?: emptyList()
+    actual fun fromAlertJson(alertString: String): List<WeatherEntity.Alert?> = decodeList(alertString) ?: emptyList()
 
     @TypeConverter
     actual fun toDailyWeatherJson(dailyWeatherReports: List<WeatherEntity.Daily?>?): String? =
@@ -40,8 +38,7 @@ actual class WeatherDataModelConverters actual constructor() {
         decodeList(hourlyWeatherString) ?: emptyList()
 
     @TypeConverter
-    actual fun toWeatherJson(weatherReports: List<Weather?>?): String? =
-        weatherReports?.let { json.encodeToString(it) }
+    actual fun toWeatherJson(weatherReports: List<Weather?>?): String? = weatherReports?.let { json.encodeToString(it) }
 
     @TypeConverter
     actual fun fromWeatherJson(weatherString: String): List<Weather?>? = decodeList(weatherString)

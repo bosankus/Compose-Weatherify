@@ -164,7 +164,6 @@ subprojects {
     tasks.named("detektAutoCorrect") { mustRunAfter("spotlessApply") }
 }
 
-
 // Aggregator tasks
 tasks.register("spotlessCheckAll") {
     group = "verification"

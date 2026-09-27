@@ -9,7 +9,7 @@ import kotlin.time.Duration.Companion.hours
  * (see [bose.ankush.weatherify.wear.data.WeatherSyncStore]) — e.g. right after a fresh install,
  * before the paired phone has pushed anything yet.
  */
-internal const val mockLocationName = "London, UK"
+internal const val MOCK_LOCATION_NAME = "London, UK"
 
 internal val mockWeatherForecast: WeatherForecast =
     WeatherForecast(

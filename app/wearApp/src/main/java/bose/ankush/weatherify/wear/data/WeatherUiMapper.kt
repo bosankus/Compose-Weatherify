@@ -25,7 +25,11 @@ internal object WeatherUiMapper {
         locationName: String,
     ): WeatherUiState {
         val current = forecast.data?.current
-        val todayTemp = forecast.data?.daily?.firstOrNull()?.temp
+        val todayTemp =
+            forecast.data
+                ?.daily
+                ?.firstOrNull()
+                ?.temp
         return WeatherUiState(
             location = locationName,
             condition =
@@ -42,8 +46,17 @@ internal object WeatherUiMapper {
             lowTemp = todayTemp?.min?.toCelsius()?.let { "$it°" },
             humidity = current?.humidity?.let { "$it%" },
             wind = current?.windSpeed?.roundToInt()?.let { "$it m/s" },
-            hourly = forecast.data?.hourly.orEmpty().mapNotNull { it?.let(::mapHourly) }.take(8),
-            alert = forecast.data?.alerts?.firstOrNull()?.let(::mapAlert),
+            hourly =
+                forecast.data
+                    ?.hourly
+                    .orEmpty()
+                    .mapNotNull { it?.let(::mapHourly) }
+                    .take(8),
+            alert =
+                forecast.data
+                    ?.alerts
+                    ?.firstOrNull()
+                    ?.let(::mapAlert),
         )
     }
 
@@ -57,7 +70,11 @@ internal object WeatherUiMapper {
         val sunset = current?.sunset
         if (dt == null || sunrise == null || sunset == null) {
             // No sun data in the sync — fall back to the watch's local clock.
-            val hour = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
+            val hour =
+                Clock.System
+                    .now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .hour
             return when (hour) {
                 in 7..17 -> DayPhase.DAY
                 6, 18 -> DayPhase.TWILIGHT
@@ -66,7 +83,7 @@ internal object WeatherUiMapper {
         }
         return when {
             abs(dt - sunrise) <= TWILIGHT_WINDOW_SECONDS ||
-                    abs(dt - sunset) <= TWILIGHT_WINDOW_SECONDS -> DayPhase.TWILIGHT
+                abs(dt - sunset) <= TWILIGHT_WINDOW_SECONDS -> DayPhase.TWILIGHT
 
             dt in sunrise..sunset -> DayPhase.DAY
             else -> DayPhase.NIGHT

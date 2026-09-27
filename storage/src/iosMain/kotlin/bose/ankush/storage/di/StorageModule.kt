@@ -9,13 +9,13 @@ import bose.ankush.storage.PremiumStorageImpl
 import bose.ankush.storage.WeatherStorageImpl
 import bose.ankush.storage.api.LocationPreferencesStorage
 import bose.ankush.storage.api.PremiumStorage
-import bose.ankush.tokenstorage.api.TokenStorage
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.common.LOCATION_PREFERENCES_FILE_NAME
 import bose.ankush.storage.common.PREMIUM_PREFERENCES_FILE_NAME
 import bose.ankush.storage.room.WeatherDataModelConverters
 import bose.ankush.storage.room.WeatherDatabase
 import bose.ankush.storage.room.createWeatherDatabase
+import bose.ankush.tokenstorage.api.TokenStorage
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
 import org.koin.core.qualifier.named

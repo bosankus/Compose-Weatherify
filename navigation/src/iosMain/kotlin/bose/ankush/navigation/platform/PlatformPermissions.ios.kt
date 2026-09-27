@@ -34,12 +34,14 @@ private class IosPlatformPermissions : PlatformPermissions {
     // reappear even after the user had granted it.
     override suspend fun hasNotificationPermission(): Boolean =
         suspendCancellableCoroutine { continuation ->
-            UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { settings ->
-                val granted =
-                    settings?.authorizationStatus == UNAuthorizationStatusAuthorized ||
-                        settings?.authorizationStatus == UNAuthorizationStatusProvisional
-                continuation.resume(granted)
-            }
+            UNUserNotificationCenter
+                .currentNotificationCenter()
+                .getNotificationSettingsWithCompletionHandler { settings ->
+                    val granted =
+                        settings?.authorizationStatus == UNAuthorizationStatusAuthorized ||
+                            settings?.authorizationStatus == UNAuthorizationStatusProvisional
+                    continuation.resume(granted)
+                }
         }
 
     override fun requiresRuntimeNotificationPermission(): Boolean = true

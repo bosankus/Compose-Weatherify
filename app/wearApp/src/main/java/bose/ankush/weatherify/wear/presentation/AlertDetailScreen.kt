@@ -36,9 +36,10 @@ internal fun AlertDetailScreen(alert: AlertUiState) {
         scrollState = columnState,
         // Alerts always use the low-glare night storm palette — the amber heading pops
         // against it regardless of the actual time of day.
-        modifier = Modifier.background(
-            brush = WeatherIconType.THUNDERSTORM.toBackgroundGradient(DayPhase.NIGHT),
-        ),
+        modifier =
+            Modifier.background(
+                brush = WeatherIconType.THUNDERSTORM.toBackgroundGradient(DayPhase.NIGHT),
+            ),
     ) { contentPadding ->
         TransformingLazyColumn(
             state = columnState,
@@ -50,9 +51,10 @@ internal fun AlertDetailScreen(alert: AlertUiState) {
                     imageVector = Icons.Filled.WarningAmber,
                     contentDescription = null,
                     tint = AlertAmber,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .transformedHeight(this, transformationSpec)
+                    modifier =
+                        Modifier
+                            .size(24.dp)
+                            .transformedHeight(this, transformationSpec),
                 )
             }
             item {
@@ -62,10 +64,11 @@ internal fun AlertDetailScreen(alert: AlertUiState) {
                     color = AlertAmber,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .transformedHeight(this, transformationSpec)
-                        .padding(top = 4.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .transformedHeight(this, transformationSpec)
+                            .padding(top = 4.dp),
                 )
             }
             alert.sender?.let {
@@ -74,10 +77,11 @@ internal fun AlertDetailScreen(alert: AlertUiState) {
                         text = "Issued by: $it",
                         style = MaterialTheme.typography.labelSmall,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .transformedHeight(this, transformationSpec)
-                            .padding(top = 4.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .transformedHeight(this, transformationSpec)
+                                .padding(top = 4.dp),
                     )
                 }
             }
@@ -88,10 +92,11 @@ internal fun AlertDetailScreen(alert: AlertUiState) {
                         text = timeRange,
                         style = MaterialTheme.typography.bodyExtraSmall,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .transformedHeight(this, transformationSpec)
-                            .padding(top = 4.dp)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .transformedHeight(this, transformationSpec)
+                                .padding(top = 4.dp),
                     )
                 }
             }
@@ -99,10 +104,11 @@ internal fun AlertDetailScreen(alert: AlertUiState) {
                 Text(
                     text = alert.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .transformedHeight(this, transformationSpec)
-                        .padding(top = 12.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .transformedHeight(this, transformationSpec)
+                            .padding(top = 12.dp),
                 )
             }
         }

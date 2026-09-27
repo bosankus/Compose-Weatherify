@@ -8,6 +8,7 @@ import bose.ankush.home.domain.model.AirQuality
 import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.domain.repository.WeatherRepository
 import bose.ankush.home.domain.repository.WeatherWearSync
+import bose.ankush.network.repository.WeatherRemoteSource
 import bose.ankush.storage.api.WeatherStorage
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
-import bose.ankush.network.repository.WeatherRemoteSource
 
 internal class WeatherRepositoryImpl(
     private val weatherRemoteSource: WeatherRemoteSource,
