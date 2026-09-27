@@ -28,6 +28,7 @@ import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.auth.presentation.LoginScreen
 import bose.ankush.commonui.components.NotificationToast
+import bose.ankush.commonui.theme.WeatherifyTheme
 import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.web.InAppWebView
@@ -47,7 +48,7 @@ fun MainViewController(): UIViewController {
     lateinit var controller: UIViewController
     controller =
         ComposeUIViewController {
-            MaterialTheme {
+            WeatherifyTheme {
                 AppEnvironment {
                     AppContent(rootController = { controller })
                 }

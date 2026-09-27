@@ -22,8 +22,6 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
-
-        androidResources.enable = true
     }
 
     // iosX64 (Intel simulator) dropped: Compose Multiplatform stopped publishing artifacts for it

@@ -2,27 +2,22 @@ package bose.ankush.commonui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import bose.ankush.commonui.R
 
-// App typography aligned to the design mock: clean, friendly sans-serif similar to the screenshot.
-// We use the bundled Inter font to achieve a modern look consistently across the app.
-private val InterFamily =
-    FontFamily(
-        Font(R.font.inter_regular, FontWeight.Normal),
-        Font(R.font.inter_regular, FontWeight.Medium),
-        Font(R.font.inter_regular, FontWeight.SemiBold),
-        Font(R.font.inter_regular, FontWeight.Bold),
-    )
-
+/**
+ * Shared app typography. Uses [FontFamily.SansSerif] on all platforms.
+ *
+ * Note: the previous Android-only Inter asset (`R.font.inter_regular`) was an empty
+ * placeholder in-repo, so effective rendering already fell back to the platform sans.
+ * Metrics (size / weight / tracking) are preserved from the Android theme.
+ */
 val AppTypography =
     Typography(
         displayLarge =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Bold,
                 fontSize = 57.sp,
                 lineHeight = 64.sp,
@@ -30,7 +25,7 @@ val AppTypography =
             ),
         displayMedium =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Bold,
                 fontSize = 45.sp,
                 lineHeight = 52.sp,
@@ -38,7 +33,7 @@ val AppTypography =
             ),
         displaySmall =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 36.sp,
                 lineHeight = 44.sp,
@@ -46,7 +41,7 @@ val AppTypography =
             ),
         headlineLarge =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 32.sp,
                 lineHeight = 40.sp,
@@ -54,7 +49,7 @@ val AppTypography =
             ),
         headlineMedium =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 28.sp,
                 lineHeight = 36.sp,
@@ -62,7 +57,7 @@ val AppTypography =
             ),
         headlineSmall =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 24.sp,
                 lineHeight = 32.sp,
@@ -70,7 +65,7 @@ val AppTypography =
             ),
         titleLarge =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 22.sp,
                 lineHeight = 28.sp,
@@ -78,7 +73,7 @@ val AppTypography =
             ),
         titleMedium =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
@@ -86,7 +81,7 @@ val AppTypography =
             ),
         titleSmall =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
@@ -94,7 +89,7 @@ val AppTypography =
             ),
         bodyLarge =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
@@ -102,7 +97,7 @@ val AppTypography =
             ),
         bodyMedium =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
@@ -110,7 +105,7 @@ val AppTypography =
             ),
         bodySmall =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
@@ -118,7 +113,7 @@ val AppTypography =
             ),
         labelLarge =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
@@ -126,7 +121,7 @@ val AppTypography =
             ),
         labelMedium =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
@@ -134,7 +129,7 @@ val AppTypography =
             ),
         labelSmall =
             TextStyle(
-                fontFamily = InterFamily,
+                fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Medium,
                 fontSize = 11.sp,
                 lineHeight = 16.sp,
