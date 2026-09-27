@@ -3,8 +3,8 @@
 package bose.ankush.iosapp.payment
 
 import bose.ankush.payment.presentation.CheckoutParams
-import cocoapods.razorpay_pod.RazorpayCheckout
-import cocoapods.razorpay_pod.RazorpayPaymentCompletionProtocolWithDataProtocol
+import swiftPMImport.bose.ankush.app.iosApp.RazorpayCheckout
+import swiftPMImport.bose.ankush.app.iosApp.RazorpayPaymentCompletionProtocolWithDataProtocol
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSNumber
 import platform.Foundation.NSTimer

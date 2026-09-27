@@ -1,8 +1,8 @@
 package bose.ankush.home.data.remoteconfig
 
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
-import cocoapods.FirebaseRemoteConfig.FIRRemoteConfig
-import cocoapods.FirebaseRemoteConfig.FIRRemoteConfigSettings
+import swiftPMImport.bose.ankush.feature.home.FIRRemoteConfig
+import swiftPMImport.bose.ankush.feature.home.FIRRemoteConfigSettings
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
