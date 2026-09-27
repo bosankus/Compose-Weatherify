@@ -16,10 +16,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlin.time.Clock
-import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
+import bose.ankush.network.repository.WeatherRemoteSource
 
 internal class WeatherRepositoryImpl(
-    private val networkRepository: NetworkWeatherRepository,
+    private val weatherRemoteSource: WeatherRemoteSource,
     private val weatherStorage: WeatherStorage,
     private val weatherWearSync: WeatherWearSync,
     private val homeGeocoder: HomeGeocoder,
@@ -49,7 +49,7 @@ internal class WeatherRepositoryImpl(
             val isDataStale = forceRefresh || (currentTime - lastUpdateTime) > ONE_HOUR_IN_MILLIS
 
             if (isDataStale) {
-                networkRepository.refreshWeatherData(coordinates).fold(
+                weatherRemoteSource.refreshWeatherData(coordinates).fold(
                     onSuccess = {
                         val weatherStorageData =
                             NetworkToStorageMapper.mapWeatherToStorageEntity(it)
