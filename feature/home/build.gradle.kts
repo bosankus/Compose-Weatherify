@@ -23,6 +23,8 @@ kotlin {
                 .get()
                 .toInt()
         androidResources.enable = true
+        // Enables running commonTest on the Android host (JVM unit tests).
+        withHostTest {}
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
