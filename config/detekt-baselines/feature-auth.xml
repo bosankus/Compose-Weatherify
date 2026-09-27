@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>MaxLineLength:LoginScreen.kt$"https://data.androidplay.in/wfy/terms-and-conditions"</ID>
+    <ID>TooGenericExceptionCaught:AuthViewModel.kt$AuthViewModel$e: Exception</ID>
+  </CurrentIssues>
+</SmellBaseline>
