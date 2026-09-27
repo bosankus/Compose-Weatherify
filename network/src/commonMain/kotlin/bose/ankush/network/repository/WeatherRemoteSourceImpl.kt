@@ -5,10 +5,10 @@ import bose.ankush.network.model.WeatherForecast
 import bose.ankush.network.util.NetworkConnectivity
 import bose.ankush.network.utils.NetworkUtils
 
-class WeatherRepositoryImpl(
+class WeatherRemoteSourceImpl(
     private val apiService: WeatherApiService,
     private val networkConnectivity: NetworkConnectivity,
-) : WeatherRepository {
+) : WeatherRemoteSource {
     override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>): Result<WeatherForecast> {
         if (!networkConnectivity.isNetworkAvailable()) {
             return Result.failure(Exception("No internet connection"))

@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import bose.ankush.network.model.WeatherForecast as NetworkWeatherForecast
-import bose.ankush.network.repository.WeatherRepository as NetworkWeatherRepository
+import bose.ankush.network.repository.WeatherRemoteSource
 
 /**
  * Exercises the cache/network refresh gate inside [WeatherRepositoryImpl]:
@@ -27,7 +27,7 @@ class WeatherRepositoryImplRefreshPolicyTest {
     fun refreshWeatherData_skipsNetworkWhenCacheIsFresh() =
         runTest {
             val now = Clock.System.now().toEpochMilliseconds()
-            val network = FakeNetworkWeatherRepository()
+            val network = FakeWeatherRemoteSource()
             val storage =
                 FakeWeatherStorage(lastUpdateTime = now - THIRTY_MINUTES_MS)
             val repo = createRepository(network, storage)
@@ -43,7 +43,7 @@ class WeatherRepositoryImplRefreshPolicyTest {
     fun refreshWeatherData_hitsNetworkWhenCacheIsStale() =
         runTest {
             val now = Clock.System.now().toEpochMilliseconds()
-            val network = FakeNetworkWeatherRepository()
+            val network = FakeWeatherRemoteSource()
             val storage =
                 FakeWeatherStorage(lastUpdateTime = now - TWO_HOURS_MS)
             val wearSync = FakeWeatherWearSync()
@@ -64,7 +64,7 @@ class WeatherRepositoryImplRefreshPolicyTest {
     fun refreshWeatherData_forceRefreshHitsNetworkEvenWhenFresh() =
         runTest {
             val now = Clock.System.now().toEpochMilliseconds()
-            val network = FakeNetworkWeatherRepository()
+            val network = FakeWeatherRemoteSource()
             val storage =
                 FakeWeatherStorage(lastUpdateTime = now - FIVE_MINUTES_MS)
             val repo = createRepository(network, storage)
@@ -78,7 +78,7 @@ class WeatherRepositoryImplRefreshPolicyTest {
     @Test
     fun refreshWeatherData_treatsMissingLastUpdateAsStale() =
         runTest {
-            val network = FakeNetworkWeatherRepository()
+            val network = FakeWeatherRemoteSource()
             val storage = FakeWeatherStorage(lastUpdateTime = 0L)
             val repo = createRepository(network, storage)
 
@@ -93,7 +93,7 @@ class WeatherRepositoryImplRefreshPolicyTest {
         runTest {
             val now = Clock.System.now().toEpochMilliseconds()
             val network =
-                FakeNetworkWeatherRepository(
+                FakeWeatherRemoteSource(
                     result = Result.failure(IllegalStateException("offline")),
                 )
             val storage =
@@ -114,7 +114,7 @@ class WeatherRepositoryImplRefreshPolicyTest {
     fun refreshWeatherData_usesDefaultLocationNameWhenGeocodeNull() =
         runTest {
             val now = Clock.System.now().toEpochMilliseconds()
-            val network = FakeNetworkWeatherRepository()
+            val network = FakeWeatherRemoteSource()
             val storage =
                 FakeWeatherStorage(lastUpdateTime = now - TWO_HOURS_MS)
             val wearSync = FakeWeatherWearSync()
@@ -127,19 +127,19 @@ class WeatherRepositoryImplRefreshPolicyTest {
         }
 
     private fun createRepository(
-        network: FakeNetworkWeatherRepository,
+        network: FakeWeatherRemoteSource,
         storage: FakeWeatherStorage,
         wearSync: FakeWeatherWearSync = FakeWeatherWearSync(),
         geocoder: FakeHomeGeocoder = FakeHomeGeocoder(),
     ) = WeatherRepositoryImpl(
-        networkRepository = network,
+        weatherRemoteSource = network,
         weatherStorage = storage,
         weatherWearSync = wearSync,
         homeGeocoder = geocoder,
         ioDispatcher = UnconfinedTestDispatcher(),
     )
 
-    private class FakeNetworkWeatherRepository(
+    private class FakeWeatherRemoteSource(
         var result: Result<NetworkWeatherForecast> =
             Result.success(
                 NetworkWeatherForecast(
@@ -154,7 +154,7 @@ class WeatherRepositoryImplRefreshPolicyTest {
                     status = true,
                 ),
             ),
-    ) : NetworkWeatherRepository {
+    ) : WeatherRemoteSource {
         var refreshCallCount = 0
             private set
 
