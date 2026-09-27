@@ -3,21 +3,17 @@
 package bose.ankush.commonui.web
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.OpenInBrowser
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -37,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.UIKitView
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -45,6 +39,7 @@ import kotlinx.cinterop.ObjCSignatureOverride
 import kotlinx.cinterop.readValue
 import platform.CoreGraphics.CGRectZero
 import platform.Foundation.NSError
+import platform.Foundation.NSHTTPURLResponse
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLRequest
 import platform.UIKit.UIActivityViewController
@@ -53,6 +48,8 @@ import platform.WebKit.WKNavigation
 import platform.WebKit.WKNavigationAction
 import platform.WebKit.WKNavigationActionPolicy
 import platform.WebKit.WKNavigationDelegateProtocol
+import platform.WebKit.WKNavigationResponse
+import platform.WebKit.WKNavigationResponsePolicy
 import platform.WebKit.WKWebView
 import platform.WebKit.WKWebViewConfiguration
 import platform.WebKit.WKWebsiteDataStore
@@ -67,8 +64,7 @@ actual fun InAppWebView(
 ) {
     var pageTitle by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(true) }
-    var loadError by remember { mutableStateOf(false) }
-    var errorMessage by remember { mutableStateOf("") }
+    var loadError by remember { mutableStateOf<WebViewError?>(null) }
     var canGoBack by remember { mutableStateOf(false) }
     var currentUrl by remember { mutableStateOf(url) }
 
@@ -87,10 +83,18 @@ actual fun InAppWebView(
             }
         }
 
+    val openInBrowser = {
+        NSURL.URLWithString(currentUrl)?.let { nsUrl ->
+            @Suppress("DEPRECATION")
+            UIApplication.sharedApplication.openURL(nsUrl)
+        }
+        Unit
+    }
+
     delegate.initialUrl = url
     delegate.onLoadStart = {
         isLoading = true
-        loadError = false
+        loadError = null
     }
     delegate.onLoadFinish = { wv ->
         isLoading = false
@@ -98,10 +102,9 @@ actual fun InAppWebView(
         pageTitle = wv.title ?: ""
         currentUrl = wv.URL?.absoluteString ?: url
     }
-    delegate.onLoadError = { msg ->
+    delegate.onLoadError = { error ->
         isLoading = false
-        loadError = true
-        errorMessage = msg
+        loadError = error
     }
     delegate.onNavigationBlocked = {
         onClose()
@@ -117,10 +120,14 @@ actual fun InAppWebView(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = pageTitle.ifBlank { "Weatherify" },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+                    WebViewTitle(
+                        text =
+                            resolveWebViewTitle(
+                                error = loadError,
+                                pageTitle = pageTitle,
+                                currentUrl = currentUrl,
+                                fallback = "Weatherify",
+                            ),
                     )
                 },
                 navigationIcon = {
@@ -134,7 +141,11 @@ actual fun InAppWebView(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { webView.reload() }) {
+                    IconButton(onClick = {
+                        loadError = null
+                        isLoading = true
+                        webView.reload()
+                    }) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
                             contentDescription = "Refresh page",
@@ -156,12 +167,7 @@ actual fun InAppWebView(
                             contentDescription = "Share page",
                         )
                     }
-                    IconButton(onClick = {
-                        NSURL.URLWithString(currentUrl)?.let { nsUrl ->
-                            @Suppress("DEPRECATION")
-                            UIApplication.sharedApplication.openURL(nsUrl)
-                        }
-                    }) {
+                    IconButton(onClick = openInBrowser) {
                         Icon(
                             imageVector = Icons.Outlined.OpenInBrowser,
                             contentDescription = "Open in browser",
@@ -183,7 +189,7 @@ actual fun InAppWebView(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(paddingValues),
         ) {
-            if (isLoading) {
+            if (isLoading && loadError == null) {
                 LinearProgressIndicator(
                     modifier =
                         Modifier
@@ -204,7 +210,7 @@ actual fun InAppWebView(
                     update = {},
                 )
 
-                if (isLoading) {
+                if (isLoading && loadError == null) {
                     Box(
                         modifier =
                             Modifier
@@ -216,56 +222,16 @@ actual fun InAppWebView(
                     }
                 }
 
-                if (loadError) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.background.copy(alpha = 0.95f)),
-                    ) {
-                        Column(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.ErrorOutline,
-                                contentDescription = "Error",
-                                modifier =
-                                    Modifier
-                                        .size(64.dp)
-                                        .padding(bottom = 16.dp),
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                            Text(
-                                text = "Failed to load page",
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(bottom = 8.dp),
-                            )
-                            if (errorMessage.isNotBlank()) {
-                                Text(
-                                    text = errorMessage,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                                    modifier = Modifier.padding(bottom = 24.dp),
-                                )
-                            }
-                            Button(
-                                onClick = {
-                                    loadError = false
-                                    errorMessage = ""
-                                    isLoading = true
-                                    webView.reload()
-                                },
-                            ) {
-                                Text("Retry")
-                            }
-                        }
-                    }
+                loadError?.let { error ->
+                    WebViewErrorContent(
+                        error = error,
+                        onRetry = {
+                            loadError = null
+                            isLoading = true
+                            webView.reload()
+                        },
+                        onOpenInBrowser = openInBrowser.takeIf { !error.isRetryable },
+                    )
                 }
             }
         }
@@ -292,7 +258,7 @@ private class InAppWebViewDelegate :
     WKNavigationDelegateProtocol {
     var onLoadStart: () -> Unit = {}
     var onLoadFinish: (WKWebView) -> Unit = {}
-    var onLoadError: (String) -> Unit = {}
+    var onLoadError: (WebViewError) -> Unit = {}
     var onNavigationBlocked: () -> Unit = {}
     var initialUrl: String = ""
 
@@ -318,7 +284,7 @@ private class InAppWebViewDelegate :
         didFailProvisionalNavigation: WKNavigation?,
         withError: NSError,
     ) {
-        onLoadError(withError.localizedDescription)
+        reportError(withError)
     }
 
     @ObjCSignatureOverride
@@ -327,7 +293,7 @@ private class InAppWebViewDelegate :
         didFailNavigation: WKNavigation?,
         withError: NSError,
     ) {
-        onLoadError(withError.localizedDescription)
+        reportError(withError)
     }
 
     @ObjCSignatureOverride
@@ -351,6 +317,64 @@ private class InAppWebViewDelegate :
         }
     }
 
+    /**
+     * WKWebView renders HTTP error pages instead of failing the navigation, so the status code for
+     * the main frame is only visible here. Anything outside 2xx/3xx is surfaced as an error.
+     */
+    @ObjCSignatureOverride
+    override fun webView(
+        webView: WKWebView,
+        decidePolicyForNavigationResponse: WKNavigationResponse,
+        decisionHandler: (WKNavigationResponsePolicy) -> Unit,
+    ) {
+        decisionHandler(WKNavigationResponsePolicy.WKNavigationResponsePolicyAllow)
+
+        if (!decidePolicyForNavigationResponse.forMainFrame) return
+        val httpResponse = decidePolicyForNavigationResponse.response as? NSHTTPURLResponse ?: return
+        val statusCode = httpResponse.statusCode.toInt()
+        if (statusCode >= 400) {
+            onLoadError(
+                WebViewError.fromHttpStatus(
+                    statusCode = statusCode,
+                    reasonPhrase = NSHTTPURLResponse.localizedStringForStatusCode(httpResponse.statusCode),
+                ),
+            )
+        }
+    }
+
+    private fun reportError(error: NSError) {
+        val detail = error.localizedDescription.takeIf { it.isNotBlank() }
+        onLoadError(
+            when (error.code) {
+                // Navigation we cancelled ourselves (e.g. a blocked URL) — not a failure to show.
+                NSURL_ERROR_CANCELLED -> return
+
+                NSURL_ERROR_NOT_CONNECTED_TO_INTERNET,
+                NSURL_ERROR_NETWORK_CONNECTION_LOST,
+                NSURL_ERROR_CANNOT_FIND_HOST,
+                NSURL_ERROR_CANNOT_CONNECT_TO_HOST,
+                NSURL_ERROR_DNS_LOOKUP_FAILED,
+                -> WebViewError.noInternet(detail)
+
+                NSURL_ERROR_TIMED_OUT -> WebViewError.timeout(detail)
+
+                NSURL_ERROR_SECURE_CONNECTION_FAILED,
+                NSURL_ERROR_SERVER_CERTIFICATE_HAS_BAD_DATE,
+                NSURL_ERROR_SERVER_CERTIFICATE_UNTRUSTED,
+                NSURL_ERROR_SERVER_CERTIFICATE_HAS_UNKNOWN_ROOT,
+                NSURL_ERROR_SERVER_CERTIFICATE_NOT_YET_VALID,
+                NSURL_ERROR_CLIENT_CERTIFICATE_REJECTED,
+                -> WebViewError.secureConnection(detail)
+
+                NSURL_ERROR_BAD_SERVER_RESPONSE -> WebViewError.fromHttpStatus(500)
+
+                NSURL_ERROR_FILE_DOES_NOT_EXIST -> WebViewError.fromHttpStatus(404)
+
+                else -> WebViewError.generic(detail)
+            },
+        )
+    }
+
     private fun isWhitelistedUrl(urlString: String): Boolean {
         val url = NSURL.URLWithString(urlString) ?: return false
         val host = url.host?.lowercase() ?: return false
@@ -363,3 +387,21 @@ private class InAppWebViewDelegate :
         }
     }
 }
+
+// NSURLErrorDomain codes (CFNetworkErrors). Declared at file level because a Kotlin companion
+// object is not allowed inside a subclass of an Objective-C type.
+private const val NSURL_ERROR_CANCELLED = -999L
+private const val NSURL_ERROR_BAD_SERVER_RESPONSE = -1011L
+private const val NSURL_ERROR_TIMED_OUT = -1001L
+private const val NSURL_ERROR_CANNOT_FIND_HOST = -1003L
+private const val NSURL_ERROR_CANNOT_CONNECT_TO_HOST = -1004L
+private const val NSURL_ERROR_NETWORK_CONNECTION_LOST = -1005L
+private const val NSURL_ERROR_DNS_LOOKUP_FAILED = -1006L
+private const val NSURL_ERROR_NOT_CONNECTED_TO_INTERNET = -1009L
+private const val NSURL_ERROR_FILE_DOES_NOT_EXIST = -1100L
+private const val NSURL_ERROR_SECURE_CONNECTION_FAILED = -1200L
+private const val NSURL_ERROR_SERVER_CERTIFICATE_HAS_BAD_DATE = -1201L
+private const val NSURL_ERROR_SERVER_CERTIFICATE_UNTRUSTED = -1202L
+private const val NSURL_ERROR_SERVER_CERTIFICATE_HAS_UNKNOWN_ROOT = -1203L
+private const val NSURL_ERROR_SERVER_CERTIFICATE_NOT_YET_VALID = -1204L
+private const val NSURL_ERROR_CLIENT_CERTIFICATE_REJECTED = -1205L
