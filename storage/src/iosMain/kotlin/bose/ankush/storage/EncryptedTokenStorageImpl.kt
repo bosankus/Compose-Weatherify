@@ -1,6 +1,6 @@
 package bose.ankush.storage
 
-import bose.ankush.storage.api.TokenStorage
+import bose.ankush.tokenstorage.api.TokenStorage
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc

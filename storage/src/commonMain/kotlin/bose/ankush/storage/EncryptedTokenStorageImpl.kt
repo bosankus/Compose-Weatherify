@@ -1,6 +1,6 @@
 package bose.ankush.storage
 
-import bose.ankush.storage.api.TokenStorage
+import bose.ankush.tokenstorage.api.TokenStorage
 import kotlinx.coroutines.flow.Flow
 
 expect class EncryptedTokenStorageImpl : TokenStorage {

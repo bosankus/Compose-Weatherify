@@ -5,7 +5,7 @@ import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.model.LoginRequest
 import bose.ankush.network.auth.model.RefreshTokenRequest
 import bose.ankush.network.auth.model.RegisterRequest
-import bose.ankush.storage.api.TokenStorage
+import bose.ankush.tokenstorage.api.TokenStorage
 import kotlinx.coroutines.flow.Flow
 
 class AuthRepositoryImpl(
