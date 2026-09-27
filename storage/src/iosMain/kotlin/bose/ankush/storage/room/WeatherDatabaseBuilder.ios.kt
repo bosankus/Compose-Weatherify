@@ -1,3 +1,4 @@
+@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
 package bose.ankush.storage.room
 
 import androidx.room.Room
