@@ -27,7 +27,6 @@ internal class DeviceLocationClient(
     private val context: Context,
     private val client: FusedLocationProviderClient,
 ) : LocationClient {
-
     private fun checkLocationPermission() {
         if (!context.hasLocationPermission()) {
             throw LocationClient.LocationException("Location permission is not granted.")
@@ -38,7 +37,7 @@ internal class DeviceLocationClient(
         if (!isLocationEnabled()) {
             throw LocationClient.LocationException(
                 message = "GPS is disabled",
-                isGpsDisabled = true
+                isGpsDisabled = true,
             )
         }
     }
@@ -85,49 +84,60 @@ internal class DeviceLocationClient(
                         }
                     }
 
-                    providerReceiver = object : BroadcastReceiver() {
-                        override fun onReceive(context: Context?, intent: Intent?) {
-                            if (!isLocationEnabled()) {
-                                cts.cancel()
-                                resumeOnce(
-                                    Result.failure(
-                                        LocationClient.LocationException(
-                                            message = "GPS was disabled while fetching coordinates!",
-                                            isGpsDisabled = true
-                                        )
+                    providerReceiver =
+                        object : BroadcastReceiver() {
+                            override fun onReceive(
+                                context: Context?,
+                                intent: Intent?,
+                            ) {
+                                if (!isLocationEnabled()) {
+                                    cts.cancel()
+                                    resumeOnce(
+                                        Result.failure(
+                                            LocationClient.LocationException(
+                                                message = "GPS was disabled while fetching coordinates!",
+                                                isGpsDisabled = true,
+                                            ),
+                                        ),
                                     )
-                                )
+                                }
                             }
                         }
-                    }
 
                     ContextCompat.registerReceiver(
                         context,
                         providerReceiver,
                         IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION),
-                        ContextCompat.RECEIVER_NOT_EXPORTED
+                        ContextCompat.RECEIVER_NOT_EXPORTED,
                     )
 
                     client
                         .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
                         .addOnSuccessListener { location ->
                             when {
-                                location == null -> resumeOnce(
-                                    Result.failure(LocationClient.LocationException("Coordinates are not present."))
-                                )
-
-                                !isAcceptable(location) -> resumeOnce(
-                                    Result.failure(LocationClient.LocationException("Coordinates are not updated!"))
-                                )
-
-                                else -> resumeOnce(
-                                    Result.success(
-                                        Coordinates(
-                                            location.latitude,
-                                            location.longitude
-                                        )
+                                location == null ->
+                                    resumeOnce(
+                                        Result.failure(
+                                            LocationClient.LocationException("Coordinates are not present."),
+                                        ),
                                     )
-                                )
+
+                                !isAcceptable(location) ->
+                                    resumeOnce(
+                                        Result.failure(
+                                            LocationClient.LocationException("Coordinates are not updated!"),
+                                        ),
+                                    )
+
+                                else ->
+                                    resumeOnce(
+                                        Result.success(
+                                            Coordinates(
+                                                location.latitude,
+                                                location.longitude,
+                                            ),
+                                        ),
+                                    )
                             }
                         }.addOnFailureListener { e ->
                             resumeOnce(
@@ -163,10 +173,11 @@ internal class DeviceLocationClient(
         private const val MAX_ACCURACY_METERS = 200f
         private const val MAX_ATTEMPTS = 2
         private val RETRY_DELAY_MS = 500.milliseconds
-        private val TRANSIENT_FAILURE_MESSAGES = setOf(
-            "Coordinates are not present.",
-            "Coordinates are not updated!",
-        )
+        private val TRANSIENT_FAILURE_MESSAGES =
+            setOf(
+                "Coordinates are not present.",
+                "Coordinates are not updated!",
+            )
     }
 }
 

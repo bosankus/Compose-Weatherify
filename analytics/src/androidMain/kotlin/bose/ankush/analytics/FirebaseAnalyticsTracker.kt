@@ -4,7 +4,9 @@ import android.content.Context
 import android.os.Bundle
 import com.google.firebase.analytics.FirebaseAnalytics
 
-internal class FirebaseAnalyticsTracker(context: Context) : AnalyticsTracker {
+internal class FirebaseAnalyticsTracker(
+    context: Context,
+) : AnalyticsTracker {
     private val firebaseAnalytics: FirebaseAnalytics = FirebaseAnalytics.getInstance(context)
 
     override fun track(event: AnalyticsEvent) {

@@ -28,22 +28,23 @@ import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.auth.presentation.LoginScreen
 import bose.ankush.commonui.components.NotificationToast
-import bose.ankush.commonui.theme.WeatherifyTheme
 import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
+import bose.ankush.commonui.theme.WeatherifyTheme
 import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.home.HomeSessionCleaner
 import bose.ankush.iosapp.payment.RazorpayCheckoutBridge
 import bose.ankush.language.util.AppEnvironment
 import bose.ankush.navigation.AppNavigation
-import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
+import bose.ankush.storage.api.PremiumStorage
 import org.koin.compose.koinInject
 import platform.UIKit.UIViewController
 
 // Entry point called from Swift (iosApp/iosApp/iOSApp.swift).
+@Suppress("ktlint:standard:function-naming")
 fun MainViewController(): UIViewController {
     lateinit var controller: UIViewController
     controller =

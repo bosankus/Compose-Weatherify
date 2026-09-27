@@ -13,7 +13,11 @@ plugins {
 // secrets.defaults.properties placeholder, and emit a tiny generated Kotlin object.
 // Runs eagerly at configuration time (cheap, single small file) so the generated
 // source is present before the iosMain source set below is evaluated.
-val generatedIosSecretsRoot = layout.buildDirectory.dir("generated/iosSecrets").get().asFile
+val generatedIosSecretsRoot =
+    layout.buildDirectory
+        .dir("generated/iosSecrets")
+        .get()
+        .asFile
 run {
     val secretsFile =
         rootProject
@@ -89,28 +93,29 @@ kotlin {
     }
 
     sourceSets {
-        val iosMain = create("iosMain") {
-            dependsOn(commonMain.get())
-            kotlin.srcDir(generatedIosSecretsRoot)
-            dependencies {
-                api(project(":common-ui"))
-                api(project(":navigation"))
-                api(project(":storage"))
-                api(project(":network"))
-                api(project(":feature:auth"))
-                api(project(":feature:language"))
-                api(project(":feature:payment"))
-                api(project(":feature:finder"))
-                api(project(":feature:home"))
-                api(project(":feature:settings"))
-                api(project(":analytics"))
+        val iosMain =
+            create("iosMain") {
+                dependsOn(commonMain.get())
+                kotlin.srcDir(generatedIosSecretsRoot)
+                dependencies {
+                    api(project(":common-ui"))
+                    api(project(":navigation"))
+                    api(project(":storage"))
+                    api(project(":network"))
+                    api(project(":feature:auth"))
+                    api(project(":feature:language"))
+                    api(project(":feature:payment"))
+                    api(project(":feature:finder"))
+                    api(project(":feature:home"))
+                    api(project(":feature:settings"))
+                    api(project(":analytics"))
 
-                implementation(libs.compose.multiplatform.runtime)
-                implementation(libs.compose.multiplatform.ui)
-                implementation(libs.koin.core)
-                implementation(libs.koin.compose)
+                    implementation(libs.compose.multiplatform.runtime)
+                    implementation(libs.compose.multiplatform.ui)
+                    implementation(libs.koin.core)
+                    implementation(libs.koin.compose)
+                }
             }
-        }
 
         getByName("iosArm64Main") {
             dependsOn(iosMain)

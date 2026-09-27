@@ -44,10 +44,10 @@ internal fun WeatherOverlay(
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(res))
     val progress by
-    animateLottieCompositionAsState(
-        composition = composition,
-        iterations = LottieConstants.IterateForever,
-    )
+        animateLottieCompositionAsState(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+        )
     LottieAnimation(
         composition = composition,
         progress = { progress },

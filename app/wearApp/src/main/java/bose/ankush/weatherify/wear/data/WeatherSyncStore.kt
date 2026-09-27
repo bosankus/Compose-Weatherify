@@ -43,10 +43,9 @@ internal object WeatherSyncStore {
         return runCatching {
             SyncedWeather(
                 locationName,
-                Json.decodeFromString<WeatherForecast>(json)
+                Json.decodeFromString<WeatherForecast>(json),
             )
-        }
-            .onFailure { Timber.w(it, "Failed to parse synced forecast") }
+        }.onFailure { Timber.w(it, "Failed to parse synced forecast") }
             .getOrNull()
     }
 

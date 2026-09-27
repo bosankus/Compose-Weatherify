@@ -90,24 +90,27 @@ private fun responsiveHorizontalMargin(): androidx.compose.ui.unit.Dp {
 @Composable
 internal fun WaitingForSyncScreen() {
     ScreenScaffold(
-        modifier = Modifier.background(
-            brush = WeatherIconType.UNKNOWN.toBackgroundGradient(DayPhase.NIGHT),
-        ),
+        modifier =
+            Modifier.background(
+                brush = WeatherIconType.UNKNOWN.toBackgroundGradient(DayPhase.NIGHT),
+            ),
     ) {
         val infiniteTransition = rememberInfiniteTransition(label = "waiting-pulse")
         val pulseAlpha by infiniteTransition.animateFloat(
             initialValue = 0.35f,
             targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 900, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse,
-            ),
+            animationSpec =
+                infiniteRepeatable(
+                    animation = tween(durationMillis = 900, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse,
+                ),
             label = "waiting-pulse-alpha",
         )
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = responsiveHorizontalMargin()),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = responsiveHorizontalMargin()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -115,9 +118,10 @@ internal fun WaitingForSyncScreen() {
                 imageVector = Icons.Filled.WbCloudy,
                 contentDescription = null,
                 tint = WeatherIconType.UNKNOWN.toTextColor(DayPhase.NIGHT),
-                modifier = Modifier
-                    .size(32.dp)
-                    .graphicsLayer { alpha = pulseAlpha },
+                modifier =
+                    Modifier
+                        .size(32.dp)
+                        .graphicsLayer { alpha = pulseAlpha },
             )
             Spacer(Modifier.height(8.dp))
             Text(
@@ -146,9 +150,10 @@ internal fun WeatherScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 state = columnState,
                 contentPadding = contentPadding,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = horizontalMargin),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = horizontalMargin),
             ) {
                 // CurrentConditions is the entire glance: location, hero temp, and the
                 // feels-like/humidity/wind line all live in one block so nothing needs
@@ -157,9 +162,10 @@ internal fun WeatherScreen(
                     CurrentConditions(
                         uiState = uiState,
                         textColor = textColor,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .transformedHeight(this, transformationSpec),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .transformedHeight(this, transformationSpec),
                     )
                 }
                 if (uiState.hourly.isNotEmpty()) {
@@ -170,10 +176,11 @@ internal fun WeatherScreen(
                             // requiredWidth escapes the column's horizontal margin so the
                             // strip runs edge to edge and hours slide in from the true
                             // screen border, not from inside the margin.
-                            modifier = Modifier
-                                .requiredWidth(LocalConfiguration.current.screenWidthDp.dp)
-                                .transformedHeight(this, transformationSpec)
-                                .padding(top = 4.dp),
+                            modifier =
+                                Modifier
+                                    .requiredWidth(LocalConfiguration.current.screenWidthDp.dp)
+                                    .transformedHeight(this, transformationSpec)
+                                    .padding(top = 4.dp),
                         )
                     }
                 }
@@ -201,13 +208,14 @@ internal fun WeatherScreen(
 /** Long names don't wrap or truncate — they drift slowly right-to-left instead.
  * initialDelayMillis must be set explicitly: in Immediately mode it defaults to
  * repeatDelayMillis, which leaves the name sitting clipped before the first scroll. */
-private val marqueeModifier = Modifier.basicMarquee(
-    iterations = Int.MAX_VALUE,
-    repeatDelayMillis = 1200,
-    initialDelayMillis = 500,
-    spacing = MarqueeSpacing(24.dp),
-    velocity = 24.dp,
-)
+private val marqueeModifier =
+    Modifier.basicMarquee(
+        iterations = Int.MAX_VALUE,
+        repeatDelayMillis = 1200,
+        initialDelayMillis = 500,
+        spacing = MarqueeSpacing(24.dp),
+        velocity = 24.dp,
+    )
 
 @Composable
 private fun CurrentConditions(
@@ -253,10 +261,11 @@ private fun CurrentConditions(
         }
         // Condition + feels-like share one line so the "what's it actually like"
         // context doesn't cost the hero an extra row of height.
-        val conditionLine = listOfNotNull(
-            uiState.condition,
-            uiState.feelsLike?.let { "Feels $it" },
-        ).joinToString("  •  ")
+        val conditionLine =
+            listOfNotNull(
+                uiState.condition,
+                uiState.feelsLike?.let { "Feels $it" },
+            ).joinToString("  •  ")
         if (conditionLine.isNotEmpty()) {
             Text(
                 text = conditionLine,
@@ -338,37 +347,39 @@ private fun HourlyStrip(
                 val isNearest = index == 0
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillParentMaxWidth(1f / VISIBLE_HOURS)
-                        // Parabolic offset matching the indicator's quadratic: y grows
-                        // with the square of the distance from centre, and the column
-                        // tilts tangent to that curve. listState is read inside the
-                        // graphicsLayer block, so scrolling only re-draws the layer —
-                        // it never recomposes the row.
-                        .graphicsLayer {
-                            val layoutInfo = listState.layoutInfo
-                            val item = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
-                                ?: return@graphicsLayer
-                            val viewportCenter =
-                                (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
-                            val halfViewport =
-                                (layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset) / 2f
-                            val itemCenter = item.offset + item.size / 2f
-                            val normalized =
-                                ((itemCenter - viewportCenter) / halfViewport).coerceIn(-1f, 1f)
-                            translationY = HourlyArcDepth.toPx() * normalized * normalized
-                            rotationZ = HOURLY_ARC_MAX_TILT_DEGREES * normalized
-                        }
-                        .padding(horizontal = 2.dp),
+                    modifier =
+                        Modifier
+                            .fillParentMaxWidth(1f / VISIBLE_HOURS)
+                            // Parabolic offset matching the indicator's quadratic: y grows
+                            // with the square of the distance from centre, and the column
+                            // tilts tangent to that curve. listState is read inside the
+                            // graphicsLayer block, so scrolling only re-draws the layer —
+                            // it never recomposes the row.
+                            .graphicsLayer {
+                                val layoutInfo = listState.layoutInfo
+                                val item =
+                                    layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
+                                        ?: return@graphicsLayer
+                                val viewportCenter =
+                                    (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2f
+                                val halfViewport =
+                                    (layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset) / 2f
+                                val itemCenter = item.offset + item.size / 2f
+                                val normalized =
+                                    ((itemCenter - viewportCenter) / halfViewport).coerceIn(-1f, 1f)
+                                translationY = HourlyArcDepth.toPx() * normalized * normalized
+                                rotationZ = HOURLY_ARC_MAX_TILT_DEGREES * normalized
+                            }.padding(horizontal = 2.dp),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(1.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(textColor.copy(alpha = if (isNearest) 0.16f else 0.07f))
-                            .padding(vertical = 4.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(textColor.copy(alpha = if (isNearest) 0.16f else 0.07f))
+                                .padding(vertical = 4.dp),
                     ) {
                         Text(
                             text = hour.time,
@@ -396,10 +407,11 @@ private fun HourlyStrip(
                 listState = listState,
                 itemCount = hours.size,
                 color = textColor,
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .fillMaxWidth(0.38f)
-                    .height(6.dp),
+                modifier =
+                    Modifier
+                        .padding(top = 2.dp)
+                        .fillMaxWidth(0.38f)
+                        .height(6.dp),
             )
         }
     }
@@ -468,10 +480,11 @@ private fun AlertEdgeButton(
         onClick = onClick,
         modifier = modifier,
         buttonSize = EdgeButtonSize.Small,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = AlertAmber.copy(alpha = 0.2f),
-            contentColor = AlertAmber,
-        ),
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = AlertAmber.copy(alpha = 0.2f),
+                contentColor = AlertAmber,
+            ),
     ) {
         Icon(
             imageVector = Icons.Filled.WarningAmber,
@@ -500,8 +513,10 @@ private fun WeatherIconType.toImageVector(): ImageVector =
         WeatherIconType.UNKNOWN -> Icons.Filled.WbCloudy
     }
 
-private fun gradient(top: Long, bottom: Long): Brush =
-    Brush.verticalGradient(listOf(Color(top), Color(bottom)))
+private fun gradient(
+    top: Long,
+    bottom: Long,
+): Brush = Brush.verticalGradient(listOf(Color(top), Color(bottom)))
 
 // Backgrounds are keyed by condition AND time of day. Every variant runs dark at the
 // bottom stop — near black so the dial blends into the bezel, stays AMOLED-cheap, and
@@ -510,38 +525,41 @@ private fun gradient(top: Long, bottom: Long): Brush =
 // tint over black so the screen doesn't glare in a dark room.
 internal fun WeatherIconType.toBackgroundGradient(phase: DayPhase): Brush =
     when (phase) {
-        DayPhase.DAY -> when (this) {
-            WeatherIconType.CLEAR -> gradient(0xFF1565C0, 0xFF071426)
-            WeatherIconType.CLOUDS -> gradient(0xFF56707E, 0xFF0E1417)
-            WeatherIconType.RAIN -> gradient(0xFF3B5361, 0xFF0A1116)
-            WeatherIconType.THUNDERSTORM -> gradient(0xFF45338F, 0xFF0C0817)
-            WeatherIconType.SNOW -> gradient(0xFF4E7FA0, 0xFF0D161D)
-            WeatherIconType.ATMOSPHERE -> gradient(0xFF5E6B70, 0xFF0F1213)
-            WeatherIconType.WIND -> gradient(0xFF3E7C74, 0xFF0A1413)
-            WeatherIconType.UNKNOWN -> gradient(0xFF4A545C, 0xFF0D0F11)
-        }
+        DayPhase.DAY ->
+            when (this) {
+                WeatherIconType.CLEAR -> gradient(0xFF1565C0, 0xFF071426)
+                WeatherIconType.CLOUDS -> gradient(0xFF56707E, 0xFF0E1417)
+                WeatherIconType.RAIN -> gradient(0xFF3B5361, 0xFF0A1116)
+                WeatherIconType.THUNDERSTORM -> gradient(0xFF45338F, 0xFF0C0817)
+                WeatherIconType.SNOW -> gradient(0xFF4E7FA0, 0xFF0D161D)
+                WeatherIconType.ATMOSPHERE -> gradient(0xFF5E6B70, 0xFF0F1213)
+                WeatherIconType.WIND -> gradient(0xFF3E7C74, 0xFF0A1413)
+                WeatherIconType.UNKNOWN -> gradient(0xFF4A545C, 0xFF0D0F11)
+            }
 
-        DayPhase.TWILIGHT -> when (this) {
-            WeatherIconType.CLEAR -> gradient(0xFF9C4A14, 0xFF170905)
-            WeatherIconType.CLOUDS -> gradient(0xFF7A4A33, 0xFF120B08)
-            WeatherIconType.RAIN -> gradient(0xFF5C4438, 0xFF0E0B09)
-            WeatherIconType.THUNDERSTORM -> gradient(0xFF6A2E63, 0xFF120714)
-            WeatherIconType.SNOW -> gradient(0xFF8A5A66, 0xFF130D10)
-            WeatherIconType.ATMOSPHERE -> gradient(0xFF6E5648, 0xFF100C0A)
-            WeatherIconType.WIND -> gradient(0xFF6B5A3C, 0xFF0F0D08)
-            WeatherIconType.UNKNOWN -> gradient(0xFF6E4A3A, 0xFF100B08)
-        }
+        DayPhase.TWILIGHT ->
+            when (this) {
+                WeatherIconType.CLEAR -> gradient(0xFF9C4A14, 0xFF170905)
+                WeatherIconType.CLOUDS -> gradient(0xFF7A4A33, 0xFF120B08)
+                WeatherIconType.RAIN -> gradient(0xFF5C4438, 0xFF0E0B09)
+                WeatherIconType.THUNDERSTORM -> gradient(0xFF6A2E63, 0xFF120714)
+                WeatherIconType.SNOW -> gradient(0xFF8A5A66, 0xFF130D10)
+                WeatherIconType.ATMOSPHERE -> gradient(0xFF6E5648, 0xFF100C0A)
+                WeatherIconType.WIND -> gradient(0xFF6B5A3C, 0xFF0F0D08)
+                WeatherIconType.UNKNOWN -> gradient(0xFF6E4A3A, 0xFF100B08)
+            }
 
-        DayPhase.NIGHT -> when (this) {
-            WeatherIconType.CLEAR -> gradient(0xFF101E3C, 0xFF000000)
-            WeatherIconType.CLOUDS -> gradient(0xFF171D22, 0xFF000000)
-            WeatherIconType.RAIN -> gradient(0xFF0F1B24, 0xFF000000)
-            WeatherIconType.THUNDERSTORM -> gradient(0xFF1B0F2E, 0xFF000000)
-            WeatherIconType.SNOW -> gradient(0xFF14202B, 0xFF000000)
-            WeatherIconType.ATMOSPHERE -> gradient(0xFF191C1D, 0xFF000000)
-            WeatherIconType.WIND -> gradient(0xFF12201E, 0xFF000000)
-            WeatherIconType.UNKNOWN -> gradient(0xFF141618, 0xFF000000)
-        }
+        DayPhase.NIGHT ->
+            when (this) {
+                WeatherIconType.CLEAR -> gradient(0xFF101E3C, 0xFF000000)
+                WeatherIconType.CLOUDS -> gradient(0xFF171D22, 0xFF000000)
+                WeatherIconType.RAIN -> gradient(0xFF0F1B24, 0xFF000000)
+                WeatherIconType.THUNDERSTORM -> gradient(0xFF1B0F2E, 0xFF000000)
+                WeatherIconType.SNOW -> gradient(0xFF14202B, 0xFF000000)
+                WeatherIconType.ATMOSPHERE -> gradient(0xFF191C1D, 0xFF000000)
+                WeatherIconType.WIND -> gradient(0xFF12201E, 0xFF000000)
+                WeatherIconType.UNKNOWN -> gradient(0xFF141618, 0xFF000000)
+            }
     }
 
 // Text/icon tint per condition and phase — every value stays well above 7:1 contrast on
@@ -549,38 +567,41 @@ internal fun WeatherIconType.toBackgroundGradient(phase: DayPhase): Brush =
 // toward cream, and NIGHT softens luminance a notch so text doesn't bloom in low light.
 internal fun WeatherIconType.toTextColor(phase: DayPhase): Color =
     when (phase) {
-        DayPhase.DAY -> when (this) {
-            WeatherIconType.CLEAR -> Color(0xFFFFF9C4)
-            WeatherIconType.CLOUDS -> Color(0xFFECEFF1)
-            WeatherIconType.RAIN -> Color(0xFFB3E5FC)
-            WeatherIconType.THUNDERSTORM -> Color(0xFFE1BEE7)
-            WeatherIconType.SNOW -> Color(0xFFFFFFFF)
-            WeatherIconType.ATMOSPHERE -> Color(0xFFCFD8DC)
-            WeatherIconType.WIND -> Color(0xFFB2DFDB)
-            WeatherIconType.UNKNOWN -> Color(0xFFECEFF1)
-        }
+        DayPhase.DAY ->
+            when (this) {
+                WeatherIconType.CLEAR -> Color(0xFFFFF9C4)
+                WeatherIconType.CLOUDS -> Color(0xFFECEFF1)
+                WeatherIconType.RAIN -> Color(0xFFB3E5FC)
+                WeatherIconType.THUNDERSTORM -> Color(0xFFE1BEE7)
+                WeatherIconType.SNOW -> Color(0xFFFFFFFF)
+                WeatherIconType.ATMOSPHERE -> Color(0xFFCFD8DC)
+                WeatherIconType.WIND -> Color(0xFFB2DFDB)
+                WeatherIconType.UNKNOWN -> Color(0xFFECEFF1)
+            }
 
-        DayPhase.TWILIGHT -> when (this) {
-            WeatherIconType.CLEAR -> Color(0xFFFFE0B2)
-            WeatherIconType.CLOUDS -> Color(0xFFFFE8D6)
-            WeatherIconType.RAIN -> Color(0xFFF5DCC8)
-            WeatherIconType.THUNDERSTORM -> Color(0xFFF0D5F5)
-            WeatherIconType.SNOW -> Color(0xFFFFEBEE)
-            WeatherIconType.ATMOSPHERE -> Color(0xFFF0E4DA)
-            WeatherIconType.WIND -> Color(0xFFF5EBD0)
-            WeatherIconType.UNKNOWN -> Color(0xFFFFE8D6)
-        }
+        DayPhase.TWILIGHT ->
+            when (this) {
+                WeatherIconType.CLEAR -> Color(0xFFFFE0B2)
+                WeatherIconType.CLOUDS -> Color(0xFFFFE8D6)
+                WeatherIconType.RAIN -> Color(0xFFF5DCC8)
+                WeatherIconType.THUNDERSTORM -> Color(0xFFF0D5F5)
+                WeatherIconType.SNOW -> Color(0xFFFFEBEE)
+                WeatherIconType.ATMOSPHERE -> Color(0xFFF0E4DA)
+                WeatherIconType.WIND -> Color(0xFFF5EBD0)
+                WeatherIconType.UNKNOWN -> Color(0xFFFFE8D6)
+            }
 
-        DayPhase.NIGHT -> when (this) {
-            WeatherIconType.CLEAR -> Color(0xFFD6E4FF)
-            WeatherIconType.CLOUDS -> Color(0xFFDCE3E8)
-            WeatherIconType.RAIN -> Color(0xFFC9E4F5)
-            WeatherIconType.THUNDERSTORM -> Color(0xFFDCC8EE)
-            WeatherIconType.SNOW -> Color(0xFFEAF4FA)
-            WeatherIconType.ATMOSPHERE -> Color(0xFFD8DDDF)
-            WeatherIconType.WIND -> Color(0xFFC8E6E2)
-            WeatherIconType.UNKNOWN -> Color(0xFFDDE1E4)
-        }
+        DayPhase.NIGHT ->
+            when (this) {
+                WeatherIconType.CLEAR -> Color(0xFFD6E4FF)
+                WeatherIconType.CLOUDS -> Color(0xFFDCE3E8)
+                WeatherIconType.RAIN -> Color(0xFFC9E4F5)
+                WeatherIconType.THUNDERSTORM -> Color(0xFFDCC8EE)
+                WeatherIconType.SNOW -> Color(0xFFEAF4FA)
+                WeatherIconType.ATMOSPHERE -> Color(0xFFD8DDDF)
+                WeatherIconType.WIND -> Color(0xFFC8E6E2)
+                WeatherIconType.UNKNOWN -> Color(0xFFDDE1E4)
+            }
     }
 
 @Preview(device = WearDevices.SMALL_ROUND)
@@ -590,7 +611,7 @@ internal fun WeatherIconType.toTextColor(phase: DayPhase): Color =
 private fun WeatherScreenPreview() {
     AppScaffold {
         WeatherScreen(
-            uiState = WeatherUiMapper.mapToUiState(mockWeatherForecast, mockLocationName),
+            uiState = WeatherUiMapper.mapToUiState(mockWeatherForecast, MOCK_LOCATION_NAME),
             onAlertClick = {},
         )
     }

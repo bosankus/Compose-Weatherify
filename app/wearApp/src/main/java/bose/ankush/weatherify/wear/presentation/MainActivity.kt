@@ -44,14 +44,14 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             runCatching { Wearable.getDataClient(this@MainActivity).dataItems.await() }
                 .onSuccess { buffer ->
-                    buffer.mapNotNull { WeatherSyncStore.parse(it) }
+                    buffer
+                        .mapNotNull { WeatherSyncStore.parse(it) }
                         .forEach {
                             WeatherSyncStore.update(it)
                             Timber.d("Loaded previously synced forecast: %s", it.locationName)
                         }
                     buffer.release()
-                }
-                .onFailure { Timber.w(it, "Failed to load previously synced forecast") }
+                }.onFailure { Timber.w(it, "Failed to load previously synced forecast") }
         }
     }
 }
@@ -70,12 +70,13 @@ private fun WeatherifyWearApp() {
                 WaitingForSyncScreen()
             } else {
                 WeatherNavHost(
-                    uiState = remember(synced) {
-                        WeatherUiMapper.mapToUiState(
-                            synced.forecast,
-                            synced.locationName
-                        )
-                    },
+                    uiState =
+                        remember(synced) {
+                            WeatherUiMapper.mapToUiState(
+                                synced.forecast,
+                                synced.locationName,
+                            )
+                        },
                 )
             }
         }
@@ -86,33 +87,36 @@ private fun WeatherifyWearApp() {
 private fun WeatherNavHost(uiState: WeatherUiState) {
     val backStack = rememberNavBackStack(WeatherRoute as NavKey)
 
-    val entryProvider = entryProvider<NavKey> {
-        entry<WeatherRoute> {
-            WeatherScreen(
-                uiState = uiState,
-                onAlertClick = { backStack.add(AlertDetailRoute) }
-            )
-        }
+    val entryProvider =
+        entryProvider<NavKey> {
+            entry<WeatherRoute> {
+                WeatherScreen(
+                    uiState = uiState,
+                    onAlertClick = { backStack.add(AlertDetailRoute) },
+                )
+            }
 
-        entry<AlertDetailRoute> {
-            uiState.alert?.let {
-                AlertDetailScreen(alert = it)
+            entry<AlertDetailRoute> {
+                uiState.alert?.let {
+                    AlertDetailScreen(alert = it)
+                }
             }
         }
-    }
 
-    val entries = rememberDecoratedNavEntries(
-        backStack = backStack,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
-        ),
-        entryProvider = entryProvider
-    )
+    val entries =
+        rememberDecoratedNavEntries(
+            backStack = backStack,
+            entryDecorators =
+                listOf(
+                    rememberSaveableStateHolderNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
+                ),
+            entryProvider = entryProvider,
+        )
 
     NavDisplay(
         entries = entries,
         sceneStrategies = listOf(SwipeDismissableSceneStrategy()),
-        onBack = { if (backStack.size > 1) backStack.removeAt(backStack.size - 1) }
+        onBack = { if (backStack.size > 1) backStack.removeAt(backStack.size - 1) },
     )
 }
