@@ -84,7 +84,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         startInAppUpdate(this)
-        setContent { WeatherifyTheme { AppEnvironment { AppContent() } } }
+        setContent { WeatherifyTheme(isDynamicColor = true) { AppEnvironment { AppContent() } } }
     }
 
     @Composable
