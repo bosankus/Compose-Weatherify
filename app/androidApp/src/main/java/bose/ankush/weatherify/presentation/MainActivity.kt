@@ -43,7 +43,7 @@ import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.home.HomeSessionCleaner
 import bose.ankush.language.util.AppEnvironment
 import bose.ankush.navigation.AppNavigation
-import bose.ankush.payment.domain.store.PremiumStore
+import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.payment.presentation.CheckoutParams
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
@@ -53,7 +53,6 @@ import bose.ankush.weatherify.base.common.startInAppUpdate
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
 import org.koin.android.ext.android.inject
@@ -61,7 +60,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
-@AndroidEntryPoint
 class MainActivity :
     AppCompatActivity(),
     PaymentResultWithDataListener {
@@ -72,7 +70,7 @@ class MainActivity :
     private val paymentViewModel: PaymentViewModel by koinViewModel()
 
     // Koin-managed: cross-feature bridges into :feature:home
-    private val premiumStore: PremiumStore by inject()
+    private val premiumStorage: PremiumStorage by inject()
     private val homeSessionCleaner: HomeSessionCleaner by inject()
     private val analyticsTracker: AnalyticsTracker by inject()
 
@@ -84,7 +82,7 @@ class MainActivity :
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         startInAppUpdate(this)
-        setContent { WeatherifyTheme { AppEnvironment { AppContent() } } }
+        setContent { WeatherifyTheme(isDynamicColor = true) { AppEnvironment { AppContent() } } }
     }
 
     @Composable
@@ -167,11 +165,11 @@ class MainActivity :
             authViewModel.effect.collect { effect ->
                 when (effect) {
                     is AuthEffect.PremiumStatusChanged ->
-                        premiumStore.savePremiumStatus(effect.isPremium, effect.expiryMillis)
+                        premiumStorage.savePremiumStatus(effect.isPremium, effect.expiryMillis)
 
                     AuthEffect.LoggedOut -> {
                         homeSessionCleaner.clearOnLogout()
-                        premiumStore.savePremiumStatus(isPremium = false, expiryMillis = null)
+                        premiumStorage.savePremiumStatus(isPremium = false, expiryMillis = null)
                     }
                 }
             }

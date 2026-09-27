@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>NestedBlockDepth:MainActivity.kt$MainActivity$private fun launchCheckout( context: Context, params: CheckoutParams, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

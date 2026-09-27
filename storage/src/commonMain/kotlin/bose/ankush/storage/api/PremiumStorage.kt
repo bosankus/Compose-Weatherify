@@ -2,8 +2,14 @@ package bose.ankush.storage.api
 
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Shared premium-status persistence API.
+ *
+ * Owned by `:storage` so features that only need “is premium?” (e.g. finder)
+ * do not depend on `:feature:payment`. Purchase/order/verify UI stays in payment.
+ */
 interface PremiumStorage {
-    fun getPremiumStatusFlow(): Flow<PremiumStatus>
+    fun observePremiumStatus(): Flow<PremiumStatus>
 
     suspend fun savePremiumStatus(
         isPremium: Boolean,
@@ -13,5 +19,5 @@ interface PremiumStorage {
 
 data class PremiumStatus(
     val isPremium: Boolean = false,
-    val premiumExpiry: Long? = null,
+    val expiryMillis: Long? = null,
 )

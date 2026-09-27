@@ -14,7 +14,7 @@ import bose.ankush.finder.generated.resources.saved_locations_delete_success
 import bose.ankush.finder.generated.resources.saved_locations_load_error
 import bose.ankush.finder.generated.resources.saved_locations_save_error
 import bose.ankush.finder.generated.resources.saved_locations_save_success
-import bose.ankush.payment.domain.store.PremiumStore
+import bose.ankush.storage.api.PremiumStorage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +30,7 @@ internal class SavedLocationsViewModel(
     private val getSavedLocationsUseCase: GetSavedLocationsUseCase,
     private val saveLocationUseCase: SaveLocationUseCase,
     private val deleteLocationUseCase: DeleteLocationUseCase,
-    private val premiumStore: PremiumStore,
+    private val premiumStorage: PremiumStorage,
     private val analyticsTracker: AnalyticsTracker,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SavedLocationsState())
@@ -41,7 +41,7 @@ internal class SavedLocationsViewModel(
 
     init {
         viewModelScope.launch {
-            premiumStore.observePremiumStatus().collect { status ->
+            premiumStorage.observePremiumStatus().collect { status ->
                 val wasPremium = _state.value.isPremium
                 _state.update { it.copy(isPremium = status.isPremium) }
                 if (status.isPremium && !wasPremium) loadSavedLocations()
