@@ -7,6 +7,7 @@ import bose.ankush.storage.model.AirQualityData
 import bose.ankush.storage.model.WeatherData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -20,6 +21,7 @@ import bose.ankush.network.repository.WeatherRepository as NetworkWeatherReposit
  * Exercises the cache/network refresh gate inside [WeatherRepositoryImpl]:
  * network is hit only when [forceRefresh] is true or the last update is older than one hour.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class WeatherRepositoryImplRefreshPolicyTest {
     @Test
     fun refreshWeatherData_skipsNetworkWhenCacheIsFresh() =
