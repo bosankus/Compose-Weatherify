@@ -9,16 +9,13 @@ import bose.ankush.weatherify.R
 import bose.ankush.weatherify.presentation.MainActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.koin.android.ext.android.inject
 import timber.log.Timber
-import javax.inject.Inject
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
-@AndroidEntryPoint
 class WeatherifyMessagingService : FirebaseMessagingService() {
-    @Inject
-    lateinit var notificationHelper: NotificationHelper
+    private val notificationHelper: NotificationHelper by inject()
 
     private val notificationManager by lazy {
         getSystemService(NOTIFICATION_SERVICE) as NotificationManager
