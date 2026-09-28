@@ -366,9 +366,11 @@ private class InAppWebViewDelegate :
                 NSURL_ERROR_CLIENT_CERTIFICATE_REJECTED,
                 -> WebViewError.secureConnection(detail)
 
-                NSURL_ERROR_BAD_SERVER_RESPONSE -> WebViewError.fromHttpStatus(500)
+                NSURL_ERROR_BAD_SERVER_RESPONSE ->
+                    WebViewError.fromHttpStatus(WebViewError.HTTP_INTERNAL_SERVER_ERROR)
 
-                NSURL_ERROR_FILE_DOES_NOT_EXIST -> WebViewError.fromHttpStatus(404)
+                NSURL_ERROR_FILE_DOES_NOT_EXIST ->
+                    WebViewError.fromHttpStatus(WebViewError.HTTP_NOT_FOUND)
 
                 else -> WebViewError.generic(detail)
             },
