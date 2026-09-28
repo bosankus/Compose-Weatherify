@@ -190,25 +190,28 @@ actual fun InAppWebView(
                         webView.apply {
                             configureWebView(
                                 view = this,
-                                onTitle = { pageTitle.value = it },
-                                onProgress = { progress = it },
-                                onExternalIntent = { intent ->
-                                    try {
-                                        ctx.startActivity(intent)
-                                    } catch (_: ActivityNotFoundException) {
-                                        // No handler available
-                                    }
-                                },
-                                onError = { error ->
-                                    loadError = error
-                                    isInitialLoad = false
-                                },
-                                onNavigationStarted = {
-                                    loadError = null
-                                },
-                                onPageFinished = {
-                                    isInitialLoad = false
-                                },
+                                callbacks =
+                                    WebViewCallbacks(
+                                        onTitle = { pageTitle.value = it },
+                                        onProgress = { progress = it },
+                                        onExternalIntent = { intent ->
+                                            try {
+                                                ctx.startActivity(intent)
+                                            } catch (_: ActivityNotFoundException) {
+                                                // No handler available
+                                            }
+                                        },
+                                        onError = { error ->
+                                            loadError = error
+                                            isInitialLoad = false
+                                        },
+                                        onNavigationStarted = {
+                                            loadError = null
+                                        },
+                                        onPageFinished = {
+                                            isInitialLoad = false
+                                        },
+                                    ),
                             )
                         }
                     },
@@ -260,15 +263,19 @@ actual fun InAppWebView(
     }
 }
 
+private data class WebViewCallbacks(
+    val onTitle: (String) -> Unit,
+    val onProgress: (Int) -> Unit,
+    val onExternalIntent: (Intent) -> Unit,
+    val onError: (WebViewError) -> Unit = {},
+    val onNavigationStarted: () -> Unit = {},
+    val onPageFinished: () -> Unit = {},
+)
+
 @SuppressLint("SetJavaScriptEnabled")
 private fun configureWebView(
     view: WebView,
-    onTitle: (String) -> Unit,
-    onProgress: (Int) -> Unit,
-    onExternalIntent: (Intent) -> Unit,
-    onError: (WebViewError) -> Unit = {},
-    onNavigationStarted: () -> Unit = {},
-    onPageFinished: () -> Unit = {},
+    callbacks: WebViewCallbacks,
 ) {
     with(view.settings) {
         // SECURITY: Disable JavaScript to prevent XSS attacks in legal documents
@@ -305,8 +312,8 @@ private fun configureWebView(
             ): Boolean {
                 val uri = request?.url ?: return false
                 val scheme = uri.scheme ?: ""
-                onNavigationStarted()
-                return handleUrl(view, uri, scheme, onExternalIntent)
+                callbacks.onNavigationStarted()
+                return handleUrl(view, uri, scheme, callbacks.onExternalIntent)
             }
 
             override fun onPageFinished(
@@ -314,7 +321,7 @@ private fun configureWebView(
                 url: String?,
             ) {
                 super.onPageFinished(view, url)
-                onPageFinished()
+                callbacks.onPageFinished()
             }
 
             override fun onReceivedError(
@@ -325,7 +332,7 @@ private fun configureWebView(
                 super.onReceivedError(view, request, error)
                 if (request?.isForMainFrame != true) return
                 val detail = error?.description?.toString()?.takeIf { it.isNotBlank() }
-                onError(
+                callbacks.onError(
                     when (error?.errorCode) {
                         ERROR_HOST_LOOKUP,
                         ERROR_CONNECT,
@@ -337,11 +344,12 @@ private fun configureWebView(
 
                         ERROR_FAILED_SSL_HANDSHAKE -> WebViewError.secureConnection(detail)
 
-                        ERROR_FILE_NOT_FOUND -> WebViewError.fromHttpStatus(404)
+                        ERROR_FILE_NOT_FOUND ->
+                            WebViewError.fromHttpStatus(WebViewError.HTTP_NOT_FOUND)
 
                         ERROR_AUTHENTICATION,
                         ERROR_UNSUPPORTED_AUTH_SCHEME,
-                        -> WebViewError.fromHttpStatus(401)
+                        -> WebViewError.fromHttpStatus(WebViewError.HTTP_UNAUTHORIZED)
 
                         else -> WebViewError.generic(detail)
                     },
@@ -355,7 +363,7 @@ private fun configureWebView(
             ) {
                 super.onReceivedHttpError(view, request, errorResponse)
                 if (request?.isForMainFrame != true) return
-                onError(
+                callbacks.onError(
                     WebViewError.fromHttpStatus(
                         statusCode = errorResponse?.statusCode ?: 0,
                         reasonPhrase = errorResponse?.reasonPhrase,
@@ -378,7 +386,7 @@ private fun configureWebView(
                         SslError.SSL_UNTRUSTED -> "Certificate not trusted"
                         else -> null
                     }
-                onError(WebViewError.secureConnection(detail))
+                callbacks.onError(WebViewError.secureConnection(detail))
             }
         }
 
@@ -389,7 +397,7 @@ private fun configureWebView(
                 newProgress: Int,
             ) {
                 super.onProgressChanged(view, newProgress)
-                onProgress(newProgress)
+                callbacks.onProgress(newProgress)
             }
 
             override fun onReceivedTitle(
@@ -397,7 +405,7 @@ private fun configureWebView(
                 title: String?,
             ) {
                 super.onReceivedTitle(view, title)
-                if (!title.isNullOrBlank()) onTitle(title)
+                if (!title.isNullOrBlank()) callbacks.onTitle(title)
             }
         }
 }

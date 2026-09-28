@@ -29,8 +29,8 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 
+    // iosX64 dropped: matches :analytics (SwiftPM) and Compose Multiplatform 1.11+.
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
     ).forEach {
@@ -68,25 +68,21 @@ kotlin {
             }
         }
 
-        val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
 
         @Suppress("UNUSED_VARIABLE")
         val iosMain by creating {
             dependsOn(commonMain)
-            iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
         }
-        val iosX64Test by getting
         val iosArm64Test by getting
         val iosSimulatorArm64Test by getting
 
         @Suppress("UNUSED_VARIABLE")
         val iosTest by creating {
             dependsOn(commonTest)
-            iosX64Test.dependsOn(this)
             iosArm64Test.dependsOn(this)
             iosSimulatorArm64Test.dependsOn(this)
         }
@@ -100,7 +96,6 @@ room {
 // KSP for Room on every KMP target that compiles this module
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
-    add("kspIosX64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
 }

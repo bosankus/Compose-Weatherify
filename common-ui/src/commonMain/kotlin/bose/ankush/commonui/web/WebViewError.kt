@@ -35,6 +35,17 @@ data class WebViewError(
     val isRetryable: Boolean = true,
 ) {
     companion object {
+        const val HTTP_UNAUTHORIZED = 401
+        const val HTTP_FORBIDDEN = 403
+        const val HTTP_NOT_FOUND = 404
+        const val HTTP_REQUEST_TIMEOUT = 408
+        const val HTTP_GONE = 410
+        const val HTTP_INTERNAL_SERVER_ERROR = 500
+        const val HTTP_SERVICE_UNAVAILABLE = 503
+        const val HTTP_GATEWAY_TIMEOUT = 504
+        private const val HTTP_SERVER_ERROR_RANGE_START = 500
+        private const val HTTP_SERVER_ERROR_RANGE_END = 599
+
         /** Maps an HTTP status returned for the main frame to a user-facing error. */
         fun fromHttpStatus(
             statusCode: Int,
@@ -42,7 +53,7 @@ data class WebViewError(
         ): WebViewError {
             val detail = buildDetail(statusCode, reasonPhrase)
             return when {
-                statusCode == 408 || statusCode == 504 ->
+                statusCode == HTTP_REQUEST_TIMEOUT || statusCode == HTTP_GATEWAY_TIMEOUT ->
                     WebViewError(
                         kind = WebViewErrorKind.TIMEOUT,
                         toolbarTitle = "Timed out",
@@ -51,7 +62,7 @@ data class WebViewError(
                         detail = detail,
                     )
 
-                statusCode == 503 ->
+                statusCode == HTTP_SERVICE_UNAVAILABLE ->
                     WebViewError(
                         kind = WebViewErrorKind.SERVER_ERROR,
                         toolbarTitle = "Service unavailable",
@@ -62,7 +73,7 @@ data class WebViewError(
                         detail = detail,
                     )
 
-                statusCode in 500..599 ->
+                statusCode in HTTP_SERVER_ERROR_RANGE_START..HTTP_SERVER_ERROR_RANGE_END ->
                     WebViewError(
                         kind = WebViewErrorKind.SERVER_ERROR,
                         toolbarTitle = "Server error",
@@ -73,7 +84,7 @@ data class WebViewError(
                         detail = detail,
                     )
 
-                statusCode == 404 || statusCode == 410 ->
+                statusCode == HTTP_NOT_FOUND || statusCode == HTTP_GONE ->
                     WebViewError(
                         kind = WebViewErrorKind.NOT_FOUND,
                         toolbarTitle = "Page not found",
@@ -83,7 +94,7 @@ data class WebViewError(
                         isRetryable = false,
                     )
 
-                statusCode == 401 || statusCode == 403 ->
+                statusCode == HTTP_UNAUTHORIZED || statusCode == HTTP_FORBIDDEN ->
                     WebViewError(
                         kind = WebViewErrorKind.ACCESS_DENIED,
                         toolbarTitle = "Access denied",
@@ -174,8 +185,7 @@ fun resolveWebViewTitle(
 ): String {
     if (error != null) return error.toolbarTitle
     val title = pageTitle.trim()
-    if (title.isEmpty() || title.looksLikeUrl(currentUrl)) return fallback
-    return title
+    return if (title.isEmpty() || title.looksLikeUrl(currentUrl)) fallback else title
 }
 
 private fun String.looksLikeUrl(currentUrl: String): Boolean {
