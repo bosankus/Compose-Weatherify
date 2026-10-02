@@ -15,7 +15,7 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/razorpay/razorpay-pod.git",
-      from: "1.5.4"
+      from: "1.5.8"
     ),
     .package(path: "subpackages/_feature_home"),
     .package(path: "subpackages/_analytics")
