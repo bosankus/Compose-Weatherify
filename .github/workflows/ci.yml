@@ -45,7 +45,7 @@ jobs:
           UNSPLASH_SECRET: ${{ secrets.UNSPLASH_SECRET }}
         run: |
           umask 077
-          printf 'UNSPLASH_ACCESS_KEY=%s\n' "$UNSPLASH_SECRET" > secrets.properties
+          printf 'UNSPLASH_ACCESS_KEY="%s"\n' "$UNSPLASH_SECRET" > secrets.properties
 
       - name: Decode google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/androidApp/google-services.json
@@ -70,7 +70,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -105,7 +104,7 @@ jobs:
           UNSPLASH_SECRET: ${{ secrets.UNSPLASH_SECRET }}
         run: |
           umask 077
-          printf 'UNSPLASH_ACCESS_KEY=%s\n' "$UNSPLASH_SECRET" > secrets.properties
+          printf 'UNSPLASH_ACCESS_KEY="%s"\n' "$UNSPLASH_SECRET" > secrets.properties
 
       - name: Decode google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/androidApp/google-services.json
@@ -119,41 +118,7 @@ jobs:
           commit_message: "style: apply automatic code formatting"
           file_pattern: "**/*.kt **/*.kts"
 
-      - name: Verify GCP Secret Manager variables
-        run: |
-          missing=()
-          [[ -z "${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ]] && missing+=("GCP_WORKLOAD_IDENTITY_PROVIDER")
-          [[ -z "${{ vars.GCP_SERVICE_ACCOUNT }}" ]] && missing+=("GCP_SERVICE_ACCOUNT")
-          [[ -z "${{ vars.GCP_PROJECT_ID }}" ]] && missing+=("GCP_PROJECT_ID")
-          [[ -z "${{ vars.GCP_SECRET_RAZORPAY }}" ]] && missing+=("GCP_SECRET_RAZORPAY")
-          if (( ${#missing[@]} > 0 )); then
-            echo "::error::Missing required repository Actions variables: ${missing[*]}"
-            echo "Ankush must configure manually (do not put secret values in git):"
-            echo "  1. GCP Secret Manager secret with the Razorpay API key"
-            echo "     (suggested secret id: weatherify-razorpay-key)"
-            echo "  2. Workload Identity Federation + service account for GitHub OIDC"
-            echo "  3. Repo Actions variables:"
-            echo "       GCP_WORKLOAD_IDENTITY_PROVIDER"
-            echo "       GCP_SERVICE_ACCOUNT"
-            echo "       GCP_PROJECT_ID"
-            echo "       GCP_SECRET_RAZORPAY  (secret id, e.g. weatherify-razorpay-key)"
-            exit 1
-          fi
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
-
-      - name: Fetch Razorpay API key from GCP Secret Manager
-        id: fetch-razorpay
-        uses: google-github-actions/get-secretmanager-secrets@v2
-        with:
-          secrets: |-
-            RAZORPAY_KEY:${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_SECRET_RAZORPAY }}
-
       - name: Code check (spotless + detekt)
         env:
-          RAZORPAY_KEY: ${{ steps.fetch-razorpay.outputs.RAZORPAY_KEY }}
+          RAZORPAY_KEY: ${{ secrets.RAZORPAY_KEY }}
         run: ./gradlew --no-daemon --parallel codeCheck
