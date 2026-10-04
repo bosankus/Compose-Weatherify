@@ -1,7 +1,9 @@
 package bose.ankush.home.presentation.wander
 
 import bose.ankush.home.domain.model.WeatherForecast
+import bose.ankush.home.presentation.util.formatTextCapitalization
 import bose.ankush.home.presentation.util.toCelsius
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
@@ -12,6 +14,11 @@ data class WanderCalendarDay(
     val date: String,
     val temp: String,
     val selected: Boolean,
+    val min: String = "",
+    val max: String = "",
+    val description: String = "",
+    val icon: String = "",
+    val day: LocalDate? = null,
 )
 
 /** Live header, chips, and week. Preview data never goes through this. */
@@ -100,11 +107,27 @@ internal fun List<WeatherForecast.Daily?>?.toWanderDays(): List<WanderCalendarDa
                 .lowercase()
                 .replaceFirstChar { it.uppercaseChar() }
         val temp = (day.temp?.day ?: day.temp?.max).celsiusLabel().takeUnless { it == MISSING }.orEmpty()
+        val weather = day.weather?.firstOrNull()
         WanderCalendarDay(
             label = label,
             date = local.day.toString(),
             temp = temp,
             selected = local.date == today,
+            min =
+                day.temp
+                    ?.min
+                    .celsiusLabel()
+                    .takeUnless { it == MISSING }
+                    .orEmpty(),
+            max =
+                day.temp
+                    ?.max
+                    .celsiusLabel()
+                    .takeUnless { it == MISSING }
+                    .orEmpty(),
+            description = weather?.description?.formatTextCapitalization().orEmpty(),
+            icon = weather?.icon.orEmpty(),
+            day = local.date,
         )
     }
 }

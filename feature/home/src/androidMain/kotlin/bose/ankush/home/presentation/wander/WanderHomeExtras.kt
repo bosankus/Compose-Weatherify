@@ -29,8 +29,11 @@ import androidx.compose.ui.unit.sp
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.default_avatar
 import bose.ankush.home.presentation.shell.ShellEventSummary
+import bose.ankush.home.presentation.shell.ShellSectionKind
 import bose.ankush.home.presentation.shell.ShellSectionStatus
 import bose.ankush.home.presentation.shell.ShellState
+import bose.ankush.home.presentation.shell.placeholderMessage
+import bose.ankush.home.presentation.shell.retryContentDescription
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.CachePolicy
@@ -45,6 +48,7 @@ data class WanderEventLine(
 data class WanderSavedPlace(
     val name: String,
     val subtitle: String,
+    val message: String = "",
 )
 
 /**
@@ -55,12 +59,17 @@ data class WanderNearby(
     val photoUrl: String? = null,
     val showAccount: Boolean = false,
     val eventsLoading: Boolean = false,
+    val eventsFailed: Boolean = false,
     val events: List<WanderEventLine> = emptyList(),
     val savedPlace: WanderSavedPlace? = null,
     val onOpenAccount: () -> Unit = {},
+    val onRetryEvents: () -> Unit = {},
 )
 
-internal fun ShellState.toWanderNearby(onOpenAccount: () -> Unit): WanderNearby {
+internal fun ShellState.toWanderNearby(
+    onOpenAccount: () -> Unit,
+    onRetryEvents: () -> Unit = {},
+): WanderNearby {
     val place = featuredPlace
     val subtitle =
         place
@@ -69,10 +78,20 @@ internal fun ShellState.toWanderNearby(onOpenAccount: () -> Unit): WanderNearby 
                     .filter { it.isNotBlank() }
                     .joinToString(", ")
             }.orEmpty()
+    val savedStatus =
+        if (savedPlace == ShellSectionStatus.Ready &&
+            place == null
+        ) {
+            ShellSectionStatus.Empty
+        } else {
+            savedPlace
+        }
+    val savedMessage = if (place == null) placeholderMessage(ShellSectionKind.SavedPlace, savedStatus).orEmpty() else ""
     return WanderNearby(
         photoUrl = photoUrl?.takeIf { it.isNotBlank() },
         showAccount = true,
-        eventsLoading = lat != null && events == ShellSectionStatus.Loading,
+        eventsLoading = events == ShellSectionStatus.Loading,
+        eventsFailed = events == ShellSectionStatus.Failed,
         events =
             if (events == ShellSectionStatus.Ready) {
                 eventSummaries.map { it.toWanderLine() }
@@ -80,10 +99,13 @@ internal fun ShellState.toWanderNearby(onOpenAccount: () -> Unit): WanderNearby 
                 emptyList()
             },
         savedPlace =
-            place?.let {
-                WanderSavedPlace(name = it.name.trim(), subtitle = subtitle)
-            },
+            WanderSavedPlace(
+                name = place?.name?.trim().orEmpty(),
+                subtitle = if (place == null) "" else subtitle,
+                message = savedMessage,
+            ),
         onOpenAccount = onOpenAccount,
+        onRetryEvents = onRetryEvents,
     )
 }
 
@@ -142,14 +164,16 @@ internal fun WanderNearbyBlocks(
     onOpenSaved: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val showEvents = nearby.eventsLoading || nearby.events.isNotEmpty()
+    val showEvents = nearby.eventsLoading || nearby.eventsFailed || nearby.events.isNotEmpty()
     if (!showEvents && nearby.savedPlace == null) return
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         if (showEvents) {
             WanderEventsBlock(
-                loading = nearby.eventsLoading,
+                loading = nearby.eventsLoading || nearby.eventsFailed,
+                failed = nearby.eventsFailed,
                 events = nearby.events,
                 contentColor = contentColor,
+                onRetry = nearby.onRetryEvents,
             )
         }
         nearby.savedPlace?.let { place ->
@@ -161,8 +185,10 @@ internal fun WanderNearbyBlocks(
 @Composable
 private fun WanderEventsBlock(
     loading: Boolean,
+    failed: Boolean,
     events: List<WanderEventLine>,
     contentColor: Color,
+    onRetry: () -> Unit,
 ) {
     Column(
         modifier =
@@ -180,14 +206,30 @@ private fun WanderEventsBlock(
             fontWeight = FontWeight.Medium,
         )
         if (loading) {
+            val brush = rememberWanderShimmerBrush()
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth(PLACEHOLDER_WIDTH)
                         .height(14.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(contentColor.copy(alpha = PLACEHOLDER_ALPHA)),
+                        .background(brush),
             )
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(0.32f)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(brush),
+            )
+            if (failed) {
+                WanderActionLabel(
+                    label = retryContentDescription(ShellSectionKind.Events),
+                    onClick = onRetry,
+                    contentColor = contentColor,
+                )
+            }
         } else {
             events.forEach { event ->
                 EventLine(event = event, contentColor = contentColor)
@@ -257,13 +299,19 @@ private fun WanderSavedPlaceCard(
                 fontSize = 14.sp,
             )
         }
+        if (place.message.isNotBlank()) {
+            Text(
+                text = place.message,
+                color = contentColor,
+                fontSize = 14.sp,
+            )
+        }
     }
 }
 
 private val cardFill = Color.Black.copy(alpha = 0.38f)
 private val AccountMarkSize = 40.dp
 private const val PLACEHOLDER_WIDTH = 0.46f
-private const val PLACEHOLDER_ALPHA = 0.28f
 private const val ACCOUNT = "Account"
 private const val NEARBY_EVENTS = "Nearby events"
 private const val SAVED_PLACE = "Saved place"
