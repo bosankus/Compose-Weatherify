@@ -11,15 +11,16 @@ import bose.ankush.storage.room.WeatherEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 /**
  * Room-backed [WeatherStorage] shared by Android and iOS.
  *
- * Per-location last-update timestamps stay in-memory (reset on process death) — same as the
- * previous Android implementation — so a cold start still triggers a fresh network fetch policy.
- * Weather / air-quality payloads are durable in Room on both platforms.
+ * [getLastWeatherUpdateTime] reads the existing Room `lastUpdated` column. A timestamp remembered
+ * for this process is used only when that location was saved during the session, so a cold start
+ * still sees the column. Weather / air-quality payloads stay durable in Room on both platforms.
  */
 class WeatherStorageImpl(
     private val weatherDatabase: WeatherDatabase,
@@ -38,8 +39,11 @@ class WeatherStorageImpl(
             it?.toAirQualityData()
         }
 
-    override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long =
-        locationTimestamps[locationKey(coordinates)] ?: 0L
+    override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long {
+        val remembered = locationTimestamps[locationKey(coordinates)]
+        if (remembered != null) return remembered
+        return weatherDatabase.weatherDao().getWeather().first()?.lastUpdated ?: 0L
+    }
 
     override suspend fun saveLastWeatherUpdateTime(
         coordinates: Pair<Double, Double>,

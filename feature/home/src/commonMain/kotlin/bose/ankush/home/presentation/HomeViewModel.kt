@@ -19,9 +19,11 @@ import bose.ankush.home.generated.resources.location_permission_denied_txt
 import bose.ankush.home.presentation.util.CoordinateResolution
 import bose.ankush.home.presentation.util.errorMessageFromException
 import bose.ankush.storage.api.LocationPreferencesStorage
+import bose.ankush.storage.model.LocationPreferences
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -263,6 +265,8 @@ internal class HomeViewModel(
 
     private suspend fun runFetch(forceRefresh: Boolean) {
         dispatch(HomeAction.Loading(isRefreshing = forceRefresh))
+        // Paint the Room forecast before GPS, reverse geocode, or the network refresh.
+        emitSavedForecast()
         when (val resolution = resolveCoordinates()) {
             is CoordinateResolution.Ready ->
                 fetchWeatherData(
@@ -361,6 +365,45 @@ internal class HomeViewModel(
         )
     }
 
+    /**
+     * Saved coordinates only. This does not ask for a GPS fix, so the first paint is not blocked
+     * on location, reverse geocode, or Wear sync.
+     */
+    private fun savedCoordinates(prefs: LocationPreferences): CoordinateResolution.Ready? {
+        if (prefs.isLocationOverridden) {
+            val hasOverride = prefs.overrideLat != null && prefs.overrideLon != null
+            val lat = prefs.overrideLat ?: prefs.latitude
+            val lon = prefs.overrideLon ?: prefs.longitude
+            if (lat == null || lon == null) return null
+            return CoordinateResolution.Ready(
+                lat = lat,
+                lon = lon,
+                isOverridden = hasOverride,
+                overrideName = if (hasOverride) prefs.overrideLocationName else null,
+            )
+        }
+        val lat = prefs.latitude ?: return null
+        val lon = prefs.longitude ?: return null
+        return CoordinateResolution.Ready(lat, lon, isOverridden = false, overrideName = null)
+    }
+
+    /** Emits the Room forecast when one exists. An empty cache leaves the loading state alone. */
+    private suspend fun emitSavedForecast() {
+        val saved = savedCoordinates(locationPreferencesStorage.getLocationPreferencesFlow().first()) ?: return
+        val location = saved.lat to saved.lon
+        val cached = getWeatherReport(location).first() ?: return
+        val air = getAirQuality(saved.lat, saved.lon).first()
+        dispatch(
+            HomeAction.Success(
+                location = location,
+                isLocationOverridden = saved.isOverridden,
+                overrideLocationName = saved.overrideName,
+                weather = cached,
+                airQuality = air,
+            ),
+        )
+    }
+
     private suspend fun fetchWeatherData(
         lat: Double,
         lon: Double,
@@ -369,19 +412,21 @@ internal class HomeViewModel(
         forceRefresh: Boolean,
     ) {
         val location = lat to lon
-        refreshWeatherReport(location, forceRefresh)
-
-        getAirQuality(location.first, location.second)
-            .combine(getWeatherReport(location)) { air, weather ->
-                HomeState(
-                    isLoading = false,
-                    userLocation = location,
-                    weatherData = weather,
-                    airQualityData = air,
-                    error = null,
-                    isLocationOverridden = isOverridden,
-                    activeLocationName = overrideName,
-                )
+        coroutineScope {
+            val refreshFinished = MutableStateFlow(false)
+            launch {
+                try {
+                    refreshWeatherReport(location, forceRefresh)
+                } finally {
+                    refreshFinished.value = true
+                }
+            }
+            combine(
+                getAirQuality(location.first, location.second),
+                getWeatherReport(location),
+                refreshFinished,
+            ) { air, weather, finished ->
+                Triple(air, weather, finished)
             }.catch { e ->
                 if (e is CancellationException) throw e
                 val error =
@@ -391,17 +436,20 @@ internal class HomeViewModel(
                         getString(Res.string.general_error_txt)
                     }
                 dispatch(HomeAction.Error(message = error))
-            }.collectLatest { newState ->
+            }.collectLatest { (air, weather, finished) ->
+                // Empty Room stays on the loading state until the refresh settles.
+                if (weather == null && !finished) return@collectLatest
                 dispatch(
                     HomeAction.Success(
                         location = location,
                         isLocationOverridden = isOverridden,
                         overrideLocationName = overrideName,
-                        weather = newState.weatherData,
-                        airQuality = newState.airQualityData,
+                        weather = weather,
+                        airQuality = air,
                     ),
                 )
             }
+        }
     }
 
     private fun resetLocationOverride() {
