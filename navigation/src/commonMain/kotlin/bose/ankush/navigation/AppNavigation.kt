@@ -179,28 +179,38 @@ fun AppNavigation(
                     entry<HomeRoute> {
                         TrackedScreen("home", "HomeScreen", analyticsTracker)
                         ExitAppOnBackPress()
-                        HomeFeatureRoute(
-                            bottomBar = {
-                                AppBottomBar(
-                                    rememberSaveable { mutableStateOf(true) },
-                                    navigator,
-                                    toastAnchorState,
+                        PlatformHomeEntry(
+                            weather = {
+                                HomeFeatureRoute(
+                                    toastAnchorState = toastAnchorState,
+                                    hasLocationPermission = hasLocationPermission,
+                                    hasNotificationPermission = hasNotificationPermission,
+                                    notificationPermissionResult = notificationPermissionResult,
+                                    requiresNotificationSettingsNavigationHint =
+                                        platformPermissions.requiresManualSettingsNavigationHint(),
+                                    onRequestNotificationPermission = {
+                                        showNotificationPermissionRequest = true
+                                    },
+                                    onRequestLocationPermission = {
+                                        locationPermissionRequestId++
+                                    },
+                                    onOpenSettings = { platformPermissions.openAppSystemSettings() },
+                                    onOpenLocationSettings = { platformPermissions.openLocationSettings() },
                                 )
                             },
-                            toastAnchorState = toastAnchorState,
-                            hasLocationPermission = hasLocationPermission,
-                            hasNotificationPermission = hasNotificationPermission,
-                            notificationPermissionResult = notificationPermissionResult,
-                            requiresNotificationSettingsNavigationHint =
-                                platformPermissions.requiresManualSettingsNavigationHint(),
-                            onRequestNotificationPermission = {
-                                showNotificationPermissionRequest = true
+                            places = {
+                                SavedLocationsFinderRoute(
+                                    onLocationSelected = { lat, lon, name ->
+                                        coroutineScope.launch {
+                                            homeLocationCoordinator.setDefaultLocation(lat, lon, name)
+                                        }
+                                    },
+                                    onUpgradeClick = { navigator.navigate(SettingsRoute) },
+                                )
                             },
-                            onRequestLocationPermission = {
-                                locationPermissionRequestId++
-                            },
-                            onOpenSettings = { platformPermissions.openAppSystemSettings() },
-                            onOpenLocationSettings = { platformPermissions.openLocationSettings() },
+                            onOpenHub = { navigator.navigate(SettingsRoute) },
+                            // No travel screen exists. Do not invent one.
+                            onOpenTravel = {},
                         )
                     }
                     entry<SavedLocationsRoute> {

@@ -18,10 +18,9 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 
 /**
- * Full-bleed home background. Each condition paints a dark gradient, then Coil loads
- * `drawable/wander_<key>` when that resource exists (`wander_clear`, `wander_clouds`,
- * `wander_rain`, `wander_fog`, `wander_storm`, `wander_snow`, `wander_night`) and crossfades it in.
- * No network image fetch. A bottom scrim keeps type readable over either the gradient or a photo.
+ * Full-bleed home background. A dark gradient shows first. When [photoUrl] is set, Coil
+ * hotlinks that URL (the one Unsplash returned). Otherwise Coil loads `drawable/wander_<key>`
+ * if that resource exists. A bottom scrim keeps type readable.
  */
 enum class WanderCondition(
     val key: String,
@@ -52,28 +51,30 @@ enum class WanderCondition(
 @Composable
 fun WanderConditionBackground(
     condition: WanderCondition,
+    photoUrl: String? = null,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     Box(modifier = modifier.fillMaxSize()) {
         Crossfade(
-            targetState = condition,
+            targetState = condition to photoUrl,
             animationSpec = tween(durationMillis = BACKGROUND_FADE_MILLIS),
             label = "wanderConditionBackground",
-        ) { current ->
+        ) { (current, url) ->
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .background(current.gradient),
             ) {
-                val request =
+                val bundled =
                     remember(current, context) {
                         bundledConditionRequest(context, current)
                     }
-                if (request != null) {
+                val model = url ?: bundled
+                if (model != null) {
                     AsyncImage(
-                        model = request,
+                        model = model,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),

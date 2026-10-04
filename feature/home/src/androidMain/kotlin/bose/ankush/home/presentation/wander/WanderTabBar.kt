@@ -29,7 +29,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 /**
- * Bottom tabs. The white pill slides to the selected item. Taps only change selection.
+ * Bottom tabs. The white pill slides to the selected item.
  */
 @Composable
 fun WanderTabBar(
