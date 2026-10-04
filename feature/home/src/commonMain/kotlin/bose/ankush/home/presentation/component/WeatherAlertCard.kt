@@ -303,7 +303,7 @@ private fun formatTimestamp(timestamp: Long): String {
     val instant = Instant.fromEpochSeconds(timestamp)
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
     val month = localDateTime.month.name.take(3)
-    val day = localDateTime.dayOfMonth
+    val day = localDateTime.day
     val hour12 =
         when {
             localDateTime.hour == 0 -> 12

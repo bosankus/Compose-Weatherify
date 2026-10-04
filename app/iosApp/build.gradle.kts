@@ -96,29 +96,28 @@ kotlin {
     }
 
     sourceSets {
-        val iosMain =
-            create("iosMain") {
-                dependsOn(commonMain.get())
-                kotlin.srcDir(generatedIosSecretsRoot)
-                dependencies {
-                    api(project(":common-ui"))
-                    api(project(":navigation"))
-                    api(project(":storage"))
-                    api(project(":network"))
-                    api(project(":feature:auth"))
-                    api(project(":feature:language"))
-                    api(project(":feature:payment"))
-                    api(project(":feature:finder"))
-                    api(project(":feature:home"))
-                    api(project(":feature:settings"))
-                    api(project(":analytics"))
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            kotlin.srcDir(generatedIosSecretsRoot)
+            dependencies {
+                api(project(":common-ui"))
+                api(project(":navigation"))
+                api(project(":storage"))
+                api(project(":network"))
+                api(project(":analytics"))
+                api(project(":feature:auth"))
+                api(project(":feature:home"))
+                api(project(":feature:finder"))
+                api(project(":feature:settings"))
+                api(project(":feature:language"))
+                api(project(":feature:payment"))
 
-                    implementation(libs.compose.multiplatform.runtime)
-                    implementation(libs.compose.multiplatform.ui)
-                    implementation(libs.koin.core)
-                    implementation(libs.koin.compose)
-                }
+                implementation(libs.compose.multiplatform.runtime)
+                implementation(libs.compose.multiplatform.ui)
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
             }
+        }
 
         getByName("iosArm64Main") {
             dependsOn(iosMain)
