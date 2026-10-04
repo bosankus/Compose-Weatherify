@@ -7,5 +7,4 @@ class WanderHomeLinks(
     val weather: @Composable () -> Unit,
     val places: @Composable () -> Unit,
     val onOpenHub: () -> Unit,
-    val onOpenTravel: () -> Unit,
 )

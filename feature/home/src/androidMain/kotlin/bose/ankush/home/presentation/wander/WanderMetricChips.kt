@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun WanderMetricChips(
-    feel: String = "16°",
-    wind: String = "WSW 6 mph",
-    uv: String = "7",
+    feel: String,
+    wind: String,
+    uv: String,
     modifier: Modifier = Modifier,
 ) {
     Row(

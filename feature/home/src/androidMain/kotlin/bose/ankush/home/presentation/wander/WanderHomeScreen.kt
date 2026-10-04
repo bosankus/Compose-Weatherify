@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -25,16 +27,22 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import bose.ankush.home.domain.location.HomeGeocoder
+import bose.ankush.home.presentation.HomeViewModel
+import bose.ankush.home.presentation.state.ShowLoading
+import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Android Wander home. Home is this shell. Weather and Map are the existing
- * forecast and saved-places screens. Hub leaves this shell for Settings.
+ * Android Wander home. Home is this shell, bound to the forecast already loaded
+ * by [HomeViewModel]. Weather is that same forecast. Map is saved places.
+ * Hub pushes Settings so back returns here. There is no travel tab.
  */
 @Composable
 fun WanderHomeScreen(
     links: WanderHomeLinks,
-    fogPhoto: WanderFogPhoto?,
-    mock: WanderHomeMock = WanderHomePreviewData.home,
+    shell: WanderShell,
     modifier: Modifier = Modifier,
 ) {
     var selectedTabName by rememberSaveable { mutableStateOf(WanderTab.HOME.name) }
@@ -43,13 +51,27 @@ fun WanderHomeScreen(
     val onTab = { tab: WanderTab ->
         when (tab) {
             WanderTab.HUB -> links.onOpenHub()
-            WanderTab.TRAVEL -> links.onOpenTravel()
             else -> selectedTabName = tab.name
         }
     }
 
     if (selectedTab == WanderTab.HOME) {
-        WanderHomePage(mock = mock, fogPhoto = fogPhoto, selectedTab = selectedTab, onTab = onTab, modifier = modifier)
+        when (shell) {
+            is WanderShell.Waiting ->
+                WanderWaitingPage(
+                    waiting = shell,
+                    selectedTab = selectedTab,
+                    onTab = onTab,
+                    modifier = modifier,
+                )
+            is WanderShell.Ready ->
+                WanderHomePage(
+                    ready = shell,
+                    selectedTab = selectedTab,
+                    onTab = onTab,
+                    modifier = modifier,
+                )
+        }
     } else {
         Column(modifier = modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -70,15 +92,16 @@ fun WanderHomeScreen(
 
 @Composable
 private fun WanderHomePage(
-    mock: WanderHomeMock,
-    fogPhoto: WanderFogPhoto?,
+    ready: WanderShell.Ready,
     selectedTab: WanderTab,
     onTab: (WanderTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val photoUrl = fogPhoto?.imageUrl?.takeIf { mock.condition == WanderCondition.FOG }
+    val content = ready.content
+    val fogPhoto = ready.fogPhoto
+    val photoUrl = fogPhoto?.imageUrl?.takeIf { content.condition == WanderCondition.FOG }
     Box(modifier = modifier.fillMaxSize()) {
-        WanderConditionBackground(condition = mock.condition, photoUrl = photoUrl)
+        WanderConditionBackground(condition = content.condition, photoUrl = photoUrl)
         Column(
             modifier =
                 Modifier
@@ -89,19 +112,54 @@ private fun WanderHomePage(
         ) {
             Spacer(modifier = Modifier.height(28.dp))
             WanderTemperatureHeader(
-                temperature = mock.temperature,
-                place = mock.place,
-                conditionLine = mock.condition.line,
+                temperature = content.temperature,
+                place = content.place,
+                conditionLine = content.condition.line,
             )
             Spacer(modifier = Modifier.height(28.dp))
-            WanderMetricChips(feel = mock.feel, wind = mock.wind, uv = mock.uv)
-            Spacer(modifier = Modifier.height(20.dp))
-            WanderCalendarStrip()
-            Spacer(modifier = Modifier.height(16.dp))
-            WanderSmallCards()
+            WanderMetricChips(feel = content.feel, wind = content.wind, uv = content.uv)
+            if (content.days.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                WanderCalendarStrip(days = content.days)
+            }
+            if (content.showSmallCards) {
+                Spacer(modifier = Modifier.height(16.dp))
+                WanderSmallCards()
+            }
             if (fogPhoto != null && photoUrl != null) {
+                TrackShownWanderPhoto(fogPhoto)
                 Spacer(modifier = Modifier.height(8.dp))
                 UnsplashCredit(fogPhoto)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            WanderTabBar(selected = selectedTab, onSelected = onTab)
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+private fun WanderWaitingPage(
+    waiting: WanderShell.Waiting,
+    selectedTab: WanderTab,
+    onTab: (WanderTab) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        WanderConditionBackground(condition = WanderCondition.CLOUDS)
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp),
+        ) {
+            Spacer(modifier = Modifier.height(28.dp))
+            if (waiting.loading) {
+                ShowLoading(modifier = Modifier.fillMaxWidth())
+            } else if (!waiting.statusMessage.isNullOrBlank()) {
+                Text(text = waiting.statusMessage, color = Color.White, fontSize = 16.sp)
             }
             Spacer(modifier = Modifier.weight(1f))
             WanderTabBar(selected = selectedTab, onSelected = onTab)
@@ -136,15 +194,49 @@ private fun UnsplashCredit(photo: WanderFogPhoto) {
     )
 }
 
-/** App entry. The preview does not call this, so it never touches Koin or the network. */
+/**
+ * App entry. Uses the forecast [HomeViewModel] already loads. The preview does not
+ * call this, so it never touches Koin or the network.
+ */
 @Composable
 fun WanderHomeRoute(
     links: WanderHomeLinks,
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = koinViewModel<HomeViewModel>()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val current = state.weatherData?.current
+    val condition = current?.wanderCondition() ?: WanderCondition.CLOUDS
+    val place = rememberForecastPlace(state.userLocation)
+    val fogPhoto = rememberWanderFogPhoto(if (current == null) WanderCondition.CLOUDS else condition)
+    val content = state.weatherData?.takeIf { current != null }?.toWanderContent(place)
+    val shell =
+        if (content == null) {
+            WanderShell.Waiting(
+                loading = state.isLoading,
+                statusMessage = state.error ?: state.offlineMessage,
+            )
+        } else {
+            WanderShell.Ready(content = content, fogPhoto = fogPhoto)
+        }
     WanderHomeScreen(
         links = links,
-        fogPhoto = rememberWanderFogPhoto(),
+        shell = shell,
         modifier = modifier,
     )
 }
+
+/** Same resolver as the forecast header: reverse-geocode the loaded coordinates. */
+@Composable
+private fun rememberForecastPlace(userLocation: Pair<Double, Double>?): String {
+    val geocoder = koinInject<HomeGeocoder>()
+    var place by remember(userLocation) { mutableStateOf(CURRENT_LOCATION) }
+    LaunchedEffect(userLocation) {
+        if (userLocation != null) {
+            place = geocoder.reverseGeocode(userLocation.first, userLocation.second) ?: CURRENT_LOCATION
+        }
+    }
+    return place
+}
+
+private const val CURRENT_LOCATION = "Current Location"

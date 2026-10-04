@@ -9,7 +9,6 @@ actual fun PlatformHomeEntry(
     weather: @Composable () -> Unit,
     places: @Composable () -> Unit,
     onOpenHub: () -> Unit,
-    onOpenTravel: () -> Unit,
 ) {
     WanderHomeRoute(
         links =
@@ -17,7 +16,6 @@ actual fun PlatformHomeEntry(
                 weather = weather,
                 places = places,
                 onOpenHub = onOpenHub,
-                onOpenTravel = onOpenTravel,
             ),
     )
 }
