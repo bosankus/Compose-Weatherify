@@ -27,5 +27,9 @@ object WanderHomePreviewData {
 @Preview(showBackground = true, widthDp = 390, heightDp = 844, backgroundColor = 0xFF101418)
 @Composable
 internal fun WanderHomeScreenPreview() {
-    WanderHomeScreen(mock = WanderHomePreviewData.home)
+    WanderHomeScreen(
+        links = WanderHomeLinks(weather = {}, places = {}, onOpenHub = {}, onOpenTravel = {}),
+        fogPhoto = null,
+        mock = WanderHomePreviewData.home,
+    )
 }
