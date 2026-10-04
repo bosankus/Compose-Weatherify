@@ -28,17 +28,21 @@ internal class ShellViewModel(
     val effect: Flow<ShellEffect> = _effect.receiveAsFlow()
 
     private var sideJob: Job? = null
+    private var accountJob: Job? = null
 
-    init {
-        viewModelScope.launch {
-            val photoUrl =
-                accountRepository
-                    .getAccount()
-                    .getOrNull()
-                    ?.photoUrl
-                    ?.takeIf { it.isNotBlank() }
-            dispatch(ShellIntent.AccountLoaded(photoUrl))
-        }
+    /** GET /account. The signed photo URL is kept in memory only. */
+    fun refreshAccount() {
+        accountJob?.cancel()
+        accountJob =
+            viewModelScope.launch {
+                val photoUrl =
+                    accountRepository
+                        .getAccount()
+                        .getOrNull()
+                        ?.photoUrl
+                        ?.takeIf { it.isNotBlank() }
+                dispatch(ShellIntent.AccountLoaded(photoUrl))
+            }
     }
 
     fun onIntent(intent: ShellIntent) {

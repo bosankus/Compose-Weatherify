@@ -39,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.network.model.SavedLocation
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import kotlinx.datetime.LocalDate
 
 /**
@@ -161,8 +164,16 @@ private fun AccountSpot(
                 }.clickable(onClick = onClick),
     ) {
         if (!photoUrl.isNullOrBlank()) {
+            val context = LocalPlatformContext.current
             AsyncImage(
-                model = photoUrl,
+                model =
+                    ImageRequest
+                        .Builder(context)
+                        .data(photoUrl)
+                        .diskCachePolicy(CachePolicy.DISABLED)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .networkCachePolicy(CachePolicy.DISABLED)
+                        .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),

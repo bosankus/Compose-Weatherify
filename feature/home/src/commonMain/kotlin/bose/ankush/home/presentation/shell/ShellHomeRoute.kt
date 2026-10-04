@@ -27,6 +27,9 @@ fun ShellHomeRoute(
     val shell by shellViewModel.state.collectAsStateWithLifecycle()
     val placeName = rememberPlaceName(home)
 
+    LaunchedEffect(Unit) {
+        shellViewModel.refreshAccount()
+    }
     LaunchedEffect(home.userLocation) {
         val location = home.userLocation ?: return@LaunchedEffect
         shellViewModel.onIntent(ShellIntent.LocationUpdated(location.first, location.second))

@@ -3,6 +3,7 @@ package bose.ankush.network.api
 import bose.ankush.network.auth.interceptor.authorizedRequest
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.model.Account
+import bose.ankush.network.model.AccountPhoto
 import bose.ankush.network.model.ApiResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -17,5 +18,11 @@ class KtorAccountApiService(
         httpClient
             .authorizedRequest(tokenManager) { authConfig ->
                 get("$baseUrl/account") { authConfig() }
+            }.body()
+
+    override suspend fun getAccountPhoto(): ApiResponse<AccountPhoto> =
+        httpClient
+            .authorizedRequest(tokenManager) { authConfig ->
+                get("$baseUrl/account/photo") { authConfig() }
             }.body()
 }
