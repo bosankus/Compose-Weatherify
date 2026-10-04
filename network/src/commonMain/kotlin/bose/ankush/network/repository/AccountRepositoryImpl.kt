@@ -19,4 +19,17 @@ class AccountRepositoryImpl(
         } catch (e: Exception) {
             Result.failure(e)
         }
+
+    @Suppress("TooGenericExceptionCaught")
+    override suspend fun getAccountPhotoUrl(): Result<String?> =
+        try {
+            val response = apiService.getAccountPhoto()
+            if (response.status) {
+                Result.success(response.data?.photoUrl?.takeIf { it.isNotBlank() })
+            } else {
+                Result.failure(Exception(response.message))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
 }
