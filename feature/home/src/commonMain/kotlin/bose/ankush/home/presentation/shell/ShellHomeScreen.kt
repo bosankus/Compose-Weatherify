@@ -29,9 +29,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Dehaze
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.Thunderstorm
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +53,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -131,20 +140,6 @@ private fun HomeColumn(
                 onAccount = { actions.onIntent(ShellIntent.OpenAccount) },
                 onRetryForecast = actions.onRetryForecast,
             )
-            if (liveForecast != null) {
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    text = liveForecast.conditionLine,
-                    color = Ink,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MetricLine(label = "Real feel", value = liveForecast.feel)
-                    MetricLine(label = "Wind", value = liveForecast.wind)
-                    MetricLine(label = "UV", value = liveForecast.uv)
-                }
-            }
             Spacer(modifier = Modifier.height(28.dp))
             CalendarBlock(
                 days = forecast?.days.orEmpty(),
@@ -261,7 +256,55 @@ private fun ForecastTitle(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+            WeatherFacts(forecast)
         }
+    }
+}
+
+@Composable
+private fun WeatherFacts(forecast: ShellForecast) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        forecast.sky?.let { sky ->
+            Icon(
+                imageVector = skyIcon(sky),
+                contentDescription = forecast.conditionLine,
+                tint = Ink,
+                modifier = Modifier.size(28.dp),
+            )
+        }
+        MetricIcon(icon = Icons.Filled.Thermostat, description = "Real feel", value = forecast.feel)
+        MetricIcon(icon = Icons.Filled.Air, description = "Wind", value = forecast.wind)
+        MetricIcon(icon = Icons.Filled.WbSunny, description = "UV", value = forecast.uv)
+    }
+}
+
+private fun skyIcon(sky: ShellSky): ImageVector =
+    when (sky) {
+        ShellSky.Clear -> Icons.Filled.WbSunny
+        ShellSky.Clouds -> Icons.Filled.Cloud
+        ShellSky.Rain -> Icons.Filled.WaterDrop
+        ShellSky.Snow -> Icons.Filled.AcUnit
+        ShellSky.Thunderstorm -> Icons.Filled.Thunderstorm
+        ShellSky.Mist -> Icons.Filled.Dehaze
+    }
+
+@Composable
+private fun MetricIcon(
+    icon: ImageVector,
+    description: String,
+    value: String,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = description,
+            tint = Muted,
+            modifier = Modifier.size(20.dp),
+        )
+        Text(text = value, color = Muted, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -355,14 +398,6 @@ private fun SectionHold(
                 ).padding(top = 4.dp),
         )
     }
-}
-
-@Composable
-private fun MetricLine(
-    label: String,
-    value: String,
-) {
-    Text(text = "$label: $value", color = Muted, style = MaterialTheme.typography.bodyMedium)
 }
 
 @Composable

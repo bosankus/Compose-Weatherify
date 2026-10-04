@@ -30,11 +30,25 @@ internal data class ShellForecast(
     val temperature: String,
     val place: String,
     val conditionLine: String,
+    val sky: ShellSky?,
     val feel: String,
     val wind: String,
     val uv: String,
     val days: List<ShellDay>,
 )
+
+/**
+ * Coarse sky used only to pick an icon. Null when the forecast names nothing we can map.
+ * No condition is invented for an empty or unrecognized report.
+ */
+internal enum class ShellSky {
+    Clear,
+    Clouds,
+    Rain,
+    Snow,
+    Thunderstorm,
+    Mist,
+}
 
 /**
  * "Closely" was not given a radius. One kilometre is an assumption, the same order of
@@ -70,6 +84,7 @@ internal fun WeatherForecast.toShellForecast(
         temperature = tempLabel ?: if (placeLabel == null) MISSING else "",
         place = placeLabel.orEmpty(),
         conditionLine = conditionLine(now),
+        sky = shellSky(now),
         feel = now?.feels_like?.let { "${it.toCelsius()}°" } ?: MISSING,
         wind = now?.wind_speed?.let { "$it m/s" } ?: MISSING,
         uv = now?.uvi?.let { it.toString() } ?: MISSING,
@@ -83,6 +98,23 @@ private fun conditionLine(now: WeatherForecast.Current?): String {
         weather?.description?.takeIf { it.isNotBlank() }
             ?: weather?.main?.takeIf { it.isNotBlank() }
     return words?.let { "It's ${it.lowercase()}" } ?: MISSING
+}
+
+/** Thunder before rain, snow before rain, so mixed phrases keep the stronger sky. */
+internal fun shellSky(now: WeatherForecast.Current?): ShellSky? {
+    val weather = now?.weather?.firstOrNull() ?: return null
+    val text = "${weather.main} ${weather.description}".lowercase()
+    if (text.isBlank()) return null
+    return when {
+        "thunder" in text -> ShellSky.Thunderstorm
+        "snow" in text || "sleet" in text -> ShellSky.Snow
+        "drizzle" in text || "rain" in text -> ShellSky.Rain
+        "clear" in text -> ShellSky.Clear
+        "cloud" in text -> ShellSky.Clouds
+        "mist" in text || "fog" in text || "haze" in text || "smoke" in text ||
+            "dust" in text || "sand" in text || "ash" in text -> ShellSky.Mist
+        else -> null
+    }
 }
 
 private fun List<WeatherForecast.Daily?>?.toShellDays(today: LocalDate): List<ShellDay> {
