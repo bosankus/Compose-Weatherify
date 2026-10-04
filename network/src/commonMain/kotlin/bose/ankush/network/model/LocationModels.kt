@@ -15,6 +15,9 @@ data class SavedLocation(
     val lat: Double = 0.0,
     val lon: Double = 0.0,
     val createdAt: String = "",
+    val city: String = "",
+    val state: String = "",
+    val country: String = "",
 )
 
 /**

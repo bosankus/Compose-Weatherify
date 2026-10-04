@@ -1,13 +1,17 @@
 package bose.ankush.network.di
 
+import bose.ankush.network.api.AccountApiService
 import bose.ankush.network.api.FeedbackApiService
+import bose.ankush.network.api.KtorAccountApiService
 import bose.ankush.network.api.KtorFeedbackApiService
 import bose.ankush.network.api.KtorLocationApiService
 import bose.ankush.network.api.KtorPaymentApiService
+import bose.ankush.network.api.KtorPlaceEventApiService
 import bose.ankush.network.api.KtorServiceApiService
 import bose.ankush.network.api.KtorWeatherApiService
 import bose.ankush.network.api.LocationApiService
 import bose.ankush.network.api.PaymentApiService
+import bose.ankush.network.api.PlaceEventApiService
 import bose.ankush.network.api.ServiceApiService
 import bose.ankush.network.api.WeatherApiService
 import bose.ankush.network.auth.api.AuthApiService
@@ -15,10 +19,14 @@ import bose.ankush.network.auth.api.KtorAuthApiService
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.network.auth.repository.AuthRepositoryImpl
 import bose.ankush.network.auth.token.TokenManager
+import bose.ankush.network.repository.AccountRepository
+import bose.ankush.network.repository.AccountRepositoryImpl
 import bose.ankush.network.repository.FeedbackRepository
 import bose.ankush.network.repository.FeedbackRepositoryImpl
 import bose.ankush.network.repository.LocationRepository
 import bose.ankush.network.repository.LocationRepositoryImpl
+import bose.ankush.network.repository.PlaceEventRepository
+import bose.ankush.network.repository.PlaceEventRepositoryImpl
 import bose.ankush.network.repository.ServiceRepository
 import bose.ankush.network.repository.ServiceRepositoryImpl
 import bose.ankush.network.repository.WeatherRemoteSource
@@ -62,6 +70,22 @@ actual val networkDomainModule: Module =
             )
         }
         single<LocationRepository> { LocationRepositoryImpl(get()) }
+        single<AccountApiService> {
+            KtorAccountApiService(
+                get(),
+                get(),
+                NetworkConstants.WEATHER_BASE_URL,
+            )
+        }
+        single<AccountRepository> { AccountRepositoryImpl(get()) }
+        single<PlaceEventApiService> {
+            KtorPlaceEventApiService(
+                get(),
+                get(),
+                NetworkConstants.WEATHER_BASE_URL,
+            )
+        }
+        single<PlaceEventRepository> { PlaceEventRepositoryImpl(get()) }
         single<ServiceApiService> {
             KtorServiceApiService(
                 get(),
