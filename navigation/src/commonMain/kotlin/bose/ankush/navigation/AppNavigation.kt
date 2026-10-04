@@ -17,6 +17,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation3.runtime.entryProvider
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
+import bose.ankush.analytics.ErrorReporter
 import bose.ankush.auth.presentation.AuthIntent
 import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
@@ -62,6 +63,7 @@ fun AppNavigation(
     val lifecycleOwner = LocalLifecycleOwner.current
     val homeLocationCoordinator = koinInject<HomeLocationCoordinator>()
     val analyticsTracker = koinInject<AnalyticsTracker>()
+    val errorReporter = koinInject<ErrorReporter>()
     val coroutineScope = rememberCoroutineScope()
 
     var hasLocationPermission by remember { mutableStateOf(platformPermissions.hasLocationPermission()) }
@@ -177,7 +179,7 @@ fun AppNavigation(
             navigationState.toEntries(
                 entryProvider {
                     entry<HomeRoute> {
-                        TrackedScreen("home", "HomeScreen", analyticsTracker)
+                        TrackedScreen("home", "HomeScreen", analyticsTracker, errorReporter)
                         ExitAppOnBackPress()
                         HomeFeatureRoute(
                             bottomBar = {
@@ -204,7 +206,7 @@ fun AppNavigation(
                         )
                     }
                     entry<SavedLocationsRoute> {
-                        TrackedScreen("saved_locations", "SavedLocationsScreen", analyticsTracker)
+                        TrackedScreen("saved_locations", "SavedLocationsScreen", analyticsTracker, errorReporter)
                         SavedLocationsFinderRoute(
                             onLocationSelected = { lat, lon, name ->
                                 coroutineScope.launch {
@@ -222,7 +224,7 @@ fun AppNavigation(
                         )
                     }
                     entry<SettingsRoute> {
-                        TrackedScreen("settings", "SettingsScreen", analyticsTracker)
+                        TrackedScreen("settings", "SettingsScreen", analyticsTracker, errorReporter)
                         SettingsEntry(
                             authViewModel,
                             paymentViewModel,
@@ -239,7 +241,7 @@ fun AppNavigation(
                         )
                     }
                     entry<LanguageRoute> { route ->
-                        TrackedScreen("language", "LanguageScreen", analyticsTracker)
+                        TrackedScreen("language", "LanguageScreen", analyticsTracker, errorReporter)
                         LanguageScreen(languages = route.languages) { navigator.goBack() }
                     }
                 },
@@ -256,9 +258,11 @@ private fun TrackedScreen(
     screenName: String,
     screenClass: String,
     tracker: AnalyticsTracker,
+    errorReporter: ErrorReporter,
 ) {
     LaunchedEffect(Unit) {
         tracker.track(AnalyticsEvent.ScreenView(screenName, screenClass))
+        errorReporter.log("screen: $screenName")
     }
 }
 

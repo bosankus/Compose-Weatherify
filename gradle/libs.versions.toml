@@ -18,8 +18,8 @@ cmp-materialIconsExtended = "1.7.3"
 # Gradle plugins
 agp = "9.3.1"
 secretsPlugin = "2.0.1"
-benManesVersions = "0.58.0"
-spotless = "8.9.0"
+benManesVersions = "0.64.0"
+spotless = "8.10.2"
 ksp = "2.3.9"
 ktlintGradle = "14.2.0"
 ktlintCli = "1.7.1"
@@ -34,7 +34,7 @@ mockk = "1.14.11"
 
 # AndroidX core
 androidxCore = "1.19.0"
-appCompat = "1.7.1"
+appCompat = "1.8.0"
 androidMaterial = "1.14.0"
 lifecycle = "2.11.0"
 googlePlayCore = "2.1.0"
@@ -46,14 +46,14 @@ securityCrypto = "1.1.0"
 activityCompose = "1.13.0"
 
 # Room
-room = "2.8.4"
+room = "2.8.5"
 sqlite = "2.6.2"
 
 # Networking
 gson = "2.14.0"
 
 # Firebase
-firebaseBom = "34.17.0"
+firebaseBom = "34.19.0"
 
 # Coroutines (also covers kotlinx-coroutines-test)
 coroutines = "1.11.0"
@@ -66,12 +66,12 @@ hilt = "2.60.1"
 hiltCompose = "1.4.0"
 
 # Navigation 3
-nav3 = "1.1.5"
+nav3 = "1.1.7"
 lifecycleViewmodelNav3 = "2.11.0"
 
 # Miscellaneous
 timber = "5.0.1"
-coilKmp = "3.5.0"
+coilKmp = "3.6.3"
 
 # Memory leak
 leakCanary = "2.14"
@@ -100,7 +100,7 @@ koin = "4.2.2"
 kmpLifecycleViewModel = "2.11.0"
 
 # KMP — Okio (file paths for multiplatform DataStore)
-okio = "3.18.1"
+okio = "3.18.2"
 
 [libraries]
 # buildSrc convention-plugin dependencies (applied by Gradle-plugin-id, not version catalog alias,
