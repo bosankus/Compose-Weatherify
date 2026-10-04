@@ -1,60 +1,85 @@
 package bose.ankush.home.presentation.wander
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import bose.ankush.commonui.theme.ToastOnWarning
+import bose.ankush.commonui.theme.WarningYellow
+
+private val cards =
+    listOf(
+        "16 Top beautiful trails nearby",
+        "5 Personalized activity recommendations",
+    )
 
 @Composable
 fun WanderSmallCards(modifier: Modifier = Modifier) {
-    Row(modifier = modifier.fillMaxWidth()) {
-        SmallCard(
-            title = "Sunrise",
-            value = "6:30 AM",
-            modifier = Modifier.weight(1f).padding(end = 6.dp),
-        )
-        SmallCard(
-            title = "Sunset",
-            value = "9:00 PM",
-            modifier = Modifier.weight(1f).padding(start = 6.dp),
-        )
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        cards.forEach { title ->
+            SmallCard(title = title, modifier = Modifier.weight(1f))
+        }
     }
 }
 
 @Composable
 private fun SmallCard(
     title: String,
-    value: String,
     modifier: Modifier = Modifier,
 ) {
     Column(
         modifier =
             modifier
                 .background(cardFill, RoundedCornerShape(20.dp))
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 14.dp, vertical = 14.dp),
     ) {
         Text(
             text = title,
-            color = cardLabel,
-            fontSize = 12.sp,
-        )
-        Text(
-            text = value,
             color = Color.White,
-            fontSize = 18.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
+            lineHeight = 18.sp,
         )
+        Spacer(modifier = Modifier.height(14.dp))
+        Box(
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(WarningYellow),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = ToastOnWarning,
+            )
+        }
     }
 }
 
-private val cardFill = Color.White.copy(alpha = 0.14f)
-private val cardLabel = Color.White.copy(alpha = 0.7f)
+private val cardFill = Color.Black.copy(alpha = 0.38f)
