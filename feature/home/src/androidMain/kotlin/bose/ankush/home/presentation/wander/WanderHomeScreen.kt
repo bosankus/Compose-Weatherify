@@ -38,16 +38,18 @@ import bose.ankush.home.domain.location.HomeGeocoder
 import bose.ankush.home.presentation.HomeIntent
 import bose.ankush.home.presentation.HomeState
 import bose.ankush.home.presentation.HomeViewModel
+import bose.ankush.home.presentation.shell.ShellCreateDialog
 import bose.ankush.home.presentation.shell.ShellIntent
 import bose.ankush.home.presentation.shell.ShellViewModel
+import bose.ankush.home.presentation.shell.canSubmitEvent
 import bose.ankush.home.presentation.state.ShowLoading
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Android Wander home. Home is this shell, bound to the forecast already loaded
- * by [HomeViewModel]. Weather is that same forecast. Map is saved places.
- * Hub pushes Settings so back returns here. There is no travel tab.
+ * by [HomeViewModel]. Alerts, air quality, and the hourly list sit on this column.
+ * Map is saved places. Hub pushes Settings so back returns here. There is no weather tab.
  */
 @Composable
 fun WanderHomeScreen(
@@ -55,6 +57,8 @@ fun WanderHomeScreen(
     shell: WanderShell,
     modifier: Modifier = Modifier,
     nearby: WanderNearby = WanderNearby(),
+    onOpenCalendar: () -> Unit = {},
+    forecast: WanderForecastDetails = WanderForecastDetails(),
 ) {
     var selectedTabName by rememberSaveable { mutableStateOf(WanderTab.HOME.name) }
     val selectedTab = WanderTab.entries.firstOrNull { it.name == selectedTabName } ?: WanderTab.HOME
@@ -82,6 +86,8 @@ fun WanderHomeScreen(
                     selectedTab = selectedTab,
                     onTab = onTab,
                     nearby = nearby,
+                    onOpenCalendar = onOpenCalendar,
+                    forecast = forecast,
                     modifier = modifier,
                 )
         }
@@ -89,9 +95,8 @@ fun WanderHomeScreen(
         Column(modifier = modifier.fillMaxSize()) {
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                 when (selectedTab) {
-                    WanderTab.WEATHER -> links.weather()
                     WanderTab.MAP -> links.places()
-                    else -> Unit
+                    WanderTab.HOME, WanderTab.HUB -> Unit
                 }
             }
             WanderTabBar(
@@ -109,6 +114,8 @@ private fun WanderHomePage(
     selectedTab: WanderTab,
     onTab: (WanderTab) -> Unit,
     nearby: WanderNearby,
+    onOpenCalendar: () -> Unit,
+    forecast: WanderForecastDetails,
     modifier: Modifier = Modifier,
 ) {
     val content = ready.content
@@ -149,8 +156,13 @@ private fun WanderHomePage(
                 )
                 if (content.days.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(20.dp))
-                    WanderCalendarStrip(days = content.days, contentColor = contentColor)
+                    WanderCalendarStrip(
+                        days = content.days,
+                        onOpen = onOpenCalendar,
+                        contentColor = contentColor,
+                    )
                 }
+                WanderForecastDetails(details = forecast, contentColor = contentColor)
                 ready.leaveBy?.let { leaveBy ->
                     Spacer(modifier = Modifier.height(16.dp))
                     WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
@@ -343,12 +355,32 @@ fun WanderHomeRoute(
         } else {
             WanderShell.Ready(content = content, photo = photo, leaveBy = leaveBy)
         }
-    WanderHomeScreen(
-        links = links,
-        shell = shell,
-        modifier = modifier,
-        nearby = shellState.toWanderNearby(onOpenAccount = links.onOpenHub),
-    )
+    val placeName = state.activeLocationName?.takeIf { it.isNotBlank() } ?: place.takeIf { it != CURRENT_LOCATION }
+    LaunchedEffect(placeName) {
+        if (!placeName.isNullOrBlank()) {
+            shellViewModel.onIntent(ShellIntent.PlaceNameUpdated(placeName))
+        }
+    }
+    Box(modifier = modifier) {
+        WanderHomeScreen(
+            links = links,
+            shell = shell,
+            nearby = shellState.toWanderNearby(onOpenAccount = links.onOpenHub),
+            onOpenCalendar = { shellViewModel.onIntent(ShellIntent.OpenCreate) },
+            forecast =
+                WanderForecastDetails(
+                    alerts = state.weatherData?.alerts.orEmpty(),
+                    airQuality = state.airQualityData,
+                    hourly = state.weatherData?.hourly.orEmpty(),
+                ),
+        )
+        ShellCreateDialog(
+            state = shellState,
+            canSave = canSubmitEvent(shellState),
+            onIntent = shellViewModel::onIntent,
+            onSave = shellViewModel::submitCreate,
+        )
+    }
 }
 
 /** Same resolver as the forecast header: reverse-geocode the loaded coordinates. */

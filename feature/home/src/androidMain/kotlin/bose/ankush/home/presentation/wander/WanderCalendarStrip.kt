@@ -1,6 +1,7 @@
 package bose.ankush.home.presentation.wander
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -24,6 +28,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun WanderCalendarStrip(
     days: List<WanderCalendarDay>,
+    onOpen: () -> Unit,
     modifier: Modifier = Modifier,
     contentColor: Color = WanderOnDark,
 ) {
@@ -34,6 +39,10 @@ fun WanderCalendarStrip(
             color = contentColor,
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium,
+            modifier =
+                Modifier
+                    .semantics { contentDescription = ADD_EVENT }
+                    .clickable(role = Role.Button, onClick = onOpen),
         )
         Spacer(modifier = Modifier.height(12.dp))
         Row(
@@ -45,7 +54,7 @@ fun WanderCalendarStrip(
             verticalAlignment = Alignment.Top,
         ) {
             days.forEach { day ->
-                DayCell(day = day, contentColor = contentColor)
+                DayCell(day = day, contentColor = contentColor, onOpen = onOpen)
             }
         }
     }
@@ -55,8 +64,15 @@ fun WanderCalendarStrip(
 private fun DayCell(
     day: WanderCalendarDay,
     contentColor: Color,
+    onOpen: () -> Unit,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier =
+            Modifier
+                .semantics { contentDescription = day.eventDescription() }
+                .clickable(role = Role.Button, onClick = onOpen),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         Text(
             text = day.label,
             color = contentColor,
@@ -89,3 +105,14 @@ private fun DayCell(
         }
     }
 }
+
+private fun WanderCalendarDay.eventDescription(): String {
+    val whenLabel = "$label $date"
+    return if (temp.isEmpty()) {
+        "$ADD_EVENT, $whenLabel"
+    } else {
+        "$ADD_EVENT, $whenLabel, $temp"
+    }
+}
+
+private const val ADD_EVENT = "Add event"
