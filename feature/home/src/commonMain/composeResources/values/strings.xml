@@ -25,4 +25,12 @@
     <string name="enable_notification_btn">Enable</string>
     <string name="location_override_reset_btn">Reset to GPS</string>
     <string name="location_override_chip_content_desc">Currently showing weather for %1$s. Tap to reset to GPS.</string>
+    <string name="leave_by_title">Rain on your way home?</string>
+    <string name="leave_by_body">We’ll tell you whether to leave now or wait. This is a test, not a forecast yet.</string>
+    <string name="leave_by_primary">Notify me when to leave</string>
+    <string name="leave_by_dismiss">Not now</string>
+    <string name="leave_by_misleading">was this misleading?</string>
+    <string name="leave_by_joined_confirmation">You’re on the list.</string>
+    <string name="leave_by_misleading_noted">Thanks. Noted locally.</string>
+    <string name="leave_by_icon_content_desc">Rain</string>
 </resources>

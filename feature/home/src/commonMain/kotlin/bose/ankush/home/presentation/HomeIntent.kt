@@ -21,4 +21,12 @@ internal sealed interface HomeIntent {
         val isGranted: Boolean,
         val isPermanentlyDeclined: Boolean,
     ) : HomeIntent
+
+    data object RefreshLeaveByEligibility : HomeIntent
+
+    data object JoinLeaveByList : HomeIntent
+
+    data object DismissLeaveByCard : HomeIntent
+
+    data object NoteLeaveByMisleading : HomeIntent
 }

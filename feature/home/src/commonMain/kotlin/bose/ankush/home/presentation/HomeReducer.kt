@@ -60,5 +60,15 @@ internal object HomeReducer {
 
             is HomeAction.DismissNotificationBanner ->
                 state.copy(showNotificationBanner = false, isNotificationBannerDismissed = true)
+
+            is HomeAction.UpdateLeaveByCard ->
+                state.copy(showLeaveByCard = action.show && !state.isLeaveByDismissed)
+
+            is HomeAction.DismissLeaveByCard ->
+                state.copy(showLeaveByCard = false, isLeaveByDismissed = true)
+
+            is HomeAction.JoinLeaveByList -> state.copy(hasJoinedLeaveByList = true)
+
+            is HomeAction.NoteLeaveByMisleading -> state.copy(hasNotedLeaveByMisleading = true)
         }
 }

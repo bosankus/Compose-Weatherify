@@ -35,4 +35,14 @@ internal sealed interface HomeAction {
     ) : HomeAction
 
     data object DismissNotificationBanner : HomeAction
+
+    data class UpdateLeaveByCard(
+        val show: Boolean,
+    ) : HomeAction
+
+    data object DismissLeaveByCard : HomeAction
+
+    data object JoinLeaveByList : HomeAction
+
+    data object NoteLeaveByMisleading : HomeAction
 }
