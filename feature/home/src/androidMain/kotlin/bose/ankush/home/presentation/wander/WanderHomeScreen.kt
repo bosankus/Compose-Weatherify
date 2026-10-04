@@ -128,10 +128,6 @@ private fun WanderHomePage(
                 Spacer(modifier = Modifier.height(16.dp))
                 WanderLeaveByRow(leaveBy = leaveBy)
             }
-            if (content.showSmallCards) {
-                Spacer(modifier = Modifier.height(16.dp))
-                WanderSmallCards()
-            }
             if (fogPhoto != null && photoUrl != null) {
                 TrackShownWanderPhoto(fogPhoto)
                 Spacer(modifier = Modifier.height(8.dp))

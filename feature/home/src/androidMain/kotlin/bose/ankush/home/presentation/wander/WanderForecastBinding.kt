@@ -23,7 +23,6 @@ data class WanderHomeContent(
     val wind: String,
     val uv: String,
     val days: List<WanderCalendarDay>,
-    val showSmallCards: Boolean = false,
 )
 
 /**

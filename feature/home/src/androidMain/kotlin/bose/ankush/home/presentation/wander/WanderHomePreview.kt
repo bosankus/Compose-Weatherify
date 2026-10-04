@@ -52,7 +52,6 @@ internal fun WanderHomeScreenPreview() {
                         wind = mock.wind,
                         uv = mock.uv,
                         days = previewDays,
-                        showSmallCards = true,
                     ),
                 fogPhoto = null,
             ),
