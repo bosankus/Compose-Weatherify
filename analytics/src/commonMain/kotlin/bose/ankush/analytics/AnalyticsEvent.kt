@@ -157,23 +157,31 @@ sealed interface AnalyticsEvent {
         override val params get() = emptyMap<String, Any?>()
     }
 
-    data object LeaveByFakeDoorImpression : AnalyticsEvent {
+    data class LeaveByFakeDoorImpression(
+        val surface: String,
+    ) : AnalyticsEvent {
         override val firebaseName = "leave_by_fake_door_impression"
-        override val params get() = emptyMap<String, Any?>()
+        override val params get() = mapOf("surface" to surface)
     }
 
-    data object LeaveByFakeDoorPrimaryTap : AnalyticsEvent {
+    data class LeaveByFakeDoorPrimaryTap(
+        val surface: String,
+    ) : AnalyticsEvent {
         override val firebaseName = "leave_by_fake_door_primary_tap"
-        override val params get() = emptyMap<String, Any?>()
+        override val params get() = mapOf("surface" to surface)
     }
 
-    data object LeaveByFakeDoorDismiss : AnalyticsEvent {
+    data class LeaveByFakeDoorDismiss(
+        val surface: String,
+    ) : AnalyticsEvent {
         override val firebaseName = "leave_by_fake_door_dismiss"
-        override val params get() = emptyMap<String, Any?>()
+        override val params get() = mapOf("surface" to surface)
     }
 
-    data object LeaveByFakeDoorMisleadingTap : AnalyticsEvent {
+    data class LeaveByFakeDoorMisleadingTap(
+        val surface: String,
+    ) : AnalyticsEvent {
         override val firebaseName = "leave_by_fake_door_misleading_tap"
-        override val params get() = emptyMap<String, Any?>()
+        override val params get() = mapOf("surface" to surface)
     }
 }

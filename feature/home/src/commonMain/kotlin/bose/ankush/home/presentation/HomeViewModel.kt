@@ -198,7 +198,7 @@ internal class HomeViewModel(
             return
         }
         if (eligible && !current.showLeaveByCard) {
-            analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorImpression)
+            analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorImpression(surface = LEAVE_BY_SURFACE))
         }
         if (current.showLeaveByCard != eligible) {
             dispatch(HomeAction.UpdateLeaveByCard(show = eligible))
@@ -208,20 +208,20 @@ internal class HomeViewModel(
     private fun joinLeaveByList() {
         val current = _state.value
         if (!current.showLeaveByCard || current.hasJoinedLeaveByList) return
-        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorPrimaryTap)
+        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorPrimaryTap(surface = LEAVE_BY_SURFACE))
         dispatch(HomeAction.JoinLeaveByList)
     }
 
     private fun dismissLeaveByCard() {
         if (!_state.value.showLeaveByCard) return
-        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorDismiss)
+        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorDismiss(surface = LEAVE_BY_SURFACE))
         dispatch(HomeAction.DismissLeaveByCard)
     }
 
     private fun noteLeaveByMisleading() {
         val current = _state.value
         if (!current.showLeaveByCard || current.hasNotedLeaveByMisleading) return
-        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorMisleadingTap)
+        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorMisleadingTap(surface = LEAVE_BY_SURFACE))
         dispatch(HomeAction.NoteLeaveByMisleading)
     }
 
@@ -408,5 +408,10 @@ internal class HomeViewModel(
         viewModelScope.launch(dataFetchExceptionHandler) {
             locationPreferencesStorage.clearLocationOverride()
         }
+    }
+
+    private companion object {
+        /** Wander home is the only surface that shows this card. */
+        const val LEAVE_BY_SURFACE = "wander_home"
     }
 }
