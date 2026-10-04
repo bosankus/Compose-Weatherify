@@ -35,6 +35,7 @@ internal data class ShellState(
     val featuredPlace: SavedLocation? = null,
     val events: ShellSectionStatus = ShellSectionStatus.Loading,
     val eventDates: Set<LocalDate> = emptySet(),
+    val eventSummaries: List<ShellEventSummary> = emptyList(),
     val accountPhoto: ShellSectionStatus = ShellSectionStatus.Loading,
     val photoUrl: String? = null,
     val showCreate: Boolean = false,
@@ -89,6 +90,7 @@ internal sealed interface ShellIntent {
 
     data class EventsLoaded(
         val eventDates: Set<LocalDate>,
+        val summaries: List<ShellEventSummary> = emptyList(),
     ) : ShellIntent
 
     data object EventsFailed : ShellIntent

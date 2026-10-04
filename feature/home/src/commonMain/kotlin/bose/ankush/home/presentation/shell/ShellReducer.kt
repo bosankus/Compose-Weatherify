@@ -23,7 +23,7 @@ internal object ShellReducer {
             is ShellIntent.SavedPlaceLoaded -> savedPlaceLoaded(state, intent.featured)
             ShellIntent.SavedPlaceFailed -> failedSavedPlace(state)
             ShellIntent.MarkEventsLoading -> loadingEvents(state)
-            is ShellIntent.EventsLoaded -> eventsLoaded(state, intent.eventDates)
+            is ShellIntent.EventsLoaded -> eventsLoaded(state, intent.eventDates, intent.summaries)
             ShellIntent.EventsFailed -> failedEvents(state)
             ShellIntent.MarkAccountLoading -> loadingAccount(state)
             is ShellIntent.AccountLoaded -> accountLoaded(state, intent.photoUrl)
@@ -54,6 +54,7 @@ internal object ShellReducer {
                 featuredPlace = null,
                 events = ShellSectionStatus.Loading,
                 eventDates = emptySet(),
+                eventSummaries = emptyList(),
             ),
         )
 
@@ -75,21 +76,35 @@ internal object ShellReducer {
         ShellReduce(state.copy(savedPlace = ShellSectionStatus.Failed, featuredPlace = null))
 
     private fun loadingEvents(state: ShellState): ShellReduce =
-        ShellReduce(state.copy(events = ShellSectionStatus.Loading, eventDates = emptySet()))
+        ShellReduce(
+            state.copy(
+                events = ShellSectionStatus.Loading,
+                eventDates = emptySet(),
+                eventSummaries = emptyList(),
+            ),
+        )
 
     private fun eventsLoaded(
         state: ShellState,
         eventDates: Set<LocalDate>,
+        summaries: List<ShellEventSummary>,
     ): ShellReduce =
         ShellReduce(
             state.copy(
                 eventDates = eventDates,
+                eventSummaries = summaries,
                 events = if (eventDates.isEmpty()) ShellSectionStatus.Empty else ShellSectionStatus.Ready,
             ),
         )
 
     private fun failedEvents(state: ShellState): ShellReduce =
-        ShellReduce(state.copy(events = ShellSectionStatus.Failed, eventDates = emptySet()))
+        ShellReduce(
+            state.copy(
+                events = ShellSectionStatus.Failed,
+                eventDates = emptySet(),
+                eventSummaries = emptyList(),
+            ),
+        )
 
     private fun loadingAccount(state: ShellState): ShellReduce =
         ShellReduce(state.copy(accountPhoto = ShellSectionStatus.Loading, photoUrl = null))

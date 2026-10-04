@@ -24,6 +24,12 @@ internal data class ShellDay(
     val selected: Boolean,
 )
 
+/** A real nearby event. Blank [title] stays blank. The date is never invented. */
+internal data class ShellEventSummary(
+    val title: String,
+    val whenLabel: String,
+)
+
 /** Live forecast fields only. Missing values stay as [MISSING], never a made-up number. */
 internal data class ShellForecast(
     val temperatureLine: String,
@@ -168,6 +174,22 @@ internal fun closestSavedPlace(
  */
 internal fun eventDatesFrom(events: List<PlaceEvent>): Set<LocalDate> =
     events.mapNotNull { eventLocalDate(it.startsAt) }.toSet()
+
+/** Same date rule as [eventDatesFrom]. Titles come from the payload and are not filled in. */
+internal fun eventSummariesFrom(events: List<PlaceEvent>): List<ShellEventSummary> =
+    events.mapNotNull { event ->
+        val date = eventLocalDate(event.startsAt) ?: return@mapNotNull null
+        ShellEventSummary(title = event.title.trim(), whenLabel = nearbyEventWhen(date))
+    }
+
+private fun nearbyEventWhen(date: LocalDate): String {
+    val month =
+        date.month.name
+            .take(DAY_ABBREV)
+            .lowercase()
+            .replaceFirstChar { it.uppercaseChar() }
+    return "${date.day} $month"
+}
 
 internal fun eventLocalDate(startsAt: String): LocalDate? =
     try {

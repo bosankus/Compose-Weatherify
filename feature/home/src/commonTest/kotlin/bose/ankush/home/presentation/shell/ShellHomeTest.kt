@@ -105,6 +105,17 @@ class ShellHomeTest {
             )
         assertEquals(setOf(eventLocalDate(startsAt)), dates)
         assertNotNull(eventLocalDate(startsAt))
+        val summaries =
+            eventSummariesFrom(
+                listOf(
+                    PlaceEvent(startsAt = startsAt, title = "Dinner"),
+                    PlaceEvent(startsAt = "", title = "Broken"),
+                    PlaceEvent(startsAt = startsAt, title = " "),
+                ),
+            )
+        assertEquals(listOf("Dinner", ""), summaries.map { it.title })
+        assertEquals(2, summaries.size)
+        assertTrue(summaries.all { it.whenLabel.isNotBlank() })
     }
 
     @Test
@@ -208,6 +219,7 @@ class ShellHomeTest {
                 featuredPlace = SavedLocation(id = "a", name = "Near", lat = 1.0, lon = 2.0),
                 events = ShellSectionStatus.Ready,
                 eventDates = setOf(LocalDate(2026, 10, 4)),
+                eventSummaries = listOf(ShellEventSummary(title = "Dinner", whenLabel = "4 Oct")),
             )
 
         val reduced = ShellReducer.reduce(start, ShellIntent.LocationUpdated(lat = 3.0, lon = 4.0))
@@ -216,6 +228,7 @@ class ShellHomeTest {
         assertEquals(ShellSectionStatus.Loading, reduced.state.events)
         assertNull(reduced.state.featuredPlace)
         assertTrue(reduced.state.eventDates.isEmpty())
+        assertTrue(reduced.state.eventSummaries.isEmpty())
     }
 
     @Test

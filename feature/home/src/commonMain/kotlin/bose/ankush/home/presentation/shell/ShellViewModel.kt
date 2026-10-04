@@ -156,7 +156,14 @@ internal class ShellViewModel(
                 val result = placeEventRepository.getPlaceEvents(lat, lon)
                 if (token != eventsToken || _state.value.lat != lat || _state.value.lon != lon) return@launch
                 result.fold(
-                    onSuccess = { events -> dispatch(ShellIntent.EventsLoaded(eventDatesFrom(events))) },
+                    onSuccess = { events ->
+                        dispatch(
+                            ShellIntent.EventsLoaded(
+                                eventDates = eventDatesFrom(events),
+                                summaries = eventSummariesFrom(events),
+                            ),
+                        )
+                    },
                     onFailure = { dispatch(ShellIntent.EventsFailed) },
                 )
             }

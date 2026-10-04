@@ -1,7 +1,9 @@
 package bose.ankush.home.presentation.wander
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.LinkAnnotation
@@ -32,6 +38,8 @@ import bose.ankush.home.domain.location.HomeGeocoder
 import bose.ankush.home.presentation.HomeIntent
 import bose.ankush.home.presentation.HomeState
 import bose.ankush.home.presentation.HomeViewModel
+import bose.ankush.home.presentation.shell.ShellIntent
+import bose.ankush.home.presentation.shell.ShellViewModel
 import bose.ankush.home.presentation.state.ShowLoading
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -46,6 +54,7 @@ fun WanderHomeScreen(
     links: WanderHomeLinks,
     shell: WanderShell,
     modifier: Modifier = Modifier,
+    nearby: WanderNearby = WanderNearby(),
 ) {
     var selectedTabName by rememberSaveable { mutableStateOf(WanderTab.HOME.name) }
     val selectedTab = WanderTab.entries.firstOrNull { it.name == selectedTabName } ?: WanderTab.HOME
@@ -64,6 +73,7 @@ fun WanderHomeScreen(
                     waiting = shell,
                     selectedTab = selectedTab,
                     onTab = onTab,
+                    nearby = nearby,
                     modifier = modifier,
                 )
             is WanderShell.Ready ->
@@ -71,6 +81,7 @@ fun WanderHomeScreen(
                     ready = shell,
                     selectedTab = selectedTab,
                     onTab = onTab,
+                    nearby = nearby,
                     modifier = modifier,
                 )
         }
@@ -97,6 +108,7 @@ private fun WanderHomePage(
     ready: WanderShell.Ready,
     selectedTab: WanderTab,
     onTab: (WanderTab) -> Unit,
+    nearby: WanderNearby,
     modifier: Modifier = Modifier,
 ) {
     val content = ready.content
@@ -110,42 +122,64 @@ private fun WanderHomePage(
                 Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 20.dp),
+                    .navigationBarsPadding(),
         ) {
-            Spacer(modifier = Modifier.height(28.dp))
-            WanderTemperatureHeader(
-                temperature = content.temperature,
-                place = content.place,
-                conditionLine = content.condition.line,
-                contentColor = contentColor,
+            Column(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp),
+            ) {
+                Spacer(modifier = Modifier.height(28.dp))
+                WanderHeader(
+                    temperature = content.temperature,
+                    place = content.place,
+                    conditionLine = content.condition.line,
+                    contentColor = contentColor,
+                    nearby = nearby,
+                )
+                Spacer(modifier = Modifier.height(28.dp))
+                WanderMetricChips(
+                    feel = content.feel,
+                    wind = content.wind,
+                    uv = content.uv,
+                    contentColor = contentColor,
+                )
+                if (content.days.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    WanderCalendarStrip(days = content.days, contentColor = contentColor)
+                }
+                ready.leaveBy?.let { leaveBy ->
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
+                }
+                if (content.showSmallCards) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WanderSmallCards(contentColor = contentColor)
+                }
+                if (nearby.eventsLoading || nearby.events.isNotEmpty() || nearby.savedPlace != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WanderNearbyBlocks(
+                        nearby = nearby,
+                        contentColor = contentColor,
+                        onOpenSaved = { onTab(WanderTab.MAP) },
+                    )
+                }
+                if (photo != null && photoUrl != null) {
+                    TrackShownWanderPhoto(photo)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    UnsplashCredit(photo = photo, contentColor = contentColor)
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            WanderTabBar(
+                selected = selectedTab,
+                onSelected = onTab,
+                inactiveTint = contentColor,
+                modifier = Modifier.padding(horizontal = 20.dp),
             )
-            Spacer(modifier = Modifier.height(28.dp))
-            WanderMetricChips(
-                feel = content.feel,
-                wind = content.wind,
-                uv = content.uv,
-                contentColor = contentColor,
-            )
-            if (content.days.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(20.dp))
-                WanderCalendarStrip(days = content.days, contentColor = contentColor)
-            }
-            ready.leaveBy?.let { leaveBy ->
-                Spacer(modifier = Modifier.height(16.dp))
-                WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
-            }
-            if (content.showSmallCards) {
-                Spacer(modifier = Modifier.height(16.dp))
-                WanderSmallCards(contentColor = contentColor)
-            }
-            if (photo != null && photoUrl != null) {
-                TrackShownWanderPhoto(photo)
-                Spacer(modifier = Modifier.height(8.dp))
-                UnsplashCredit(photo = photo, contentColor = contentColor)
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            WanderTabBar(selected = selectedTab, onSelected = onTab, inactiveTint = contentColor)
             Spacer(modifier = Modifier.height(12.dp))
         }
     }
@@ -156,6 +190,7 @@ private fun WanderWaitingPage(
     waiting: WanderShell.Waiting,
     selectedTab: WanderTab,
     onTab: (WanderTab) -> Unit,
+    nearby: WanderNearby,
     modifier: Modifier = Modifier,
 ) {
     val contentColor = rememberWanderContentColor(WanderCondition.CLOUDS, photoUrl = null)
@@ -166,22 +201,74 @@ private fun WanderWaitingPage(
                 Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 20.dp),
+                    .navigationBarsPadding(),
         ) {
-            Spacer(modifier = Modifier.height(28.dp))
-            if (waiting.loading) {
-                ShowLoading(modifier = Modifier.fillMaxWidth())
-            } else if (!waiting.statusMessage.isNullOrBlank()) {
-                Text(text = waiting.statusMessage, color = contentColor, fontSize = 18.sp)
+            Column(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 20.dp),
+            ) {
+                Spacer(modifier = Modifier.height(28.dp))
+                if (nearby.showAccount) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        WanderAccountMark(photoUrl = nearby.photoUrl, onOpen = nearby.onOpenAccount)
+                    }
+                }
+                if (waiting.loading) {
+                    ShowLoading(modifier = Modifier.fillMaxWidth())
+                } else if (!waiting.statusMessage.isNullOrBlank()) {
+                    Text(text = waiting.statusMessage, color = contentColor, fontSize = 18.sp)
+                }
+                waiting.leaveBy?.let { leaveBy ->
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
+                }
+                if (nearby.eventsLoading || nearby.events.isNotEmpty() || nearby.savedPlace != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WanderNearbyBlocks(
+                        nearby = nearby,
+                        contentColor = contentColor,
+                        onOpenSaved = { onTab(WanderTab.MAP) },
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
             }
-            waiting.leaveBy?.let { leaveBy ->
-                Spacer(modifier = Modifier.height(16.dp))
-                WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            WanderTabBar(selected = selectedTab, onSelected = onTab, inactiveTint = contentColor)
+            WanderTabBar(
+                selected = selectedTab,
+                onSelected = onTab,
+                inactiveTint = contentColor,
+                modifier = Modifier.padding(horizontal = 20.dp),
+            )
             Spacer(modifier = Modifier.height(12.dp))
+        }
+    }
+}
+
+@Composable
+private fun WanderHeader(
+    temperature: String,
+    place: String,
+    conditionLine: String,
+    contentColor: Color,
+    nearby: WanderNearby,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top,
+    ) {
+        WanderTemperatureHeader(
+            temperature = temperature,
+            place = place,
+            conditionLine = conditionLine,
+            contentColor = contentColor,
+            modifier = Modifier.weight(1f),
+        )
+        if (nearby.showAccount) {
+            Spacer(modifier = Modifier.width(12.dp))
+            WanderAccountMark(photoUrl = nearby.photoUrl, onOpen = nearby.onOpenAccount)
         }
     }
 }
@@ -225,7 +312,16 @@ fun WanderHomeRoute(
     modifier: Modifier = Modifier,
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
+    val shellViewModel = koinViewModel<ShellViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val shellState by shellViewModel.state.collectAsStateWithLifecycle()
+    LaunchedEffect(Unit) {
+        shellViewModel.refreshAccount()
+    }
+    LaunchedEffect(state.userLocation) {
+        val location = state.userLocation ?: return@LaunchedEffect
+        shellViewModel.onIntent(ShellIntent.LocationUpdated(location.first, location.second))
+    }
     val current = state.weatherData?.current
     val place = rememberForecastPlace(state.userLocation)
     val weatherMain =
@@ -251,6 +347,7 @@ fun WanderHomeRoute(
         links = links,
         shell = shell,
         modifier = modifier,
+        nearby = shellState.toWanderNearby(onOpenAccount = links.onOpenHub),
     )
 }
 
