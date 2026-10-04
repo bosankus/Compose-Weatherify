@@ -33,7 +33,7 @@ truth = "1.4.5"
 mockk = "1.14.11"
 
 # AndroidX core
-androidxCore = "1.19.0"
+androidxCore = "1.19.1"
 appCompat = "1.8.0"
 androidMaterial = "1.14.0"
 lifecycle = "2.11.0"
