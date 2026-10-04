@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -40,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -50,12 +52,15 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import bose.ankush.home.generated.resources.Res
+import bose.ankush.home.generated.resources.default_avatar
 import bose.ankush.network.model.SavedLocation
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * Type sizes come from [MaterialTheme.typography] so each line keeps that style's line height.
@@ -125,7 +130,6 @@ private fun HomeColumn(
                 photoUrl = state.photoUrl,
                 onAccount = { actions.onIntent(ShellIntent.OpenAccount) },
                 onRetryForecast = actions.onRetryForecast,
-                onRetryAccount = actions.onRetryAccount,
             )
             if (liveForecast != null) {
                 Spacer(modifier = Modifier.height(20.dp))
@@ -179,10 +183,9 @@ private fun Header(
     photoUrl: String?,
     onAccount: () -> Unit,
     onRetryForecast: () -> Unit,
-    onRetryAccount: () -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val sideBySide = maxWidth >= PhotoWidth + HeaderGap + MinTitleWidth
+        val sideBySide = maxWidth >= PhotoSize + HeaderGap + MinTitleWidth
         if (sideBySide) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -199,7 +202,6 @@ private fun Header(
                     status = photoStatus,
                     photoUrl = photoUrl,
                     onAccount = onAccount,
-                    onRetry = onRetryAccount,
                 )
             }
         } else {
@@ -218,7 +220,6 @@ private fun Header(
                         status = photoStatus,
                         photoUrl = photoUrl,
                         onAccount = onAccount,
-                        onRetry = onRetryAccount,
                     )
                 }
             }
@@ -276,15 +277,15 @@ private fun AccountPhoto(
     status: ShellSectionStatus,
     photoUrl: String?,
     onAccount: () -> Unit,
-    onRetry: () -> Unit,
 ) {
     val hasPhoto = status == ShellSectionStatus.Ready && !photoUrl.isNullOrBlank()
-    val shown = if (status == ShellSectionStatus.Ready && !hasPhoto) ShellSectionStatus.Empty else status
+    val avatarPainter = painterResource(Res.drawable.default_avatar)
     Box(
         modifier =
             Modifier
-                .size(width = PhotoWidth, height = PhotoHeight)
-                .clip(PhotoShape)
+                .size(PhotoSize)
+                .shadow(elevation = 4.dp, shape = CircleShape)
+                .clip(CircleShape)
                 .background(DayFill)
                 .semantics {
                     role = Role.Button
@@ -302,29 +303,18 @@ private fun AccountPhoto(
                         .memoryCachePolicy(CachePolicy.ENABLED)
                         .networkCachePolicy(CachePolicy.DISABLED)
                         .build(),
+                placeholder = avatarPainter,
+                error = avatarPainter,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize().clip(PhotoShape),
+                modifier = Modifier.fillMaxSize(),
             )
         } else {
-            Text(
-                text = checkNotNull(placeholderMessage(ShellSectionKind.Photo, shown)),
-                color = Ink,
-                style = MaterialTheme.typography.bodySmall,
-                modifier =
-                    Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
-            )
-        }
-        IconButton(
-            onClick = onRetry,
-            modifier = Modifier.align(Alignment.TopEnd),
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Refresh,
-                contentDescription = retryContentDescription(ShellSectionKind.Photo),
-                tint = PlusYellow,
+            Image(
+                painter = avatarPainter,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
             )
         }
     }
@@ -656,9 +646,7 @@ private fun SavedPlaceCard(
 private val ScreenHorizontal = 24.dp
 private val HeaderGap = 16.dp
 private val MinTitleWidth = 160.dp
-private val PhotoWidth = 128.dp
-private val PhotoHeight = 168.dp
-private val PhotoShape = RoundedCornerShape(16.dp)
+private val PhotoSize = 56.dp
 private val GradientTop = Color(0xFF3A342C)
 private val GradientBottom = Color(0xFF14161C)
 private val PlusYellow = Color(0xFFF5C400)
