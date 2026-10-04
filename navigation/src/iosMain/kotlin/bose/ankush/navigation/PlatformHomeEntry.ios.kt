@@ -7,7 +7,6 @@ actual fun PlatformHomeEntry(
     weather: @Composable () -> Unit,
     places: @Composable () -> Unit,
     onOpenHub: () -> Unit,
-    onOpenTravel: () -> Unit,
 ) {
     weather()
 }

@@ -209,8 +209,6 @@ fun AppNavigation(
                                 )
                             },
                             onOpenHub = { navigator.navigate(SettingsRoute) },
-                            // No travel screen exists. Do not invent one.
-                            onOpenTravel = {},
                         )
                     }
                     entry<SavedLocationsRoute> {
