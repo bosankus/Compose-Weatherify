@@ -11,10 +11,12 @@ import bose.ankush.home.di.homeDomainModule
 import bose.ankush.home.di.homePlatformModule
 import bose.ankush.home.di.homeViewModelModule
 import bose.ankush.network.di.networkDomainModule
+import bose.ankush.network.di.unsplashKoinModule
 import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
 import bose.ankush.settings.di.settingsViewModelModule
 import bose.ankush.storage.di.storageDomainModule
+import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.base.logging.CrashlyticsTree
 import bose.ankush.weatherify.di.appNotificationKoinModule
 import bose.ankush.weatherify.di.appPaymentKoinModule
@@ -87,6 +89,7 @@ class WeatherifyApplication : Application() {
                     paymentDomainModule,
                     paymentViewModelModule,
                     appPaymentKoinModule,
+                    unsplashKoinModule(BuildConfig.UNSPLASH_ACCESS_KEY),
                     appNotificationKoinModule,
                     authViewModelModule,
                     authDomainModule,
