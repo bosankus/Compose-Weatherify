@@ -41,7 +41,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
+import kotlin.time.Clock
 
 /**
  * Home's MVI ViewModel. Reactively observes [LocationPreferencesStorage] for location-override
@@ -176,7 +179,8 @@ internal class HomeViewModel(
                             .getOrNull()
                             ?.map { LeaveByPlace(lat = it.lat, lon = it.lon) }
                             .orEmpty()
-                    publishLeaveBy(LeaveByFakeDoorEligibility.isEligible(places))
+                    val localNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                    publishLeaveBy(LeaveByFakeDoorEligibility.isEligible(places, localNow))
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (_: Exception) {

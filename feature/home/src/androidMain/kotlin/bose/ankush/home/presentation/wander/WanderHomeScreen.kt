@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bose.ankush.home.domain.location.HomeGeocoder
+import bose.ankush.home.presentation.HomeIntent
+import bose.ankush.home.presentation.HomeState
 import bose.ankush.home.presentation.HomeViewModel
 import bose.ankush.home.presentation.state.ShowLoading
 import org.koin.compose.koinInject
@@ -122,6 +124,10 @@ private fun WanderHomePage(
                 Spacer(modifier = Modifier.height(20.dp))
                 WanderCalendarStrip(days = content.days)
             }
+            ready.leaveBy?.let { leaveBy ->
+                Spacer(modifier = Modifier.height(16.dp))
+                WanderLeaveByRow(leaveBy = leaveBy)
+            }
             if (content.showSmallCards) {
                 Spacer(modifier = Modifier.height(16.dp))
                 WanderSmallCards()
@@ -160,6 +166,10 @@ private fun WanderWaitingPage(
                 ShowLoading(modifier = Modifier.fillMaxWidth())
             } else if (!waiting.statusMessage.isNullOrBlank()) {
                 Text(text = waiting.statusMessage, color = Color.White, fontSize = 16.sp)
+            }
+            waiting.leaveBy?.let { leaveBy ->
+                Spacer(modifier = Modifier.height(16.dp))
+                WanderLeaveByRow(leaveBy = leaveBy)
             }
             Spacer(modifier = Modifier.weight(1f))
             WanderTabBar(selected = selectedTab, onSelected = onTab)
@@ -210,14 +220,16 @@ fun WanderHomeRoute(
     val place = rememberForecastPlace(state.userLocation)
     val fogPhoto = rememberWanderFogPhoto(if (current == null) WanderCondition.CLOUDS else condition)
     val content = state.weatherData?.takeIf { current != null }?.toWanderContent(place)
+    val leaveBy = leaveByRow(state, viewModel)
     val shell =
         if (content == null) {
             WanderShell.Waiting(
                 loading = state.isLoading,
                 statusMessage = state.error ?: state.offlineMessage,
+                leaveBy = leaveBy,
             )
         } else {
-            WanderShell.Ready(content = content, fogPhoto = fogPhoto)
+            WanderShell.Ready(content = content, fogPhoto = fogPhoto, leaveBy = leaveBy)
         }
     WanderHomeScreen(
         links = links,
@@ -237,6 +249,20 @@ private fun rememberForecastPlace(userLocation: Pair<Double, Double>?): String {
         }
     }
     return place
+}
+
+private fun leaveByRow(
+    state: HomeState,
+    viewModel: HomeViewModel,
+): WanderLeaveBy? {
+    if (!state.showLeaveByCard) return null
+    return WanderLeaveBy(
+        hasJoined = state.hasJoinedLeaveByList,
+        hasNotedMisleading = state.hasNotedLeaveByMisleading,
+        onJoin = { viewModel.processIntent(HomeIntent.JoinLeaveByList) },
+        onDismiss = { viewModel.processIntent(HomeIntent.DismissLeaveByCard) },
+        onMisleading = { viewModel.processIntent(HomeIntent.NoteLeaveByMisleading) },
+    )
 }
 
 private const val CURRENT_LOCATION = "Current Location"

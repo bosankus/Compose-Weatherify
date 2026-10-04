@@ -26,16 +26,32 @@ data class WanderHomeContent(
     val showSmallCards: Boolean = false,
 )
 
+/**
+ * Leave-by actions. The ViewModel still owns the Remote Config flag, eligibility,
+ * and the four analytics events.
+ */
+data class WanderLeaveBy(
+    val hasJoined: Boolean,
+    val hasNotedMisleading: Boolean,
+    val onJoin: () -> Unit,
+    val onDismiss: () -> Unit,
+    val onMisleading: () -> Unit,
+)
+
 /** What the shell shows. Ready is live forecast data. Waiting has no mock numbers. */
 sealed interface WanderShell {
+    val leaveBy: WanderLeaveBy?
+
     data class Ready(
         val content: WanderHomeContent,
         val fogPhoto: WanderFogPhoto?,
+        override val leaveBy: WanderLeaveBy? = null,
     ) : WanderShell
 
     data class Waiting(
         val loading: Boolean,
         val statusMessage: String?,
+        override val leaveBy: WanderLeaveBy? = null,
     ) : WanderShell
 }
 
