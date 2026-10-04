@@ -1,13 +1,14 @@
 package bose.ankush.home.presentation.wander
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,30 +19,41 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val days =
+private val week =
     listOf(
-        "Mon" to "5",
-        "Tue" to "6",
-        "Wed" to "7",
-        "Thu" to "8",
-        "Fri" to "9",
-        "Sat" to "10",
-        "Sun" to "11",
+        "Sun" to "16",
+        "Mon" to "17",
+        "Tue" to "18",
+        "Wed" to "19",
+        "Thu" to "20",
+        "Fri" to "21",
+        "Sat" to "22",
     )
+
+private const val SELECTED_DATE = "19"
 
 @Composable
 fun WanderCalendarStrip(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        days.forEachIndexed { index, (label, date) ->
-            DayCell(
-                label = label,
-                date = date,
-                selected = index == SELECTED_DAY_INDEX,
-                modifier = Modifier.weight(1f),
-            )
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = "Event calendar",
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            week.forEach { (label, date) ->
+                DayCell(
+                    label = label,
+                    date = date,
+                    selected = date == SELECTED_DATE,
+                )
+            }
         }
     }
 }
@@ -51,33 +63,29 @@ private fun DayCell(
     label: String,
     date: String,
     selected: Boolean,
-    modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier =
-            modifier
-                .padding(horizontal = 2.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(if (selected) selectedDayFill else Color.Transparent)
-                .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = label,
-            color = dayLabel,
+            color = Color.White.copy(alpha = 0.65f),
             fontSize = 11.sp,
         )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = date,
-            color = Color.White,
-            fontSize = 15.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier =
+                Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(if (selected) Color.White else Color.Transparent),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = date,
+                color = if (selected) Color.Black else Color.White,
+                fontSize = 14.sp,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+            )
+        }
     }
 }
-
-private const val SELECTED_DAY_INDEX = 2
-
-private val selectedDayFill = Color.White.copy(alpha = 0.16f)
-private val dayLabel = Color.White.copy(alpha = 0.7f)
