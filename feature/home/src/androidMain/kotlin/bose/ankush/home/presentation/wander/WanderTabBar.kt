@@ -37,6 +37,7 @@ fun WanderTabBar(
     selected: WanderTab,
     onSelected: (WanderTab) -> Unit,
     modifier: Modifier = Modifier,
+    inactiveTint: Color = inactiveIcon,
 ) {
     val tabs = WanderTab.entries
     val selectedIndex = tabs.indexOf(selected).coerceAtLeast(0)
@@ -84,7 +85,7 @@ fun WanderTabBar(
                         Icon(
                             imageVector = tab.icon,
                             contentDescription = null,
-                            tint = if (isSelected) selectedIcon else inactiveIcon,
+                            tint = if (isSelected) selectedIcon else inactiveTint,
                         )
                     }
                 }

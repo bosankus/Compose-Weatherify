@@ -102,6 +102,7 @@ private fun WanderHomePage(
     val content = ready.content
     val photo = ready.photo
     val photoUrl = photo?.imageUrl
+    val contentColor = rememberWanderContentColor(content.condition, photoUrl)
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = content.condition, photoUrl = photoUrl)
         Column(
@@ -117,28 +118,34 @@ private fun WanderHomePage(
                 temperature = content.temperature,
                 place = content.place,
                 conditionLine = content.condition.line,
+                contentColor = contentColor,
             )
             Spacer(modifier = Modifier.height(28.dp))
-            WanderMetricChips(feel = content.feel, wind = content.wind, uv = content.uv)
+            WanderMetricChips(
+                feel = content.feel,
+                wind = content.wind,
+                uv = content.uv,
+                contentColor = contentColor,
+            )
             if (content.days.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(20.dp))
-                WanderCalendarStrip(days = content.days)
+                WanderCalendarStrip(days = content.days, contentColor = contentColor)
             }
             ready.leaveBy?.let { leaveBy ->
                 Spacer(modifier = Modifier.height(16.dp))
-                WanderLeaveByRow(leaveBy = leaveBy)
+                WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
             }
             if (content.showSmallCards) {
                 Spacer(modifier = Modifier.height(16.dp))
-                WanderSmallCards()
+                WanderSmallCards(contentColor = contentColor)
             }
             if (photo != null && photoUrl != null) {
                 TrackShownWanderPhoto(photo)
                 Spacer(modifier = Modifier.height(8.dp))
-                UnsplashCredit(photo)
+                UnsplashCredit(photo = photo, contentColor = contentColor)
             }
             Spacer(modifier = Modifier.weight(1f))
-            WanderTabBar(selected = selectedTab, onSelected = onTab)
+            WanderTabBar(selected = selectedTab, onSelected = onTab, inactiveTint = contentColor)
             Spacer(modifier = Modifier.height(12.dp))
         }
     }
@@ -151,6 +158,7 @@ private fun WanderWaitingPage(
     onTab: (WanderTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val contentColor = rememberWanderContentColor(WanderCondition.CLOUDS, photoUrl = null)
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = WanderCondition.CLOUDS)
         Column(
@@ -165,25 +173,28 @@ private fun WanderWaitingPage(
             if (waiting.loading) {
                 ShowLoading(modifier = Modifier.fillMaxWidth())
             } else if (!waiting.statusMessage.isNullOrBlank()) {
-                Text(text = waiting.statusMessage, color = Color.White, fontSize = 16.sp)
+                Text(text = waiting.statusMessage, color = contentColor, fontSize = 18.sp)
             }
             waiting.leaveBy?.let { leaveBy ->
                 Spacer(modifier = Modifier.height(16.dp))
-                WanderLeaveByRow(leaveBy = leaveBy)
+                WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
             }
             Spacer(modifier = Modifier.weight(1f))
-            WanderTabBar(selected = selectedTab, onSelected = onTab)
+            WanderTabBar(selected = selectedTab, onSelected = onTab, inactiveTint = contentColor)
             Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
 
 @Composable
-private fun UnsplashCredit(photo: WanderFogPhoto) {
+private fun UnsplashCredit(
+    photo: WanderFogPhoto,
+    contentColor: Color,
+) {
     val linkStyle =
         TextLinkStyles(
             SpanStyle(
-                color = Color.White.copy(alpha = 0.92f),
+                color = contentColor,
                 textDecoration = TextDecoration.Underline,
             ),
         )
@@ -199,8 +210,8 @@ private fun UnsplashCredit(photo: WanderFogPhoto) {
                     append("Unsplash")
                 }
             },
-        color = Color.White.copy(alpha = 0.72f),
-        fontSize = 11.sp,
+        color = contentColor,
+        fontSize = 13.sp,
     )
 }
 

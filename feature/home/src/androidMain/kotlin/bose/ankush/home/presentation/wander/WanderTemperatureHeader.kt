@@ -17,11 +17,12 @@ fun WanderTemperatureHeader(
     place: String,
     conditionLine: String,
     modifier: Modifier = Modifier,
+    contentColor: Color = WanderOnDark,
 ) {
     Column(modifier = modifier) {
         Text(
             text = temperature,
-            color = Color.White,
+            color = contentColor,
             fontSize = 96.sp,
             fontWeight = FontWeight.Light,
             lineHeight = 96.sp,
@@ -29,18 +30,16 @@ fun WanderTemperatureHeader(
         )
         Text(
             text = place,
-            color = Color.White,
-            fontSize = 28.sp,
+            color = contentColor,
+            fontSize = 30.sp,
             fontWeight = FontWeight.Medium,
         )
         Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = conditionLine,
-            color = conditionLineColor,
-            fontSize = 16.sp,
+            color = contentColor,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Normal,
         )
     }
 }
-
-private val conditionLineColor = Color.White.copy(alpha = 0.82f)

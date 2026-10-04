@@ -124,6 +124,20 @@ internal fun bundledConditionDrawable(
     return null
 }
 
+internal fun WanderCondition.dominantBackgroundLuminance(): Double {
+    val (top, bottom) =
+        when (this) {
+            WanderCondition.CLEAR -> clearTop to clearBottom
+            WanderCondition.CLOUDS -> cloudsTop to cloudsBottom
+            WanderCondition.RAIN -> rainTop to rainBottom
+            WanderCondition.FOG -> fogTop to fogBottom
+            WanderCondition.STORM -> stormTop to stormBottom
+            WanderCondition.SNOW -> snowTop to snowBottom
+            WanderCondition.NIGHT -> nightTop to nightBottom
+        }
+    return (relativeLuminance(top) + relativeLuminance(bottom)) / 2
+}
+
 private fun vertical(
     top: Color,
     bottom: Color,

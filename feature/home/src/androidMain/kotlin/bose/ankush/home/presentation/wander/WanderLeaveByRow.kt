@@ -23,7 +23,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import bose.ankush.commonui.theme.WarningYellow
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.leave_by_body
 import bose.ankush.home.generated.resources.leave_by_dismiss
@@ -43,6 +42,7 @@ import org.jetbrains.compose.resources.stringResource
 fun WanderLeaveByRow(
     leaveBy: WanderLeaveBy,
     modifier: Modifier = Modifier,
+    contentColor: Color = WanderOnDark,
 ) {
     Column(
         modifier =
@@ -56,29 +56,29 @@ fun WanderLeaveByRow(
                 imageVector = Icons.Filled.Thunderstorm,
                 contentDescription = stringResource(Res.string.leave_by_icon_content_desc),
                 modifier = Modifier.size(16.dp),
-                tint = Color.White,
+                tint = contentColor,
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(Res.string.leave_by_title),
-                    color = Color.White,
-                    fontSize = 14.sp,
+                    color = contentColor,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                 )
                 Text(
                     text = stringResource(Res.string.leave_by_body),
-                    color = Color.White.copy(alpha = 0.72f),
-                    fontSize = 12.sp,
-                    lineHeight = 16.sp,
+                    color = contentColor,
+                    fontSize = 14.sp,
+                    lineHeight = 18.sp,
                 )
             }
         }
         if (leaveBy.hasJoined) {
             Text(
                 text = stringResource(Res.string.leave_by_joined_confirmation),
-                color = WarningYellow,
-                fontSize = 12.sp,
+                color = contentColor,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(top = 8.dp),
             )
@@ -88,17 +88,29 @@ fun WanderLeaveByRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (!leaveBy.hasJoined) {
-                ActionText(text = stringResource(Res.string.leave_by_primary), onClick = leaveBy.onJoin)
+                ActionText(
+                    text = stringResource(Res.string.leave_by_primary),
+                    contentColor = contentColor,
+                    onClick = leaveBy.onJoin,
+                )
             }
-            ActionText(text = stringResource(Res.string.leave_by_dismiss), onClick = leaveBy.onDismiss)
+            ActionText(
+                text = stringResource(Res.string.leave_by_dismiss),
+                contentColor = contentColor,
+                onClick = leaveBy.onDismiss,
+            )
             if (leaveBy.hasNotedMisleading) {
                 Text(
                     text = stringResource(Res.string.leave_by_misleading_noted),
-                    color = Color.White.copy(alpha = 0.65f),
-                    fontSize = 12.sp,
+                    color = contentColor,
+                    fontSize = 14.sp,
                 )
             } else {
-                ActionText(text = stringResource(Res.string.leave_by_misleading), onClick = leaveBy.onMisleading)
+                ActionText(
+                    text = stringResource(Res.string.leave_by_misleading),
+                    contentColor = contentColor,
+                    onClick = leaveBy.onMisleading,
+                )
             }
         }
     }
@@ -107,12 +119,13 @@ fun WanderLeaveByRow(
 @Composable
 private fun ActionText(
     text: String,
+    contentColor: Color,
     onClick: () -> Unit,
 ) {
     Text(
         text = text,
-        color = Color.White,
-        fontSize = 12.sp,
+        color = contentColor,
+        fontSize = 14.sp,
         fontWeight = FontWeight.Medium,
         modifier = Modifier.clickable(role = Role.Button, onClick = onClick),
     )

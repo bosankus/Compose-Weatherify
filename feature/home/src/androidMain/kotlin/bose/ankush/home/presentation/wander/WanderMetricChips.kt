@@ -31,6 +31,7 @@ fun WanderMetricChips(
     wind: String,
     uv: String,
     modifier: Modifier = Modifier,
+    contentColor: Color = WanderOnDark,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -41,6 +42,7 @@ fun WanderMetricChips(
             label = "Feel",
             value = feel,
             contentDescription = "Real feel",
+            contentColor = contentColor,
             modifier = Modifier.weight(1f),
         )
         MetricChip(
@@ -48,6 +50,7 @@ fun WanderMetricChips(
             label = "Wind",
             value = wind,
             contentDescription = "Wind",
+            contentColor = contentColor,
             modifier = Modifier.weight(1f),
         )
         MetricChip(
@@ -55,6 +58,7 @@ fun WanderMetricChips(
             label = "UV",
             value = uv,
             contentDescription = "UV",
+            contentColor = contentColor,
             modifier = Modifier.weight(1f),
         )
     }
@@ -66,6 +70,7 @@ private fun MetricChip(
     label: String,
     value: String,
     contentDescription: String,
+    contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -79,21 +84,21 @@ private fun MetricChip(
             imageVector = icon,
             contentDescription = contentDescription,
             modifier = Modifier.size(16.dp),
-            tint = Color.White,
+            tint = contentColor,
         )
         Spacer(modifier = Modifier.width(6.dp))
         Column {
             Text(
                 text = value,
-                color = Color.White,
-                fontSize = 14.sp,
+                color = contentColor,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
             )
             Text(
                 text = label,
-                color = Color.White.copy(alpha = 0.65f),
-                fontSize = 11.sp,
+                color = contentColor,
+                fontSize = 13.sp,
                 maxLines = 1,
             )
         }

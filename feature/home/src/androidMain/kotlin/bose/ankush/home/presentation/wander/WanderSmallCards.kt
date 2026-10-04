@@ -34,13 +34,16 @@ private val cards =
     )
 
 @Composable
-fun WanderSmallCards(modifier: Modifier = Modifier) {
+fun WanderSmallCards(
+    modifier: Modifier = Modifier,
+    contentColor: Color = WanderOnDark,
+) {
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         cards.forEach { title ->
-            SmallCard(title = title, modifier = Modifier.weight(1f))
+            SmallCard(title = title, contentColor = contentColor, modifier = Modifier.weight(1f))
         }
     }
 }
@@ -48,6 +51,7 @@ fun WanderSmallCards(modifier: Modifier = Modifier) {
 @Composable
 private fun SmallCard(
     title: String,
+    contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -58,10 +62,10 @@ private fun SmallCard(
     ) {
         Text(
             text = title,
-            color = Color.White,
-            fontSize = 14.sp,
+            color = contentColor,
+            fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            lineHeight = 18.sp,
+            lineHeight = 20.sp,
         )
         Spacer(modifier = Modifier.height(14.dp))
         Box(

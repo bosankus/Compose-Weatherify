@@ -25,13 +25,14 @@ import androidx.compose.ui.unit.sp
 fun WanderCalendarStrip(
     days: List<WanderCalendarDay>,
     modifier: Modifier = Modifier,
+    contentColor: Color = WanderOnDark,
 ) {
     if (days.isEmpty()) return
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "Event calendar",
-            color = Color.White,
-            fontSize = 16.sp,
+            color = contentColor,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Medium,
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -44,19 +45,22 @@ fun WanderCalendarStrip(
             verticalAlignment = Alignment.Top,
         ) {
             days.forEach { day ->
-                DayCell(day = day)
+                DayCell(day = day, contentColor = contentColor)
             }
         }
     }
 }
 
 @Composable
-private fun DayCell(day: WanderCalendarDay) {
+private fun DayCell(
+    day: WanderCalendarDay,
+    contentColor: Color,
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = day.label,
-            color = Color.White.copy(alpha = 0.65f),
-            fontSize = 11.sp,
+            color = contentColor,
+            fontSize = 13.sp,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Column(
@@ -70,8 +74,8 @@ private fun DayCell(day: WanderCalendarDay) {
         ) {
             Text(
                 text = day.date,
-                color = if (day.selected) Color.Black else Color.White,
-                fontSize = 14.sp,
+                color = if (day.selected) WanderOnLight else contentColor,
+                fontSize = 16.sp,
                 fontWeight = if (day.selected) FontWeight.SemiBold else FontWeight.Normal,
             )
         }
@@ -79,8 +83,8 @@ private fun DayCell(day: WanderCalendarDay) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = day.temp,
-                color = Color.White.copy(alpha = 0.85f),
-                fontSize = 11.sp,
+                color = contentColor,
+                fontSize = 13.sp,
             )
         }
     }
