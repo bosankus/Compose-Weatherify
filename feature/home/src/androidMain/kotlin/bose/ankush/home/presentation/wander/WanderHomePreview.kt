@@ -18,9 +18,9 @@ object WanderHomePreviewData {
             temperature = "16°",
             place = "London",
             condition = WanderCondition.FOG,
-            feel = "14°",
-            wind = "8 km/h",
-            uv = "1",
+            feel = "16°",
+            wind = "WSW 6 mph",
+            uv = "7",
         )
 }
 
