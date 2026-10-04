@@ -1,21 +1,17 @@
 package bose.ankush.navigation
 
 import androidx.compose.runtime.Composable
-import bose.ankush.home.presentation.wander.WanderHomeLinks
-import bose.ankush.home.presentation.wander.WanderHomeRoute
+import bose.ankush.home.presentation.shell.ShellHomeRoute
 
 @Composable
+@Suppress("UNUSED_PARAMETER", "UnusedParameter")
 actual fun PlatformHomeEntry(
     weather: @Composable () -> Unit,
     places: @Composable () -> Unit,
     onOpenHub: () -> Unit,
 ) {
-    WanderHomeRoute(
-        links =
-            WanderHomeLinks(
-                weather = weather,
-                places = places,
-                onOpenHub = onOpenHub,
-            ),
+    ShellHomeRoute(
+        places = places,
+        onOpenSettings = onOpenHub,
     )
 }

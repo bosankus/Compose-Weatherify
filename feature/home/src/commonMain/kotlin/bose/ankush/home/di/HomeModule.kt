@@ -10,6 +10,7 @@ import bose.ankush.home.domain.usecase.GetAirQuality
 import bose.ankush.home.domain.usecase.GetWeatherReport
 import bose.ankush.home.domain.usecase.RefreshWeatherReport
 import bose.ankush.home.presentation.HomeViewModel
+import bose.ankush.home.presentation.shell.ShellViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -33,4 +34,5 @@ val homeDomainModule: Module =
 val homeViewModelModule: Module =
     module {
         viewModelOf(::HomeViewModel)
+        viewModelOf(::ShellViewModel)
     }
