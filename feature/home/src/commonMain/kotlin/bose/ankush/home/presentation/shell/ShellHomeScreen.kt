@@ -1,5 +1,11 @@
 package bose.ankush.home.presentation.shell
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -23,15 +29,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -147,7 +156,6 @@ private fun HomeColumn(
                 status = state.savedPlace,
                 place = state.featuredPlace,
                 onOpen = { actions.onIntent(ShellIntent.SelectTab(ShellTab.SAVED)) },
-                onRetry = actions.onRetrySavedPlace,
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
@@ -377,6 +385,15 @@ private fun CalendarBlock(
     onRetryForecast: () -> Unit,
     onRetryEvents: () -> Unit,
 ) {
+    val shownDayStatus =
+        if (dayStatus == ShellSectionStatus.Ready && days.isEmpty()) {
+            ShellSectionStatus.Empty
+        } else {
+            dayStatus
+        }
+    val showRealDays = nearbyWeekBody(shownDayStatus) == NearbyWeekBody.Days && days.isNotEmpty()
+    val shimmerWeek = showNearbyWeekShimmer(shownDayStatus, events, hasDays = showRealDays)
+    val shimmerEvents = nearbyEventsUseShimmer(events)
     val retryDays = dayStatus != ShellSectionStatus.Ready
     val retryEvents = events != ShellSectionStatus.Ready
     Column(modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp)) {
@@ -415,33 +432,102 @@ private fun CalendarBlock(
                 }
             }
         }
-        val shownDayStatus =
-            if (dayStatus == ShellSectionStatus.Ready && days.isEmpty()) {
-                ShellSectionStatus.Empty
-            } else {
-                dayStatus
-            }
-        if (shownDayStatus == ShellSectionStatus.Ready && days.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                days.forEach { day ->
-                    DayCell(day = day, marked = day.date in eventDates)
+        if (showRealDays || shimmerWeek || shimmerEvents) {
+            val brush = if (shimmerWeek || shimmerEvents) rememberEventsShimmerBrush() else null
+            if (showRealDays) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    days.forEach { day ->
+                        DayCell(day = day, marked = day.date in eventDates)
+                    }
                 }
+            } else if (shimmerWeek && brush != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                EventsWeekShimmer(brush = brush)
             }
-        } else {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = checkNotNull(placeholderMessage(ShellSectionKind.Calendar, shownDayStatus)),
-                color = Ink,
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            if (shimmerEvents && brush != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                EventsContentShimmer(brush = brush)
+            }
         }
-        placeholderMessage(ShellSectionKind.Events, events)?.let { message ->
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(text = message, color = Ink, style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Composable
+private fun rememberEventsShimmerBrush(): Brush {
+    val transition = rememberInfiniteTransition(label = "nearby-events")
+    val travel by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(durationMillis = 1100, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+        label = "nearby-events-travel",
+    )
+    val base = Color.White.copy(alpha = 0.10f)
+    val highlight = Color.White.copy(alpha = 0.34f)
+    return Brush.linearGradient(
+        colors = listOf(base, highlight, base),
+        start = Offset(x = travel * SHIMMER_TRAVEL, y = 0f),
+        end = Offset(x = travel * SHIMMER_TRAVEL + SHIMMER_SPAN, y = SHIMMER_DROP),
+    )
+}
+
+/** Week-day row skeleton: a short label and a day circle, repeated across the week. */
+@Composable
+private fun EventsWeekShimmer(brush: Brush) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+                .semantics { contentDescription = "Nearby events" },
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        repeat(NEARBY_EVENTS_SHIMMER_DAY_COUNT) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(width = ShimmerLabelWidth, height = ShimmerLabelHeight)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(brush),
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    modifier =
+                        Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(brush),
+                )
+            }
+        }
+    }
+}
+
+/** Event-content skeleton under the week. Widths follow a title and a shorter line, not copy. */
+@Composable
+private fun EventsContentShimmer(brush: Brush) {
+    Column(
+        modifier = Modifier.fillMaxWidth().semantics { contentDescription = "Nearby events" },
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        repeat(NEARBY_EVENTS_SHIMMER_LINE_COUNT) { index ->
+            val fraction = if (index == 0) 0.72f else 0.46f
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth(fraction)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(brush),
+            )
         }
     }
 }
@@ -485,18 +571,46 @@ private fun SavedPlaceSection(
     status: ShellSectionStatus,
     place: SavedLocation?,
     onOpen: () -> Unit,
-    onRetry: () -> Unit,
 ) {
     if (status == ShellSectionStatus.Ready && place != null) {
         SavedPlaceCard(place = place, onClick = onOpen)
     } else {
         val shown = if (status == ShellSectionStatus.Ready) ShellSectionStatus.Empty else status
-        SectionHold(
+        SavedPlaceMessage(
             message = checkNotNull(placeholderMessage(ShellSectionKind.SavedPlace, shown)),
-            retryDescription = retryContentDescription(ShellSectionKind.SavedPlace),
-            onRetry = onRetry,
-            onBodyClick = onOpen,
-            modifier = Modifier.fillMaxWidth(),
+            onClick = onOpen,
+        )
+    }
+}
+
+@Composable
+private fun SavedPlaceMessage(
+    message: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = 96.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(DayFill)
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Bookmark,
+            contentDescription = null,
+            tint = PlusYellow,
+            modifier = Modifier.size(22.dp),
+        )
+        Text(
+            text = message,
+            color = Ink,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -510,7 +624,7 @@ private fun SavedPlaceCard(
         listOf(place.city, place.state, place.country)
             .filter { it.isNotBlank() }
             .joinToString(", ")
-    Column(
+    Row(
         modifier =
             Modifier
                 .fillMaxWidth()
@@ -518,13 +632,23 @@ private fun SavedPlaceCard(
                 .background(DayFill)
                 .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (place.name.isNotBlank()) {
-            Text(text = place.name, color = Ink, style = MaterialTheme.typography.titleMedium)
-        }
-        if (subtitle.isNotBlank()) {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = subtitle, color = Muted, style = MaterialTheme.typography.bodyMedium)
+        Icon(
+            imageVector = Icons.Filled.Bookmark,
+            contentDescription = null,
+            tint = PlusYellow,
+            modifier = Modifier.size(22.dp),
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            if (place.name.isNotBlank()) {
+                Text(text = place.name, color = Ink, style = MaterialTheme.typography.titleMedium)
+            }
+            if (subtitle.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = subtitle, color = Muted, style = MaterialTheme.typography.bodyMedium)
+            }
         }
     }
 }
@@ -541,3 +665,8 @@ private val PlusYellow = Color(0xFFF5C400)
 private val Ink = Color.White
 private val Muted = Color.White.copy(alpha = 0.72f)
 private val DayFill = Color(0x66101418)
+private val ShimmerLabelWidth = 28.dp
+private val ShimmerLabelHeight = 8.dp
+private const val SHIMMER_TRAVEL = 700f
+private const val SHIMMER_SPAN = 220f
+private const val SHIMMER_DROP = 48f

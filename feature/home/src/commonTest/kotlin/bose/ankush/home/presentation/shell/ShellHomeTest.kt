@@ -248,7 +248,11 @@ class ShellHomeTest {
 
     @Test
     fun placeholders_coverLoadingEmptyAndFailedForEverySection() {
-        ShellSectionKind.entries.forEach { kind ->
+        val withSentences =
+            ShellSectionKind.entries.filter {
+                it != ShellSectionKind.Calendar && it != ShellSectionKind.Events
+            }
+        withSentences.forEach { kind ->
             val loading = placeholderMessage(kind, ShellSectionStatus.Loading)
             val empty = placeholderMessage(kind, ShellSectionStatus.Empty)
             val failed = placeholderMessage(kind, ShellSectionStatus.Failed)
@@ -259,5 +263,60 @@ class ShellHomeTest {
             assertEquals(setOf(loading, empty, failed).size, 3)
             assertTrue(retryContentDescription(kind).startsWith("Retry"))
         }
+    }
+
+    @Test
+    fun nearbyEvents_shimmerInsteadOfAnErrorSentence() {
+        listOf(ShellSectionKind.Calendar, ShellSectionKind.Events).forEach { kind ->
+            assertNull(placeholderMessage(kind, ShellSectionStatus.Loading))
+            assertNull(placeholderMessage(kind, ShellSectionStatus.Failed))
+            assertNull(placeholderMessage(kind, ShellSectionStatus.Empty))
+            assertNull(placeholderMessage(kind, ShellSectionStatus.Ready))
+        }
+        assertTrue(nearbyEventsUseShimmer(ShellSectionStatus.Loading))
+        assertTrue(nearbyEventsUseShimmer(ShellSectionStatus.Failed))
+        assertFalse(nearbyEventsUseShimmer(ShellSectionStatus.Ready))
+        assertFalse(nearbyEventsUseShimmer(ShellSectionStatus.Empty))
+        assertEquals(NearbyWeekBody.Shimmer, nearbyWeekBody(ShellSectionStatus.Loading))
+        assertEquals(NearbyWeekBody.Shimmer, nearbyWeekBody(ShellSectionStatus.Failed))
+        assertEquals(NearbyWeekBody.Days, nearbyWeekBody(ShellSectionStatus.Ready))
+        assertEquals(NearbyWeekBody.Quiet, nearbyWeekBody(ShellSectionStatus.Empty))
+        assertEquals(7, NEARBY_EVENTS_SHIMMER_DAY_COUNT)
+        assertEquals(2, NEARBY_EVENTS_SHIMMER_LINE_COUNT)
+        assertTrue(
+            showNearbyWeekShimmer(
+                dayStatus = ShellSectionStatus.Failed,
+                events = ShellSectionStatus.Ready,
+                hasDays = false,
+            ),
+        )
+        assertTrue(
+            showNearbyWeekShimmer(
+                dayStatus = ShellSectionStatus.Empty,
+                events = ShellSectionStatus.Failed,
+                hasDays = false,
+            ),
+        )
+        assertFalse(
+            showNearbyWeekShimmer(
+                dayStatus = ShellSectionStatus.Ready,
+                events = ShellSectionStatus.Ready,
+                hasDays = true,
+            ),
+        )
+        assertFalse(
+            showNearbyWeekShimmer(
+                dayStatus = ShellSectionStatus.Ready,
+                events = ShellSectionStatus.Failed,
+                hasDays = true,
+            ),
+        )
+        assertFalse(
+            showNearbyWeekShimmer(
+                dayStatus = ShellSectionStatus.Empty,
+                events = ShellSectionStatus.Empty,
+                hasDays = false,
+            ),
+        )
     }
 }
