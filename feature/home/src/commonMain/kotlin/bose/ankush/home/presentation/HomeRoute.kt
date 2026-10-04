@@ -64,7 +64,6 @@ import bose.ankush.home.presentation.component.BriefAirQualityReportCardLayout
 import bose.ankush.home.presentation.component.CurrentWeatherReportLayout
 import bose.ankush.home.presentation.component.DailyWeatherForecastReportLayout
 import bose.ankush.home.presentation.component.HourlyWeatherForecastReportLayout
-import bose.ankush.home.presentation.component.LeaveByFakeDoorCard
 import bose.ankush.home.presentation.component.SunriseSunsetCombinedAnimation
 import bose.ankush.home.presentation.component.WeatherAlertLayout
 import bose.ankush.home.presentation.state.ErrorBackgroundAnimation
@@ -149,11 +148,15 @@ fun HomeFeatureRoute(
                 state = state,
                 bottomBar = bottomBar,
                 toastAnchorState = toastAnchorState,
-                onRefresh = { viewModel.processIntent(HomeIntent.Refresh) },
-                onResetLocationOverride = { viewModel.processIntent(HomeIntent.ResetLocationOverride) },
-                onEnableNotifications = { viewModel.processIntent(HomeIntent.EnableNotificationBanner) },
-                onDismissNotificationBanner = { viewModel.processIntent(HomeIntent.DismissNotificationBanner) },
-                onLeaveBy = { viewModel.processIntent(it) },
+                actions =
+                    ForecastContainerActions(
+                        onRefresh = { viewModel.processIntent(HomeIntent.Refresh) },
+                        onResetLocationOverride = { viewModel.processIntent(HomeIntent.ResetLocationOverride) },
+                        onEnableNotifications = { viewModel.processIntent(HomeIntent.EnableNotificationBanner) },
+                        onDismissNotificationBanner = {
+                            viewModel.processIntent(HomeIntent.DismissNotificationBanner)
+                        },
+                    ),
                 requiresNotificationSettingsNavigationHint = requiresNotificationSettingsNavigationHint,
             )
         }
@@ -235,17 +238,20 @@ private fun HandleScreenError(
     }
 }
 
+private class ForecastContainerActions(
+    val onRefresh: () -> Unit,
+    val onResetLocationOverride: () -> Unit,
+    val onEnableNotifications: () -> Unit,
+    val onDismissNotificationBanner: () -> Unit,
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ShowUIContainer(
     state: HomeState,
     bottomBar: @Composable () -> Unit,
     toastAnchorState: ToastAnchorState?,
-    onRefresh: () -> Unit,
-    onResetLocationOverride: () -> Unit,
-    onEnableNotifications: () -> Unit,
-    onDismissNotificationBanner: () -> Unit,
-    onLeaveBy: (HomeIntent) -> Unit,
+    actions: ForecastContainerActions,
     requiresNotificationSettingsNavigationHint: Boolean,
 ) {
     val weatherReports = state.weatherData
@@ -313,8 +319,8 @@ private fun ShowUIContainer(
                         },
                     ),
                 isPermanentlyDeclined = state.isNotificationPermissionPermanentlyDeclined,
-                onPositiveAction = onEnableNotifications,
-                onNegativeAction = onDismissNotificationBanner,
+                onPositiveAction = actions.onEnableNotifications,
+                onNegativeAction = actions.onDismissNotificationBanner,
                 positiveButtonLabel = stringResource(Res.string.enable_notification_btn),
                 negativeButtonLabel = stringResource(Res.string.cancel_btn_txt),
             )
@@ -325,7 +331,7 @@ private fun ShowUIContainer(
             content = { innerPadding ->
                 PullToRefreshBox(
                     isRefreshing = state.isRefreshing,
-                    onRefresh = onRefresh,
+                    onRefresh = actions.onRefresh,
                     state = pullToRefreshState,
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -345,7 +351,7 @@ private fun ShowUIContainer(
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     AssistChip(
-                                        onClick = onResetLocationOverride,
+                                        onClick = actions.onResetLocationOverride,
                                         label = {
                                             Text(
                                                 text =
@@ -374,18 +380,6 @@ private fun ShowUIContainer(
                                             ),
                                     )
                                 }
-                            }
-                        }
-
-                        item(key = "leave_by_fake_door") {
-                            if (state.showLeaveByCard) {
-                                LeaveByFakeDoorCard(
-                                    hasJoined = state.hasJoinedLeaveByList,
-                                    hasNotedMisleading = state.hasNotedLeaveByMisleading,
-                                    onJoin = { onLeaveBy(HomeIntent.JoinLeaveByList) },
-                                    onDismiss = { onLeaveBy(HomeIntent.DismissLeaveByCard) },
-                                    onMisleading = { onLeaveBy(HomeIntent.NoteLeaveByMisleading) },
-                                )
                             }
                         }
 
