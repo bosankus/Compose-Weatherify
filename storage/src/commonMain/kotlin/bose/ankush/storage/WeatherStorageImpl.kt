@@ -42,7 +42,11 @@ class WeatherStorageImpl(
     override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long {
         val remembered = locationTimestamps[locationKey(coordinates)]
         if (remembered != null) return remembered
-        return weatherDatabase.weatherDao().getWeather().first()?.lastUpdated ?: 0L
+        return weatherDatabase
+            .weatherDao()
+            .getWeather()
+            .first()
+            ?.lastUpdated ?: 0L
     }
 
     override suspend fun saveLastWeatherUpdateTime(

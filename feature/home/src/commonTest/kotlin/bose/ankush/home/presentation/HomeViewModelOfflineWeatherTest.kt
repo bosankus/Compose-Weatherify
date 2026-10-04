@@ -90,7 +90,11 @@ class HomeViewModelOfflineWeatherTest {
             assertEquals(CACHED_ID, weatherWhenRefreshStarted?.id)
             assertEquals(CACHED_UPDATED, weatherWhenRefreshStarted?.lastUpdated)
             assertEquals(21.0, weatherWhenRefreshStarted?.current?.temp)
-            assertEquals(CACHED_ID, viewModel.state.value.weatherData?.id)
+            assertEquals(
+                CACHED_ID,
+                viewModel.state.value.weatherData
+                    ?.id,
+            )
             assertEquals(SAVED_LAT to SAVED_LON, viewModel.state.value.userLocation)
             assertFalse(viewModel.state.value.isLoading)
             assertEquals(1, repository.refreshCallCount)
