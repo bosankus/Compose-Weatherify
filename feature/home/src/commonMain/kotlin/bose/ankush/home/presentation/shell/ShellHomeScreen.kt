@@ -29,17 +29,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.Dehaze
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.Thunderstorm
-import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.outlined.AcUnit
+import androidx.compose.material.icons.outlined.Air
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Dehaze
+import androidx.compose.material.icons.outlined.Thermostat
+import androidx.compose.material.icons.outlined.Thunderstorm
+import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -264,28 +264,26 @@ private fun ForecastTitle(
 @Composable
 private fun WeatherFacts(forecast: ShellForecast) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        forecast.sky?.let { sky ->
-            Icon(
-                imageVector = skyIcon(sky),
-                contentDescription = forecast.conditionLine,
-                tint = Ink,
-                modifier = Modifier.size(28.dp),
-            )
-        }
-        MetricIcon(icon = Icons.Filled.Thermostat, description = "Real feel", value = forecast.feel)
-        MetricIcon(icon = Icons.Filled.Air, description = "Wind", value = forecast.wind)
-        MetricIcon(icon = Icons.Filled.WbSunny, description = "UV", value = forecast.uv)
+        Icon(
+            imageVector = skyIcon(forecast.sky),
+            contentDescription = forecast.conditionLine.ifBlank { "Sky" },
+            tint = Ink,
+            modifier = Modifier.size(32.dp),
+        )
+        MetricIcon(icon = Icons.Outlined.Thermostat, description = "Real feel", value = forecast.feel)
+        MetricIcon(icon = Icons.Outlined.Air, description = "Wind", value = forecast.wind)
+        MetricIcon(icon = Icons.Outlined.WbSunny, description = "UV", value = forecast.uv)
     }
 }
 
-private fun skyIcon(sky: ShellSky): ImageVector =
+private fun skyIcon(sky: ShellSky?): ImageVector =
     when (sky) {
-        ShellSky.Clear -> Icons.Filled.WbSunny
-        ShellSky.Clouds -> Icons.Filled.Cloud
-        ShellSky.Rain -> Icons.Filled.WaterDrop
-        ShellSky.Snow -> Icons.Filled.AcUnit
-        ShellSky.Thunderstorm -> Icons.Filled.Thunderstorm
-        ShellSky.Mist -> Icons.Filled.Dehaze
+        ShellSky.Clear -> Icons.Outlined.WbSunny
+        ShellSky.Clouds, null -> Icons.Outlined.Cloud
+        ShellSky.Rain -> Icons.Outlined.WaterDrop
+        ShellSky.Snow -> Icons.Outlined.AcUnit
+        ShellSky.Thunderstorm -> Icons.Outlined.Thunderstorm
+        ShellSky.Mist -> Icons.Outlined.Dehaze
     }
 
 @Composable
@@ -301,10 +299,10 @@ private fun MetricIcon(
         Icon(
             imageVector = icon,
             contentDescription = description,
-            tint = Muted,
-            modifier = Modifier.size(20.dp),
+            tint = Ink,
+            modifier = Modifier.size(24.dp),
         )
-        Text(text = value, color = Muted, style = MaterialTheme.typography.bodyMedium)
+        Text(text = value, color = Ink, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
