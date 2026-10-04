@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
+import bose.ankush.finder.domain.usecase.GetSavedLocationsUseCase
+import bose.ankush.home.domain.leaveby.LeaveByFakeDoorEligibility
+import bose.ankush.home.domain.leaveby.LeaveByPlace
 import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.usecase.GetAirQuality
@@ -38,7 +41,10 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
+import kotlin.time.Clock
 
 /**
  * Home's MVI ViewModel. Reactively observes [LocationPreferencesStorage] for location-override
@@ -53,6 +59,7 @@ internal class HomeViewModel(
     private val locationPreferencesStorage: LocationPreferencesStorage,
     private val remoteConfigGate: HomeRemoteConfigGate,
     private val analyticsTracker: AnalyticsTracker,
+    private val getSavedLocationsUseCase: GetSavedLocationsUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
@@ -77,9 +84,13 @@ internal class HomeViewModel(
             }
         }
 
+    private var leaveByJob: Job? = null
+
     init {
-        // Initialize Firebase Remote Config
-        remoteConfigGate.initialize()
+        // Initialize Firebase Remote Config. Re-check the fake door once activate finishes
+        // so a freshly fetched flag is not stuck on the in-app default for this session.
+        remoteConfigGate.initialize(onActivated = { refreshLeaveByEligibility() })
+        refreshLeaveByEligibility()
 
         val overrideChanged =
             locationPreferencesStorage
@@ -112,7 +123,10 @@ internal class HomeViewModel(
 
     internal fun processIntent(intent: HomeIntent) {
         when (intent) {
-            HomeIntent.FetchLocation, HomeIntent.Refresh -> refreshTrigger.tryEmit(value = true)
+            HomeIntent.FetchLocation, HomeIntent.Refresh -> {
+                refreshTrigger.tryEmit(value = true)
+                refreshLeaveByEligibility()
+            }
             HomeIntent.ResetLocationOverride -> resetLocationOverride()
             HomeIntent.RequestLocationPermission ->
                 _effect.trySend(element = HomeEffect.RequestLocationPermission)
@@ -135,7 +149,80 @@ internal class HomeViewModel(
                 updateNotificationBannerVisibility(hasPermission = intent.hasPermission)
 
             is HomeIntent.NotificationPermissionResult -> handlePermissionResult(intent = intent)
+
+            HomeIntent.RefreshLeaveByEligibility -> refreshLeaveByEligibility()
+
+            HomeIntent.JoinLeaveByList -> joinLeaveByList()
+
+            HomeIntent.DismissLeaveByCard -> dismissLeaveByCard()
+
+            HomeIntent.NoteLeaveByMisleading -> noteLeaveByMisleading()
         }
+    }
+
+    /**
+     * Joined / dismissed / misleading live in [HomeState] for this ViewModel session only.
+     * No preference, no network write, no notification schedule.
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private fun refreshLeaveByEligibility() {
+        leaveByJob?.cancel()
+        leaveByJob =
+            viewModelScope.launch {
+                try {
+                    if (!remoteConfigGate.isLeaveByFakeDoorEnabled()) {
+                        publishLeaveBy(eligible = false)
+                        return@launch
+                    }
+                    val places =
+                        getSavedLocationsUseCase()
+                            .getOrNull()
+                            ?.map { LeaveByPlace(lat = it.lat, lon = it.lon) }
+                            .orEmpty()
+                    val localNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                    publishLeaveBy(LeaveByFakeDoorEligibility.isEligible(places, localNow))
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    publishLeaveBy(eligible = false)
+                }
+            }
+    }
+
+    private fun publishLeaveBy(eligible: Boolean) {
+        val current = _state.value
+        if (current.isLeaveByDismissed) {
+            if (current.showLeaveByCard) {
+                dispatch(HomeAction.UpdateLeaveByCard(show = false))
+            }
+            return
+        }
+        if (eligible && !current.showLeaveByCard) {
+            analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorImpression)
+        }
+        if (current.showLeaveByCard != eligible) {
+            dispatch(HomeAction.UpdateLeaveByCard(show = eligible))
+        }
+    }
+
+    private fun joinLeaveByList() {
+        val current = _state.value
+        if (!current.showLeaveByCard || current.hasJoinedLeaveByList) return
+        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorPrimaryTap)
+        dispatch(HomeAction.JoinLeaveByList)
+    }
+
+    private fun dismissLeaveByCard() {
+        if (!_state.value.showLeaveByCard) return
+        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorDismiss)
+        dispatch(HomeAction.DismissLeaveByCard)
+    }
+
+    private fun noteLeaveByMisleading() {
+        val current = _state.value
+        if (!current.showLeaveByCard || current.hasNotedLeaveByMisleading) return
+        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorMisleadingTap)
+        dispatch(HomeAction.NoteLeaveByMisleading)
     }
 
     private var notificationBannerVisibilityJob: Job? = null

@@ -64,6 +64,7 @@ import bose.ankush.home.presentation.component.BriefAirQualityReportCardLayout
 import bose.ankush.home.presentation.component.CurrentWeatherReportLayout
 import bose.ankush.home.presentation.component.DailyWeatherForecastReportLayout
 import bose.ankush.home.presentation.component.HourlyWeatherForecastReportLayout
+import bose.ankush.home.presentation.component.LeaveByFakeDoorCard
 import bose.ankush.home.presentation.component.SunriseSunsetCombinedAnimation
 import bose.ankush.home.presentation.component.WeatherAlertLayout
 import bose.ankush.home.presentation.state.ErrorBackgroundAnimation
@@ -152,6 +153,7 @@ fun HomeFeatureRoute(
                 onResetLocationOverride = { viewModel.processIntent(HomeIntent.ResetLocationOverride) },
                 onEnableNotifications = { viewModel.processIntent(HomeIntent.EnableNotificationBanner) },
                 onDismissNotificationBanner = { viewModel.processIntent(HomeIntent.DismissNotificationBanner) },
+                onLeaveBy = { viewModel.processIntent(it) },
                 requiresNotificationSettingsNavigationHint = requiresNotificationSettingsNavigationHint,
             )
         }
@@ -243,6 +245,7 @@ private fun ShowUIContainer(
     onResetLocationOverride: () -> Unit,
     onEnableNotifications: () -> Unit,
     onDismissNotificationBanner: () -> Unit,
+    onLeaveBy: (HomeIntent) -> Unit,
     requiresNotificationSettingsNavigationHint: Boolean,
 ) {
     val weatherReports = state.weatherData
@@ -371,6 +374,18 @@ private fun ShowUIContainer(
                                             ),
                                     )
                                 }
+                            }
+                        }
+
+                        item(key = "leave_by_fake_door") {
+                            if (state.showLeaveByCard) {
+                                LeaveByFakeDoorCard(
+                                    hasJoined = state.hasJoinedLeaveByList,
+                                    hasNotedMisleading = state.hasNotedLeaveByMisleading,
+                                    onJoin = { onLeaveBy(HomeIntent.JoinLeaveByList) },
+                                    onDismiss = { onLeaveBy(HomeIntent.DismissLeaveByCard) },
+                                    onMisleading = { onLeaveBy(HomeIntent.NoteLeaveByMisleading) },
+                                )
                             }
                         }
 

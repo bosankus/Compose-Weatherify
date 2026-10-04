@@ -19,4 +19,8 @@ internal data class HomeState(
     val showNotificationBanner: Boolean = false,
     val isNotificationPermissionPermanentlyDeclined: Boolean = false,
     val isNotificationBannerDismissed: Boolean = false,
+    val showLeaveByCard: Boolean = false,
+    val isLeaveByDismissed: Boolean = false,
+    val hasJoinedLeaveByList: Boolean = false,
+    val hasNotedLeaveByMisleading: Boolean = false,
 )

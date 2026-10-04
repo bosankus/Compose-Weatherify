@@ -172,4 +172,43 @@ class HomeReducerTest {
         assertFalse(result.showNotificationBanner)
         assertTrue(result.isNotificationBannerDismissed)
     }
+
+    @Test
+    fun updateLeaveByCard_hidesWhenAlreadyDismissed() {
+        val dismissed = HomeState(isLeaveByDismissed = true, showLeaveByCard = false)
+
+        val result = HomeReducer.reduce(dismissed, HomeAction.UpdateLeaveByCard(show = true))
+
+        assertFalse(result.showLeaveByCard)
+        assertTrue(result.isLeaveByDismissed)
+    }
+
+    @Test
+    fun dismissLeaveByCard_hidesForTheSession() {
+        val result =
+            HomeReducer.reduce(
+                HomeState(showLeaveByCard = true),
+                HomeAction.DismissLeaveByCard,
+            )
+
+        assertFalse(result.showLeaveByCard)
+        assertTrue(result.isLeaveByDismissed)
+    }
+
+    @Test
+    fun joinAndMisleading_areSessionFlagsAndSurviveSuccess() {
+        val joined =
+            HomeReducer.reduce(
+                HomeReducer.reduce(
+                    HomeState(showLeaveByCard = true),
+                    HomeAction.JoinLeaveByList,
+                ),
+                HomeAction.NoteLeaveByMisleading,
+            )
+        val result = HomeReducer.reduce(joined, HomeAction.Success(weather = WeatherForecast(id = 1L)))
+
+        assertTrue(result.showLeaveByCard)
+        assertTrue(result.hasJoinedLeaveByList)
+        assertTrue(result.hasNotedLeaveByMisleading)
+    }
 }

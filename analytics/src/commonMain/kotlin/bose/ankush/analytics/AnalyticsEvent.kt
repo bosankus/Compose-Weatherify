@@ -156,4 +156,24 @@ sealed interface AnalyticsEvent {
         override val firebaseName = "logout"
         override val params get() = emptyMap<String, Any?>()
     }
+
+    data object LeaveByFakeDoorImpression : AnalyticsEvent {
+        override val firebaseName = "leave_by_fake_door_impression"
+        override val params get() = emptyMap<String, Any?>()
+    }
+
+    data object LeaveByFakeDoorPrimaryTap : AnalyticsEvent {
+        override val firebaseName = "leave_by_fake_door_primary_tap"
+        override val params get() = emptyMap<String, Any?>()
+    }
+
+    data object LeaveByFakeDoorDismiss : AnalyticsEvent {
+        override val firebaseName = "leave_by_fake_door_dismiss"
+        override val params get() = emptyMap<String, Any?>()
+    }
+
+    data object LeaveByFakeDoorMisleadingTap : AnalyticsEvent {
+        override val firebaseName = "leave_by_fake_door_misleading_tap"
+        override val params get() = emptyMap<String, Any?>()
+    }
 }

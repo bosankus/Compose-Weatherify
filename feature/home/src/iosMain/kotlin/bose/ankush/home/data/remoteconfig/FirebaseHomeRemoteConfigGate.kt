@@ -15,17 +15,24 @@ internal class FirebaseHomeRemoteConfigGate : HomeRemoteConfigGate {
         }
     }
 
-    override fun initialize() {
-        val config = remoteConfig ?: return
+    override fun initialize(onActivated: () -> Unit) {
+        val config = remoteConfig
+        if (config == null) {
+            onActivated()
+            return
+        }
         config.configSettings =
             FIRRemoteConfigSettings().apply {
                 minimumFetchInterval = DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS
             }
-        config.fetchAndActivateWithCompletionHandler { _, _ -> }
+        config.fetchAndActivateWithCompletionHandler { _, _ -> onActivated() }
     }
 
     override fun isNotificationBannerEnabled(): Boolean =
         remoteConfig?.configValueForKey(ENABLE_NOTIFICATION_KEY)?.boolValue ?: false
+
+    // Android-only product. Do not surface the card on iOS even if the key is on.
+    override fun isLeaveByFakeDoorEnabled(): Boolean = false
 
     companion object {
         private const val DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS = 3600.0

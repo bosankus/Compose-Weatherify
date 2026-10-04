@@ -73,6 +73,7 @@ kotlin {
             dependencies {
                 implementation(project(":network"))
                 implementation(project(":storage"))
+                implementation(project(":feature:finder"))
                 implementation(project(":common-ui"))
                 implementation(project(":analytics"))
                 implementation(libs.compose.multiplatform.resources)
