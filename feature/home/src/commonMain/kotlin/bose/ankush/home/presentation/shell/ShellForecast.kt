@@ -27,6 +27,8 @@ internal data class ShellDay(
 /** Live forecast fields only. Missing values stay as [MISSING], never a made-up number. */
 internal data class ShellForecast(
     val temperatureLine: String,
+    val temperature: String,
+    val place: String,
     val conditionLine: String,
     val feel: String,
     val wind: String,
@@ -65,6 +67,8 @@ internal fun WeatherForecast.toShellForecast(
         }
     return ShellForecast(
         temperatureLine = temperatureLine,
+        temperature = tempLabel ?: if (placeLabel == null) MISSING else "",
+        place = placeLabel.orEmpty(),
         conditionLine = conditionLine(now),
         feel = now?.feels_like?.let { "${it.toCelsius()}°" } ?: MISSING,
         wind = now?.wind_speed?.let { "$it m/s" } ?: MISSING,

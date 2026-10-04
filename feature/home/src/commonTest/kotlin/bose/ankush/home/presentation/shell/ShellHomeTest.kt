@@ -38,6 +38,8 @@ class ShellHomeTest {
         val shell = forecast.toShellForecast(place = "Harbor", today = LocalDate(2026, 10, 4))
 
         assertEquals("16°, Harbor", shell.temperatureLine)
+        assertEquals("16°", shell.temperature)
+        assertEquals("Harbor", shell.place)
         assertEquals("It's fog", shell.conditionLine)
         assertEquals("17°", shell.feel)
         assertEquals("2.5 m/s", shell.wind)
@@ -70,6 +72,8 @@ class ShellHomeTest {
         val shell = forecast.toShellForecast(place = null, today = LocalDate(2026, 10, 4))
 
         assertEquals(MISSING, shell.temperatureLine)
+        assertEquals(MISSING, shell.temperature)
+        assertEquals("", shell.place)
         assertEquals(MISSING, shell.uv)
         assertEquals(MISSING, shell.wind)
         assertTrue(shell.days.isEmpty())
