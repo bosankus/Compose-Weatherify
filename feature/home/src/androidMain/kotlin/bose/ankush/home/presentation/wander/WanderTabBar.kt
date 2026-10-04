@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -73,15 +74,16 @@ fun WanderTabBar(
                             Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .semantics {
+                                .semantics(mergeDescendants = true) {
                                     role = Role.Tab
                                     this.selected = isSelected
-                                }.clickable { onSelected(tab) },
+                                    contentDescription = tab.label
+                                }.clickable(role = Role.Tab) { onSelected(tab) },
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             imageVector = tab.icon,
-                            contentDescription = tab.label,
+                            contentDescription = null,
                             tint = if (isSelected) selectedIcon else inactiveIcon,
                         )
                     }
