@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bose.ankush.home.domain.location.HomeGeocoder
+import bose.ankush.home.presentation.HomeIntent
 import bose.ankush.home.presentation.HomeState
 import bose.ankush.home.presentation.HomeViewModel
 import kotlinx.datetime.TimeZone
@@ -39,7 +40,10 @@ fun ShellHomeRoute(
     }
     LaunchedEffect(shellViewModel) {
         shellViewModel.effect.collect { effect ->
-            if (effect is ShellEffect.OpenSettings) onOpenSettings()
+            when (effect) {
+                ShellEffect.OpenSettings -> onOpenSettings()
+                ShellEffect.ReloadForecast -> homeViewModel.processIntent(HomeIntent.Refresh)
+            }
         }
     }
 
@@ -48,20 +52,30 @@ fun ShellHomeRoute(
             .now()
             .toLocalDateTime(TimeZone.currentSystemDefault())
             .date
+    val hasCurrent = home.weatherData?.current != null
+    val forecastStatus =
+        forecastSectionStatus(
+            isLoading = home.isLoading,
+            hasCurrent = hasCurrent,
+            hasFailure = home.error != null || home.isOffline || !home.offlineMessage.isNullOrBlank(),
+        )
     val forecast =
         home.weatherData
-            ?.takeIf { it.current != null }
+            ?.takeIf { hasCurrent }
             ?.toShellForecast(placeName, today)
-    val status = home.error ?: home.offlineMessage
 
     ShellHomeScreen(
         state = shell,
         forecast = forecast,
-        statusMessage = status,
+        forecastStatus = forecastStatus,
         actions =
             ShellActions(
                 onIntent = shellViewModel::onIntent,
                 onSave = shellViewModel::submitCreate,
+                onRetryForecast = { homeViewModel.processIntent(HomeIntent.Refresh) },
+                onRetryAccount = shellViewModel::refreshAccount,
+                onRetryEvents = shellViewModel::retryEvents,
+                onRetrySavedPlace = shellViewModel::retrySavedPlace,
             ),
         places = places,
     )

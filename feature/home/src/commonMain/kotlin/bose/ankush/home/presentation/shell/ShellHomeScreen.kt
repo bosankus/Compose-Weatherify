@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -52,7 +55,7 @@ import kotlinx.datetime.LocalDate
 internal fun ShellHomeScreen(
     state: ShellState,
     forecast: ShellForecast?,
-    statusMessage: String?,
+    forecastStatus: ShellSectionStatus,
     actions: ShellActions,
     places: @Composable () -> Unit,
 ) {
@@ -75,7 +78,7 @@ internal fun ShellHomeScreen(
                 )
             }
         } else {
-            HomeColumn(state, forecast, statusMessage, actions)
+            HomeColumn(state, forecast, forecastStatus, actions)
         }
         val canSave = canSubmitEvent(state)
         ShellCreateDialog(state = state, canSave = canSave, onIntent = actions.onIntent, onSave = actions.onSave)
@@ -86,9 +89,10 @@ internal fun ShellHomeScreen(
 private fun HomeColumn(
     state: ShellState,
     forecast: ShellForecast?,
-    statusMessage: String?,
+    forecastStatus: ShellSectionStatus,
     actions: ShellActions,
 ) {
+    val liveForecast = if (forecastStatus == ShellSectionStatus.Ready) forecast else null
     Column(
         modifier =
             Modifier
@@ -100,31 +104,44 @@ private fun HomeColumn(
     ) {
         Spacer(modifier = Modifier.height(20.dp))
         Header(
-            forecast = forecast,
+            forecast = liveForecast,
+            forecastStatus =
+                when {
+                    liveForecast != null -> ShellSectionStatus.Ready
+                    forecastStatus == ShellSectionStatus.Ready -> ShellSectionStatus.Empty
+                    else -> forecastStatus
+                },
+            photoStatus = state.accountPhoto,
             photoUrl = state.photoUrl,
             onAccount = { actions.onIntent(ShellIntent.OpenAccount) },
+            onRetryForecast = actions.onRetryForecast,
+            onRetryAccount = actions.onRetryAccount,
         )
-        if (forecast == null) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(text = statusMessage ?: "Loading", color = Ink, fontSize = 16.sp)
-        } else {
+        if (liveForecast != null) {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = forecast.conditionLine, color = Ink, fontSize = 18.sp)
+            Text(text = liveForecast.conditionLine, color = Ink, fontSize = 18.sp)
             Spacer(modifier = Modifier.height(8.dp))
-            MetricLine(label = "Real feel", value = forecast.feel)
-            MetricLine(label = "Wind", value = forecast.wind)
-            MetricLine(label = "UV", value = forecast.uv)
-            Spacer(modifier = Modifier.height(20.dp))
-            CalendarBlock(
-                days = forecast.days,
-                eventDates = state.eventDates,
-                onPlus = { actions.onIntent(ShellIntent.OpenCreate) },
-            )
-            state.featuredPlace?.let { place ->
-                Spacer(modifier = Modifier.height(16.dp))
-                SavedPlaceCard(place = place, onClick = { actions.onIntent(ShellIntent.SelectTab(ShellTab.SAVED)) })
-            }
+            MetricLine(label = "Real feel", value = liveForecast.feel)
+            MetricLine(label = "Wind", value = liveForecast.wind)
+            MetricLine(label = "UV", value = liveForecast.uv)
         }
+        Spacer(modifier = Modifier.height(20.dp))
+        CalendarBlock(
+            days = forecast?.days.orEmpty(),
+            dayStatus = calendarDaysStatus(forecastStatus, forecast?.days?.size ?: 0),
+            events = state.events,
+            eventDates = state.eventDates,
+            onPlus = { actions.onIntent(ShellIntent.OpenCreate) },
+            onRetryForecast = actions.onRetryForecast,
+            onRetryEvents = actions.onRetryEvents,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        SavedPlaceSection(
+            status = state.savedPlace,
+            place = state.featuredPlace,
+            onOpen = { actions.onIntent(ShellIntent.SelectTab(ShellTab.SAVED)) },
+            onRetry = actions.onRetrySavedPlace,
+        )
         Spacer(modifier = Modifier.height(16.dp))
         ShellTabBar(selected = state.tab, onSelected = { actions.onIntent(ShellIntent.SelectTab(it)) })
         Spacer(modifier = Modifier.height(12.dp))
@@ -134,17 +151,89 @@ private fun HomeColumn(
 @Composable
 private fun Header(
     forecast: ShellForecast?,
+    forecastStatus: ShellSectionStatus,
+    photoStatus: ShellSectionStatus,
     photoUrl: String?,
     onAccount: () -> Unit,
+    onRetryForecast: () -> Unit,
+    onRetryAccount: () -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = forecast?.temperatureLine ?: MISSING,
-            color = Ink,
-            fontSize = 40.sp,
-            modifier = Modifier.weight(1f),
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+        Box(modifier = Modifier.weight(1f)) {
+            if (forecast != null) {
+                Text(text = forecast.temperatureLine, color = Ink, fontSize = 40.sp)
+            } else {
+                SectionHold(
+                    message = checkNotNull(placeholderMessage(ShellSectionKind.Forecast, forecastStatus)),
+                    retryDescription = retryContentDescription(ShellSectionKind.Forecast),
+                    onRetry = onRetryForecast,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+        Spacer(modifier = Modifier.size(12.dp))
+        PhotoSection(
+            status = photoStatus,
+            photoUrl = photoUrl,
+            onAccount = onAccount,
+            onRetry = onRetryAccount,
         )
+    }
+}
+
+@Composable
+private fun PhotoSection(
+    status: ShellSectionStatus,
+    photoUrl: String?,
+    onAccount: () -> Unit,
+    onRetry: () -> Unit,
+) {
+    if (status == ShellSectionStatus.Ready && !photoUrl.isNullOrBlank()) {
         AccountSpot(photoUrl = photoUrl, onClick = onAccount)
+    } else {
+        val shown = if (status == ShellSectionStatus.Ready) ShellSectionStatus.Empty else status
+        SectionHold(
+            message = checkNotNull(placeholderMessage(ShellSectionKind.Photo, shown)),
+            retryDescription = retryContentDescription(ShellSectionKind.Photo),
+            onRetry = onRetry,
+            onBodyClick = onAccount,
+            modifier = Modifier.width(168.dp),
+        )
+    }
+}
+
+@Composable
+private fun SectionHold(
+    message: String,
+    retryDescription: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    onBodyClick: (() -> Unit)? = null,
+) {
+    Column(
+        modifier =
+            modifier
+                .heightIn(min = 96.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(DayFill)
+                .padding(start = 16.dp, top = 4.dp, end = 4.dp, bottom = 16.dp),
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            IconButton(onClick = onRetry) {
+                Icon(imageVector = Icons.Filled.Refresh, contentDescription = retryDescription, tint = PlusYellow)
+            }
+        }
+        Text(
+            text = message,
+            color = Ink,
+            fontSize = 16.sp,
+            modifier =
+                if (onBodyClick == null) {
+                    Modifier
+                } else {
+                    Modifier.clickable(onClick = onBodyClick)
+                },
+        )
     }
 }
 
@@ -193,28 +282,71 @@ private fun MetricLine(
 @Composable
 private fun CalendarBlock(
     days: List<ShellDay>,
+    dayStatus: ShellSectionStatus,
+    events: ShellSectionStatus,
     eventDates: Set<LocalDate>,
     onPlus: () -> Unit,
+    onRetryForecast: () -> Unit,
+    onRetryEvents: () -> Unit,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Event calendar", color = Ink, fontSize = 16.sp, modifier = Modifier.weight(1f))
-        IconButton(onClick = onPlus) {
-            Box(
-                modifier = Modifier.size(28.dp).clip(CircleShape).background(PlusYellow),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add event", tint = Color(0xFF1A1A1A))
+    val retryDays = dayStatus != ShellSectionStatus.Ready
+    val retryEvents = events != ShellSectionStatus.Ready
+    Column(modifier = Modifier.fillMaxWidth().heightIn(min = 96.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(text = "Event calendar", color = Ink, fontSize = 16.sp, modifier = Modifier.weight(1f))
+            if (retryDays || retryEvents) {
+                val retryDescription =
+                    listOfNotNull(
+                        if (retryDays) retryContentDescription(ShellSectionKind.Calendar) else null,
+                        if (retryEvents) retryContentDescription(ShellSectionKind.Events) else null,
+                    ).joinToString(". ")
+                IconButton(
+                    onClick = {
+                        if (retryDays) onRetryForecast()
+                        if (retryEvents) onRetryEvents()
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = retryDescription,
+                        tint = PlusYellow,
+                    )
+                }
+            }
+            IconButton(onClick = onPlus) {
+                Box(
+                    modifier = Modifier.size(28.dp).clip(CircleShape).background(PlusYellow),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = "Add event", tint = Color(0xFF1A1A1A))
+                }
             }
         }
-    }
-    if (days.isNotEmpty()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            days.forEach { day ->
-                DayCell(day = day, marked = day.date in eventDates)
+        val shownDayStatus =
+            if (dayStatus == ShellSectionStatus.Ready && days.isEmpty()) {
+                ShellSectionStatus.Empty
+            } else {
+                dayStatus
             }
+        if (shownDayStatus == ShellSectionStatus.Ready && days.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                days.forEach { day ->
+                    DayCell(day = day, marked = day.date in eventDates)
+                }
+            }
+        } else {
+            Text(
+                text = checkNotNull(placeholderMessage(ShellSectionKind.Calendar, shownDayStatus)),
+                color = Ink,
+                fontSize = 16.sp,
+            )
+        }
+        placeholderMessage(ShellSectionKind.Events, events)?.let { message ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = message, color = Ink, fontSize = 16.sp)
         }
     }
 }
@@ -246,6 +378,27 @@ private fun DayCell(
                         .background(PlusYellow),
             )
         }
+    }
+}
+
+@Composable
+private fun SavedPlaceSection(
+    status: ShellSectionStatus,
+    place: SavedLocation?,
+    onOpen: () -> Unit,
+    onRetry: () -> Unit,
+) {
+    if (status == ShellSectionStatus.Ready && place != null) {
+        SavedPlaceCard(place = place, onClick = onOpen)
+    } else {
+        val shown = if (status == ShellSectionStatus.Ready) ShellSectionStatus.Empty else status
+        SectionHold(
+            message = checkNotNull(placeholderMessage(ShellSectionKind.SavedPlace, shown)),
+            retryDescription = retryContentDescription(ShellSectionKind.SavedPlace),
+            onRetry = onRetry,
+            onBodyClick = onOpen,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
 

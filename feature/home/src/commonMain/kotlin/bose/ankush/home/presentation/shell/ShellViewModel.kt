@@ -27,22 +27,47 @@ internal class ShellViewModel(
     private val _effect = Channel<ShellEffect>(Channel.BUFFERED)
     val effect: Flow<ShellEffect> = _effect.receiveAsFlow()
 
-    private var sideJob: Job? = null
+    private var savedJob: Job? = null
+    private var eventsJob: Job? = null
     private var accountJob: Job? = null
+    private var savedToken = 0
+    private var eventsToken = 0
+    private var accountToken = 0
 
     /** GET /account. The signed photo URL is kept in memory only. */
     fun refreshAccount() {
         accountJob?.cancel()
+        val token = ++accountToken
+        dispatch(ShellIntent.MarkAccountLoading)
         accountJob =
             viewModelScope.launch {
-                val photoUrl =
-                    accountRepository
-                        .getAccount()
-                        .getOrNull()
-                        ?.photoUrl
-                        ?.takeIf { it.isNotBlank() }
-                dispatch(ShellIntent.AccountLoaded(photoUrl))
+                val result = accountRepository.getAccount()
+                if (token != accountToken) return@launch
+                result.fold(
+                    onSuccess = { account -> dispatch(ShellIntent.AccountLoaded(account.photoUrl)) },
+                    onFailure = { dispatch(ShellIntent.AccountFailed) },
+                )
             }
+    }
+
+    fun retrySavedPlace() {
+        val lat = _state.value.lat
+        val lon = _state.value.lon
+        if (lat == null || lon == null) {
+            _effect.trySend(ShellEffect.ReloadForecast)
+        } else {
+            refreshSaved(lat, lon)
+        }
+    }
+
+    fun retryEvents() {
+        val lat = _state.value.lat
+        val lon = _state.value.lon
+        if (lat == null || lon == null) {
+            _effect.trySend(ShellEffect.ReloadForecast)
+        } else {
+            refreshEvents(lat, lon)
+        }
     }
 
     fun onIntent(intent: ShellIntent) {
@@ -95,15 +120,45 @@ internal class ShellViewModel(
         lat: Double,
         lon: Double,
     ) {
-        sideJob?.cancel()
-        sideJob =
+        refreshSaved(lat, lon)
+        refreshEvents(lat, lon)
+    }
+
+    private fun refreshSaved(
+        lat: Double,
+        lon: Double,
+    ) {
+        savedJob?.cancel()
+        val token = ++savedToken
+        dispatch(ShellIntent.MarkSavedPlaceLoading)
+        savedJob =
             viewModelScope.launch {
-                val places = locationRepository.getSavedLocations()
-                val events = placeEventRepository.getPlaceEvents(lat, lon)
-                if (_state.value.lat != lat || _state.value.lon != lon) return@launch
-                val featured = places.getOrNull()?.let { closestSavedPlace(it, lat, lon) }
-                val dates = events.getOrNull()?.let { eventDatesFrom(it) } ?: emptySet()
-                dispatch(ShellIntent.SideDataLoaded(featured, dates))
+                val result = locationRepository.getSavedLocations()
+                if (token != savedToken || _state.value.lat != lat || _state.value.lon != lon) return@launch
+                result.fold(
+                    onSuccess = { places ->
+                        dispatch(ShellIntent.SavedPlaceLoaded(closestSavedPlace(places, lat, lon)))
+                    },
+                    onFailure = { dispatch(ShellIntent.SavedPlaceFailed) },
+                )
+            }
+    }
+
+    private fun refreshEvents(
+        lat: Double,
+        lon: Double,
+    ) {
+        eventsJob?.cancel()
+        val token = ++eventsToken
+        dispatch(ShellIntent.MarkEventsLoading)
+        eventsJob =
+            viewModelScope.launch {
+                val result = placeEventRepository.getPlaceEvents(lat, lon)
+                if (token != eventsToken || _state.value.lat != lat || _state.value.lon != lon) return@launch
+                result.fold(
+                    onSuccess = { events -> dispatch(ShellIntent.EventsLoaded(eventDatesFrom(events))) },
+                    onFailure = { dispatch(ShellIntent.EventsFailed) },
+                )
             }
     }
 

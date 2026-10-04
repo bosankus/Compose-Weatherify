@@ -114,7 +114,7 @@ internal fun distanceMeters(
     return 2 * EARTH_RADIUS_METERS * asin(sqrt(a))
 }
 
-/** Nearest saved place within [SAVED_PLACE_MATCH_METERS], or null so the card stays hidden. */
+/** Nearest saved place within [SAVED_PLACE_MATCH_METERS], or null when none qualifies. */
 internal fun closestSavedPlace(
     places: List<SavedLocation>,
     lat: Double,
