@@ -217,7 +217,12 @@ fun WanderHomeRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val current = state.weatherData?.current
     val place = rememberForecastPlace(state.userLocation)
-    val weatherMain = current?.weather?.firstOrNull()?.main?.takeIf { it.isNotBlank() }
+    val weatherMain =
+        current
+            ?.weather
+            ?.firstOrNull()
+            ?.main
+            ?.takeIf { it.isNotBlank() }
     val photo = rememberWanderConditionPhoto(weatherMain?.let(::unsplashQuery))
     val content = state.weatherData?.takeIf { current != null }?.toWanderContent(place)
     val leaveBy = leaveByRow(state, viewModel)
