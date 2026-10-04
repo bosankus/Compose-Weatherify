@@ -54,7 +54,7 @@ internal fun WanderHomeScreenPreview() {
                         days = previewDays,
                         showSmallCards = true,
                     ),
-                fogPhoto = null,
+                photo = null,
             ),
     )
 }

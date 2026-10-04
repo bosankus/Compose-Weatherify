@@ -26,29 +26,24 @@ data class WanderFogPhoto(
 )
 
 /**
- * Process-wide cache, not a screen `remember`. Fog is searched once per process
- * and only when that condition has no cached photo. Other conditions never search.
- * Leaving the shell and opening it again reads this cache.
+ * Process-wide cache, keyed by the Unsplash query for the live condition.
+ * A blank key or a failed search is not cached, so the gradient stays.
  */
 internal object WanderConditionPhotoCache {
-    private val photos = ConcurrentHashMap<WanderCondition, WanderFogPhoto>()
+    private val photos = ConcurrentHashMap<String, WanderFogPhoto>()
+    private val inflight = ConcurrentHashMap<String, CompletableDeferred<WanderFogPhoto?>>()
     private val trackedIds = mutableSetOf<String>()
-    private var fogLoad: CompletableDeferred<WanderFogPhoto?>? = null
     private val mutex = Mutex()
 
-    fun cached(condition: WanderCondition): WanderFogPhoto? = photos[condition]
+    fun cached(query: String): WanderFogPhoto? = photos[query]
 
     suspend fun photo(
-        condition: WanderCondition,
+        query: String,
         api: UnsplashApi,
     ): WanderFogPhoto? {
-        if (condition != WanderCondition.FOG) return null
-        return photos[condition] ?: sharedFogPhoto(api)
-    }
-
-    private suspend fun sharedFogPhoto(api: UnsplashApi): WanderFogPhoto? {
-        val request = mutex.withLock { reserveFogLoad() }
-        if (request.leader) loadFog(request.pending, api)
+        photos[query]?.let { return it }
+        val request = reserve(query)
+        if (request.leader) load(query, request.pending, api)
         return request.pending.await()
     }
 
@@ -72,31 +67,21 @@ internal object WanderConditionPhotoCache {
         }
     }
 
-    private fun reserveFogLoad(): FogRequest {
-        val ready = photos[WanderCondition.FOG]
-        val inFlight = fogLoad
-        val pending: CompletableDeferred<WanderFogPhoto?>
-        val leader: Boolean
-        when {
-            ready != null -> {
-                pending = CompletableDeferred(ready)
-                leader = false
-            }
-            inFlight != null -> {
-                pending = inFlight
-                leader = false
-            }
-            else -> {
-                pending = CompletableDeferred()
-                fogLoad = pending
-                leader = true
-            }
+    private fun reserve(query: String): LoadRequest {
+        val ready = photos[query]
+        if (ready != null) return LoadRequest(CompletableDeferred(ready), leader = false)
+        val created = CompletableDeferred<WanderFogPhoto?>()
+        val existing = inflight.putIfAbsent(query, created)
+        return if (existing == null) {
+            LoadRequest(created, leader = true)
+        } else {
+            LoadRequest(existing, leader = false)
         }
-        return FogRequest(pending, leader)
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    private suspend fun loadFog(
+    private suspend fun load(
+        query: String,
         pending: CompletableDeferred<WanderFogPhoto?>,
         api: UnsplashApi,
     ) {
@@ -104,7 +89,7 @@ internal object WanderConditionPhotoCache {
         try {
             loaded =
                 try {
-                    api.searchPhotos(query = FOG_LANDSCAPE_QUERY, perPage = 1).firstOrNull()?.toWanderPhoto()
+                    api.searchPhotos(query = query, perPage = 1).firstOrNull()?.toWanderPhoto()
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (_: Exception) {
@@ -115,35 +100,40 @@ internal object WanderConditionPhotoCache {
             withContext(NonCancellable) {
                 val published =
                     mutex.withLock {
-                        if (loaded != null) photos.putIfAbsent(WanderCondition.FOG, loaded)
-                        if (fogLoad === pending) fogLoad = null
-                        photos[WanderCondition.FOG]
+                        if (loaded != null) photos.putIfAbsent(query, loaded)
+                        if (inflight[query] === pending) inflight.remove(query)
+                        photos[query]
                     }
                 if (!pending.isCompleted) pending.complete(published)
             }
         }
     }
 
-    private data class FogRequest(
+    private data class LoadRequest(
         val pending: CompletableDeferred<WanderFogPhoto?>,
         val leader: Boolean,
     )
 }
 
 /**
- * Searches only while the shown condition is fog. The client already asks Unsplash
- * for a portrait photo, content_filter high, and per_page 1. A blank key or any
+ * Searches for the live condition. The client already asks Unsplash for a portrait
+ * photo, content_filter high, and per_page 1. A null query, a blank key, or any
  * failure keeps the gradient. The image URL is the raw URL Unsplash returned, plus
  * the existing size params.
  */
 @Composable
-fun rememberWanderFogPhoto(condition: WanderCondition): WanderFogPhoto? {
+fun rememberWanderConditionPhoto(query: String?): WanderFogPhoto? {
     val api = koinInject<UnsplashApi>()
-    var photo by remember(condition) { mutableStateOf(WanderConditionPhotoCache.cached(condition)) }
-    LaunchedEffect(condition) {
-        photo = WanderConditionPhotoCache.photo(condition, api)
+    var photo by remember(query) { mutableStateOf(query?.let(WanderConditionPhotoCache::cached)) }
+    LaunchedEffect(query) {
+        photo =
+            if (query == null) {
+                null
+            } else {
+                WanderConditionPhotoCache.photo(query, api)
+            }
     }
-    return if (condition == WanderCondition.FOG) photo else null
+    return photo
 }
 
 /** Runs only from the branch that actually puts the photo on screen. */
@@ -154,6 +144,19 @@ internal fun TrackShownWanderPhoto(photo: WanderFogPhoto) {
         WanderConditionPhotoCache.trackShown(photo, api)
     }
 }
+
+/** OpenWeather `weather.main` to an Unsplash search. Unknown mains use one default. */
+internal fun unsplashQuery(weatherMain: String): String =
+    when (weatherMain.lowercase()) {
+        "clear" -> "clear sky landscape"
+        "clouds" -> "clouds landscape"
+        "rain", "drizzle" -> "rain landscape"
+        "snow" -> "snow landscape"
+        "thunderstorm", "squall", "tornado" -> "thunderstorm landscape"
+        "mist" -> "mist landscape"
+        "fog" -> "fog landscape"
+        else -> "weather landscape"
+    }
 
 private fun UnsplashPhoto.toWanderPhoto(): WanderFogPhoto =
     WanderFogPhoto(
@@ -175,5 +178,3 @@ internal fun unsplashReferralUrl(profileHtml: String): String {
 }
 
 internal const val UNSPLASH_HOME_URL = "https://unsplash.com/?utm_source=weatherify&utm_medium=referral"
-
-private const val FOG_LANDSCAPE_QUERY = "fog landscape"

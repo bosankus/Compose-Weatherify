@@ -100,8 +100,8 @@ private fun WanderHomePage(
     modifier: Modifier = Modifier,
 ) {
     val content = ready.content
-    val fogPhoto = ready.fogPhoto
-    val photoUrl = fogPhoto?.imageUrl?.takeIf { content.condition == WanderCondition.FOG }
+    val photo = ready.photo
+    val photoUrl = photo?.imageUrl
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = content.condition, photoUrl = photoUrl)
         Column(
@@ -132,10 +132,10 @@ private fun WanderHomePage(
                 Spacer(modifier = Modifier.height(16.dp))
                 WanderSmallCards()
             }
-            if (fogPhoto != null && photoUrl != null) {
-                TrackShownWanderPhoto(fogPhoto)
+            if (photo != null && photoUrl != null) {
+                TrackShownWanderPhoto(photo)
                 Spacer(modifier = Modifier.height(8.dp))
-                UnsplashCredit(fogPhoto)
+                UnsplashCredit(photo)
             }
             Spacer(modifier = Modifier.weight(1f))
             WanderTabBar(selected = selectedTab, onSelected = onTab)
@@ -216,9 +216,9 @@ fun WanderHomeRoute(
     val viewModel = koinViewModel<HomeViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val current = state.weatherData?.current
-    val condition = current?.wanderCondition() ?: WanderCondition.CLOUDS
     val place = rememberForecastPlace(state.userLocation)
-    val fogPhoto = rememberWanderFogPhoto(if (current == null) WanderCondition.CLOUDS else condition)
+    val weatherMain = current?.weather?.firstOrNull()?.main?.takeIf { it.isNotBlank() }
+    val photo = rememberWanderConditionPhoto(weatherMain?.let(::unsplashQuery))
     val content = state.weatherData?.takeIf { current != null }?.toWanderContent(place)
     val leaveBy = leaveByRow(state, viewModel)
     val shell =
@@ -229,7 +229,7 @@ fun WanderHomeRoute(
                 leaveBy = leaveBy,
             )
         } else {
-            WanderShell.Ready(content = content, fogPhoto = fogPhoto, leaveBy = leaveBy)
+            WanderShell.Ready(content = content, photo = photo, leaveBy = leaveBy)
         }
     WanderHomeScreen(
         links = links,

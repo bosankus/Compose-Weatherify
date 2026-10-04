@@ -44,7 +44,7 @@ sealed interface WanderShell {
 
     data class Ready(
         val content: WanderHomeContent,
-        val fogPhoto: WanderFogPhoto?,
+        val photo: WanderFogPhoto?,
         override val leaveBy: WanderLeaveBy? = null,
     ) : WanderShell
 
@@ -55,7 +55,7 @@ sealed interface WanderShell {
     ) : WanderShell
 }
 
-/** OpenWeather `weather.main`. Only Fog and Mist search Unsplash. */
+/** OpenWeather `weather.main` to the gradient. The photo query is separate. */
 internal fun WeatherForecast.Current.wanderCondition(): WanderCondition {
     val main = weather?.firstOrNull()?.main.orEmpty()
     return when (main.lowercase()) {
