@@ -40,6 +40,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Write Unsplash access key
+        env:
+          UNSPLASH_SECRET: ${{ secrets.UNSPLASH_SECRET }}
+        run: |
+          umask 077
+          printf 'UNSPLASH_ACCESS_KEY=%s\n' "$UNSPLASH_SECRET" > secrets.properties
+
       - name: Decode google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/androidApp/google-services.json
 
@@ -92,6 +99,13 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+
+      - name: Write Unsplash access key
+        env:
+          UNSPLASH_SECRET: ${{ secrets.UNSPLASH_SECRET }}
+        run: |
+          umask 077
+          printf 'UNSPLASH_ACCESS_KEY=%s\n' "$UNSPLASH_SECRET" > secrets.properties
 
       - name: Decode google-services.json
         run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/androidApp/google-services.json
