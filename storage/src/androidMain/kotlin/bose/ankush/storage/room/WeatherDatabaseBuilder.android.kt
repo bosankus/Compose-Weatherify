@@ -8,7 +8,8 @@ import bose.ankush.storage.common.WEATHER_DATABASE_NAME
  * Builds the Android [WeatherDatabase] in SupportSQLite compatibility mode (no [androidx.sqlite.SQLiteDriver]).
  * Keeps the same on-disk file name ([WEATHER_DATABASE_NAME]) and Gson converters as before Room KMP.
  *
- * Registers [MIGRATION_3_4] (drop `auth_tokens` only) and [MIGRATION_4_5] (add `timezoneOffset`). Destructive fallback stays disabled so weather
+ * Registers [MIGRATION_3_4] (drop `auth_tokens` only) and [MIGRATION_4_5] (add `timezoneOffset`).
+ * Destructive fallback stays disabled so weather
  * cache is never wiped on schema mismatch.
  */
 fun createWeatherDatabase(
