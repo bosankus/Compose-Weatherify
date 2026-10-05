@@ -6,6 +6,8 @@ internal object HomeReducer {
         action: HomeAction,
     ): HomeState =
         when (action) {
+            HomeAction.CacheChecked -> state.copy(hasCheckedCache = true)
+
             is HomeAction.Loading ->
                 state.copy(
                     isLoading = true,
@@ -41,7 +43,7 @@ internal object HomeReducer {
                     offlineMessage = null,
                     weatherData = action.weather,
                     airQualityData = action.airQuality,
-                    userLocation = action.location,
+                    userLocation = action.location ?: state.userLocation,
                     isLocationOverridden = action.isLocationOverridden,
                     activeLocationName = action.overrideLocationName,
                 )

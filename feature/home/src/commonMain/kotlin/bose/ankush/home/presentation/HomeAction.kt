@@ -4,6 +4,9 @@ import bose.ankush.home.domain.model.AirQuality
 import bose.ankush.home.domain.model.WeatherForecast
 
 internal sealed interface HomeAction {
+    /** The first Room read finished. Empty Room may now show the loading state. */
+    data object CacheChecked : HomeAction
+
     data class Loading(
         val isRefreshing: Boolean = false,
     ) : HomeAction

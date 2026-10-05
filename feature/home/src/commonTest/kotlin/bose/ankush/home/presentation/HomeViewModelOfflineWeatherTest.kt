@@ -20,6 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -164,29 +166,125 @@ class HomeViewModelOfflineWeatherTest {
             assertTrue(refreshStarted)
             assertNull(viewModel.state.value.weatherData)
             assertTrue(viewModel.state.value.isLoading)
+            assertTrue(viewModel.state.value.hasCheckedCache)
             releaseRefresh.complete(Unit)
             advanceUntilIdle()
         }
 
-    private fun homeViewModel(repository: FakeWeatherRepository): HomeViewModel {
-        val preferences =
-            MutableStateFlow(
-                LocationPreferences(latitude = SAVED_LAT, longitude = SAVED_LON),
+    /**
+     * Reload with Room populated but no saved coordinates and a GPS fix that has not
+     * arrived. The cached forecast must be on screen, not the loading page.
+     */
+    @Test
+    fun reloadShowsCachedForecastWithoutSavedCoordinatesOrGps() =
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val gpsFix = CompletableDeferred<Result<Coordinates>>()
+            val repository = FakeWeatherRepository(initial = cachedForecast(), onRefresh = {})
+            val viewModel =
+                homeViewModel(
+                    repository = repository,
+                    savedPreferences = LocationPreferences(),
+                    gpsFix = { gpsFix.await() },
+                )
+            advanceUntilIdle()
+
+            val state = viewModel.state.value
+            assertEquals(CACHED_ID, state.weatherData?.id)
+            assertFalse(state.isLoading)
+            assertTrue(state.hasCheckedCache)
+            assertEquals(0, repository.refreshCallCount)
+            gpsFix.complete(Result.success(Coordinates(SAVED_LAT, SAVED_LON)))
+            advanceUntilIdle()
+        }
+
+    /** Reload where the saved-coordinate read is slow. Room still paints first. */
+    @Test
+    fun reloadPaintsCacheBeforeSavedCoordinatesLoad() =
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val preferencesGate = CompletableDeferred<Unit>()
+            val releaseRefresh = CompletableDeferred<Unit>()
+            val repository =
+                FakeWeatherRepository(initial = cachedForecast(), onRefresh = { releaseRefresh.await() })
+            val viewModel = homeViewModel(repository = repository, preferencesGate = preferencesGate)
+            advanceUntilIdle()
+
+            assertEquals(
+                CACHED_ID,
+                viewModel.state.value.weatherData
+                    ?.id,
             )
+            assertFalse(viewModel.state.value.isLoading)
+            assertTrue(viewModel.state.value.hasCheckedCache)
+            assertNull(viewModel.state.value.userLocation)
+            assertFalse(viewModel.refreshing.value)
+
+            preferencesGate.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(SAVED_LAT to SAVED_LON, viewModel.state.value.userLocation)
+            assertEquals(
+                CACHED_ID,
+                viewModel.state.value.weatherData
+                    ?.id,
+            )
+            assertTrue(viewModel.refreshing.value)
+            assertFalse(viewModel.state.value.isLoading)
+            releaseRefresh.complete(Unit)
+            advanceUntilIdle()
+            assertFalse(viewModel.refreshing.value)
+        }
+
+    private fun cachedForecast(): WeatherForecast =
+        WeatherForecast(
+            id = CACHED_ID,
+            lastUpdated = CACHED_UPDATED,
+            current =
+                WeatherForecast.Current(
+                    clouds = 1,
+                    dt = 1L,
+                    feels_like = 20.0,
+                    humidity = 10,
+                    pressure = 1000,
+                    sunrise = 1L,
+                    sunset = 2L,
+                    temp = 21.0,
+                    uvi = 0.0,
+                    weather = emptyList(),
+                    wind_gust = null,
+                    wind_speed = 1.0,
+                ),
+        )
+
+    private fun homeViewModel(
+        repository: FakeWeatherRepository,
+        savedPreferences: LocationPreferences = LocationPreferences(latitude = SAVED_LAT, longitude = SAVED_LON),
+        preferencesGate: CompletableDeferred<Unit>? = null,
+        gpsFix: suspend () -> Result<Coordinates> = { Result.success(Coordinates(SAVED_LAT, SAVED_LON)) },
+    ): HomeViewModel {
+        val preferences = MutableStateFlow(savedPreferences)
+        val preferencesFlow: Flow<LocationPreferences> =
+            if (preferencesGate == null) {
+                preferences
+            } else {
+                flow {
+                    preferencesGate.await()
+                    emitAll(preferences)
+                }
+            }
         return HomeViewModel(
             refreshWeatherReport = RefreshWeatherReport(repository),
             getWeatherReport = GetWeatherReport(repository),
             getAirQuality = GetAirQuality(repository),
             locationClient =
                 object : LocationClient {
-                    override suspend fun getCurrentLocation(): Result<Coordinates> =
-                        Result.success(Coordinates(SAVED_LAT, SAVED_LON))
+                    override suspend fun getCurrentLocation(): Result<Coordinates> = gpsFix()
 
                     override fun hasLocationPermission(): Boolean = true
                 },
             locationPreferencesStorage =
                 object : LocationPreferencesStorage {
-                    override fun getLocationPreferencesFlow(): Flow<LocationPreferences> = preferences
+                    override fun getLocationPreferencesFlow(): Flow<LocationPreferences> = preferencesFlow
 
                     override suspend fun saveLocationPreferences(coordinates: Pair<Double, Double>) {
                         preferences.value =

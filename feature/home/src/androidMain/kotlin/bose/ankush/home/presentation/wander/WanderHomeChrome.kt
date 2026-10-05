@@ -123,7 +123,8 @@ internal fun rememberWanderChrome(
         onEnableNotifications = { viewModel.processIntent(HomeIntent.EnableNotificationBanner) },
         onDismissNotifications = { viewModel.processIntent(HomeIntent.DismissNotificationBanner) },
         offlineMessage = if (forecastVisible && state.isOffline) state.offlineMessage else null,
-        forecastLoading = state.isLoading && !forecastVisible,
+        // No week shimmer until Room is known to be empty, so a cached reload never flashes it.
+        forecastLoading = state.isLoading && !forecastVisible && state.hasCheckedCache,
         forecastFailed = !forecastVisible && !state.isLoading && (state.error != null || state.isOffline),
         onRetryForecast = { viewModel.processIntent(HomeIntent.FetchLocation) },
         eventDates = shellState.eventDates,

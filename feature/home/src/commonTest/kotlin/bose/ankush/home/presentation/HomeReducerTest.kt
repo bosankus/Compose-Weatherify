@@ -211,4 +211,21 @@ class HomeReducerTest {
         assertTrue(result.hasJoinedLeaveByList)
         assertTrue(result.hasNotedLeaveByMisleading)
     }
+
+    @Test
+    fun cacheChecked_onlyMarksTheCacheRead() {
+        val initial = HomeState(isLoading = true)
+        val result = HomeReducer.reduce(initial, HomeAction.CacheChecked)
+        assertTrue(result.hasCheckedCache)
+        assertTrue(result.isLoading)
+        assertNull(result.weatherData)
+    }
+
+    @Test
+    fun success_withoutLocation_keepsKnownLocation() {
+        val initial = HomeState(userLocation = 1.0 to 2.0)
+        val result = HomeReducer.reduce(initial, HomeAction.Success(weather = WeatherForecast(id = 1L)))
+        assertEquals(1.0 to 2.0, result.userLocation)
+        assertFalse(result.isLoading)
+    }
 }
