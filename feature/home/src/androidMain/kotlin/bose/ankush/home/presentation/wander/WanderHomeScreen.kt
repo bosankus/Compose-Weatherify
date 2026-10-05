@@ -133,7 +133,9 @@ private fun WanderHomePage(
     val content = ready.content
     val photo = ready.photo
     val photoUrl = photo?.imageUrl
-    val contentColor = rememberWanderContentColor(content.condition, photoUrl)
+    val imageSample = rememberWanderImageSample(content.condition, photoUrl)
+    val contentColor = contentColorForLuminance(imageSample.luminance)
+    val chipColors = rememberWanderChipColors(imageSample.averageColor)
     var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
     val onHomeTab = { tab: WanderTab ->
         openAlert = null
@@ -160,7 +162,8 @@ private fun WanderHomePage(
                             Modifier
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState())
-                                .padding(horizontal = 20.dp),
+                                .padding(horizontal = 20.dp)
+                                .padding(bottom = 40.dp),
                     ) {
                         Spacer(modifier = Modifier.height(28.dp))
                         chrome.locationOverrideName?.let { name ->
@@ -260,6 +263,14 @@ private fun WanderHomePage(
                         Spacer(modifier = Modifier.height(12.dp))
                     }
                     WanderAlertPanel(alert = openAlert, onDismiss = { openAlert = null })
+                    WanderRefreshChip(
+                        visible = chrome.backgroundRefreshing && !chrome.refreshing,
+                        colors = chipColors,
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 8.dp),
+                    )
                 }
                 WanderTabBar(
                     selected = selectedTab,

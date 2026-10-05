@@ -125,18 +125,31 @@ internal fun bundledConditionDrawable(
 }
 
 internal fun WanderCondition.dominantBackgroundLuminance(): Double {
-    val (top, bottom) =
-        when (this) {
-            WanderCondition.CLEAR -> clearTop to clearBottom
-            WanderCondition.CLOUDS -> cloudsTop to cloudsBottom
-            WanderCondition.RAIN -> rainTop to rainBottom
-            WanderCondition.FOG -> fogTop to fogBottom
-            WanderCondition.STORM -> stormTop to stormBottom
-            WanderCondition.SNOW -> snowTop to snowBottom
-            WanderCondition.NIGHT -> nightTop to nightBottom
-        }
+    val (top, bottom) = dominantGradientEnds()
     return (relativeLuminance(top) + relativeLuminance(bottom)) / 2
 }
+
+/** Mean of the condition gradient ends. Used before a photo is sampled. */
+internal fun WanderCondition.dominantBackgroundColor(): Color {
+    val (top, bottom) = dominantGradientEnds()
+    return Color(
+        red = (top.red + bottom.red) / 2f,
+        green = (top.green + bottom.green) / 2f,
+        blue = (top.blue + bottom.blue) / 2f,
+        alpha = 1f,
+    )
+}
+
+private fun WanderCondition.dominantGradientEnds(): Pair<Color, Color> =
+    when (this) {
+        WanderCondition.CLEAR -> clearTop to clearBottom
+        WanderCondition.CLOUDS -> cloudsTop to cloudsBottom
+        WanderCondition.RAIN -> rainTop to rainBottom
+        WanderCondition.FOG -> fogTop to fogBottom
+        WanderCondition.STORM -> stormTop to stormBottom
+        WanderCondition.SNOW -> snowTop to snowBottom
+        WanderCondition.NIGHT -> nightTop to nightBottom
+    }
 
 private fun vertical(
     top: Color,
