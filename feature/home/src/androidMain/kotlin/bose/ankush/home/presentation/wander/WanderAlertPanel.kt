@@ -193,7 +193,7 @@ private fun AlertPanelCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             AlertTimes(alert = alert, summary = parsed.summary)
-            parsed.bodySections.forEach { section -> AlertSectionBlock(section) }
+            parsed.displaySections().forEach { display -> AlertSectionBlock(display) }
             parsed.fallback?.let { Text(text = it, color = WanderOnDark, fontSize = 14.sp) }
             alert.sender_name?.takeIf { it.isNotBlank() }?.let { source ->
                 Text(text = "Source · $source", color = Muted, fontSize = 12.sp)
@@ -243,9 +243,10 @@ private fun AlertChip(text: String) {
 }
 
 @Composable
-private fun AlertSectionBlock(section: AlertSection) {
+private fun AlertSectionBlock(display: AlertDisplaySection) {
+    val section = display.section
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        section.label?.let { label ->
+        display.heading?.let { label ->
             Text(
                 text = label.uppercase(),
                 color = Muted,

@@ -28,6 +28,26 @@ internal data class AlertSection(
     val items: List<String>? = null,
 )
 
+/** A body section as the panel shows it. A null [heading] means the body runs without a title. */
+internal data class AlertDisplaySection(
+    val heading: String?,
+    val section: AlertSection,
+)
+
+/**
+ * Panel order: What and Impacts first with no heading, then Where as "Impacted areas",
+ * then every other section in its original order under its own label. When stays the summary.
+ */
+internal fun ParsedAlert.displaySections(): List<AlertDisplaySection> {
+    val body = bodySections
+    val leading = listOf(WHAT_LABEL, IMPACTS_LABEL)
+    val ordered =
+        leading.flatMap { label -> body.filter { it.label == label }.map { AlertDisplaySection(null, it) } } +
+            body.filter { it.label == WHERE_LABEL }.map { AlertDisplaySection(IMPACTED_AREAS_HEADING, it) }
+    val placed = leading + WHERE_LABEL
+    return ordered + body.filterNot { it.label in placed }.map { AlertDisplaySection(it.label, it) }
+}
+
 internal fun parseAlertDescription(raw: String?): ParsedAlert {
     val text = raw?.replace("\r\n", "\n")?.replace('\r', '\n').orEmpty()
     if (text.isBlank()) return ParsedAlert()
@@ -90,3 +110,6 @@ private val PARAGRAPH_BREAK = Regex("""\n[ \t]*\n""")
 private val WHITESPACE = Regex("""\s+""")
 private const val WHEN_LABEL = "When"
 private const val WHERE_LABEL = "Where"
+private const val WHAT_LABEL = "What"
+private const val IMPACTS_LABEL = "Impacts"
+internal const val IMPACTED_AREAS_HEADING = "Impacted areas"

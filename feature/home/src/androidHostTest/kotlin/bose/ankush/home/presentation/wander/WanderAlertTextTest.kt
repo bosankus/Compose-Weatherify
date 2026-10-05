@@ -92,6 +92,38 @@ class WanderAlertTextTest {
         assertNull(splitAlertAreas("Coastal Marin County."))
     }
 
+    @Test
+    fun panelShowsWhatThenImpactsWithoutHeadingsBeforeWhere() {
+        val display = parseAlertDescription(HEAT_ADVISORY).displaySections()
+
+        assertEquals(listOf("What", "Impacts", "Where"), display.map { it.section.label })
+        assertNull(display[0].heading)
+        assertNull(display[1].heading)
+    }
+
+    @Test
+    fun whereIsHeadedImpactedAreasAndKeepsItsAreaList() {
+        val where = parseAlertDescription(HEAT_ADVISORY).displaySections().single { it.section.label == "Where" }
+
+        assertEquals("Impacted areas", where.heading)
+        assertEquals(7, where.section.items?.size)
+    }
+
+    @Test
+    fun otherSectionsFollowWhereWithTheirOwnHeadingsInOriginalOrder() {
+        val display =
+            parseAlertDescription(
+                "Issued for the coast.\n\n* WHERE...Marin, Sonoma.\n\n* ADDITIONAL DETAILS...Roads may flood." +
+                    "\n\n* WHEN...Until noon.\n\n* WHAT...Rain.",
+            ).displaySections()
+
+        assertEquals(
+            listOf("What", "Where", null, "Additional details"),
+            display.map { it.section.label },
+        )
+        assertEquals(listOf(null, "Impacted areas", null, "Additional details"), display.map { it.heading })
+    }
+
     private companion object {
         const val HEAT_ADVISORY =
             "* WHAT...Hot conditions with maximum temperatures in the mid-90s to\nlow-100s. Mild minimum " +
