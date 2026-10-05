@@ -2,11 +2,9 @@ package bose.ankush.home.presentation.wander
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
@@ -27,7 +24,6 @@ import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.ic_sunny
 import bose.ankush.home.generated.resources.weather_icon_content
-import bose.ankush.home.presentation.component.SunriseSunsetCombinedAnimation
 import bose.ankush.home.presentation.util.formatTextCapitalization
 import bose.ankush.home.presentation.util.getFormattedDateTimeFromEpoch
 import bose.ankush.home.presentation.util.getIconUrl
@@ -36,12 +32,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Clock
 import kotlin.time.Instant
 
 /**
  * Observation, icon, and today's summary on the Wander column.
- * The sunrise drawing sits in this card. The Unsplash photo stays behind it.
+ * Sunrise and sunset are a static arc. The Unsplash photo stays behind this card.
  */
 @Composable
 internal fun WanderCurrentReport(
@@ -67,20 +62,11 @@ internal fun WanderCurrentReport(
         }
         ConditionRow(icon = weather?.icon, description = description, contentColor = contentColor)
         DetailLine(text = metricLine(current), contentColor = contentColor)
-        SunTimes(current = current, contentColor = contentColor)
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(SunBoxHeight)
-                    .clip(RoundedCornerShape(16.dp)),
-        ) {
-            SunriseSunsetCombinedAnimation(
-                sunriseTimestamp = current.sunrise,
-                sunsetTimestamp = current.sunset,
-                currentTimestamp = Clock.System.now().epochSeconds,
-            )
-        }
+        WanderDayArc(
+            sunrise = current.sunrise,
+            sunset = current.sunset,
+            contentColor = contentColor,
+        )
         val summary = todaySummary?.takeIf { it.isNotBlank() }
         if (summary != null) {
             Text(
@@ -140,25 +126,6 @@ private fun DetailLine(
     Text(text = text, color = contentColor, fontSize = 14.sp)
 }
 
-@Composable
-private fun SunTimes(
-    current: WeatherForecast.Current,
-    contentColor: Color,
-) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(
-            text = "Sunrise ${current.sunrise?.toClock() ?: UNAVAILABLE}",
-            color = contentColor,
-            fontSize = 14.sp,
-        )
-        Text(
-            text = "Sunset ${current.sunset?.toClock() ?: UNAVAILABLE}",
-            color = contentColor,
-            fontSize = 14.sp,
-        )
-    }
-}
-
 private fun metricLine(current: WeatherForecast.Current): String =
     listOfNotNull(
         current.humidity?.let { "Humidity $it%" },
@@ -186,7 +153,5 @@ internal fun Long.toClock(): String {
 }
 
 private val cardFill = Color.Black.copy(alpha = 0.38f)
-private val SunBoxHeight = 112.dp
 private const val CURRENT_WEATHER = "Current weather"
 private const val TODAY = "Today's forecast"
-private const val UNAVAILABLE = "N/A"
