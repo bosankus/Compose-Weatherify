@@ -44,7 +44,7 @@ internal fun rememberWanderContentColor(
     photoUrl: String?,
 ): Color {
     val sample = rememberWanderImageSample(condition, photoUrl)
-    return contentColorForLuminance(sample.luminance)
+    return contentColorForLuminance(sample.headerLuminance)
 }
 
 /**
@@ -76,6 +76,7 @@ internal fun rememberWanderImageSample(
     val fallback =
         WanderImageSample(
             luminance = condition.dominantBackgroundLuminance(),
+            headerLuminance = condition.dominantHeaderLuminance(),
             averageColor = condition.dominantBackgroundColor(),
         )
     val photoModel =
@@ -187,6 +188,7 @@ internal fun relativeLuminance(color: Color): Double =
 
 internal data class WanderImageSample(
     val luminance: Double,
+    val headerLuminance: Double,
     val averageColor: Color,
 )
 
@@ -194,23 +196,35 @@ internal fun sampleBitmap(bitmap: Bitmap): WanderImageSample {
     val width = bitmap.width
     val height = bitmap.height
     if (width <= 0 || height <= 0) {
-        return WanderImageSample(luminance = 0.0, averageColor = Color.Black)
+        return WanderImageSample(
+            luminance = 0.0,
+            headerLuminance = 0.0,
+            averageColor = Color.Black,
+        )
     }
+    val headerHeight = headerSampleHeight(height)
     var totalLuminance = 0.0
+    var headerLuminanceTotal = 0.0
     var totalRed = 0.0
     var totalGreen = 0.0
     var totalBlue = 0.0
     val row = IntArray(width)
     val count = (width * height).toDouble()
+    val headerCount = (width * headerHeight).toDouble()
     for (y in 0 until height) {
         bitmap.getPixels(row, 0, width, 0, y, width, 1)
         for (pixel in row) {
             val red = ((pixel shr RED_SHIFT) and CHANNEL_MASK) / BYTE_MAX
             val green = ((pixel shr GREEN_SHIFT) and CHANNEL_MASK) / BYTE_MAX
             val blue = (pixel and CHANNEL_MASK) / BYTE_MAX
-            totalLuminance += REC709_RED * linearSrgb(red) +
-                REC709_GREEN * linearSrgb(green) +
-                REC709_BLUE * linearSrgb(blue)
+            val pixelLuminance =
+                REC709_RED * linearSrgb(red) +
+                    REC709_GREEN * linearSrgb(green) +
+                    REC709_BLUE * linearSrgb(blue)
+            totalLuminance += pixelLuminance
+            if (y < headerHeight) {
+                headerLuminanceTotal += pixelLuminance
+            }
             totalRed += red
             totalGreen += green
             totalBlue += blue
@@ -218,6 +232,7 @@ internal fun sampleBitmap(bitmap: Bitmap): WanderImageSample {
     }
     return WanderImageSample(
         luminance = totalLuminance / count,
+        headerLuminance = headerLuminanceTotal / headerCount,
         averageColor =
             Color(
                 red = (totalRed / count).toFloat(),
@@ -226,6 +241,18 @@ internal fun sampleBitmap(bitmap: Bitmap): WanderImageSample {
                 alpha = 1f,
             ),
     )
+}
+
+/**
+ * How many rows from the top of [imageHeight] represent the header text band.
+ * Matches the upper ~45% of a portrait, ContentScale.Crop background.
+ */
+internal fun headerSampleHeight(
+    imageHeight: Int,
+    fraction: Float = HEADER_LUMINANCE_FRACTION,
+): Int {
+    if (imageHeight <= 0) return 0
+    return (imageHeight * fraction).toInt().coerceIn(1, imageHeight)
 }
 
 private fun linearSrgb(channel: Double): Double {
@@ -271,6 +298,7 @@ private fun bundledPhotoModel(
 
 private const val WANDER_LUMINANCE_THRESHOLD = 0.45
 private const val SAMPLE_EDGE_PX = 24
+internal const val HEADER_LUMINANCE_FRACTION = 0.45f
 private const val SRGB_LINEAR_THRESHOLD = 0.04045
 private const val SRGB_LINEAR_SLOPE = 12.92
 private const val SRGB_OFFSET = 0.055

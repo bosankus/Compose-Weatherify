@@ -7,8 +7,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -23,26 +23,38 @@ fun WanderTemperatureHeader(
     Column(modifier = modifier) {
         Text(
             text = temperature,
-            color = contentColor,
-            fontSize = 96.sp,
-            fontWeight = FontWeight.Light,
-            lineHeight = 96.sp,
-            letterSpacing = (-1.5).sp,
+            style =
+                TextStyle(
+                    color = contentColor,
+                    fontSize = 96.sp,
+                    fontWeight = FontWeight.Light,
+                    lineHeight = 96.sp,
+                    letterSpacing = (-1.5).sp,
+                    shadow = HeaderTextShadow,
+                ),
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = place,
-            color = contentColor,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Medium,
-            lineHeight = 35.sp,
+            style =
+                TextStyle(
+                    color = contentColor,
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 35.sp,
+                    shadow = HeaderTextShadow,
+                ),
         )
         Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = conditionLine,
-            color = contentColor,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Normal,
+            style =
+                TextStyle(
+                    color = contentColor,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Normal,
+                    shadow = HeaderTextShadow,
+                ),
         )
     }
 }
