@@ -99,8 +99,49 @@ class HomeViewModelOfflineWeatherTest {
             assertFalse(viewModel.state.value.isLoading)
             assertEquals(1, repository.refreshCallCount)
             assertFalse(releaseRefresh.isCompleted)
+            assertTrue(viewModel.refreshing.value)
             releaseRefresh.complete(Unit)
             advanceUntilIdle()
+            assertFalse(viewModel.refreshing.value)
+        }
+
+    @Test
+    fun refreshingIsTrueOnlyWhileNetworkRefreshRuns() =
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val releaseRefresh = CompletableDeferred<Unit>()
+            val repository =
+                FakeWeatherRepository(
+                    initial =
+                        WeatherForecast(
+                            id = CACHED_ID,
+                            lastUpdated = CACHED_UPDATED,
+                            current =
+                                WeatherForecast.Current(
+                                    clouds = 1,
+                                    dt = 1L,
+                                    feels_like = 20.0,
+                                    humidity = 10,
+                                    pressure = 1000,
+                                    sunrise = 1L,
+                                    sunset = 2L,
+                                    temp = 21.0,
+                                    uvi = 0.0,
+                                    weather = emptyList(),
+                                    wind_gust = null,
+                                    wind_speed = 1.0,
+                                ),
+                        ),
+                    onRefresh = { releaseRefresh.await() },
+                )
+            val viewModel = homeViewModel(repository)
+            advanceUntilIdle()
+            assertTrue(viewModel.refreshing.value)
+            assertFalse(viewModel.state.value.isRefreshing)
+            assertFalse(viewModel.state.value.isLoading)
+            releaseRefresh.complete(Unit)
+            advanceUntilIdle()
+            assertFalse(viewModel.refreshing.value)
         }
 
     @Test

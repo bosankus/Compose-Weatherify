@@ -69,6 +69,10 @@ internal class HomeViewModel(
     private val _effect = Channel<HomeEffect>(Channel.BUFFERED)
     val effect: Flow<HomeEffect> = _effect.receiveAsFlow()
 
+    /** Background network refresh while a Room forecast is already on screen. Not pull-to-refresh. */
+    private val _refreshing = MutableStateFlow(false)
+    val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
+
     private val refreshTrigger =
         MutableSharedFlow<Boolean>(
             extraBufferCapacity = 1,
@@ -414,16 +418,17 @@ internal class HomeViewModel(
         val location = lat to lon
         coroutineScope {
             val refreshFinished = MutableStateFlow(false)
-            launch {
-                try {
-                    refreshWeatherReport(location, forceRefresh)
-                } finally {
-                    refreshFinished.value = true
-                }
-            }
             combine(
                 getAirQuality(location.first, location.second),
-                getWeatherReport(location),
+                getWeatherReport.observeWithRefresh(
+                    location = location,
+                    refresh = { refreshWeatherReport(location, forceRefresh) },
+                    onRefreshStart = { _refreshing.value = true },
+                    onRefreshEnd = {
+                        _refreshing.value = false
+                        refreshFinished.value = true
+                    },
+                ),
                 refreshFinished,
             ) { air, weather, finished ->
                 Triple(air, weather, finished)
