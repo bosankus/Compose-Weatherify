@@ -73,6 +73,7 @@ import org.jetbrains.compose.resources.stringResource
  */
 data class WanderHomeChrome(
     val current: WeatherForecast.Current? = null,
+    val timezoneOffset: Int? = null,
     val todaySummary: String? = null,
     val refreshing: Boolean = false,
     val onRefresh: () -> Unit = {},
@@ -103,6 +104,7 @@ internal fun rememberWanderChrome(
     val context = LocalContext.current
     return WanderHomeChrome(
         current = state.weatherData?.current,
+        timezoneOffset = state.weatherData?.timezoneOffset,
         todaySummary =
             state.weatherData
                 ?.daily

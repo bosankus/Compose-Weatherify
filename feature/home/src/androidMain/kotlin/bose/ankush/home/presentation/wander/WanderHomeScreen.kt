@@ -174,7 +174,7 @@ private fun WanderHomePage(
                         }
                         chrome.current?.dt?.let { observed ->
                             Text(
-                                text = observedLabel(observed, wanderForecastZone()),
+                                text = observedLabel(observed, wanderForecastZone(chrome.timezoneOffset)),
                                 color = contentColor.copy(alpha = OBSERVED_ALPHA),
                                 fontSize = 13.sp,
                             )
@@ -206,6 +206,7 @@ private fun WanderHomePage(
                             Spacer(modifier = Modifier.height(16.dp))
                             WanderCurrentReport(
                                 current = current,
+                                timezoneOffset = chrome.timezoneOffset,
                                 contentColor = contentColor,
                             )
                         }

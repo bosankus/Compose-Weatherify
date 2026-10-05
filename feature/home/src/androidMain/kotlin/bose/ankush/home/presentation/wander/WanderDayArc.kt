@@ -42,8 +42,9 @@ internal fun WanderDayArc(
     sunset: Long?,
     contentColor: Color,
     modifier: Modifier = Modifier,
+    timezoneOffset: Int? = null,
 ) {
-    val zone = wanderForecastZone()
+    val zone = wanderForecastZone(timezoneOffset)
     val progress = sunAlongDay(sunrise, sunset, Clock.System.now().epochSeconds)
     val sunriseLabel = sunrise?.toClock(zone) ?: UNAVAILABLE
     val sunsetLabel = sunset?.toClock(zone) ?: UNAVAILABLE

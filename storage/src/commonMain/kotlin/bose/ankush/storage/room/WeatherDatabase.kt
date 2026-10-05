@@ -10,10 +10,11 @@ import androidx.room.RoomDatabaseConstructor
  *
  * Version 4 drops the unused `auth_tokens` table (tokens live in EncryptedSharedPreferences /
  * Keychain via [bose.ankush.storage.api.TokenStorage]). Weather / AQ tables are unchanged.
+ * Version 5 adds the nullable `timezoneOffset` column to the weather table.
  */
 @Database(
     entities = [WeatherEntity::class, AirQualityEntity::class],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 @ConstructedBy(WeatherDatabaseConstructor::class)

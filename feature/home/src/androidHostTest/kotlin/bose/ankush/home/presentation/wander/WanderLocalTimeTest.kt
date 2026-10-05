@@ -46,6 +46,12 @@ class WanderLocalTimeTest {
     }
 
     @Test
+    fun wanderZoneUsesTheForecastOffsetAndFallsBackToTheDevice() {
+        assertEquals("7:06 AM", SUNRISE.toClock(wanderForecastZone(MOUNTAIN_VIEW_OFFSET)))
+        assertEquals("7:36 PM", SUNRISE.toClock(wanderForecastZone(null)))
+    }
+
+    @Test
     fun midnightAndNoonUseTwelve() {
         val utc = forecastTimeZone(0)
 

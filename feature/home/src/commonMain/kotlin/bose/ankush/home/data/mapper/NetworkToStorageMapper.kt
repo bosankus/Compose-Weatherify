@@ -106,6 +106,7 @@ internal object NetworkToStorageMapper {
             daily = mapDailyToData(data?.daily),
             hourly = mapHourlyToData(data?.hourly),
             alerts = mapAlertsToData(data?.alerts),
+            timezoneOffset = data?.timezoneOffset,
         )
     }
 

@@ -26,6 +26,12 @@ data class WeatherForecast(
         val airQuality: AirQuality.Data? = null,
         @SerialName("entitlements")
         val entitlements: Entitlements? = null,
+        /** OpenWeather's shift from UTC in seconds for the forecast location (e.g. -25200 for PDT). */
+        @SerialName("timezone_offset")
+        val timezoneOffset: Int? = null,
+        /** OpenWeather's IANA zone name for the forecast location, e.g. "America/Los_Angeles". */
+        @SerialName("timezone")
+        val timezone: String? = null,
     ) {
         @Serializable
         data class WeatherInfo(

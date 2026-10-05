@@ -15,7 +15,7 @@ import platform.Foundation.NSUserDomainMask
  * Builds a durable iOS [WeatherDatabase] with [BundledSQLiteDriver] under the app Documents directory.
  * File name matches Android's [WEATHER_DATABASE_NAME] for parity (fresh iOS DB; no cross-platform file share).
  *
- * Registers [MIGRATION_3_4] (drop `auth_tokens` only). Destructive fallback stays disabled.
+ * Registers [MIGRATION_3_4] (drop `auth_tokens` only) and [MIGRATION_4_5] (add `timezoneOffset`). Destructive fallback stays disabled.
  */
 fun createWeatherDatabase(converters: WeatherDataModelConverters): WeatherDatabase {
     val dbPath = documentDirectory() + "/$WEATHER_DATABASE_NAME"
@@ -24,7 +24,7 @@ fun createWeatherDatabase(converters: WeatherDataModelConverters): WeatherDataba
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
         .addTypeConverter(converters)
-        .addMigrations(MIGRATION_3_4)
+        .addMigrations(MIGRATION_3_4, MIGRATION_4_5)
         .fallbackToDestructiveMigration(false)
         .build()
 }

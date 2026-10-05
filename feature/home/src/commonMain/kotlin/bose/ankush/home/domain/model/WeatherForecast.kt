@@ -11,6 +11,8 @@ data class WeatherForecast(
     val daily: List<Daily?>? = listOf(),
     val hourly: List<Hourly?>? = listOf(),
     val lastUpdated: Long = Clock.System.now().toEpochMilliseconds(),
+    /** OpenWeather `timezone_offset` in seconds for the forecast location. Null when unknown. */
+    val timezoneOffset: Int? = null,
 ) {
     data class Alert(
         val description: String?,

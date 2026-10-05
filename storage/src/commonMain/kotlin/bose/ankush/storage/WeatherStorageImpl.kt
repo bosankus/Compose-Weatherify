@@ -157,6 +157,7 @@ internal fun WeatherEntity.toWeatherData() =
                 }
             },
         lastUpdated = lastUpdated,
+        timezoneOffset = timezoneOffset,
     )
 
 internal fun WeatherData.toWeatherEntity() =
@@ -230,6 +231,7 @@ internal fun WeatherData.toWeatherEntity() =
                 }
             },
         lastUpdated = lastUpdated,
+        timezoneOffset = timezoneOffset,
     )
 
 internal fun AirQualityEntity.toAirQualityData() = AirQualityData(id, aqi, co, no2, o3, so2, pm10, pm25)

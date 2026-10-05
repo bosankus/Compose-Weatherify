@@ -46,6 +46,7 @@ internal fun WanderCurrentReport(
     current: WeatherForecast.Current,
     contentColor: Color,
     modifier: Modifier = Modifier,
+    timezoneOffset: Int? = null,
 ) {
     val weather = current.weather?.firstOrNull()
     val description = weather?.description?.formatTextCapitalization().orEmpty()
@@ -62,6 +63,7 @@ internal fun WanderCurrentReport(
         WanderDayArc(
             sunrise = current.sunrise,
             sunset = current.sunset,
+            timezoneOffset = timezoneOffset,
             contentColor = contentColor,
         )
     }

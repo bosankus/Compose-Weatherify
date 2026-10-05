@@ -14,11 +14,10 @@ internal fun forecastTimeZone(offsetSeconds: Int?): TimeZone =
     offsetSeconds?.let { FixedOffsetTimeZone(UtcOffset(seconds = it)) } ?: TimeZone.currentSystemDefault()
 
 /**
- * Zone the Wander home formats sunrise, sunset, and the observation time in.
- * The forecast API and the domain model do not carry `timezone_offset` yet, so this is the
- * device zone. Once the offset is available, pass it to [forecastTimeZone] here.
+ * Zone the Wander home formats sunrise, sunset, and the observation time in: the forecast
+ * location's [timezoneOffset] (seconds), or the device zone when the forecast has none.
  */
-internal fun wanderForecastZone(): TimeZone = forecastTimeZone(offsetSeconds = null)
+internal fun wanderForecastZone(timezoneOffset: Int?): TimeZone = forecastTimeZone(offsetSeconds = timezoneOffset)
 
 /** 12-hour clock in [zone], e.g. "7:06 AM". */
 internal fun Long.toClock(zone: TimeZone): String {

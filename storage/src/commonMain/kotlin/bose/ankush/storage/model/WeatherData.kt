@@ -9,6 +9,7 @@ data class WeatherData(
     val daily: List<Daily?>? = listOf(),
     val hourly: List<Hourly?>? = listOf(),
     val lastUpdated: Long = 0L,
+    val timezoneOffset: Int? = null,
 ) {
     data class Alert(
         val description: String?,

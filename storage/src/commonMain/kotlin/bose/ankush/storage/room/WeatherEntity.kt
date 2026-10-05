@@ -16,6 +16,8 @@ data class WeatherEntity(
     @field:TypeConverters(WeatherDataModelConverters::class) val daily: List<Daily?>? = listOf(),
     @field:TypeConverters(WeatherDataModelConverters::class) val hourly: List<Hourly?>? = listOf(),
     @ColumnInfo(defaultValue = "0") val lastUpdated: Long = 0L,
+    /** OpenWeather `timezone_offset` in seconds. Added in schema 5; null for older rows. */
+    val timezoneOffset: Int? = null,
 ) {
     @Serializable
     data class Alert(

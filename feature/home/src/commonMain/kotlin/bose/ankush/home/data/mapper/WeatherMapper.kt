@@ -102,6 +102,7 @@ internal object WeatherMapper {
                 daily = mapDaily(it.daily),
                 hourly = mapHourly(it.hourly),
                 lastUpdated = it.lastUpdated,
+                timezoneOffset = it.timezoneOffset,
             )
         }
 }
