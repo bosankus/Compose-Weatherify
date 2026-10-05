@@ -436,6 +436,15 @@ internal class HomeViewModel(
         forceRefresh: Boolean,
     ) {
         val location = lat to lon
+        // A new active location (a saved place picked, or back to GPS) keeps the current
+        // forecast and place on screen until the forecast for the new coordinates lands,
+        // so Room's single row never pairs the old weather with the new place name.
+        // GPS-to-GPS jitter on pull to refresh is not a switch.
+        val current = _state.value
+        val switchingLocation =
+            forceRefresh &&
+                current.userLocation.let { it != null && it != location } &&
+                (isOverridden || current.isLocationOverridden)
         coroutineScope {
             val refreshFinished = MutableStateFlow(false)
             combine(
@@ -462,8 +471,8 @@ internal class HomeViewModel(
                     }
                 dispatch(HomeAction.Error(message = error))
             }.collectLatest { (air, weather, finished) ->
-                // Empty Room stays on the loading state until the refresh settles.
-                if (weather == null && !finished) return@collectLatest
+                // Empty Room, or a location switch, waits for the refresh to settle.
+                if ((weather == null || switchingLocation) && !finished) return@collectLatest
                 dispatch(
                     HomeAction.Success(
                         location = location,
