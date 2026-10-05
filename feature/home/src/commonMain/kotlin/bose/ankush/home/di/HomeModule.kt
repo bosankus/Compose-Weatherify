@@ -1,8 +1,10 @@
 package bose.ankush.home.di
 
 import bose.ankush.home.HomeLocationCoordinator
+import bose.ankush.home.HomeSavedPlacesEntry
 import bose.ankush.home.HomeSessionCleaner
 import bose.ankush.home.data.HomeLocationCoordinatorImpl
+import bose.ankush.home.data.HomeSavedPlacesEntryImpl
 import bose.ankush.home.data.HomeSessionCleanerImpl
 import bose.ankush.home.data.repository.WeatherRepositoryImpl
 import bose.ankush.home.domain.repository.WeatherRepository
@@ -10,9 +12,11 @@ import bose.ankush.home.domain.usecase.GetAirQuality
 import bose.ankush.home.domain.usecase.GetWeatherReport
 import bose.ankush.home.domain.usecase.RefreshWeatherReport
 import bose.ankush.home.presentation.HomeViewModel
+import bose.ankush.home.presentation.places.WanderPlacesViewModel
 import bose.ankush.home.presentation.shell.ShellViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 /** Platform-specific bindings: [bose.ankush.home.domain.location.LocationClient],
@@ -28,6 +32,7 @@ val homeDomainModule: Module =
         factory { RefreshWeatherReport(get()) }
         factory { GetAirQuality(get()) }
         single<HomeLocationCoordinator> { HomeLocationCoordinatorImpl(get()) }
+        single { HomeSavedPlacesEntryImpl() } bind HomeSavedPlacesEntry::class
         single<HomeSessionCleaner> { HomeSessionCleanerImpl(get(), get()) }
     }
 
@@ -35,4 +40,5 @@ val homeViewModelModule: Module =
     module {
         viewModelOf(::HomeViewModel)
         viewModelOf(::ShellViewModel)
+        viewModelOf(::WanderPlacesViewModel)
     }
