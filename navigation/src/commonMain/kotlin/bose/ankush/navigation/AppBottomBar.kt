@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.components.toastAnchor
+import bose.ankush.home.HomeSavedPlacesEntry
 import bose.ankush.navigation.generated.resources.Res
 import bose.ankush.navigation.generated.resources.home_nested_nav
 import bose.ankush.navigation.generated.resources.ic_home
@@ -36,6 +37,7 @@ import bose.ankush.navigation.generated.resources.saved_locations_nested_nav
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 private data class TabItem(
     val route: NavKey,
@@ -56,6 +58,7 @@ fun AppBottomBar(
     toastAnchorState: ToastAnchorState? = null,
 ) {
     val currentRoute = navigator.navigationState.topLevelRoute
+    val homeSavedPlaces = koinInject<HomeSavedPlacesEntry>()
 
     AnimatedVisibility(
         modifier = if (toastAnchorState != null) Modifier.toastAnchor(toastAnchorState) else Modifier,
@@ -106,7 +109,12 @@ fun AppBottomBar(
                         }
                     },
                     selected = tab.route == currentRoute,
-                    onClick = { navigator.navigate(tab.route) },
+                    onClick = {
+                        // Android Wander home shows saved places on its own pager page; the
+                        // saved locations route stays for platforms whose home has no such page.
+                        val openedOnHome = tab.route == SavedLocationsRoute && homeSavedPlaces.openSavedPlaces()
+                        navigator.navigate(if (openedOnHome) HomeRoute else tab.route)
+                    },
                     colors =
                         NavigationBarItemDefaults.colors(
                             indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
