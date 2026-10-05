@@ -1,16 +1,29 @@
 package bose.ankush.home.presentation.wander
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -20,14 +33,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,8 +47,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -45,6 +60,8 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.home.domain.model.AirQuality
@@ -62,6 +79,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 import kotlin.time.Instant
 
 /**
@@ -79,6 +97,7 @@ internal fun WanderForecastDetails(
     details: WanderForecastDetails,
     contentColor: Color,
     modifier: Modifier = Modifier,
+    onOpenAlert: (WeatherForecast.Alert) -> Unit = {},
 ) {
     val alerts =
         details.alerts.mapNotNull { alert ->
@@ -91,7 +110,6 @@ internal fun WanderForecastDetails(
             .filter { it.dt != null }
             .take(HOURLY_LIMIT)
     if (alerts.isEmpty() && air == null && hours.isEmpty()) return
-    var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
     Column(
         modifier = modifier.fillMaxWidth().padding(top = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -99,7 +117,7 @@ internal fun WanderForecastDetails(
         if (alerts.isNotEmpty()) {
             WanderDetailCard(title = ALERTS, contentColor = contentColor) {
                 alerts.forEach { alert ->
-                    AlertRow(alert = alert, contentColor = contentColor, onOpen = { openAlert = alert })
+                    AlertRow(alert = alert, contentColor = contentColor, onOpen = { onOpenAlert(alert) })
                 }
             }
         }
@@ -109,9 +127,6 @@ internal fun WanderForecastDetails(
         if (hours.isNotEmpty()) {
             HourlyCard(hours = hours, contentColor = contentColor)
         }
-    }
-    openAlert?.let { alert ->
-        AlertDetailSheet(alert = alert, onDismiss = { openAlert = null })
     }
 }
 
@@ -187,30 +202,88 @@ private fun AlertRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Alert details drawn in the home layout, not in a window. The caller bounds it above
+ * the tab bar, so the tabs stay tappable and the system bars and photo never change.
+ */
 @Composable
-private fun AlertDetailSheet(
+internal fun WanderAlertPanel(
+    alert: WeatherForecast.Alert?,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var shown by remember { mutableStateOf(alert) }
+    if (alert != null) shown = alert
+    BackHandler(enabled = alert != null, onBack = onDismiss)
+    Box(modifier = modifier.fillMaxSize()) {
+        AnimatedVisibility(visible = alert != null, enter = fadeIn(), exit = fadeOut()) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(PanelScrim)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClickLabel = "Close alert details",
+                            onClick = onDismiss,
+                        ),
+            )
+        }
+        AnimatedVisibility(
+            visible = alert != null,
+            enter = slideInVertically { it },
+            exit = slideOutVertically { it },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        ) {
+            shown?.let { AlertPanelCard(alert = it, onDismiss = onDismiss) }
+        }
+    }
+}
+
+@Composable
+private fun AlertPanelCard(
     alert: WeatherForecast.Alert,
     onDismiss: () -> Unit,
 ) {
     val title = alert.event?.takeIf { it.isNotBlank() } ?: ALERT_FALLBACK_TITLE
     val issued = alert.start?.toIssuedLabel()
     val body = alert.description?.takeIf { it.isNotBlank() }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = SheetFill,
-        contentColor = WanderOnDark,
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+    var dragOffset by remember(alert) { mutableFloatStateOf(0f) }
+    val dragState = rememberDraggableState { delta -> dragOffset = (dragOffset + delta).coerceAtLeast(0f) }
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp, start = 12.dp, end = 12.dp, bottom = 8.dp)
+                .offset { IntOffset(0, dragOffset.roundToInt()) }
+                .clip(RoundedCornerShape(20.dp))
+                .background(SheetFill)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {},
+                ).nestedScroll(remember { ConsumeAllScroll() }),
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                    .draggable(
+                        state = dragState,
+                        orientation = Orientation.Vertical,
+                        onDragStopped = {
+                            if (dragOffset > DISMISS_DRAG_PX) onDismiss() else dragOffset = 0f
+                        },
+                    ).padding(start = 20.dp, end = 8.dp, top = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Box(
+                modifier =
+                    Modifier
+                        .size(width = 36.dp, height = 4.dp)
+                        .background(WanderOnDark.copy(alpha = 0.4f), RoundedCornerShape(2.dp)),
+            )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Filled.Warning,
@@ -233,6 +306,15 @@ private fun AlertDetailSheet(
                     )
                 }
             }
+        }
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             if (!issued.isNullOrBlank()) {
                 Text(text = issued, color = WanderOnDark, fontSize = 13.sp)
             }
@@ -260,6 +342,20 @@ private fun AlertDetailSheet(
             Text(text = alert.end?.toIssuedLabel() ?: "Unknown", color = WanderOnDark, fontSize = 13.sp)
         }
     }
+}
+
+/** Keeps panel scrolling from reaching the home column or pull to refresh. */
+private class ConsumeAllScroll : NestedScrollConnection {
+    override fun onPostScroll(
+        consumed: Offset,
+        available: Offset,
+        source: NestedScrollSource,
+    ): Offset = available
+
+    override suspend fun onPostFling(
+        consumed: Velocity,
+        available: Velocity,
+    ): Velocity = available
 }
 
 @Composable
@@ -450,6 +546,8 @@ private val HOUR_ZOOM_INSET_X = 4.dp
 private val HOUR_ZOOM_INSET_Y = 6.dp
 private const val HOUR_SELECTED_SCALE = 1.07f
 private const val HOUR_ZOOM_MILLIS = 220
+private val PanelScrim = Color.Black.copy(alpha = 0.24f)
+private const val DISMISS_DRAG_PX = 120f
 private const val HOURLY_LIMIT = 24
 private const val ALERTS = "Weather alerts"
 private const val ALERT_FALLBACK_TITLE = "Weather alert"

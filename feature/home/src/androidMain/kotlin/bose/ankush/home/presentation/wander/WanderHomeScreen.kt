@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bose.ankush.home.domain.location.HomeGeocoder
+import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.presentation.HomeIntent
 import bose.ankush.home.presentation.HomeState
 import bose.ankush.home.presentation.HomeViewModel
@@ -134,6 +135,11 @@ private fun WanderHomePage(
     val photo = ready.photo
     val photoUrl = photo?.imageUrl
     val contentColor = rememberWanderContentColor(content.condition, photoUrl)
+    var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
+    val onHomeTab = { tab: WanderTab ->
+        openAlert = null
+        onTab(tab)
+    }
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = content.condition, photoUrl = photoUrl)
         WanderNotificationPrompt(chrome)
@@ -149,94 +155,100 @@ private fun WanderHomePage(
                         .statusBarsPadding()
                         .navigationBarsPadding(),
             ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 20.dp),
-                ) {
-                    Spacer(modifier = Modifier.height(28.dp))
-                    chrome.locationOverrideName?.let { name ->
-                        WanderLocationChip(
-                            label = name,
-                            name = name,
-                            onReset = chrome.onResetLocation,
-                            contentColor = contentColor,
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-                    WanderHeader(
-                        temperature = content.temperature,
-                        place = content.place,
-                        conditionLine = content.condition.line,
-                        contentColor = contentColor,
-                        nearby = nearby,
-                    )
-                    Spacer(modifier = Modifier.height(28.dp))
-                    WanderMetricChips(
-                        feel = content.feel,
-                        wind = content.wind,
-                        uv = content.uv,
-                        contentColor = contentColor,
-                    )
-                    chrome.current?.let { current ->
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WanderCurrentReport(
-                            current = current,
-                            todaySummary = chrome.todaySummary,
-                            contentColor = contentColor,
-                        )
-                    }
-                    if (content.days.isNotEmpty() || chrome.forecastFailed) {
-                        Spacer(modifier = Modifier.height(20.dp))
-                        WanderCalendarStrip(
-                            days = content.days,
-                            onOpen = onOpenCalendar,
-                            contentColor = contentColor,
-                            eventDates = chrome.eventDates,
-                            showWeekShimmer = content.days.isEmpty() && chrome.forecastLoading,
-                            onRetryCalendar = if (chrome.forecastFailed) chrome.onRetryForecast else null,
-                        )
-                    }
-                    if (chrome.forecastFailed) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        WanderActionLabel(
-                            label = retryContentDescription(ShellSectionKind.Forecast),
-                            onClick = chrome.onRetryForecast,
-                            contentColor = contentColor,
-                        )
-                    }
-                    WanderForecastDetails(details = forecast, contentColor = contentColor)
-                    ready.leaveBy?.let { leaveBy ->
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
-                    }
-                    if (content.showSmallCards) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WanderSmallCards(contentColor = contentColor)
-                    }
-                    if (nearby.eventsLoading || nearby.eventsFailed || nearby.events.isNotEmpty() ||
-                        nearby.savedPlace != null
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 20.dp),
                     ) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WanderNearbyBlocks(
-                            nearby = nearby,
+                        Spacer(modifier = Modifier.height(28.dp))
+                        chrome.locationOverrideName?.let { name ->
+                            WanderLocationChip(
+                                label = name,
+                                name = name,
+                                onReset = chrome.onResetLocation,
+                                contentColor = contentColor,
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        WanderHeader(
+                            temperature = content.temperature,
+                            place = content.place,
+                            conditionLine = content.condition.line,
                             contentColor = contentColor,
-                            onOpenSaved = { onTab(WanderTab.MAP) },
+                            nearby = nearby,
                         )
+                        Spacer(modifier = Modifier.height(28.dp))
+                        WanderMetricChips(
+                            feel = content.feel,
+                            wind = content.wind,
+                            uv = content.uv,
+                            contentColor = contentColor,
+                        )
+                        chrome.current?.let { current ->
+                            Spacer(modifier = Modifier.height(16.dp))
+                            WanderCurrentReport(
+                                current = current,
+                                todaySummary = chrome.todaySummary,
+                                contentColor = contentColor,
+                            )
+                        }
+                        if (content.days.isNotEmpty() || chrome.forecastFailed) {
+                            Spacer(modifier = Modifier.height(20.dp))
+                            WanderCalendarStrip(
+                                days = content.days,
+                                onOpen = onOpenCalendar,
+                                contentColor = contentColor,
+                                eventDates = chrome.eventDates,
+                                showWeekShimmer = content.days.isEmpty() && chrome.forecastLoading,
+                                onRetryCalendar = if (chrome.forecastFailed) chrome.onRetryForecast else null,
+                            )
+                        }
+                        if (chrome.forecastFailed) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            WanderActionLabel(
+                                label = retryContentDescription(ShellSectionKind.Forecast),
+                                onClick = chrome.onRetryForecast,
+                                contentColor = contentColor,
+                            )
+                        }
+                        WanderForecastDetails(
+                            details = forecast,
+                            contentColor = contentColor,
+                            onOpenAlert = { openAlert = it },
+                        )
+                        ready.leaveBy?.let { leaveBy ->
+                            Spacer(modifier = Modifier.height(16.dp))
+                            WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
+                        }
+                        if (content.showSmallCards) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            WanderSmallCards(contentColor = contentColor)
+                        }
+                        if (nearby.eventsLoading || nearby.eventsFailed || nearby.events.isNotEmpty() ||
+                            nearby.savedPlace != null
+                        ) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            WanderNearbyBlocks(
+                                nearby = nearby,
+                                contentColor = contentColor,
+                                onOpenSaved = { onHomeTab(WanderTab.MAP) },
+                            )
+                        }
+                        if (photo != null && photoUrl != null) {
+                            TrackShownWanderPhoto(photo)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            UnsplashCredit(photo = photo, contentColor = contentColor)
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    if (photo != null && photoUrl != null) {
-                        TrackShownWanderPhoto(photo)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        UnsplashCredit(photo = photo, contentColor = contentColor)
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
+                    WanderAlertPanel(alert = openAlert, onDismiss = { openAlert = null })
                 }
                 WanderTabBar(
                     selected = selectedTab,
-                    onSelected = onTab,
+                    onSelected = onHomeTab,
                     inactiveTint = contentColor,
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
