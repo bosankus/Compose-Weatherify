@@ -99,10 +99,7 @@ internal fun WanderForecastDetails(
     modifier: Modifier = Modifier,
     onOpenAlert: (WeatherForecast.Alert) -> Unit = {},
 ) {
-    val alerts =
-        details.alerts.mapNotNull { alert ->
-            alert?.takeIf { !it.event.isNullOrBlank() || !it.description.isNullOrBlank() }
-        }
+    val alerts = details.alerts.toWanderAlertRows()
     val air = details.airQuality?.takeIf { it.aqi > 0 }
     val hours =
         details.hourly
@@ -116,8 +113,8 @@ internal fun WanderForecastDetails(
     ) {
         if (alerts.isNotEmpty()) {
             WanderDetailCard(title = ALERTS, contentColor = contentColor) {
-                alerts.forEach { alert ->
-                    AlertRow(alert = alert, contentColor = contentColor, onOpen = { onOpenAlert(alert) })
+                alerts.forEach { row ->
+                    AlertRow(row = row, contentColor = contentColor, onOpen = { onOpenAlert(row.alert) })
                 }
             }
         }
@@ -157,12 +154,12 @@ private fun WanderDetailCard(
 
 @Composable
 private fun AlertRow(
-    alert: WeatherForecast.Alert,
+    row: WanderAlertRowContent,
     contentColor: Color,
     onOpen: () -> Unit,
 ) {
-    val title = alert.event?.takeIf { it.isNotBlank() } ?: ALERT_FALLBACK_TITLE
-    val issued = alert.start?.toIssuedLabel()
+    val title = row.title
+    val issued = row.startText
     Row(
         modifier =
             Modifier
@@ -526,7 +523,7 @@ private fun HourCell(
     }
 }
 
-private fun Long.toIssuedLabel(): String {
+internal fun Long.toIssuedLabel(): String {
     val local = Instant.fromEpochSeconds(this).toLocalDateTime(TimeZone.currentSystemDefault())
     val month =
         local.month.name
