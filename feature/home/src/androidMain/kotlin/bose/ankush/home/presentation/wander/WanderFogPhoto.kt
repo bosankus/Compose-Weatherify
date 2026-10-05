@@ -11,6 +11,7 @@ import bose.ankush.network.model.UnsplashPhoto
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -126,12 +127,29 @@ fun rememberWanderConditionPhoto(query: String?): WanderFogPhoto? {
     val api = koinInject<UnsplashApi>()
     var photo by remember(query) { mutableStateOf(query?.let(WanderConditionPhotoCache::cached)) }
     LaunchedEffect(query) {
-        photo =
-            if (query == null) {
-                null
-            } else {
-                WanderConditionPhotoCache.photo(query, api)
+        if (query == null) {
+            photo = null
+            return@LaunchedEffect
+        }
+        // Cached hit from remember above: still re-check so a concurrent fill is picked up.
+        WanderConditionPhotoCache.cached(query)?.let {
+            photo = it
+            return@LaunchedEffect
+        }
+        // Cold start often races the network. Retry a miss with short backoff while the query
+        // is unchanged. Failures are not cached, so each attempt re-searches.
+        for (waitMs in PHOTO_SEARCH_BACKOFF_MS) {
+            if (waitMs > 0L) delay(waitMs)
+            WanderConditionPhotoCache.cached(query)?.let {
+                photo = it
+                return@LaunchedEffect
             }
+            val result = WanderConditionPhotoCache.photo(query, api)
+            if (result != null) {
+                photo = result
+                return@LaunchedEffect
+            }
+        }
     }
     return photo
 }
@@ -178,3 +196,5 @@ internal fun unsplashReferralUrl(profileHtml: String): String {
 }
 
 internal const val UNSPLASH_HOME_URL = "https://unsplash.com/?utm_source=weatherify&utm_medium=referral"
+
+private val PHOTO_SEARCH_BACKOFF_MS = longArrayOf(0L, 2_000L, 5_000L, 15_000L)
