@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Air
 import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Speed
 import androidx.compose.material.icons.outlined.Thermostat
+import androidx.compose.material.icons.outlined.Umbrella
 import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Icon
@@ -45,6 +47,7 @@ private data class DetailCell(
 
 /**
  * Feel, wind, UV, humidity, pressure, and clouds as a 3x2 grid drawn straight on the photo.
+ * Rain today and next rain append as an extra row only when their values are present.
  * No fill: a soft text shadow and 1dp dividers keep it readable.
  */
 @Composable
@@ -53,42 +56,59 @@ internal fun WanderDetailsGrid(
     current: WeatherForecast.Current?,
     contentColor: Color,
     modifier: Modifier = Modifier,
+    extras: WanderForecastExtras = WanderForecastExtras(),
 ) {
     val cells =
-        listOf(
-            DetailCell(Icons.Outlined.Thermostat, "Feel", content.feel),
-            DetailCell(
-                Icons.Outlined.Air,
-                "Wind",
-                content.wind,
-                current?.wind_gust?.let {
-                    "Gust ${formatWanderNumber(it, decimals = if (it % 1.0 == 0.0) 0 else 1, suffix = " m/s")}"
-                },
-            ),
-            DetailCell(Icons.Outlined.WbSunny, "UV", content.uv),
-            DetailCell(
-                Icons.Outlined.WaterDrop,
-                "Humidity",
-                formatWanderNumber(current?.humidity?.toDouble(), suffix = "%"),
-            ),
-            DetailCell(
-                Icons.Outlined.Speed,
-                "Pressure",
-                formatWanderNumber(current?.pressure?.toDouble(), suffix = " hPa"),
-            ),
-            DetailCell(Icons.Outlined.Cloud, "Clouds", formatWanderNumber(current?.clouds?.toDouble(), suffix = "%")),
-        )
-    val divider = contentColor.copy(alpha = DIVIDER_ALPHA)
-    cells.chunked(COLUMNS).forEachIndexed { rowIndex, row ->
-        if (rowIndex > 0) {
-            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(divider))
+        buildList {
+            add(DetailCell(Icons.Outlined.Thermostat, "Feel", content.feel))
+            add(
+                DetailCell(
+                    Icons.Outlined.Air,
+                    "Wind",
+                    content.wind,
+                    current?.wind_gust?.let {
+                        "Gust ${formatWanderNumber(it, decimals = if (it % 1.0 == 0.0) 0 else 1, suffix = " m/s")}"
+                    },
+                ),
+            )
+            add(DetailCell(Icons.Outlined.WbSunny, "UV", content.uv))
+            add(
+                DetailCell(
+                    Icons.Outlined.WaterDrop,
+                    "Humidity",
+                    formatWanderNumber(current?.humidity?.toDouble(), suffix = "%"),
+                ),
+            )
+            add(
+                DetailCell(
+                    Icons.Outlined.Speed,
+                    "Pressure",
+                    formatWanderNumber(current?.pressure?.toDouble(), suffix = " hPa"),
+                ),
+            )
+            add(
+                DetailCell(
+                    Icons.Outlined.Cloud,
+                    "Clouds",
+                    formatWanderNumber(current?.clouds?.toDouble(), suffix = "%"),
+                ),
+            )
+            extras.rainToday?.let { add(DetailCell(Icons.Outlined.Umbrella, "Rain today", it)) }
+            extras.nextRain?.let { add(DetailCell(Icons.Outlined.Schedule, "Next rain", it)) }
         }
-        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-            row.forEachIndexed { index, cell ->
-                if (index > 0) {
-                    Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(divider))
+    val divider = contentColor.copy(alpha = DIVIDER_ALPHA)
+    Column(modifier = modifier.fillMaxWidth()) {
+        cells.chunked(COLUMNS).forEachIndexed { rowIndex, row ->
+            if (rowIndex > 0) {
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(divider))
+            }
+            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                row.forEachIndexed { index, cell ->
+                    if (index > 0) {
+                        Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(divider))
+                    }
+                    DetailCellView(cell, contentColor, Modifier.weight(1f))
                 }
-                DetailCellView(cell, contentColor, Modifier.weight(1f))
             }
         }
     }
@@ -140,7 +160,6 @@ private fun shadowed(
 ) = TextStyle(color = color, fontSize = size, fontWeight = weight, shadow = TextShadow)
 
 private val TextShadow = Shadow(color = Color.Black.copy(alpha = 0.4f), offset = Offset(0f, 1f), blurRadius = 6f)
-private const val DETAILS = "Details"
 private const val COLUMNS = 3
 private const val DIVIDER_ALPHA = 0.15f
 private const val MUTED_ALPHA = 0.72f

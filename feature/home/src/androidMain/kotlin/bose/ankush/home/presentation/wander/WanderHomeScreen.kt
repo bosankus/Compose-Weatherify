@@ -219,6 +219,7 @@ private fun WanderHomePage(
                             content = content,
                             current = chrome.current,
                             contentColor = contentColor,
+                            extras = forecast.extras,
                         )
                         chrome.current?.let { current ->
                             Spacer(modifier = Modifier.height(16.dp))
@@ -227,6 +228,10 @@ private fun WanderHomePage(
                                 timezoneOffset = chrome.timezoneOffset,
                                 contentColor = contentColor,
                             )
+                        }
+                        forecast.extras.temperatureTrend?.let { trend ->
+                            Spacer(modifier = Modifier.height(12.dp))
+                            WanderTemperatureTrend(trend = trend, contentColor = contentColor)
                         }
                         if (content.days.isNotEmpty() || chrome.forecastFailed) {
                             Spacer(modifier = Modifier.height(20.dp))
@@ -422,6 +427,7 @@ fun WanderHomeRoute(
                     alerts = state.weatherData?.alerts.orEmpty(),
                     airQuality = state.airQualityData,
                     hourly = state.weatherData?.hourly.orEmpty(),
+                    extras = state.weatherData?.toWanderForecastExtras() ?: WanderForecastExtras(),
                 ),
             chrome =
                 rememberWanderChrome(

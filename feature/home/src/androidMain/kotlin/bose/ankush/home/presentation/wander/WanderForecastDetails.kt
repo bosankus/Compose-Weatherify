@@ -64,6 +64,7 @@ data class WanderForecastDetails(
     val alerts: List<WeatherForecast.Alert?> = emptyList(),
     val airQuality: AirQuality? = null,
     val hourly: List<WeatherForecast.Hourly?> = emptyList(),
+    val extras: WanderForecastExtras = WanderForecastExtras(),
 )
 
 @Composable
