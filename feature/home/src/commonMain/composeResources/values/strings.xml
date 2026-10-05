@@ -54,4 +54,9 @@
     <string name="wander_places_search_error">Search failed. Check your connection and try again.</string>
     <string name="wander_places_save_error">Couldn’t save this place. Try again.</string>
     <string name="wander_places_saved_badge">Saved</string>
+    <string name="wander_places_search_label">City or place</string>
+    <string name="wander_places_add_action">Add place</string>
+    <string name="wander_places_show_action">Show this place</string>
+    <string name="wander_places_saving">Saving…</string>
+    <string name="wander_places_pick_hint">Pick a place from the list, then add it.</string>
 </resources>
