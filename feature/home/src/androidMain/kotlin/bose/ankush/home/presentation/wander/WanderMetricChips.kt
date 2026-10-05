@@ -25,6 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+private data class MetricChipContent(
+    val icon: ImageVector,
+    val label: String,
+    val value: String,
+    val contentDescription: String,
+)
+
 @Composable
 fun WanderMetricChips(
     feel: String,
@@ -38,26 +45,35 @@ fun WanderMetricChips(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         MetricChip(
-            icon = Icons.Outlined.Thermostat,
-            label = "Feel",
-            value = feel,
-            contentDescription = "Real feel",
+            content =
+                MetricChipContent(
+                    icon = Icons.Outlined.Thermostat,
+                    label = "Feel",
+                    value = feel,
+                    contentDescription = "Real feel",
+                ),
             contentColor = contentColor,
             modifier = Modifier.weight(1f),
         )
         MetricChip(
-            icon = Icons.Outlined.Air,
-            label = "Wind",
-            value = wind,
-            contentDescription = "Wind",
+            content =
+                MetricChipContent(
+                    icon = Icons.Outlined.Air,
+                    label = "Wind",
+                    value = wind,
+                    contentDescription = "Wind",
+                ),
             contentColor = contentColor,
             modifier = Modifier.weight(1f),
         )
         MetricChip(
-            icon = Icons.Outlined.WbSunny,
-            label = "UV",
-            value = uv,
-            contentDescription = "UV",
+            content =
+                MetricChipContent(
+                    icon = Icons.Outlined.WbSunny,
+                    label = "UV",
+                    value = uv,
+                    contentDescription = "UV",
+                ),
             contentColor = contentColor,
             modifier = Modifier.weight(1f),
         )
@@ -66,10 +82,7 @@ fun WanderMetricChips(
 
 @Composable
 private fun MetricChip(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    contentDescription: String,
+    content: MetricChipContent,
     contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
@@ -81,22 +94,22 @@ private fun MetricChip(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
+            imageVector = content.icon,
+            contentDescription = content.contentDescription,
             modifier = Modifier.size(16.dp),
             tint = contentColor,
         )
         Spacer(modifier = Modifier.width(6.dp))
         Column {
             Text(
-                text = value,
+                text = content.value,
                 color = contentColor,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,
             )
             Text(
-                text = label,
+                text = content.label,
                 color = contentColor,
                 fontSize = 13.sp,
                 maxLines = 1,

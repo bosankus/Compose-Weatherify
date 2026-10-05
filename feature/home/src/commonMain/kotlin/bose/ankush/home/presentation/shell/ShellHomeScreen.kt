@@ -128,27 +128,39 @@ private fun HomeColumn(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
             Header(
-                forecast = liveForecast,
-                forecastStatus =
-                    when {
-                        liveForecast != null -> ShellSectionStatus.Ready
-                        forecastStatus == ShellSectionStatus.Ready -> ShellSectionStatus.Empty
-                        else -> forecastStatus
-                    },
-                photoStatus = state.accountPhoto,
-                photoUrl = state.photoUrl,
-                onAccount = { actions.onIntent(ShellIntent.OpenAccount) },
-                onRetryForecast = actions.onRetryForecast,
+                model =
+                    HeaderModel(
+                        forecast = liveForecast,
+                        forecastStatus =
+                            when {
+                                liveForecast != null -> ShellSectionStatus.Ready
+                                forecastStatus == ShellSectionStatus.Ready -> ShellSectionStatus.Empty
+                                else -> forecastStatus
+                            },
+                        photoStatus = state.accountPhoto,
+                        photoUrl = state.photoUrl,
+                    ),
+                actions =
+                    HeaderActions(
+                        onAccount = { actions.onIntent(ShellIntent.OpenAccount) },
+                        onRetryForecast = actions.onRetryForecast,
+                    ),
             )
             Spacer(modifier = Modifier.height(28.dp))
             CalendarBlock(
-                days = forecast?.days.orEmpty(),
-                dayStatus = calendarDaysStatus(forecastStatus, forecast?.days?.size ?: 0),
-                events = state.events,
-                eventDates = state.eventDates,
-                onPlus = { actions.onIntent(ShellIntent.OpenCreate) },
-                onRetryForecast = actions.onRetryForecast,
-                onRetryEvents = actions.onRetryEvents,
+                model =
+                    CalendarBlockModel(
+                        days = forecast?.days.orEmpty(),
+                        dayStatus = calendarDaysStatus(forecastStatus, forecast?.days?.size ?: 0),
+                        events = state.events,
+                        eventDates = state.eventDates,
+                    ),
+                actions =
+                    CalendarBlockActions(
+                        onPlus = { actions.onIntent(ShellIntent.OpenCreate) },
+                        onRetryForecast = actions.onRetryForecast,
+                        onRetryEvents = actions.onRetryEvents,
+                    ),
             )
             Spacer(modifier = Modifier.height(24.dp))
             SavedPlaceSection(
@@ -170,15 +182,29 @@ private fun HomeColumn(
     }
 }
 
+private data class HeaderModel(
+    val forecast: ShellForecast?,
+    val forecastStatus: ShellSectionStatus,
+    val photoStatus: ShellSectionStatus,
+    val photoUrl: String?,
+)
+
+private data class HeaderActions(
+    val onAccount: () -> Unit,
+    val onRetryForecast: () -> Unit,
+)
+
 @Composable
 private fun Header(
-    forecast: ShellForecast?,
-    forecastStatus: ShellSectionStatus,
-    photoStatus: ShellSectionStatus,
-    photoUrl: String?,
-    onAccount: () -> Unit,
-    onRetryForecast: () -> Unit,
+    model: HeaderModel,
+    actions: HeaderActions,
 ) {
+    val forecast = model.forecast
+    val forecastStatus = model.forecastStatus
+    val photoStatus = model.photoStatus
+    val photoUrl = model.photoUrl
+    val onAccount = actions.onAccount
+    val onRetryForecast = actions.onRetryForecast
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val sideBySide = maxWidth >= PhotoSize + HeaderGap + MinTitleWidth
         if (sideBySide) {
@@ -398,16 +424,31 @@ private fun SectionHold(
     }
 }
 
+private data class CalendarBlockModel(
+    val days: List<ShellDay>,
+    val dayStatus: ShellSectionStatus,
+    val events: ShellSectionStatus,
+    val eventDates: Set<LocalDate>,
+)
+
+private data class CalendarBlockActions(
+    val onPlus: () -> Unit,
+    val onRetryForecast: () -> Unit,
+    val onRetryEvents: () -> Unit,
+)
+
 @Composable
 private fun CalendarBlock(
-    days: List<ShellDay>,
-    dayStatus: ShellSectionStatus,
-    events: ShellSectionStatus,
-    eventDates: Set<LocalDate>,
-    onPlus: () -> Unit,
-    onRetryForecast: () -> Unit,
-    onRetryEvents: () -> Unit,
+    model: CalendarBlockModel,
+    actions: CalendarBlockActions,
 ) {
+    val days = model.days
+    val dayStatus = model.dayStatus
+    val events = model.events
+    val eventDates = model.eventDates
+    val onPlus = actions.onPlus
+    val onRetryForecast = actions.onRetryForecast
+    val onRetryEvents = actions.onRetryEvents
     val shownDayStatus =
         if (dayStatus == ShellSectionStatus.Ready && days.isEmpty()) {
             ShellSectionStatus.Empty
