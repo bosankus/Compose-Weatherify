@@ -46,8 +46,6 @@ import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.hourly_forecast_heading_txt
 import bose.ankush.home.generated.resources.ic_sunny
-import bose.ankush.home.presentation.util.AirQualityIndexAnalyser
-import bose.ankush.home.presentation.util.AirQualityIndexAnalyser.getFormattedAQI
 import bose.ankush.home.presentation.util.formatTextCapitalization
 import bose.ankush.home.presentation.util.getIconUrl
 import bose.ankush.home.presentation.util.toCelsius
@@ -88,9 +86,13 @@ internal fun WanderForecastDetails(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (alerts.isNotEmpty()) {
-            WanderDetailCard(title = ALERTS, contentColor = contentColor) {
+            WanderDetailCard(title = ALERTS) {
                 alerts.forEach { row ->
-                    AlertRow(row = row, contentColor = contentColor, onOpen = { onOpenAlert(row.alert) })
+                    AlertRow(
+                        row = row,
+                        contentColor = contentColor,
+                        onOpen = { onOpenAlert(row.alert) },
+                    )
                 }
             }
         }
@@ -106,7 +108,6 @@ internal fun WanderForecastDetails(
 @Composable
 private fun WanderDetailCard(
     title: String,
-    contentColor: Color,
     content: @Composable () -> Unit,
 ) {
     Column(
@@ -118,12 +119,6 @@ private fun WanderDetailCard(
                 .semantics { contentDescription = title },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = title,
-            color = contentColor,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-        )
         content()
     }
 }
@@ -176,83 +171,12 @@ private fun AlertRow(
 }
 
 @Composable
-private fun AirQualityCard(
-    air: AirQuality,
-    contentColor: Color,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val status = AirQualityIndexAnalyser.getAQIAnalysedText(air.aqi).first
-    val index = air.aqi.getFormattedAQI()
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(cardFill)
-                .semantics { contentDescription = if (expanded) "Collapse air quality" else "Expand air quality" }
-                .clickable(role = Role.Button) { expanded = !expanded }
-                .padding(horizontal = 14.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = AIR_QUALITY,
-                color = contentColor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f),
-            )
-            Icon(
-                imageVector = Icons.Filled.KeyboardArrowDown,
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.rotate(if (expanded) 180f else 0f),
-            )
-        }
-        Text(text = status, color = contentColor, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-        Text(text = index, color = contentColor, fontSize = 13.sp)
-        if (expanded) {
-            PollutantGrid(air = air, contentColor = contentColor)
-            Text(text = UNIT_NOTE, color = contentColor, fontSize = 13.sp)
-        }
-    }
-}
-
-@Composable
-private fun PollutantGrid(
-    air: AirQuality,
-    contentColor: Color,
-) {
-    val rows =
-        listOf(
-            listOf("PM2.5" to air.pm25, "PM10" to air.pm10),
-            listOf("CO" to air.co, "O3" to air.o3),
-            listOf("NO2" to air.no2, "SO2" to air.so2),
-        )
-    rows.forEach { row ->
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            row.forEach { (name, value) ->
-                Text(
-                    text = "$name ${value.toInt()}",
-                    color = contentColor,
-                    fontSize = 14.sp,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun HourlyCard(
     hours: List<WeatherForecast.Hourly>,
     contentColor: Color,
 ) {
     var selected by remember { mutableIntStateOf(0) }
-    WanderDetailCard(
-        title = stringResource(Res.string.hourly_forecast_heading_txt),
-        contentColor = contentColor,
-    ) {
+    WanderDetailCard(title = stringResource(Res.string.hourly_forecast_heading_txt)) {
         Row(
             modifier =
                 Modifier
@@ -364,6 +288,4 @@ private const val HOUR_SELECTED_SCALE = 1.07f
 private const val HOUR_ZOOM_MILLIS = 220
 private const val HOURLY_LIMIT = 24
 private const val ALERTS = "Weather alerts"
-private const val AIR_QUALITY = "Air quality"
-private const val UNIT_NOTE = "Concentration in μg/m³"
 private const val MONTH_ABBREV = 3

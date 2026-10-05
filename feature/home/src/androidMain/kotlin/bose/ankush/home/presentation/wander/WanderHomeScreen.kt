@@ -120,7 +120,6 @@ fun WanderHomeScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun WanderHomePage(
     ready: WanderShell.Ready,
     selectedTab: WanderTab,

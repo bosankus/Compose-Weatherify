@@ -127,7 +127,8 @@ private fun AlertPanelCard(
     val title = alert.event?.takeIf { it.isNotBlank() } ?: ALERT_ROW_FALLBACK_TITLE
     val parsed = remember(alert.description) { parseAlertDescription(alert.description) }
     var dragOffset by remember(alert) { mutableFloatStateOf(0f) }
-    val dragState = rememberDraggableState { delta -> dragOffset = (dragOffset + delta).coerceAtLeast(0f) }
+    val dragState =
+        rememberDraggableState { delta -> dragOffset = (dragOffset + delta).coerceAtLeast(0f) }
     Column(
         modifier =
             modifier
@@ -195,9 +196,6 @@ private fun AlertPanelCard(
             AlertTimes(alert = alert, summary = parsed.summary)
             parsed.displaySections().forEach { display -> AlertSectionBlock(display) }
             parsed.fallback?.let { Text(text = it, color = WanderOnDark, fontSize = 14.sp) }
-            alert.sender_name?.takeIf { it.isNotBlank() }?.let { source ->
-                Text(text = "Source · $source", color = Muted, fontSize = 12.sp)
-            }
         }
     }
 }
@@ -207,8 +205,8 @@ private fun AlertTimes(
     alert: WeatherForecast.Alert,
     summary: String?,
 ) {
-    val starts = alert.start?.toIssuedLabel()
-    val until = alert.end?.toIssuedLabel()
+    val duration: String =
+        "${alert.start?.toIssuedLabel()} - ${alert.end?.toIssuedLabel()}".ifBlank { "Still unknown" }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (!summary.isNullOrBlank()) {
             Text(
@@ -219,11 +217,9 @@ private fun AlertTimes(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        if (starts != null || until != null) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                starts?.let { AlertChip("Starts $it") }
-                until?.let { AlertChip("Until $it") }
-            }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            AlertChip(duration.ifEmpty { "Timeline unknown" })
+            AlertChip(alert.sender_name ?: "Source unknown")
         }
     }
 }

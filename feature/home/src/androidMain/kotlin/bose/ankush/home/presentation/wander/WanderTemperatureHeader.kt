@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -28,13 +29,15 @@ fun WanderTemperatureHeader(
             lineHeight = 96.sp,
             letterSpacing = (-1.5).sp,
         )
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = place,
             color = contentColor,
             fontSize = 30.sp,
             fontWeight = FontWeight.Medium,
+            lineHeight = 35.sp,
         )
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Text(
             text = conditionLine,
             color = contentColor,
