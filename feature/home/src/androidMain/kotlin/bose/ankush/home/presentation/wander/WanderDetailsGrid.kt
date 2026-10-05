@@ -79,23 +79,16 @@ internal fun WanderDetailsGrid(
             DetailCell(Icons.Outlined.Cloud, "Clouds", formatWanderNumber(current?.clouds?.toDouble(), suffix = "%")),
         )
     val divider = contentColor.copy(alpha = DIVIDER_ALPHA)
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = DETAILS,
-            style = shadowed(contentColor, 13.sp, FontWeight.Medium),
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
-        cells.chunked(COLUMNS).forEachIndexed { rowIndex, row ->
-            if (rowIndex > 0) {
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(divider))
-            }
-            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-                row.forEachIndexed { index, cell ->
-                    if (index > 0) {
-                        Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(divider))
-                    }
-                    DetailCellView(cell, contentColor, Modifier.weight(1f))
+    cells.chunked(COLUMNS).forEachIndexed { rowIndex, row ->
+        if (rowIndex > 0) {
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(divider))
+        }
+        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+            row.forEachIndexed { index, cell ->
+                if (index > 0) {
+                    Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(divider))
                 }
+                DetailCellView(cell, contentColor, Modifier.weight(1f))
             }
         }
     }
