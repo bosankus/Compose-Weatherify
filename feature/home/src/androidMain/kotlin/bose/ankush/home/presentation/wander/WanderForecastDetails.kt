@@ -11,11 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -79,6 +85,7 @@ internal fun WanderForecastDetails(
             .filter { it.dt != null }
             .take(HOURLY_LIMIT)
     if (alerts.isEmpty() && air == null && hours.isEmpty()) return
+    var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
     Column(
         modifier = modifier.fillMaxWidth().padding(top = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -86,7 +93,7 @@ internal fun WanderForecastDetails(
         if (alerts.isNotEmpty()) {
             WanderDetailCard(title = ALERTS, contentColor = contentColor) {
                 alerts.forEach { alert ->
-                    AlertLine(alert = alert, contentColor = contentColor)
+                    AlertRow(alert = alert, contentColor = contentColor, onOpen = { openAlert = alert })
                 }
             }
         }
@@ -96,6 +103,9 @@ internal fun WanderForecastDetails(
         if (hours.isNotEmpty()) {
             HourlyCard(hours = hours, contentColor = contentColor)
         }
+    }
+    openAlert?.let { alert ->
+        AlertDetailSheet(alert = alert, onDismiss = { openAlert = null })
     }
 }
 
@@ -125,64 +135,123 @@ private fun WanderDetailCard(
 }
 
 @Composable
-private fun AlertLine(
+private fun AlertRow(
     alert: WeatherForecast.Alert,
     contentColor: Color,
+    onOpen: () -> Unit,
 ) {
-    var expanded by remember(alert.event, alert.start, alert.end) { mutableStateOf(false) }
-    val title = alert.event?.takeIf { it.isNotBlank() } ?: alert.description.orEmpty()
-    val body = alert.description?.takeIf { it.isNotBlank() }
+    val title = alert.event?.takeIf { it.isNotBlank() } ?: ALERT_FALLBACK_TITLE
     val issued = alert.start?.toIssuedLabel()
-    Column(
+    Row(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .semantics {
-                    contentDescription = if (expanded) "Collapse alert" else "Expand alert"
-                }.clickable(role = Role.Button) { expanded = !expanded }
+                .semantics { contentDescription = "$title. Open alert details" }
+                .clickable(role = Role.Button, onClick = onOpen)
                 .padding(vertical = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
-            Icon(
-                imageVector = Icons.Filled.Warning,
-                contentDescription = "Weather alert",
-                tint = AlertYellow,
-                modifier = Modifier.size(18.dp),
-            )
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = title,
-                    color = contentColor,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = if (expanded) Int.MAX_VALUE else 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (!issued.isNullOrBlank()) {
-                    Text(text = issued, color = contentColor, fontSize = 13.sp)
-                }
-            }
-        }
-        if (!body.isNullOrBlank() && body != title) {
+        Icon(
+            imageVector = Icons.Filled.Warning,
+            contentDescription = null,
+            tint = AlertYellow,
+            modifier = Modifier.size(20.dp),
+        )
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                text = body,
+                text = title,
                 color = contentColor,
-                fontSize = 13.sp,
-                maxLines = if (expanded) Int.MAX_VALUE else 3,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            if (!issued.isNullOrBlank()) {
+                Text(text = issued, color = contentColor, fontSize = 13.sp, maxLines = 1)
+            }
         }
-        if (expanded) {
-            Text(text = "Source", color = contentColor, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        Icon(
+            imageVector = Icons.Filled.KeyboardArrowDown,
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.rotate(-90f),
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AlertDetailSheet(
+    alert: WeatherForecast.Alert,
+    onDismiss: () -> Unit,
+) {
+    val title = alert.event?.takeIf { it.isNotBlank() } ?: ALERT_FALLBACK_TITLE
+    val issued = alert.start?.toIssuedLabel()
+    val body = alert.description?.takeIf { it.isNotBlank() }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = SheetFill,
+        contentColor = WanderOnDark,
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(start = 20.dp, end = 20.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Filled.Warning,
+                    contentDescription = null,
+                    tint = AlertYellow,
+                    modifier = Modifier.size(22.dp),
+                )
+                Text(
+                    text = title,
+                    color = WanderOnDark,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f).padding(start = 10.dp),
+                )
+                IconButton(onClick = onDismiss) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = "Close alert details",
+                        tint = WanderOnDark,
+                    )
+                }
+            }
+            if (!issued.isNullOrBlank()) {
+                Text(text = issued, color = WanderOnDark, fontSize = 13.sp)
+            }
+            if (body != null && body != title) {
+                Text(
+                    text = body,
+                    color = WanderOnDark,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+            Text(
+                text = "Source",
+                color = WanderOnDark,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(top = 8.dp),
+            )
             Text(
                 text = alert.sender_name?.takeIf { it.isNotBlank() } ?: "Unknown",
-                color = contentColor,
+                color = WanderOnDark,
                 fontSize = 13.sp,
             )
-            Text(text = "Valid until", color = contentColor, fontSize = 13.sp, fontWeight = FontWeight.Medium)
-            Text(text = alert.end?.toIssuedLabel() ?: "Unknown", color = contentColor, fontSize = 13.sp)
+            Text(text = "Valid until", color = WanderOnDark, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+            Text(text = alert.end?.toIssuedLabel() ?: "Unknown", color = WanderOnDark, fontSize = 13.sp)
         }
     }
 }
@@ -348,8 +417,10 @@ private fun Long.toIssuedLabel(): String {
 
 private val cardFill = Color.Black.copy(alpha = 0.38f)
 private val AlertYellow = Color(0xFFF5C400)
+private val SheetFill = Color(0xFF14171C)
 private const val HOURLY_LIMIT = 24
 private const val ALERTS = "Weather alerts"
+private const val ALERT_FALLBACK_TITLE = "Weather alert"
 private const val AIR_QUALITY = "Air quality"
 private const val UNIT_NOTE = "Concentration in μg/m³"
 private const val MONTH_ABBREV = 3
