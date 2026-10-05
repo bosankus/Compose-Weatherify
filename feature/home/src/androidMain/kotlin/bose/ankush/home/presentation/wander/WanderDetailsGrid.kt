@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,7 +48,8 @@ private data class DetailCell(
 
 /**
  * Feel, wind, UV, humidity, pressure, and clouds as a 3x2 grid drawn straight on the photo.
- * Rain today and next rain append as an extra row only when their values are present.
+ * Rain today and next rain append as an extra row only when their values are present, padded to
+ * three slots so its dividers line up with the rows above.
  * No fill: a soft text shadow and 1dp dividers keep it readable.
  */
 @Composable
@@ -98,21 +100,36 @@ internal fun WanderDetailsGrid(
         }
     val divider = contentColor.copy(alpha = DIVIDER_ALPHA)
     Column(modifier = modifier.fillMaxWidth()) {
-        cells.chunked(COLUMNS).forEachIndexed { rowIndex, row ->
+        detailGridRows(cells, COLUMNS).forEachIndexed { rowIndex, row ->
             if (rowIndex > 0) {
                 Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(divider))
             }
             Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                 row.forEachIndexed { index, cell ->
                     if (index > 0) {
-                        Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(divider))
+                        // Empty slots keep a transparent 1dp gap so the weighted columns match the rows above.
+                        val gap = if (cell != null) Modifier.background(divider) else Modifier
+                        Box(modifier = Modifier.width(1.dp).fillMaxHeight().then(gap))
                     }
-                    DetailCellView(cell, contentColor, Modifier.weight(1f))
+                    if (cell != null) {
+                        DetailCellView(cell, contentColor, Modifier.weight(1f))
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
     }
 }
+
+/**
+ * Splits [cells] into rows of exactly [columns] slots, padding the last row with nulls so a short
+ * row (e.g. only Rain today) still lines up with the full rows above it.
+ */
+internal fun <T : Any> detailGridRows(
+    cells: List<T>,
+    columns: Int,
+): List<List<T?>> = cells.chunked(columns).map { row -> row + List(columns - row.size) { null } }
 
 @Composable
 private fun DetailCellView(
