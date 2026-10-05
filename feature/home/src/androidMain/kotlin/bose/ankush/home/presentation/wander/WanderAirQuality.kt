@@ -6,6 +6,16 @@ import kotlin.math.roundToInt
 /** OpenWeather AQI band, 1 (good) to 5 (very poor). */
 internal enum class AirLevel { GOOD, FAIR, MODERATE, POOR, VERY_POOR }
 
+/** WHO 2021 24 h guideline, µg/m³. */
+private const val PM25_LIMIT_UG_M3 = 15.0
+private const val PM10_LIMIT_UG_M3 = 45.0
+private const val CO_LIMIT_UG_M3 = 4000.0
+
+/** WHO 2021 8 h peak guideline, µg/m³. */
+private const val O3_LIMIT_UG_M3 = 100.0
+private const val NO2_LIMIT_UG_M3 = 25.0
+private const val SO2_LIMIT_UG_M3 = 40.0
+
 /**
  * Reference limits in µg/m³. Approximate WHO 2021 air quality guideline values: 24 h for
  * PM2.5, PM10, NO2, SO2 and CO; 8 h peak for O3. They only scale the tile bars.
@@ -14,12 +24,12 @@ internal enum class Pollutant(
     val label: String,
     val limit: Double,
 ) {
-    PM25("PM₂.₅", 15.0),
-    PM10("PM₁₀", 45.0),
-    CO("CO", 4000.0),
-    O3("O₃", 100.0),
-    NO2("NO₂", 25.0),
-    SO2("SO₂", 40.0),
+    PM25("PM₂.₅", PM25_LIMIT_UG_M3),
+    PM10("PM₁₀", PM10_LIMIT_UG_M3),
+    CO("CO", CO_LIMIT_UG_M3),
+    O3("O₃", O3_LIMIT_UG_M3),
+    NO2("NO₂", NO2_LIMIT_UG_M3),
+    SO2("SO₂", SO2_LIMIT_UG_M3),
 }
 
 internal data class PollutantReading(
@@ -70,7 +80,7 @@ internal fun formatConcentration(value: Double): String =
     if (value >= DECIMAL_BELOW) {
         value.roundToInt().toString()
     } else {
-        ((value * 10).roundToInt() / 10.0).toString().removeSuffix(".0")
+        ((value * TENTHS_FACTOR).roundToInt() / TENTHS_FACTOR).toString().removeSuffix(".0")
     }
 
 private const val GOOD_SHARE = 0.5
@@ -78,3 +88,4 @@ private const val FAIR_SHARE = 1.0
 private const val MODERATE_SHARE = 1.5
 private const val POOR_SHARE = 2.0
 private const val DECIMAL_BELOW = 10.0
+private const val TENTHS_FACTOR = 10.0
