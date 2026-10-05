@@ -241,7 +241,12 @@ private fun WanderHomePage(
                                 .padding(bottom = 8.dp),
                     )
                     WanderAddPlaceButton(
-                        visible = pager.currentPage == PLACES_PAGE && places.state.isPremium,
+                        visible =
+                            WanderAddPlaceAction.showAddButton(
+                                onPlacesPage = pager.currentPage == PLACES_PAGE,
+                                isPremium = places.state.isPremium,
+                                sheetOpen = places.state.search.isOpen,
+                            ),
                         onClick = { places.onIntent(WanderPlacesIntent.OpenSearch) },
                         modifier =
                             Modifier

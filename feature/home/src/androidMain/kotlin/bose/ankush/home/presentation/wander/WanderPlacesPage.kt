@@ -277,6 +277,8 @@ private fun SelectedTick() {
 
 private fun <T> trailingTween() = tween<T>(durationMillis = TRAILING_ANIM_MILLIS)
 
+private fun <T> fabTween() = tween<T>(durationMillis = FAB_ANIM_MILLIS)
+
 @Composable
 private fun PremiumCard(
     contentColor: Color,
@@ -351,7 +353,10 @@ private fun PlacesNoticeLine(
     Text(text = text, color = contentColor.copy(alpha = NOTICE_ALPHA), fontSize = 13.sp)
 }
 
-/** Add-a-place button. Shown only while the places page is the current page. */
+/**
+ * Add-a-place button. Shown only on the places page, and hidden while the add sheet is
+ * open; it shrinks and fades out as the sheet rises, and comes back when it closes.
+ */
 @Composable
 internal fun WanderAddPlaceButton(
     visible: Boolean,
@@ -360,8 +365,8 @@ internal fun WanderAddPlaceButton(
 ) {
     AnimatedVisibility(
         visible = visible,
-        enter = scaleIn() + fadeIn(),
-        exit = scaleOut() + fadeOut(),
+        enter = scaleIn(fabTween(), initialScale = FAB_HIDDEN_SCALE) + fadeIn(fabTween()),
+        exit = scaleOut(fabTween(), targetScale = FAB_HIDDEN_SCALE) + fadeOut(fabTween()),
         modifier = modifier,
     ) {
         FloatingActionButton(
@@ -383,3 +388,5 @@ private const val MUTED_ALPHA = 0.72f
 private const val NOTICE_ALPHA = 0.9f
 private const val TRAILING_ANIM_MILLIS = 200
 private const val TRAILING_START_SCALE = 0.6f
+private const val FAB_ANIM_MILLIS = 200
+private const val FAB_HIDDEN_SCALE = 0.4f
