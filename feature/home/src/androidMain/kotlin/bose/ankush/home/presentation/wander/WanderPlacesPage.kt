@@ -1,10 +1,13 @@
 package bose.ankush.home.presentation.wander
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
@@ -49,7 +53,6 @@ import bose.ankush.commonui.theme.ToastOnWarning
 import bose.ankush.commonui.theme.WarningYellow
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.retry_btn_txt
-import bose.ankush.home.generated.resources.wander_places_active
 import bose.ankush.home.generated.resources.wander_places_add
 import bose.ankush.home.generated.resources.wander_places_current
 import bose.ankush.home.generated.resources.wander_places_current_detail
@@ -209,36 +212,70 @@ private fun PlaceCard(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        if (model.isActive) ActiveBadge()
-        val deleteLabel = model.deleteLabel
-        if (deleteLabel != null) {
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Filled.Close,
-                    contentDescription = deleteLabel,
-                    tint = contentColor.copy(alpha = MUTED_ALPHA),
-                    modifier = Modifier.size(18.dp),
-                )
-            }
-        } else {
-            Spacer(modifier = Modifier.size(8.dp))
+        PlaceCardEnd(
+            trailing = placeCardTrailing(isActive = model.isActive, canDelete = model.deleteLabel != null),
+            deleteLabel = model.deleteLabel.orEmpty(),
+            contentColor = contentColor,
+            onDelete = onDelete,
+        )
+    }
+}
+
+/**
+ * Right end of a place card: a tick on the place Home is showing, otherwise the remove
+ * button (or nothing). Switching between them crossfades with a small scale.
+ */
+@Composable
+private fun PlaceCardEnd(
+    trailing: WanderPlaceCardTrailing,
+    deleteLabel: String,
+    contentColor: Color,
+    onDelete: () -> Unit,
+) {
+    AnimatedContent(
+        targetState = trailing,
+        transitionSpec = {
+            (fadeIn(trailingTween()) + scaleIn(trailingTween(), initialScale = TRAILING_START_SCALE))
+                .togetherWith(fadeOut(trailingTween()) + scaleOut(trailingTween(), targetScale = TRAILING_START_SCALE))
+        },
+        contentAlignment = Alignment.Center,
+        label = "placeCardTrailing",
+    ) { state ->
+        when (state) {
+            WanderPlaceCardTrailing.Selected -> SelectedTick()
+            WanderPlaceCardTrailing.Remove ->
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = deleteLabel,
+                        tint = contentColor.copy(alpha = MUTED_ALPHA),
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            WanderPlaceCardTrailing.None -> Spacer(modifier = Modifier.size(8.dp))
         }
     }
 }
 
 @Composable
-private fun ActiveBadge() {
-    Text(
-        text = stringResource(Res.string.wander_places_active),
-        color = ToastOnWarning,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
-        modifier =
-            Modifier
-                .background(WarningYellow, RoundedCornerShape(12.dp))
-                .padding(horizontal = 10.dp, vertical = 4.dp),
-    )
+private fun SelectedTick() {
+    // Same 48dp slot as the remove button, so the text column never jumps.
+    Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.size(28.dp).clip(CircleShape).background(WarningYellow),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null,
+                tint = ToastOnWarning,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
 }
+
+private fun <T> trailingTween() = tween<T>(durationMillis = TRAILING_ANIM_MILLIS)
 
 @Composable
 private fun PremiumCard(
@@ -344,3 +381,5 @@ private val ActiveOutline = WarningYellow.copy(alpha = 0.8f)
 private val FabClearance = 72.dp
 private const val MUTED_ALPHA = 0.72f
 private const val NOTICE_ALPHA = 0.9f
+private const val TRAILING_ANIM_MILLIS = 200
+private const val TRAILING_START_SCALE = 0.6f

@@ -36,7 +36,6 @@
     <string name="wander_places_title">Saved places</string>
     <string name="wander_places_current">Current location</string>
     <string name="wander_places_current_detail">Follows your GPS</string>
-    <string name="wander_places_active">Showing</string>
     <string name="wander_places_loading">Loading saved places…</string>
     <string name="wander_places_empty">No saved places yet. Tap + to add a city.</string>
     <string name="wander_places_load_error">Couldn’t load your saved places.</string>
