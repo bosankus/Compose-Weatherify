@@ -68,12 +68,13 @@ import org.koin.compose.viewmodel.koinViewModel
 fun WanderHomeScreen(
     links: WanderHomeLinks,
     shell: WanderShell,
-    modifier: Modifier = Modifier,
-    nearby: WanderNearby = WanderNearby(),
+    sections: WanderHomeSections = WanderHomeSections(),
     onOpenCalendar: () -> Unit = {},
-    forecast: WanderForecastDetails = WanderForecastDetails(),
-    chrome: WanderHomeChrome = WanderHomeChrome(),
+    modifier: Modifier = Modifier,
 ) {
+    val nearby = sections.nearby
+    val forecast = sections.forecast
+    val chrome = sections.chrome
     var selectedTabName by rememberSaveable { mutableStateOf(WanderTab.HOME.name) }
     val selectedTab = WanderTab.entries.firstOrNull { it.name == selectedTabName } ?: WanderTab.HOME
     var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
@@ -98,18 +99,24 @@ fun WanderHomeScreen(
         when {
             selectedTab == WanderTab.HOME ->
                 WanderHomePage(
-                    shell = shell,
-                    nearby = nearby,
-                    onOpenCalendar = onOpenCalendar,
-                    forecast = forecast,
-                    chrome = chrome,
-                    contentColor = contentColor,
-                    chipColors = chipColors,
-                    cornerGlow = cornerGlow,
-                    openAlert = openAlert,
-                    onOpenAlert = { openAlert = it },
-                    onDismissAlert = { openAlert = null },
-                    onOpenMap = { onTab(WanderTab.MAP) },
+                    model =
+                        WanderHomePageModel(
+                            shell = shell,
+                            nearby = nearby,
+                            forecast = forecast,
+                            chrome = chrome,
+                            contentColor = contentColor,
+                            chipColors = chipColors,
+                            cornerGlow = cornerGlow,
+                            openAlert = openAlert,
+                        ),
+                    actions =
+                        WanderHomePageActions(
+                            onOpenCalendar = onOpenCalendar,
+                            onOpenAlert = { openAlert = it },
+                            onDismissAlert = { openAlert = null },
+                            onOpenMap = { onTab(WanderTab.MAP) },
+                        ),
                     modifier = Modifier.fillMaxSize(),
                 )
             else ->
@@ -134,23 +141,43 @@ fun WanderHomeScreen(
     }
 }
 
+private data class WanderHomePageModel(
+    val shell: WanderShell,
+    val nearby: WanderNearby,
+    val forecast: WanderForecastDetails,
+    val chrome: WanderHomeChrome,
+    val contentColor: Color,
+    val chipColors: WanderChipColors,
+    val cornerGlow: Color,
+    val openAlert: WeatherForecast.Alert?,
+)
+
+private data class WanderHomePageActions(
+    val onOpenCalendar: () -> Unit,
+    val onOpenAlert: (WeatherForecast.Alert) -> Unit,
+    val onDismissAlert: () -> Unit,
+    val onOpenMap: () -> Unit,
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WanderHomePage(
-    shell: WanderShell,
-    nearby: WanderNearby,
-    onOpenCalendar: () -> Unit,
-    forecast: WanderForecastDetails,
-    chrome: WanderHomeChrome,
-    contentColor: Color,
-    chipColors: WanderChipColors,
-    cornerGlow: Color,
-    openAlert: WeatherForecast.Alert?,
-    onOpenAlert: (WeatherForecast.Alert) -> Unit,
-    onDismissAlert: () -> Unit,
-    onOpenMap: () -> Unit,
+    model: WanderHomePageModel,
+    actions: WanderHomePageActions,
     modifier: Modifier = Modifier,
 ) {
+    val shell = model.shell
+    val nearby = model.nearby
+    val forecast = model.forecast
+    val chrome = model.chrome
+    val contentColor = model.contentColor
+    val chipColors = model.chipColors
+    val cornerGlow = model.cornerGlow
+    val openAlert = model.openAlert
+    val onOpenCalendar = actions.onOpenCalendar
+    val onOpenAlert = actions.onOpenAlert
+    val onDismissAlert = actions.onDismissAlert
+    val onOpenMap = actions.onOpenMap
     val content = shell.content
     val photo = shell.photo
     val photoUrl = photo?.imageUrl
@@ -236,11 +263,14 @@ private fun WanderHomePage(
                         if (content.days.isNotEmpty() || chrome.forecastFailed) {
                             Spacer(modifier = Modifier.height(20.dp))
                             WanderCalendarStrip(
-                                days = content.days,
+                                model =
+                                    WanderCalendarStripModel(
+                                        days = content.days,
+                                        eventDates = chrome.eventDates,
+                                        showWeekShimmer = false,
+                                    ),
                                 onOpen = onOpenCalendar,
                                 contentColor = contentColor,
-                                eventDates = chrome.eventDates,
-                                showWeekShimmer = false,
                                 onRetryCalendar = if (chrome.forecastFailed) chrome.onRetryForecast else null,
                             )
                         }
@@ -421,26 +451,29 @@ fun WanderHomeRoute(
         WanderHomeScreen(
             links = links,
             shell = shell,
+            sections =
+                WanderHomeSections(
+                    nearby =
+                        shellState.toWanderNearby(
+                            onOpenAccount = links.onOpenHub,
+                            onRetryEvents = shellViewModel::retryEvents,
+                        ),
+                    forecast =
+                        WanderForecastDetails(
+                            alerts = state.weatherData?.alerts.orEmpty(),
+                            airQuality = state.airQualityData,
+                            hourly = state.weatherData?.hourly.orEmpty(),
+                            extras = state.weatherData?.toWanderForecastExtras() ?: WanderForecastExtras(),
+                        ),
+                    chrome =
+                        rememberWanderChrome(
+                            state = state,
+                            shellState = shellState,
+                            forecastVisible = liveContent != null,
+                            viewModel = viewModel,
+                        ),
+                ),
             onOpenCalendar = { shellViewModel.onIntent(ShellIntent.OpenCreate) },
-            forecast =
-                WanderForecastDetails(
-                    alerts = state.weatherData?.alerts.orEmpty(),
-                    airQuality = state.airQualityData,
-                    hourly = state.weatherData?.hourly.orEmpty(),
-                    extras = state.weatherData?.toWanderForecastExtras() ?: WanderForecastExtras(),
-                ),
-            chrome =
-                rememberWanderChrome(
-                    state = state,
-                    shellState = shellState,
-                    forecastVisible = liveContent != null,
-                    viewModel = viewModel,
-                ),
-            nearby =
-                shellState.toWanderNearby(
-                    onOpenAccount = links.onOpenHub,
-                    onRetryEvents = shellViewModel::retryEvents,
-                ),
         )
         ShellCreateDialog(
             state = shellState,

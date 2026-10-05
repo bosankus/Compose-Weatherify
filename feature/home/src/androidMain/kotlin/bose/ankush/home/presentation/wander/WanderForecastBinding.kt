@@ -21,6 +21,13 @@ data class WanderCalendarDay(
     val day: LocalDate? = null,
 )
 
+/** Week strip inputs grouped so the composable stays under the param-list limit. */
+data class WanderCalendarStripModel(
+    val days: List<WanderCalendarDay>,
+    val eventDates: Set<LocalDate> = emptySet(),
+    val showWeekShimmer: Boolean = false,
+)
+
 /** Live header, chips, and week. Preview data never goes through this. */
 data class WanderHomeContent(
     val temperature: String,

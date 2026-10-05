@@ -47,20 +47,20 @@ import bose.ankush.home.presentation.shell.ShellSectionKind
 import bose.ankush.home.presentation.shell.retryContentDescription
 import bose.ankush.home.presentation.util.getIconUrl
 import coil3.compose.AsyncImage
-import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun WanderCalendarStrip(
-    days: List<WanderCalendarDay>,
+    model: WanderCalendarStripModel,
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
     contentColor: Color = WanderOnDark,
-    eventDates: Set<LocalDate> = emptySet(),
-    showWeekShimmer: Boolean = false,
     onRetryCalendar: (() -> Unit)? = null,
 ) {
+    val days = model.days
+    val eventDates = model.eventDates
+    val showWeekShimmer = model.showWeekShimmer
     if (days.isEmpty() && !showWeekShimmer && onRetryCalendar == null) return
     Column(modifier = modifier.fillMaxWidth()) {
         Row(

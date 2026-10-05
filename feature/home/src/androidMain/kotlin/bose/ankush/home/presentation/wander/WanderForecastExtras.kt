@@ -52,9 +52,9 @@ internal fun WeatherForecast.toWanderForecastExtras(
 
 /** Today's rain in mm, only when greater than zero. */
 internal fun formatRainToday(rainMm: Double?): String? {
-    if (rainMm == null || rainMm.isNaN() || rainMm.isInfinite() || rainMm <= 0.0) return null
-    val decimals = if (rainMm % 1.0 == 0.0) 0 else 1
-    return formatWanderNumber(rainMm, decimals = decimals, suffix = " mm", placeholder = "")
+    val amount = rainMm?.takeIf { it.isFinite() && it > 0.0 } ?: return null
+    val decimals = if (amount % 1.0 == 0.0) 0 else 1
+    return formatWanderNumber(amount, decimals = decimals, suffix = " mm", placeholder = "")
         .takeIf { it.isNotBlank() }
 }
 
@@ -71,11 +71,9 @@ internal fun findNextRainLabel(
         hourly
             .asSequence()
             .mapNotNull { it }
-            .filter { hour -> (hour.dt ?: return@filter false) >= nowEpochSeconds }
+            .filter { hour -> (hour.dt ?: Long.MIN_VALUE) >= nowEpochSeconds }
             .firstOrNull { hour -> hour.weather.orEmpty().any { condition -> isPrecipCondition(condition) } }
-            ?: return null
-    val dt = slot.dt ?: return null
-    return formatNextRainTime(dt, nowEpochSeconds, zone)
+    return slot?.dt?.let { formatNextRainTime(it, nowEpochSeconds, zone) }
 }
 
 internal fun isPrecipCondition(condition: WeatherCondition?): Boolean {
@@ -105,46 +103,44 @@ internal fun findTemperatureTrend(
     nowEpochSeconds: Long,
     zone: TimeZone,
 ): WanderTemperatureTrendData? {
-    if (currentTempKelvin == null || currentTempKelvin.isNaN() || currentTempKelvin.isInfinite()) return null
+    val current = currentTempKelvin?.takeIf { it.isFinite() } ?: return null
     val hours =
         hourly
             .mapNotNull { it }
             .mapNotNull { hour ->
                 val dt = hour.dt ?: return@mapNotNull null
-                val temp = hour.temp ?: return@mapNotNull null
-                if (temp.isNaN() || temp.isInfinite()) return@mapNotNull null
+                val temp = hour.temp?.takeIf { it.isFinite() } ?: return@mapNotNull null
                 dt to temp
             }.sortedBy { it.first }
-    if (hours.isEmpty()) return null
 
     val threeHours = nowEpochSeconds + THREE_HOURS_SECONDS
     val sixHours = nowEpochSeconds + SIX_HOURS_SECONDS
     val target =
         hours.firstOrNull { it.first >= threeHours }
             ?: hours.lastOrNull { it.first in (nowEpochSeconds + 1)..sixHours }
-            ?: return null
 
-    val futureTemp = target.second
-    val byTime = toHourClock(target.first, zone)
-    val futureCelsius = futureTemp.toCelsius()
-    val currentCelsius = currentTempKelvin.toCelsius()
-    val delta = futureTemp - currentTempKelvin
-    return when {
-        abs(delta) < STEADY_DELTA_KELVIN ->
-            WanderTemperatureTrendData(
-                line = "Steady around $currentCelsius° until $byTime",
-                direction = WanderTrendDirection.STEADY,
-            )
-        delta < 0 ->
-            WanderTemperatureTrendData(
-                line = "Cooling to $futureCelsius° by $byTime",
-                direction = WanderTrendDirection.COOLING,
-            )
-        else ->
-            WanderTemperatureTrendData(
-                line = "Warming to $futureCelsius° by $byTime",
-                direction = WanderTrendDirection.WARMING,
-            )
+    return target?.let { (epoch, futureTemp) ->
+        val byTime = toHourClock(epoch, zone)
+        val futureCelsius = futureTemp.toCelsius()
+        val currentCelsius = current.toCelsius()
+        val delta = futureTemp - current
+        when {
+            abs(delta) < STEADY_DELTA_KELVIN ->
+                WanderTemperatureTrendData(
+                    line = "Steady around $currentCelsius° until $byTime",
+                    direction = WanderTrendDirection.STEADY,
+                )
+            delta < 0 ->
+                WanderTemperatureTrendData(
+                    line = "Cooling to $futureCelsius° by $byTime",
+                    direction = WanderTrendDirection.COOLING,
+                )
+            else ->
+                WanderTemperatureTrendData(
+                    line = "Warming to $futureCelsius° by $byTime",
+                    direction = WanderTrendDirection.WARMING,
+                )
+        }
     }
 }
 

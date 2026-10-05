@@ -66,6 +66,13 @@ data class WanderNearby(
     val onRetryEvents: () -> Unit = {},
 )
 
+/** Sections that sit beside the shell on Wander home. */
+data class WanderHomeSections(
+    val nearby: WanderNearby = WanderNearby(),
+    val forecast: WanderForecastDetails = WanderForecastDetails(),
+    val chrome: WanderHomeChrome = WanderHomeChrome(),
+)
+
 internal fun ShellState.toWanderNearby(
     onOpenAccount: () -> Unit,
     onRetryEvents: () -> Unit = {},
