@@ -5,12 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,13 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.commonui.theme.WarningYellow
@@ -87,7 +85,7 @@ internal fun WanderPlaceSearchSheet(
                 peekFraction = null,
                 heightFraction = SHEET_HEIGHT_FRACTION,
             ),
-        modifier = modifier.padding(bottom = rememberKeyboardLift()),
+        modifier = modifier.aboveKeyboard(),
         header = { SearchHeader(onClose = close) },
         body = {
             SearchBody(
@@ -102,15 +100,15 @@ internal fun WanderPlaceSearchSheet(
     )
 }
 
-/** Keyboard height above the tab bar area this sheet is already bounded by. */
-@Composable
-private fun rememberKeyboardLift(): Dp {
-    val density = LocalDensity.current
-    val ime = WindowInsets.ime.getBottom(density)
-    val navigation = WindowInsets.navigationBars.getBottom(density)
-    val reserve = with(density) { TabBarReserveHeight.roundToPx() }
-    return with(density) { (ime - navigation - reserve).coerceAtLeast(0).toDp() }
-}
+/**
+ * Lifts the sheet over the keyboard. The home column already pads the navigation bar and
+ * leaves [TabBarReserveHeight] for the tab bar under this area, so both count as consumed and
+ * only the part of the keyboard above them pads the sheet. Applied in layout, so it tracks
+ * the keyboard animation frame by frame. Needs `adjustResize` on the activity: without it
+ * Android also resizes or pans the window, and the keyboard is counted twice.
+ */
+private fun Modifier.aboveKeyboard(): Modifier =
+    consumeWindowInsets(PaddingValues(bottom = TabBarReserveHeight)).imePadding()
 
 @Composable
 private fun SearchHeader(onClose: () -> Unit) {
