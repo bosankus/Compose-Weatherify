@@ -92,6 +92,7 @@ fun WanderHomeScreen(
     val readySample = rememberWanderImageSample(readyCondition, readyPhotoUrl)
     val readyContentColor = contentColorForLuminance(readySample.headerLuminance)
     val readyChipColors = rememberWanderChipColors(readySample.averageColor)
+    val readyCornerGlow = wanderCornerGlowColor(readySample.averageColor, readySample.headerLuminance)
 
     val inactiveTint =
         when {
@@ -121,6 +122,7 @@ fun WanderHomeScreen(
                     chrome = chrome,
                     contentColor = readyContentColor,
                     chipColors = readyChipColors,
+                    cornerGlow = readyCornerGlow,
                     openAlert = openAlert,
                     onOpenAlert = { openAlert = it },
                     onDismissAlert = { openAlert = null },
@@ -159,6 +161,7 @@ private fun WanderHomePage(
     chrome: WanderHomeChrome,
     contentColor: Color,
     chipColors: WanderChipColors,
+    cornerGlow: Color,
     openAlert: WeatherForecast.Alert?,
     onOpenAlert: (WeatherForecast.Alert) -> Unit,
     onDismissAlert: () -> Unit,
@@ -170,6 +173,7 @@ private fun WanderHomePage(
     val photoUrl = photo?.imageUrl
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = content.condition, photoUrl = photoUrl)
+        WanderCornerGlow(color = cornerGlow)
         WanderNotificationPrompt(chrome)
         PullToRefreshBox(
             isRefreshing = chrome.refreshing,
@@ -323,6 +327,13 @@ private fun WanderWaitingPage(
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = WanderCondition.CLOUDS)
+        WanderCornerGlow(
+            color =
+                wanderCornerGlowColor(
+                    WanderCondition.CLOUDS.dominantBackgroundColor(),
+                    WanderCondition.CLOUDS.dominantHeaderLuminance(),
+                ),
+        )
         WanderNotificationPrompt(chrome)
         PullToRefreshBox(
             isRefreshing = chrome.refreshing,
