@@ -78,15 +78,6 @@ internal fun ShellState.toWanderNearby(
                     .filter { it.isNotBlank() }
                     .joinToString(", ")
             }.orEmpty()
-    val savedStatus =
-        if (savedPlace == ShellSectionStatus.Ready &&
-            place == null
-        ) {
-            ShellSectionStatus.Empty
-        } else {
-            savedPlace
-        }
-    val savedMessage = if (place == null) placeholderMessage(ShellSectionKind.SavedPlace, savedStatus).orEmpty() else ""
     return WanderNearby(
         photoUrl = photoUrl?.takeIf { it.isNotBlank() },
         showAccount = true,
@@ -99,11 +90,13 @@ internal fun ShellState.toWanderNearby(
                 emptyList()
             },
         savedPlace =
-            WanderSavedPlace(
-                name = place?.name?.trim().orEmpty(),
-                subtitle = if (place == null) "" else subtitle,
-                message = savedMessage,
-            ),
+            place?.let {
+                WanderSavedPlace(
+                    name = it.name.trim(),
+                    subtitle = subtitle,
+                    message = "",
+                )
+            },
         onOpenAccount = onOpenAccount,
         onRetryEvents = onRetryEvents,
     )

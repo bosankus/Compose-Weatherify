@@ -3,7 +3,6 @@ package bose.ankush.home.presentation.wander
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,40 +20,32 @@ fun WanderTemperatureHeader(
     contentColor: Color = WanderOnDark,
 ) {
     Column(modifier = modifier) {
-        Text(
-            text = temperature,
+        WanderAnimatedValue(
+            text = temperature.ifBlank { WANDER_PLACEHOLDER },
+            color = contentColor,
+            fontSize = 96.sp,
+            fontWeight = FontWeight.Light,
             style =
                 TextStyle(
-                    color = contentColor,
-                    fontSize = 96.sp,
-                    fontWeight = FontWeight.Light,
                     lineHeight = 96.sp,
                     letterSpacing = (-1.5).sp,
                     shadow = HeaderTextShadow,
                 ),
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = place,
-            style =
-                TextStyle(
-                    color = contentColor,
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 35.sp,
-                    shadow = HeaderTextShadow,
-                ),
+        WanderAnimatedValue(
+            text = place.ifBlank { WANDER_PLACEHOLDER },
+            color = contentColor,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Medium,
+            style = TextStyle(lineHeight = 35.sp, shadow = HeaderTextShadow),
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = conditionLine,
-            style =
-                TextStyle(
-                    color = contentColor,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Normal,
-                    shadow = HeaderTextShadow,
-                ),
+        WanderAnimatedValue(
+            text = conditionLine.ifBlank { WANDER_PLACEHOLDER },
+            color = contentColor,
+            fontSize = 18.sp,
+            style = TextStyle(shadow = HeaderTextShadow),
         )
     }
 }

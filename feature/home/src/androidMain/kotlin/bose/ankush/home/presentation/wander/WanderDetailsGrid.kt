@@ -57,11 +57,26 @@ internal fun WanderDetailsGrid(
     val cells =
         listOf(
             DetailCell(Icons.Outlined.Thermostat, "Feel", content.feel),
-            DetailCell(Icons.Outlined.Air, "Wind", content.wind, current?.wind_gust?.let { "Gust $it m/s" }),
+            DetailCell(
+                Icons.Outlined.Air,
+                "Wind",
+                content.wind,
+                current?.wind_gust?.let {
+                    "Gust ${formatWanderNumber(it, decimals = if (it % 1.0 == 0.0) 0 else 1, suffix = " m/s")}"
+                },
+            ),
             DetailCell(Icons.Outlined.WbSunny, "UV", content.uv),
-            DetailCell(Icons.Outlined.WaterDrop, "Humidity", current?.humidity?.let { "$it%" } ?: NO_VALUE),
-            DetailCell(Icons.Outlined.Speed, "Pressure", current?.pressure?.let { "$it hPa" } ?: NO_VALUE),
-            DetailCell(Icons.Outlined.Cloud, "Clouds", current?.clouds?.let { "$it%" } ?: NO_VALUE),
+            DetailCell(
+                Icons.Outlined.WaterDrop,
+                "Humidity",
+                formatWanderNumber(current?.humidity?.toDouble(), suffix = "%"),
+            ),
+            DetailCell(
+                Icons.Outlined.Speed,
+                "Pressure",
+                formatWanderNumber(current?.pressure?.toDouble(), suffix = " hPa"),
+            ),
+            DetailCell(Icons.Outlined.Cloud, "Clouds", formatWanderNumber(current?.clouds?.toDouble(), suffix = "%")),
         )
     val divider = contentColor.copy(alpha = DIVIDER_ALPHA)
     Column(modifier = modifier.fillMaxWidth()) {
@@ -106,9 +121,20 @@ private fun DetailCellView(
             tint = contentColor,
             modifier = Modifier.size(18.dp).padding(bottom = 2.dp),
         )
-        Text(text = cell.value, style = shadowed(contentColor, 16.sp, FontWeight.Medium), maxLines = 1)
+        WanderAnimatedValue(
+            text = cell.value,
+            color = contentColor,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            style = shadowed(contentColor, 16.sp, FontWeight.Medium),
+        )
         cell.secondary?.let {
-            Text(text = it, style = shadowed(contentColor.copy(alpha = MUTED_ALPHA), 11.sp), maxLines = 1)
+            WanderAnimatedValue(
+                text = it,
+                color = contentColor.copy(alpha = MUTED_ALPHA),
+                fontSize = 11.sp,
+                style = shadowed(contentColor.copy(alpha = MUTED_ALPHA), 11.sp),
+            )
         }
         Text(text = cell.label, style = shadowed(contentColor.copy(alpha = MUTED_ALPHA), 12.sp), maxLines = 1)
     }
@@ -122,7 +148,6 @@ private fun shadowed(
 
 private val TextShadow = Shadow(color = Color.Black.copy(alpha = 0.4f), offset = Offset(0f, 1f), blurRadius = 6f)
 private const val DETAILS = "Details"
-private const val NO_VALUE = "—"
 private const val COLUMNS = 3
 private const val DIVIDER_ALPHA = 0.15f
 private const val MUTED_ALPHA = 0.72f

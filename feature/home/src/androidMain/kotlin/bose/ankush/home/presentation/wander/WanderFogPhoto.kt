@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import bose.ankush.network.api.UnsplashApi
 import bose.ankush.network.model.UnsplashPhoto
 import kotlinx.coroutines.CancellationException
@@ -117,36 +118,42 @@ internal object WanderConditionPhotoCache {
 }
 
 /**
- * Searches for the live condition. The client already asks Unsplash for a portrait
- * photo, content_filter high, and per_page 1. A null query, a blank key, or any
- * failure keeps the gradient. The image URL is the raw URL Unsplash returned, plus
- * the existing size params.
+ * Offline-first backdrop photo. Shows the last persisted URL for [condition] (Coil disk/memory)
+ * immediately, then searches Unsplash for [query] and crossfades to the new photo. A blank key
+ * or a failed search keeps the persisted or bundled image.
  */
 @Composable
-fun rememberWanderConditionPhoto(query: String?): WanderFogPhoto? {
+fun rememberWanderConditionPhoto(
+    query: String?,
+    condition: WanderCondition = WanderCondition.CLOUDS,
+): WanderFogPhoto? {
     val api = koinInject<UnsplashApi>()
-    var photo by remember(query) { mutableStateOf(query?.let(WanderConditionPhotoCache::cached)) }
-    LaunchedEffect(query) {
-        if (query == null) {
-            photo = null
-            return@LaunchedEffect
-        }
-        // Cached hit from remember above: still re-check so a concurrent fill is picked up.
+    val context = LocalContext.current
+    val prefs = remember { WanderPhotoPreferences(context) }
+    var photo by remember(condition.key) {
+        mutableStateOf(
+            prefs.read(condition.key) ?: query?.let(WanderConditionPhotoCache::cached),
+        )
+    }
+    LaunchedEffect(query, condition.key) {
+        prefs.read(condition.key)?.let { photo = it }
+        if (query == null) return@LaunchedEffect
         WanderConditionPhotoCache.cached(query)?.let {
             photo = it
+            prefs.write(condition.key, it)
             return@LaunchedEffect
         }
-        // Cold start often races the network. Retry a miss with short backoff while the query
-        // is unchanged. Failures are not cached, so each attempt re-searches.
         for (waitMs in PHOTO_SEARCH_BACKOFF_MS) {
             if (waitMs > 0L) delay(waitMs)
             WanderConditionPhotoCache.cached(query)?.let {
                 photo = it
+                prefs.write(condition.key, it)
                 return@LaunchedEffect
             }
             val result = WanderConditionPhotoCache.photo(query, api)
             if (result != null) {
                 photo = result
+                prefs.write(condition.key, result)
                 return@LaunchedEffect
             }
         }

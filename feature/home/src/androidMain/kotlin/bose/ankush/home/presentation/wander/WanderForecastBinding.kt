@@ -33,6 +33,22 @@ data class WanderHomeContent(
     val showSmallCards: Boolean = false,
 )
 
+/** Ready layout with no invented numbers. Used until Room has a forecast. */
+internal fun placeholderWanderContent(
+    place: String = WANDER_PLACEHOLDER,
+    condition: WanderCondition = WanderCondition.CLOUDS,
+): WanderHomeContent =
+    WanderHomeContent(
+        temperature = WANDER_PLACEHOLDER,
+        place = place.ifBlank { WANDER_PLACEHOLDER },
+        condition = condition,
+        feel = WANDER_PLACEHOLDER,
+        wind = WANDER_PLACEHOLDER,
+        uv = WANDER_PLACEHOLDER,
+        days = emptyList(),
+        showSmallCards = false,
+    )
+
 /**
  * Leave-by actions. The ViewModel still owns the Remote Config flag, eligibility,
  * and the four analytics events.
@@ -45,22 +61,16 @@ data class WanderLeaveBy(
     val onMisleading: () -> Unit,
 )
 
-/** What the shell shows. Ready is live forecast data. Waiting has no mock numbers. */
-sealed interface WanderShell {
-    val leaveBy: WanderLeaveBy?
-
-    data class Ready(
-        val content: WanderHomeContent,
-        val photo: WanderFogPhoto?,
-        override val leaveBy: WanderLeaveBy? = null,
-    ) : WanderShell
-
-    data class Waiting(
-        val loading: Boolean,
-        val statusMessage: String?,
-        override val leaveBy: WanderLeaveBy? = null,
-    ) : WanderShell
-}
+/**
+ * Wander home always uses [Ready]. Missing weather shows placeholder "--" values inside
+ * the same layout; there is no separate waiting page.
+ */
+data class WanderShell(
+    val content: WanderHomeContent,
+    val photo: WanderFogPhoto?,
+    val leaveBy: WanderLeaveBy? = null,
+    val statusMessage: String? = null,
+)
 
 /** OpenWeather `weather.main` to the gradient. The photo query is separate. */
 internal fun WeatherForecast.Current.wanderCondition(): WanderCondition {
@@ -134,5 +144,5 @@ internal fun List<WeatherForecast.Daily?>?.toWanderDays(): List<WanderCalendarDa
 
 private fun Double?.celsiusLabel(): String = this?.let { "${it.toCelsius()}°" } ?: MISSING
 
-private const val MISSING = "—"
+internal const val MISSING = WANDER_PLACEHOLDER
 private const val DAY_ABBREV = 3

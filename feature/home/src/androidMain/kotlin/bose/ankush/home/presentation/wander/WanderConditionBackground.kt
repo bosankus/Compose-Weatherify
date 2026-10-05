@@ -163,12 +163,14 @@ internal fun bundledConditionDrawable(
     context: Context,
     condition: WanderCondition,
 ): BundledConditionDrawable? {
-    val name = "wander_${condition.key}"
+    val names = bundledDrawableNames(condition)
     val packages = listOf(context.packageName, HOME_RESOURCE_PACKAGE).distinct()
-    for (packageName in packages) {
-        val id = context.resources.getIdentifier(name, "drawable", packageName)
-        if (id != 0) {
-            return BundledConditionDrawable(packageName, id)
+    for (name in names) {
+        for (packageName in packages) {
+            val id = context.resources.getIdentifier(name, "drawable", packageName)
+            if (id != 0) {
+                return BundledConditionDrawable(packageName, id)
+            }
         }
     }
     return null
