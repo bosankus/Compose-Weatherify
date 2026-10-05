@@ -29,10 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
@@ -57,6 +60,9 @@ import org.koin.compose.viewmodel.koinViewModel
  * Android Wander home. Home is this shell, bound to the forecast already loaded
  * by [HomeViewModel]. Alerts, air quality, and the hourly list sit on this column.
  * Map is saved places. Hub pushes Settings so back returns here. There is no weather tab.
+ *
+ * One [WanderTabBar] stays composed across HOME / MAP / HUB and all [WanderShell]
+ * states so the liquid pill springs can run when the selected tab changes.
  */
 @Composable
 fun WanderHomeScreen(
@@ -70,77 +76,98 @@ fun WanderHomeScreen(
 ) {
     var selectedTabName by rememberSaveable { mutableStateOf(WanderTab.HOME.name) }
     val selectedTab = WanderTab.entries.firstOrNull { it.name == selectedTabName } ?: WanderTab.HOME
+    var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
 
     val onTab = { tab: WanderTab ->
+        openAlert = null
         when (tab) {
             WanderTab.HUB -> links.onOpenHub()
             else -> selectedTabName = tab.name
         }
     }
 
-    if (selectedTab == WanderTab.HOME) {
-        when (shell) {
-            is WanderShell.Waiting ->
+    val waitingContentColor = rememberWanderContentColor(WanderCondition.CLOUDS, photoUrl = null)
+    val readyCondition = (shell as? WanderShell.Ready)?.content?.condition ?: WanderCondition.CLOUDS
+    val readyPhotoUrl = (shell as? WanderShell.Ready)?.photo?.imageUrl
+    val readySample = rememberWanderImageSample(readyCondition, readyPhotoUrl)
+    val readyContentColor = contentColorForLuminance(readySample.headerLuminance)
+    val readyChipColors = rememberWanderChipColors(readySample.averageColor)
+
+    val inactiveTint =
+        when {
+            selectedTab != WanderTab.HOME -> DefaultTabInactiveTint
+            shell is WanderShell.Ready -> readyContentColor
+            else -> waitingContentColor
+        }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        when {
+            selectedTab == WanderTab.HOME && shell is WanderShell.Waiting ->
                 WanderWaitingPage(
                     waiting = shell,
-                    selectedTab = selectedTab,
-                    onTab = onTab,
                     nearby = nearby,
                     onOpenCalendar = onOpenCalendar,
                     chrome = chrome,
-                    modifier = modifier,
+                    contentColor = waitingContentColor,
+                    onOpenMap = { onTab(WanderTab.MAP) },
+                    modifier = Modifier.fillMaxSize(),
                 )
-            is WanderShell.Ready ->
+            selectedTab == WanderTab.HOME && shell is WanderShell.Ready ->
                 WanderHomePage(
                     ready = shell,
-                    selectedTab = selectedTab,
-                    onTab = onTab,
                     nearby = nearby,
                     onOpenCalendar = onOpenCalendar,
                     forecast = forecast,
                     chrome = chrome,
-                    modifier = modifier,
+                    contentColor = readyContentColor,
+                    chipColors = readyChipColors,
+                    openAlert = openAlert,
+                    onOpenAlert = { openAlert = it },
+                    onDismissAlert = { openAlert = null },
+                    onOpenMap = { onTab(WanderTab.MAP) },
+                    modifier = Modifier.fillMaxSize(),
                 )
-        }
-    } else {
-        Column(modifier = modifier.fillMaxSize()) {
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                when (selectedTab) {
-                    WanderTab.MAP -> links.places()
-                    WanderTab.HOME, WanderTab.HUB -> Unit
+            else ->
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when (selectedTab) {
+                        WanderTab.MAP -> links.places()
+                        WanderTab.HOME, WanderTab.HUB -> Unit
+                    }
                 }
-            }
-            WanderTabBar(
-                selected = selectedTab,
-                onSelected = onTab,
-                modifier = Modifier.navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp),
-            )
         }
+        WanderTabBar(
+            selected = selectedTab,
+            onSelected = onTab,
+            inactiveTint = inactiveTint,
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = TabBarBottomGap),
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WanderHomePage(
     ready: WanderShell.Ready,
-    selectedTab: WanderTab,
-    onTab: (WanderTab) -> Unit,
     nearby: WanderNearby,
     onOpenCalendar: () -> Unit,
     forecast: WanderForecastDetails,
     chrome: WanderHomeChrome,
+    contentColor: Color,
+    chipColors: WanderChipColors,
+    openAlert: WeatherForecast.Alert?,
+    onOpenAlert: (WeatherForecast.Alert) -> Unit,
+    onDismissAlert: () -> Unit,
+    onOpenMap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val content = ready.content
     val photo = ready.photo
     val photoUrl = photo?.imageUrl
-    val imageSample = rememberWanderImageSample(content.condition, photoUrl)
-    val contentColor = contentColorForLuminance(imageSample.luminance)
-    val chipColors = rememberWanderChipColors(imageSample.averageColor)
-    var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
-    val onHomeTab = { tab: WanderTab ->
-        openAlert = null
-        onTab(tab)
-    }
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = content.condition, photoUrl = photoUrl)
         WanderNotificationPrompt(chrome)
@@ -178,8 +205,12 @@ private fun WanderHomePage(
                         chrome.current?.dt?.let { observed ->
                             Text(
                                 text = observedLabel(observed, wanderForecastZone(chrome.timezoneOffset)),
-                                color = contentColor.copy(alpha = OBSERVED_ALPHA),
-                                fontSize = 13.sp,
+                                style =
+                                    TextStyle(
+                                        color = contentColor.copy(alpha = OBSERVED_ALPHA),
+                                        fontSize = 13.sp,
+                                        shadow = HeaderTextShadow,
+                                    ),
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                         }
@@ -235,7 +266,7 @@ private fun WanderHomePage(
                         WanderForecastDetails(
                             details = forecast,
                             contentColor = contentColor,
-                            onOpenAlert = { openAlert = it },
+                            onOpenAlert = onOpenAlert,
                         )
                         ready.leaveBy?.let { leaveBy ->
                             Spacer(modifier = Modifier.height(16.dp))
@@ -252,7 +283,7 @@ private fun WanderHomePage(
                             WanderNearbyBlocks(
                                 nearby = nearby,
                                 contentColor = contentColor,
-                                onOpenSaved = { onHomeTab(WanderTab.MAP) },
+                                onOpenSaved = onOpenMap,
                             )
                         }
                         if (photo != null && photoUrl != null) {
@@ -262,7 +293,7 @@ private fun WanderHomePage(
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                     }
-                    WanderAlertPanel(alert = openAlert, onDismiss = { openAlert = null })
+                    WanderAlertPanel(alert = openAlert, onDismiss = onDismissAlert)
                     WanderRefreshChip(
                         visible = chrome.backgroundRefreshing && !chrome.refreshing,
                         colors = chipColors,
@@ -272,13 +303,7 @@ private fun WanderHomePage(
                                 .padding(bottom = 8.dp),
                     )
                 }
-                WanderTabBar(
-                    selected = selectedTab,
-                    onSelected = onHomeTab,
-                    inactiveTint = contentColor,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(TabBarReserveHeight))
             }
         }
         WanderOfflineToast(chrome.offlineMessage)
@@ -289,14 +314,13 @@ private fun WanderHomePage(
 @Composable
 private fun WanderWaitingPage(
     waiting: WanderShell.Waiting,
-    selectedTab: WanderTab,
-    onTab: (WanderTab) -> Unit,
     nearby: WanderNearby,
     onOpenCalendar: () -> Unit,
     chrome: WanderHomeChrome,
+    contentColor: Color,
+    onOpenMap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val contentColor = rememberWanderContentColor(WanderCondition.CLOUDS, photoUrl = null)
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = WanderCondition.CLOUDS)
         WanderNotificationPrompt(chrome)
@@ -365,18 +389,12 @@ private fun WanderWaitingPage(
                         WanderNearbyBlocks(
                             nearby = nearby,
                             contentColor = contentColor,
-                            onOpenSaved = { onTab(WanderTab.MAP) },
+                            onOpenSaved = onOpenMap,
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                 }
-                WanderTabBar(
-                    selected = selectedTab,
-                    onSelected = onTab,
-                    inactiveTint = contentColor,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(TabBarReserveHeight))
             }
         }
     }
@@ -562,3 +580,9 @@ private fun leaveByRow(
 
 private const val CURRENT_LOCATION = "Current Location"
 private const val OBSERVED_ALPHA = 0.72f
+internal val TabBarHeight = 64.dp
+internal val TabBarBottomGap = 12.dp
+internal val TabBarReserveHeight = TabBarHeight + TabBarBottomGap
+private val DefaultTabInactiveTint = Color.White.copy(alpha = 0.5f)
+internal val HeaderTextShadow =
+    Shadow(color = Color.Black.copy(alpha = 0.45f), offset = Offset(0f, 1f), blurRadius = 8f)
