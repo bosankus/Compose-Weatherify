@@ -67,10 +67,11 @@ data class WanderNearby(
 )
 
 /** Sections that sit beside the shell on Wander home. */
-data class WanderHomeSections(
+internal data class WanderHomeSections(
     val nearby: WanderNearby = WanderNearby(),
     val forecast: WanderForecastDetails = WanderForecastDetails(),
     val chrome: WanderHomeChrome = WanderHomeChrome(),
+    val places: WanderPlacesBinding = WanderPlacesBinding(),
 )
 
 internal fun ShellState.toWanderNearby(

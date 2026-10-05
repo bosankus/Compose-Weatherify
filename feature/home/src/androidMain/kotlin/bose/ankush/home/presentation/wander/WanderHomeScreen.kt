@@ -1,8 +1,10 @@
 package bose.ankush.home.presentation.wander
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +15,9 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,7 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,90 +52,97 @@ import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.presentation.HomeIntent
 import bose.ankush.home.presentation.HomeState
 import bose.ankush.home.presentation.HomeViewModel
+import bose.ankush.home.presentation.places.WanderPlacesEffect
+import bose.ankush.home.presentation.places.WanderPlacesIntent
+import bose.ankush.home.presentation.places.WanderPlacesViewModel
 import bose.ankush.home.presentation.shell.ShellCreateDialog
 import bose.ankush.home.presentation.shell.ShellIntent
 import bose.ankush.home.presentation.shell.ShellSectionKind
 import bose.ankush.home.presentation.shell.ShellViewModel
 import bose.ankush.home.presentation.shell.canSubmitEvent
 import bose.ankush.home.presentation.shell.retryContentDescription
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Android Wander home. Home is this shell, bound to the forecast already loaded
- * by [HomeViewModel]. Alerts, air quality, and the hourly list sit on this column.
- * Map is saved places. Hub pushes Settings so back returns here. There is no weather tab.
+ * by [HomeViewModel]. Under the header a [HorizontalPager] holds two pages: the weather
+ * column (alerts, air quality, hourly list) and the saved places list. The Map tab and the
+ * saved place card both open the places page. Hub pushes Settings so back returns here.
  *
- * One [WanderTabBar] stays composed across HOME / MAP / HUB and all [WanderShell]
- * states so the liquid pill springs can run when the selected tab changes.
+ * One [WanderTabBar] stays composed across both pages so the liquid pill springs can run
+ * when the selected tab changes; swiping the pager moves the pill too.
  */
 @Composable
-fun WanderHomeScreen(
+internal fun WanderHomeScreen(
     links: WanderHomeLinks,
     shell: WanderShell,
     sections: WanderHomeSections = WanderHomeSections(),
     onOpenCalendar: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val nearby = sections.nearby
-    val forecast = sections.forecast
-    val chrome = sections.chrome
-    var selectedTabName by rememberSaveable { mutableStateOf(WanderTab.HOME.name) }
-    val selectedTab = WanderTab.entries.firstOrNull { it.name == selectedTabName } ?: WanderTab.HOME
+    val places = sections.places
+    val pager = rememberPagerState(pageCount = { WANDER_PAGE_COUNT })
+    val scope = rememberCoroutineScope()
     var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
-
+    val selectedTab = if (pager.currentPage == PLACES_PAGE) WanderTab.MAP else WanderTab.HOME
+    val showPage = { page: Int ->
+        scope.launch { pager.animateScrollToPage(page) }
+        Unit
+    }
     val onTab = { tab: WanderTab ->
         openAlert = null
         when (tab) {
+            WanderTab.HOME -> showPage(WEATHER_PAGE)
+            WanderTab.MAP -> showPage(PLACES_PAGE)
             WanderTab.HUB -> links.onOpenHub()
-            else -> selectedTabName = tab.name
         }
+    }
+    // Back on the places page returns to the weather page; open sheets handle back first.
+    BackHandler(enabled = pager.currentPage == PLACES_PAGE) { showPage(WEATHER_PAGE) }
+    LaunchedEffect(places.effects) {
+        places.effects.collect { effect ->
+            when (effect) {
+                WanderPlacesEffect.ShowWeather -> pager.animateScrollToPage(WEATHER_PAGE)
+                WanderPlacesEffect.ShowPlaces -> pager.scrollToPage(PLACES_PAGE)
+            }
+        }
+    }
+    LaunchedEffect(pager.settledPage) {
+        if (pager.settledPage == PLACES_PAGE) places.onIntent(WanderPlacesIntent.Load)
     }
 
     val condition = shell.content.condition
     val photoUrl = shell.photo?.imageUrl
     val sample = rememberWanderImageSample(condition, photoUrl)
     val contentColor = contentColorForLuminance(sample.headerLuminance)
-    val chipColors = rememberWanderChipColors(sample.averageColor)
-    val cornerGlow = wanderCornerGlowColor(sample.averageColor, sample.headerLuminance)
-    val inactiveTint = if (selectedTab != WanderTab.HOME) DefaultTabInactiveTint else contentColor
 
     Box(modifier = modifier.fillMaxSize()) {
-        when {
-            selectedTab == WanderTab.HOME ->
-                WanderHomePage(
-                    model =
-                        WanderHomePageModel(
-                            shell = shell,
-                            nearby = nearby,
-                            forecast = forecast,
-                            chrome = chrome,
-                            contentColor = contentColor,
-                            chipColors = chipColors,
-                            cornerGlow = cornerGlow,
-                            openAlert = openAlert,
-                        ),
-                    actions =
-                        WanderHomePageActions(
-                            onOpenCalendar = onOpenCalendar,
-                            onOpenAlert = { openAlert = it },
-                            onDismissAlert = { openAlert = null },
-                            onOpenMap = { onTab(WanderTab.MAP) },
-                        ),
-                    modifier = Modifier.fillMaxSize(),
-                )
-            else ->
-                Box(modifier = Modifier.fillMaxSize()) {
-                    when (selectedTab) {
-                        WanderTab.MAP -> links.places()
-                        WanderTab.HOME, WanderTab.HUB -> Unit
-                    }
-                }
-        }
+        WanderHomePage(
+            model =
+                WanderHomePageModel(
+                    shell = shell,
+                    sections = sections,
+                    contentColor = contentColor,
+                    chipColors = rememberWanderChipColors(sample.averageColor),
+                    cornerGlow = wanderCornerGlowColor(sample.averageColor, sample.headerLuminance),
+                    openAlert = openAlert,
+                    pager = pager,
+                ),
+            actions =
+                WanderHomePageActions(
+                    onOpenCalendar = onOpenCalendar,
+                    onOpenAlert = { openAlert = it },
+                    onDismissAlert = { openAlert = null },
+                    onOpenPlaces = { showPage(PLACES_PAGE) },
+                ),
+            modifier = Modifier.fillMaxSize(),
+        )
         WanderTabBar(
             selected = selectedTab,
             onSelected = onTab,
-            inactiveTint = inactiveTint,
+            inactiveTint = contentColor,
             modifier =
                 Modifier
                     .align(Alignment.BottomCenter)
@@ -143,20 +155,19 @@ fun WanderHomeScreen(
 
 private data class WanderHomePageModel(
     val shell: WanderShell,
-    val nearby: WanderNearby,
-    val forecast: WanderForecastDetails,
-    val chrome: WanderHomeChrome,
+    val sections: WanderHomeSections,
     val contentColor: Color,
     val chipColors: WanderChipColors,
     val cornerGlow: Color,
     val openAlert: WeatherForecast.Alert?,
+    val pager: PagerState,
 )
 
 private data class WanderHomePageActions(
     val onOpenCalendar: () -> Unit,
     val onOpenAlert: (WeatherForecast.Alert) -> Unit,
     val onDismissAlert: () -> Unit,
-    val onOpenMap: () -> Unit,
+    val onOpenPlaces: () -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,27 +178,20 @@ private fun WanderHomePage(
     modifier: Modifier = Modifier,
 ) {
     val shell = model.shell
-    val nearby = model.nearby
-    val forecast = model.forecast
-    val chrome = model.chrome
-    val contentColor = model.contentColor
-    val chipColors = model.chipColors
-    val cornerGlow = model.cornerGlow
-    val openAlert = model.openAlert
-    val onOpenCalendar = actions.onOpenCalendar
-    val onOpenAlert = actions.onOpenAlert
-    val onDismissAlert = actions.onDismissAlert
-    val onOpenMap = actions.onOpenMap
+    val chrome = model.sections.chrome
+    val places = model.sections.places
+    val pager = model.pager
     val content = shell.content
-    val photo = shell.photo
-    val photoUrl = photo?.imageUrl
     Box(modifier = modifier.fillMaxSize()) {
-        WanderConditionBackground(condition = content.condition, photoUrl = photoUrl)
-        WanderCornerGlow(color = cornerGlow)
+        WanderConditionBackground(condition = content.condition, photoUrl = shell.photo?.imageUrl)
+        WanderCornerGlow(color = model.cornerGlow)
         WanderNotificationPrompt(chrome)
         PullToRefreshBox(
             isRefreshing = chrome.refreshing,
-            onRefresh = chrome.onRefresh,
+            onRefresh = {
+                chrome.onRefresh()
+                if (pager.currentPage == PLACES_PAGE) places.onIntent(WanderPlacesIntent.Load)
+            },
             modifier = Modifier.fillMaxSize(),
         ) {
             Column(
@@ -197,144 +201,204 @@ private fun WanderHomePage(
                         .statusBarsPadding()
                         .navigationBarsPadding(),
             ) {
-                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                BoxWithConstraints(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    val viewportHeight = maxHeight
                     Column(
                         modifier =
                             Modifier
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState())
-                                .padding(horizontal = 20.dp)
                                 .padding(bottom = 40.dp),
                     ) {
-                        Spacer(modifier = Modifier.height(28.dp))
-                        chrome.locationOverrideName?.let { name ->
-                            WanderLocationChip(
-                                label = name,
-                                name = name,
-                                onReset = chrome.onResetLocation,
-                                contentColor = contentColor,
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-                        chrome.current?.dt?.let { observed ->
-                            WanderAnimatedValue(
-                                text = observedLabel(observed, wanderForecastZone(chrome.timezoneOffset)),
-                                color = contentColor.copy(alpha = OBSERVED_ALPHA),
-                                fontSize = 13.sp,
-                                style = TextStyle(shadow = HeaderTextShadow),
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                        }
-                        WanderHeader(
-                            temperature = content.temperature,
-                            place = content.place,
-                            conditionLine =
-                                wanderHeaderLine(
-                                    summary = chrome.todaySummary,
-                                    description =
-                                        chrome.current
-                                            ?.weather
-                                            ?.firstOrNull()
-                                            ?.description,
-                                    fallback = content.condition.line,
-                                ),
-                            contentColor = contentColor,
-                            nearby = nearby,
-                        )
+                        WanderHeaderBlock(model = model, modifier = Modifier.padding(horizontal = 20.dp))
                         Spacer(modifier = Modifier.height(24.dp))
-                        WanderDetailsGrid(
-                            content = content,
-                            current = chrome.current,
-                            contentColor = contentColor,
-                            extras = forecast.extras,
-                        )
-                        chrome.current?.let { current ->
-                            Spacer(modifier = Modifier.height(16.dp))
-                            WanderCurrentReport(
-                                current = current,
-                                timezoneOffset = chrome.timezoneOffset,
-                                contentColor = contentColor,
-                            )
+                        HorizontalPager(
+                            state = pager,
+                            modifier = Modifier.fillMaxWidth(),
+                            beyondViewportPageCount = 1,
+                            verticalAlignment = Alignment.Top,
+                        ) { page ->
+                            val pageModifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
+                            when (page) {
+                                PLACES_PAGE ->
+                                    WanderPlacesPage(
+                                        places = places,
+                                        contentColor = model.contentColor,
+                                        minHeight = viewportHeight,
+                                        modifier = pageModifier,
+                                    )
+                                else -> WanderWeatherPage(model = model, actions = actions, modifier = pageModifier)
+                            }
                         }
-                        forecast.extras.temperatureTrend?.let { trend ->
-                            Spacer(modifier = Modifier.height(12.dp))
-                            WanderTemperatureTrend(trend = trend, contentColor = contentColor)
-                        }
-                        if (content.days.isNotEmpty() || chrome.forecastFailed) {
-                            Spacer(modifier = Modifier.height(20.dp))
-                            WanderCalendarStrip(
-                                model =
-                                    WanderCalendarStripModel(
-                                        days = content.days,
-                                        eventDates = chrome.eventDates,
-                                        showWeekShimmer = false,
-                                    ),
-                                onOpen = onOpenCalendar,
-                                contentColor = contentColor,
-                                onRetryCalendar = if (chrome.forecastFailed) chrome.onRetryForecast else null,
-                            )
-                        }
-                        shell.statusMessage?.takeIf { it.isNotBlank() }?.let { message ->
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = message,
-                                color = contentColor.copy(alpha = 0.84f),
-                                fontSize = 13.sp,
-                            )
-                        }
-                        if (chrome.forecastFailed) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            WanderActionLabel(
-                                label = retryContentDescription(ShellSectionKind.Forecast),
-                                onClick = chrome.onRetryForecast,
-                                contentColor = contentColor,
-                            )
-                        }
-                        WanderForecastDetails(
-                            details = forecast,
-                            contentColor = contentColor,
-                            onOpenAlert = onOpenAlert,
-                        )
-                        shell.leaveBy?.let { leaveBy ->
-                            Spacer(modifier = Modifier.height(16.dp))
-                            WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
-                        }
-                        if (content.showSmallCards) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            WanderSmallCards(contentColor = contentColor)
-                        }
-                        val showNearby =
-                            nearby.events.isNotEmpty() ||
-                                nearby.savedPlace?.name?.isNotBlank() == true
-                        if (showNearby) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            WanderNearbyBlocks(
-                                nearby = nearby.copy(eventsLoading = false, eventsFailed = nearby.eventsFailed),
-                                contentColor = contentColor,
-                                onOpenSaved = onOpenMap,
-                            )
-                        }
-                        if (photo != null && photoUrl != null && photo.downloadLocation.isNotBlank()) {
-                            TrackShownWanderPhoto(photo)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            UnsplashCredit(photo = photo, contentColor = contentColor)
-                        }
-                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    WanderAlertPanel(alert = openAlert, onDismiss = onDismissAlert)
+                    WanderAlertPanel(alert = model.openAlert, onDismiss = actions.onDismissAlert)
                     WanderRefreshChip(
                         visible = chrome.backgroundRefreshing && !chrome.refreshing,
-                        colors = chipColors,
+                        colors = model.chipColors,
                         modifier =
                             Modifier
                                 .align(Alignment.BottomCenter)
                                 .padding(bottom = 8.dp),
                     )
+                    WanderAddPlaceButton(
+                        visible = pager.currentPage == PLACES_PAGE && places.state.isPremium,
+                        onClick = { places.onIntent(WanderPlacesIntent.OpenSearch) },
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(end = 20.dp, bottom = 16.dp),
+                    )
+                    WanderPlaceSearchSheet(places = places)
                 }
                 Spacer(modifier = Modifier.height(TabBarReserveHeight))
             }
         }
         WanderOfflineToast(chrome.offlineMessage)
+    }
+}
+
+/** Observed time, location chip, and header. Stays above the pager on both pages. */
+@Composable
+private fun WanderHeaderBlock(
+    model: WanderHomePageModel,
+    modifier: Modifier = Modifier,
+) {
+    val chrome = model.sections.chrome
+    val content = model.shell.content
+    val contentColor = model.contentColor
+    Column(modifier = modifier.fillMaxWidth()) {
+        Spacer(modifier = Modifier.height(28.dp))
+        chrome.locationOverrideName?.let { name ->
+            WanderLocationChip(
+                label = name,
+                name = name,
+                onReset = chrome.onResetLocation,
+                contentColor = contentColor,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        chrome.current?.dt?.let { observed ->
+            WanderAnimatedValue(
+                text = observedLabel(observed, wanderForecastZone(chrome.timezoneOffset)),
+                color = contentColor.copy(alpha = OBSERVED_ALPHA),
+                fontSize = 13.sp,
+                style = TextStyle(shadow = HeaderTextShadow),
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+        WanderHeader(
+            temperature = content.temperature,
+            place = content.place,
+            conditionLine =
+                wanderHeaderLine(
+                    summary = chrome.todaySummary,
+                    description =
+                        chrome.current
+                            ?.weather
+                            ?.firstOrNull()
+                            ?.description,
+                    fallback = content.condition.line,
+                ),
+            contentColor = contentColor,
+            nearby = model.sections.nearby,
+        )
+    }
+}
+
+/** First pager page: every home section below the header, unchanged. */
+@Composable
+private fun WanderWeatherPage(
+    model: WanderHomePageModel,
+    actions: WanderHomePageActions,
+    modifier: Modifier = Modifier,
+) {
+    val shell = model.shell
+    val nearby = model.sections.nearby
+    val forecast = model.sections.forecast
+    val chrome = model.sections.chrome
+    val contentColor = model.contentColor
+    val content = shell.content
+    val photo = shell.photo
+    val photoUrl = photo?.imageUrl
+    Column(modifier = modifier) {
+        WanderDetailsGrid(
+            content = content,
+            current = chrome.current,
+            contentColor = contentColor,
+            extras = forecast.extras,
+        )
+        chrome.current?.let { current ->
+            Spacer(modifier = Modifier.height(16.dp))
+            WanderCurrentReport(
+                current = current,
+                timezoneOffset = chrome.timezoneOffset,
+                contentColor = contentColor,
+            )
+        }
+        forecast.extras.temperatureTrend?.let { trend ->
+            Spacer(modifier = Modifier.height(12.dp))
+            WanderTemperatureTrend(trend = trend, contentColor = contentColor)
+        }
+        if (content.days.isNotEmpty() || chrome.forecastFailed) {
+            Spacer(modifier = Modifier.height(20.dp))
+            WanderCalendarStrip(
+                model =
+                    WanderCalendarStripModel(
+                        days = content.days,
+                        eventDates = chrome.eventDates,
+                        showWeekShimmer = false,
+                    ),
+                onOpen = actions.onOpenCalendar,
+                contentColor = contentColor,
+                onRetryCalendar = if (chrome.forecastFailed) chrome.onRetryForecast else null,
+            )
+        }
+        shell.statusMessage?.takeIf { it.isNotBlank() }?.let { message ->
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = message,
+                color = contentColor.copy(alpha = 0.84f),
+                fontSize = 13.sp,
+            )
+        }
+        if (chrome.forecastFailed) {
+            Spacer(modifier = Modifier.height(8.dp))
+            WanderActionLabel(
+                label = retryContentDescription(ShellSectionKind.Forecast),
+                onClick = chrome.onRetryForecast,
+                contentColor = contentColor,
+            )
+        }
+        WanderForecastDetails(
+            details = forecast,
+            contentColor = contentColor,
+            onOpenAlert = actions.onOpenAlert,
+        )
+        shell.leaveBy?.let { leaveBy ->
+            Spacer(modifier = Modifier.height(16.dp))
+            WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
+        }
+        if (content.showSmallCards) {
+            Spacer(modifier = Modifier.height(16.dp))
+            WanderSmallCards(contentColor = contentColor)
+        }
+        val showNearby =
+            nearby.events.isNotEmpty() ||
+                nearby.savedPlace?.name?.isNotBlank() == true
+        if (showNearby) {
+            Spacer(modifier = Modifier.height(16.dp))
+            WanderNearbyBlocks(
+                nearby = nearby.copy(eventsLoading = false, eventsFailed = nearby.eventsFailed),
+                contentColor = contentColor,
+                onOpenSaved = actions.onOpenPlaces,
+            )
+        }
+        if (photo != null && photoUrl != null && photo.downloadLocation.isNotBlank()) {
+            TrackShownWanderPhoto(photo)
+            Spacer(modifier = Modifier.height(8.dp))
+            UnsplashCredit(photo = photo, contentColor = contentColor)
+        }
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
@@ -404,8 +468,10 @@ fun WanderHomeRoute(
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
     val shellViewModel = koinViewModel<ShellViewModel>()
+    val placesViewModel = koinViewModel<WanderPlacesViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val shellState by shellViewModel.state.collectAsStateWithLifecycle()
+    val placesState by placesViewModel.state.collectAsStateWithLifecycle()
     WanderCollectHomeEffects(viewModel)
     LaunchedEffect(Unit) {
         shellViewModel.refreshAccount()
@@ -472,6 +538,13 @@ fun WanderHomeRoute(
                             forecastVisible = liveContent != null,
                             viewModel = viewModel,
                         ),
+                    places =
+                        WanderPlacesBinding(
+                            state = placesState,
+                            effects = placesViewModel.effect,
+                            onIntent = placesViewModel::processIntent,
+                            onUpgrade = links.onOpenHub,
+                        ),
                 ),
             onOpenCalendar = { shellViewModel.onIntent(ShellIntent.OpenCreate) },
         )
@@ -513,9 +586,11 @@ private fun leaveByRow(
 
 private const val CURRENT_LOCATION = "Current Location"
 private const val OBSERVED_ALPHA = 0.72f
+private const val WANDER_PAGE_COUNT = 2
+private const val WEATHER_PAGE = 0
+private const val PLACES_PAGE = 1
 internal val TabBarHeight = 64.dp
 internal val TabBarBottomGap = 12.dp
 internal val TabBarReserveHeight = TabBarHeight + TabBarBottomGap
-private val DefaultTabInactiveTint = Color.White.copy(alpha = 0.5f)
 internal val HeaderTextShadow =
     Shadow(color = Color.Black.copy(alpha = 0.45f), offset = Offset(0f, 1f), blurRadius = 8f)

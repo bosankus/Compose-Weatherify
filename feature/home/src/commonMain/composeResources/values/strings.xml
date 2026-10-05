@@ -33,4 +33,26 @@
     <string name="leave_by_joined_confirmation">You’re on the list.</string>
     <string name="leave_by_misleading_noted">Thanks. Noted locally.</string>
     <string name="leave_by_icon_content_desc">Rain</string>
+    <string name="wander_places_title">Saved places</string>
+    <string name="wander_places_current">Current location</string>
+    <string name="wander_places_current_detail">Follows your GPS</string>
+    <string name="wander_places_active">Showing</string>
+    <string name="wander_places_loading">Loading saved places…</string>
+    <string name="wander_places_empty">No saved places yet. Tap + to add a city.</string>
+    <string name="wander_places_load_error">Couldn’t load your saved places.</string>
+    <string name="wander_places_premium_title">Save the places you care about</string>
+    <string name="wander_places_premium_body">Saved places are part of Premium. Upgrade to add cities and switch between them.</string>
+    <string name="wander_places_upgrade">Upgrade</string>
+    <string name="wander_places_delete_desc">Remove %1$s</string>
+    <string name="wander_places_delete_error">Couldn’t remove that place. Try again.</string>
+    <string name="wander_places_select_error">Couldn’t switch location. Try again.</string>
+    <string name="wander_places_add">Add a place</string>
+    <string name="wander_places_search_hint">Search for a city</string>
+    <string name="wander_places_search_clear">Clear search</string>
+    <string name="wander_places_search_close">Close place search</string>
+    <string name="wander_places_search_min">Type at least 2 letters</string>
+    <string name="wander_places_search_empty">No places found</string>
+    <string name="wander_places_search_error">Search failed. Check your connection and try again.</string>
+    <string name="wander_places_save_error">Couldn’t save this place. Try again.</string>
+    <string name="wander_places_saved_badge">Saved</string>
 </resources>
