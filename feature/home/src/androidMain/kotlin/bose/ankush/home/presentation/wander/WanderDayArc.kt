@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
@@ -32,8 +33,8 @@ import kotlin.math.sin
 import kotlin.time.Clock
 
 /**
- * Static sunrise and sunset. The sun sits on the arc for the current time.
- * It does not move.
+ * Static sunrise and sunset. The sun sits on the upper arc for the current time.
+ * It does not move. The arc, hatch, and glow stay inside the canvas bounds.
  */
 @Composable
 internal fun WanderDayArc(
@@ -42,9 +43,10 @@ internal fun WanderDayArc(
     contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
+    val zone = wanderForecastZone()
     val progress = sunAlongDay(sunrise, sunset, Clock.System.now().epochSeconds)
-    val sunriseLabel = sunrise?.toClock() ?: UNAVAILABLE
-    val sunsetLabel = sunset?.toClock() ?: UNAVAILABLE
+    val sunriseLabel = sunrise?.toClock(zone) ?: UNAVAILABLE
+    val sunsetLabel = sunset?.toClock(zone) ?: UNAVAILABLE
     Row(
         modifier =
             modifier
@@ -66,7 +68,8 @@ internal fun WanderDayArc(
                 Modifier
                     .weight(1f)
                     .height(ArcHeight)
-                    .padding(horizontal = 6.dp),
+                    .padding(horizontal = 6.dp)
+                    .clipToBounds(),
         )
         SunLabel(
             time = sunsetLabel,
@@ -126,7 +129,7 @@ private fun DayArcCanvas(
     Canvas(modifier = modifier) {
         val glow = GlowRadius.toPx()
         val sunRadius = SunRadius.toPx()
-        val bottom = size.height - glow * 0.35f
+        val bottom = size.height - glow
         val radius =
             min(
                 size.width / 2f - glow,
@@ -142,7 +145,7 @@ private fun DayArcCanvas(
             )
         val bowl =
             Path().apply {
-                arcTo(oval, startAngleDegrees = 180f, sweepAngleDegrees = -180f, forceMoveTo = true)
+                arcTo(oval, startAngleDegrees = 180f, sweepAngleDegrees = 180f, forceMoveTo = true)
                 close()
             }
         clipPath(bowl) {
@@ -162,7 +165,7 @@ private fun DayArcCanvas(
         drawPath(
             path =
                 Path().apply {
-                    arcTo(oval, startAngleDegrees = 180f, sweepAngleDegrees = -180f, forceMoveTo = true)
+                    arcTo(oval, startAngleDegrees = 180f, sweepAngleDegrees = 180f, forceMoveTo = true)
                 },
             color = Arc,
             style =

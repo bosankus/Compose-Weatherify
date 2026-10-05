@@ -8,46 +8,47 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AcUnit
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Dehaze
+import androidx.compose.material.icons.outlined.NightsStay
+import androidx.compose.material.icons.outlined.Thunderstorm
+import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material.icons.outlined.WbSunny
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.generated.resources.Res
-import bose.ankush.home.generated.resources.ic_sunny
 import bose.ankush.home.generated.resources.weather_icon_content
+import bose.ankush.home.presentation.shell.ShellSky
+import bose.ankush.home.presentation.shell.shellSky
 import bose.ankush.home.presentation.util.formatTextCapitalization
-import bose.ankush.home.presentation.util.getFormattedDateTimeFromEpoch
-import bose.ankush.home.presentation.util.getIconUrl
-import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Instant
 
 /**
- * Observation, icon, and today's summary on the Wander column.
- * Sunrise and sunset are a static arc. The Unsplash photo stays behind this card.
+ * Condition icon and description, then the sunrise and sunset arc.
+ * The Unsplash photo stays behind this card.
  */
 @Composable
 internal fun WanderCurrentReport(
     current: WeatherForecast.Current,
-    todaySummary: String?,
     contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
     val weather = current.weather?.firstOrNull()
     val description = weather?.description?.formatTextCapitalization().orEmpty()
-    val observed = current.dt?.let(::observedLabel)
     Column(
         modifier =
             modifier
@@ -55,103 +56,65 @@ internal fun WanderCurrentReport(
                 .background(cardFill, RoundedCornerShape(20.dp))
                 .padding(horizontal = 14.dp, vertical = 14.dp)
                 .semantics { contentDescription = CURRENT_WEATHER },
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (!observed.isNullOrBlank()) {
-            Text(text = observed, color = contentColor, fontSize = 13.sp)
-        }
-        ConditionRow(icon = weather?.icon, description = description, contentColor = contentColor)
-        DetailLine(text = metricLine(current), contentColor = contentColor)
+        ConditionRow(current = current, description = description, contentColor = contentColor)
         WanderDayArc(
             sunrise = current.sunrise,
             sunset = current.sunset,
             contentColor = contentColor,
         )
-        val summary = todaySummary?.takeIf { it.isNotBlank() }
-        if (summary != null) {
-            Text(
-                text = TODAY,
-                color = contentColor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-            )
-            Text(
-                text = summary,
-                color = contentColor,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Start,
-            )
-        }
     }
 }
 
 @Composable
 private fun ConditionRow(
-    icon: String?,
+    current: WeatherForecast.Current,
     description: String,
     contentColor: Color,
 ) {
-    if (icon.isNullOrBlank() && description.isBlank()) return
+    if (description.isBlank()) return
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        if (!icon.isNullOrBlank()) {
-            AsyncImage(
-                model = icon.getIconUrl(),
-                placeholder = painterResource(Res.drawable.ic_sunny),
-                error = painterResource(Res.drawable.ic_sunny),
-                contentDescription = stringResource(Res.string.weather_icon_content),
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(40.dp),
-            )
-        }
-        if (description.isNotBlank()) {
-            Text(
-                text = description,
-                color = contentColor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-            )
-        }
+        Icon(
+            imageVector = wanderSkyIcon(current),
+            contentDescription = stringResource(Res.string.weather_icon_content),
+            tint = contentColor,
+            modifier = Modifier.size(28.dp),
+        )
+        Text(
+            text = description,
+            color = contentColor,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+        )
     }
 }
 
-@Composable
-private fun DetailLine(
-    text: String,
-    contentColor: Color,
-) {
-    if (text.isBlank()) return
-    Text(text = text, color = contentColor, fontSize = 14.sp)
+/**
+ * Vector icon from the same sky mapping the shell home uses, so it always renders in the
+ * Wander ink. Clear at night (OpenWeather icon code ending in "n") shows a moon.
+ */
+private fun wanderSkyIcon(current: WeatherForecast.Current): ImageVector {
+    val night =
+        current.weather
+            ?.firstOrNull()
+            ?.icon
+            ?.endsWith("n") == true
+    return when (shellSky(current)) {
+        ShellSky.Clear -> if (night) Icons.Outlined.NightsStay else Icons.Outlined.WbSunny
+        ShellSky.Clouds, null -> Icons.Outlined.Cloud
+        ShellSky.Rain -> Icons.Outlined.WaterDrop
+        ShellSky.Snow -> Icons.Outlined.AcUnit
+        ShellSky.Thunderstorm -> Icons.Outlined.Thunderstorm
+        ShellSky.Mist -> Icons.Outlined.Dehaze
+    }
 }
 
-private fun metricLine(current: WeatherForecast.Current): String =
-    listOfNotNull(
-        current.humidity?.let { "Humidity $it%" },
-        current.pressure?.let { "Pressure $it hPa" },
-        current.clouds?.let { "Clouds $it%" },
-        current.wind_gust?.let { "Gust $it m/s" },
-    ).joinToString("   ")
-
-private fun observedLabel(epochSeconds: Long): String {
-    val date = getFormattedDateTimeFromEpoch(epochSeconds)
-    return "$date, ${epochSeconds.toClock()}"
-}
-
-internal fun Long.toClock(): String {
-    val local = Instant.fromEpochSeconds(this).toLocalDateTime(TimeZone.currentSystemDefault())
-    val hour12 =
-        when {
-            local.hour == 0 -> 12
-            local.hour > 12 -> local.hour - 12
-            else -> local.hour
-        }
-    val minute = local.minute.toString().padStart(2, '0')
-    val amPm = if (local.hour < 12) "AM" else "PM"
-    return "$hour12:$minute $amPm"
-}
+/** Device-zone clock, as before. Wander sun times use [toClock] with [wanderForecastZone]. */
+internal fun Long.toClock(): String = toClock(TimeZone.currentSystemDefault())
 
 private val cardFill = Color.Black.copy(alpha = 0.38f)
 private const val CURRENT_WEATHER = "Current weather"
-private const val TODAY = "Today's forecast"

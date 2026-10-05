@@ -172,25 +172,40 @@ private fun WanderHomePage(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }
+                        chrome.current?.dt?.let { observed ->
+                            Text(
+                                text = observedLabel(observed, wanderForecastZone()),
+                                color = contentColor.copy(alpha = OBSERVED_ALPHA),
+                                fontSize = 13.sp,
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
                         WanderHeader(
                             temperature = content.temperature,
                             place = content.place,
-                            conditionLine = content.condition.line,
+                            conditionLine =
+                                wanderHeaderLine(
+                                    summary = chrome.todaySummary,
+                                    description =
+                                        chrome.current
+                                            ?.weather
+                                            ?.firstOrNull()
+                                            ?.description,
+                                    fallback = content.condition.line,
+                                ),
                             contentColor = contentColor,
                             nearby = nearby,
                         )
-                        Spacer(modifier = Modifier.height(28.dp))
-                        WanderMetricChips(
-                            feel = content.feel,
-                            wind = content.wind,
-                            uv = content.uv,
+                        Spacer(modifier = Modifier.height(24.dp))
+                        WanderDetailsGrid(
+                            content = content,
+                            current = chrome.current,
                             contentColor = contentColor,
                         )
                         chrome.current?.let { current ->
                             Spacer(modifier = Modifier.height(16.dp))
                             WanderCurrentReport(
                                 current = current,
-                                todaySummary = chrome.todaySummary,
                                 contentColor = contentColor,
                             )
                         }
@@ -533,3 +548,4 @@ private fun leaveByRow(
 }
 
 private const val CURRENT_LOCATION = "Current Location"
+private const val OBSERVED_ALPHA = 0.72f
