@@ -43,6 +43,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastType
@@ -76,6 +77,7 @@ data class WanderHomeChrome(
     val timezoneOffset: Int? = null,
     val todaySummary: String? = null,
     val refreshing: Boolean = false,
+    val backgroundRefreshing: Boolean = false,
     val onRefresh: () -> Unit = {},
     val locationOverrideName: String? = null,
     val onResetLocation: () -> Unit = {},
@@ -102,6 +104,7 @@ internal fun rememberWanderChrome(
     viewModel: HomeViewModel,
 ): WanderHomeChrome {
     val context = LocalContext.current
+    val backgroundRefreshing by viewModel.refreshing.collectAsStateWithLifecycle()
     return WanderHomeChrome(
         current = state.weatherData?.current,
         timezoneOffset = state.weatherData?.timezoneOffset,
@@ -111,6 +114,7 @@ internal fun rememberWanderChrome(
                 ?.firstOrNull()
                 ?.summary,
         refreshing = state.isRefreshing,
+        backgroundRefreshing = backgroundRefreshing,
         onRefresh = { viewModel.processIntent(HomeIntent.Refresh) },
         locationOverrideName = state.activeLocationName?.takeIf { state.isLocationOverridden && it.isNotBlank() },
         onResetLocation = { viewModel.processIntent(HomeIntent.ResetLocationOverride) },
