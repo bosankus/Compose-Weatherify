@@ -353,7 +353,7 @@ private fun AccountPhoto(
                 .size(PhotoSize)
                 .shadow(elevation = 4.dp, shape = CircleShape)
                 .clip(CircleShape)
-                .background(DayFill)
+                .background(AvatarFill)
                 .semantics {
                     role = Role.Button
                     contentDescription = "Account"
@@ -727,6 +727,10 @@ private val PlusYellow = Color(0xFFF5C400)
 private val Ink = Color.White
 private val Muted = Color.White.copy(alpha = 0.72f)
 private val DayFill = Color(0x66101418)
+
+/** White disc behind the single-ink dog line art default avatar. */
+private val AvatarFill = Color.White
+
 private val ShimmerLabelWidth = 28.dp
 private val ShimmerLabelHeight = 8.dp
 private const val SHIMMER_TRAVEL = 700f

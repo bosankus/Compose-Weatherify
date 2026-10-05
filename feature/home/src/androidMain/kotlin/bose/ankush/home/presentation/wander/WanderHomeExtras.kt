@@ -124,6 +124,7 @@ internal fun WanderAccountMark(
                 .padding(top = 8.dp)
                 .size(AccountMarkSize)
                 .clip(CircleShape)
+                .background(AccountMarkFill)
                 .semantics {
                     role = Role.Button
                     contentDescription = ACCOUNT
@@ -311,6 +312,10 @@ private fun WanderSavedPlaceCard(
 
 private val cardFill = Color.Black.copy(alpha = 0.38f)
 private val AccountMarkSize = 40.dp
+
+/** White disc behind the single-ink dog line art, so it reads on any Wander photo. */
+private val AccountMarkFill = Color.White
+
 private const val PLACEHOLDER_WIDTH = 0.46f
 private const val ACCOUNT = "Account"
 private const val NEARBY_EVENTS = "Nearby events"
