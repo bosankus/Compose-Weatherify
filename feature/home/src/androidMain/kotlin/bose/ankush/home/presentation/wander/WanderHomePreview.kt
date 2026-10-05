@@ -42,7 +42,7 @@ internal fun WanderHomeScreenPreview() {
     WanderHomeScreen(
         links = WanderHomeLinks(weather = {}, places = {}, onOpenHub = {}),
         shell =
-            WanderShell.Ready(
+            WanderShell(
                 content =
                     WanderHomeContent(
                         temperature = mock.temperature,

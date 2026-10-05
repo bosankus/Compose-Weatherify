@@ -86,43 +86,26 @@ fun WanderHomeScreen(
         }
     }
 
-    val waitingContentColor = rememberWanderContentColor(WanderCondition.CLOUDS, photoUrl = null)
-    val readyCondition = (shell as? WanderShell.Ready)?.content?.condition ?: WanderCondition.CLOUDS
-    val readyPhotoUrl = (shell as? WanderShell.Ready)?.photo?.imageUrl
-    val readySample = rememberWanderImageSample(readyCondition, readyPhotoUrl)
-    val readyContentColor = contentColorForLuminance(readySample.headerLuminance)
-    val readyChipColors = rememberWanderChipColors(readySample.averageColor)
-    val readyCornerGlow = wanderCornerGlowColor(readySample.averageColor, readySample.headerLuminance)
-
-    val inactiveTint =
-        when {
-            selectedTab != WanderTab.HOME -> DefaultTabInactiveTint
-            shell is WanderShell.Ready -> readyContentColor
-            else -> waitingContentColor
-        }
+    val condition = shell.content.condition
+    val photoUrl = shell.photo?.imageUrl
+    val sample = rememberWanderImageSample(condition, photoUrl)
+    val contentColor = contentColorForLuminance(sample.headerLuminance)
+    val chipColors = rememberWanderChipColors(sample.averageColor)
+    val cornerGlow = wanderCornerGlowColor(sample.averageColor, sample.headerLuminance)
+    val inactiveTint = if (selectedTab != WanderTab.HOME) DefaultTabInactiveTint else contentColor
 
     Box(modifier = modifier.fillMaxSize()) {
         when {
-            selectedTab == WanderTab.HOME && shell is WanderShell.Waiting ->
-                WanderWaitingPage(
-                    waiting = shell,
-                    nearby = nearby,
-                    onOpenCalendar = onOpenCalendar,
-                    chrome = chrome,
-                    contentColor = waitingContentColor,
-                    onOpenMap = { onTab(WanderTab.MAP) },
-                    modifier = Modifier.fillMaxSize(),
-                )
-            selectedTab == WanderTab.HOME && shell is WanderShell.Ready ->
+            selectedTab == WanderTab.HOME ->
                 WanderHomePage(
-                    ready = shell,
+                    shell = shell,
                     nearby = nearby,
                     onOpenCalendar = onOpenCalendar,
                     forecast = forecast,
                     chrome = chrome,
-                    contentColor = readyContentColor,
-                    chipColors = readyChipColors,
-                    cornerGlow = readyCornerGlow,
+                    contentColor = contentColor,
+                    chipColors = chipColors,
+                    cornerGlow = cornerGlow,
                     openAlert = openAlert,
                     onOpenAlert = { openAlert = it },
                     onDismissAlert = { openAlert = null },
@@ -154,7 +137,7 @@ fun WanderHomeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WanderHomePage(
-    ready: WanderShell.Ready,
+    shell: WanderShell,
     nearby: WanderNearby,
     onOpenCalendar: () -> Unit,
     forecast: WanderForecastDetails,
@@ -168,8 +151,8 @@ private fun WanderHomePage(
     onOpenMap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val content = ready.content
-    val photo = ready.photo
+    val content = shell.content
+    val photo = shell.photo
     val photoUrl = photo?.imageUrl
     Box(modifier = modifier.fillMaxSize()) {
         WanderConditionBackground(condition = content.condition, photoUrl = photoUrl)
@@ -207,14 +190,11 @@ private fun WanderHomePage(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                         chrome.current?.dt?.let { observed ->
-                            Text(
+                            WanderAnimatedValue(
                                 text = observedLabel(observed, wanderForecastZone(chrome.timezoneOffset)),
-                                style =
-                                    TextStyle(
-                                        color = contentColor.copy(alpha = OBSERVED_ALPHA),
-                                        fontSize = 13.sp,
-                                        shadow = HeaderTextShadow,
-                                    ),
+                                color = contentColor.copy(alpha = OBSERVED_ALPHA),
+                                fontSize = 13.sp,
+                                style = TextStyle(shadow = HeaderTextShadow),
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                         }
@@ -255,8 +235,16 @@ private fun WanderHomePage(
                                 onOpen = onOpenCalendar,
                                 contentColor = contentColor,
                                 eventDates = chrome.eventDates,
-                                showWeekShimmer = content.days.isEmpty() && chrome.forecastLoading,
+                                showWeekShimmer = false,
                                 onRetryCalendar = if (chrome.forecastFailed) chrome.onRetryForecast else null,
+                            )
+                        }
+                        shell.statusMessage?.takeIf { it.isNotBlank() }?.let { message ->
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = message,
+                                color = contentColor.copy(alpha = 0.84f),
+                                fontSize = 13.sp,
                             )
                         }
                         if (chrome.forecastFailed) {
@@ -272,7 +260,7 @@ private fun WanderHomePage(
                             contentColor = contentColor,
                             onOpenAlert = onOpenAlert,
                         )
-                        ready.leaveBy?.let { leaveBy ->
+                        shell.leaveBy?.let { leaveBy ->
                             Spacer(modifier = Modifier.height(16.dp))
                             WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
                         }
@@ -280,17 +268,18 @@ private fun WanderHomePage(
                             Spacer(modifier = Modifier.height(16.dp))
                             WanderSmallCards(contentColor = contentColor)
                         }
-                        if (nearby.eventsLoading || nearby.eventsFailed || nearby.events.isNotEmpty() ||
-                            nearby.savedPlace != null
-                        ) {
+                        val showNearby =
+                            nearby.events.isNotEmpty() ||
+                                nearby.savedPlace?.name?.isNotBlank() == true
+                        if (showNearby) {
                             Spacer(modifier = Modifier.height(16.dp))
                             WanderNearbyBlocks(
-                                nearby = nearby,
+                                nearby = nearby.copy(eventsLoading = false, eventsFailed = nearby.eventsFailed),
                                 contentColor = contentColor,
                                 onOpenSaved = onOpenMap,
                             )
                         }
-                        if (photo != null && photoUrl != null) {
+                        if (photo != null && photoUrl != null && photo.downloadLocation.isNotBlank()) {
                             TrackShownWanderPhoto(photo)
                             Spacer(modifier = Modifier.height(8.dp))
                             UnsplashCredit(photo = photo, contentColor = contentColor)
@@ -312,117 +301,6 @@ private fun WanderHomePage(
         }
         WanderOfflineToast(chrome.offlineMessage)
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun WanderWaitingPage(
-    waiting: WanderShell.Waiting,
-    nearby: WanderNearby,
-    onOpenCalendar: () -> Unit,
-    chrome: WanderHomeChrome,
-    contentColor: Color,
-    onOpenMap: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(modifier = modifier.fillMaxSize()) {
-        WanderConditionBackground(condition = WanderCondition.CLOUDS)
-        WanderCornerGlow(
-            color =
-                wanderCornerGlowColor(
-                    WanderCondition.CLOUDS.dominantBackgroundColor(),
-                    WanderCondition.CLOUDS.dominantHeaderLuminance(),
-                ),
-        )
-        WanderNotificationPrompt(chrome)
-        PullToRefreshBox(
-            isRefreshing = chrome.refreshing,
-            onRefresh = chrome.onRefresh,
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .statusBarsPadding()
-                        .navigationBarsPadding(),
-            ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 20.dp),
-                ) {
-                    Spacer(modifier = Modifier.height(28.dp))
-                    if (nearby.showAccount) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                            WanderAccountMark(photoUrl = nearby.photoUrl, onOpen = nearby.onOpenAccount)
-                        }
-                    }
-                    chrome.locationOverrideName?.let { name ->
-                        WanderLocationChip(
-                            label = name,
-                            name = name,
-                            onReset = chrome.onResetLocation,
-                            contentColor = contentColor,
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-                    if (chrome.forecastLoading || chrome.forecastFailed) {
-                        WeekHold(showShimmer = chrome.forecastLoading || waiting.loading)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WanderCalendarStrip(
-                            days = emptyList(),
-                            onOpen = onOpenCalendar,
-                            contentColor = contentColor,
-                            showWeekShimmer = true,
-                            onRetryCalendar = if (chrome.forecastFailed) chrome.onRetryForecast else null,
-                        )
-                    }
-                    if (!waiting.loading && !waiting.statusMessage.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(text = waiting.statusMessage, color = contentColor, fontSize = 18.sp)
-                    }
-                    if (!waiting.loading) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        WanderWaitingActions(chrome = chrome, contentColor = contentColor)
-                    }
-                    waiting.leaveBy?.let { leaveBy ->
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WanderLeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
-                    }
-                    if (nearby.eventsLoading || nearby.eventsFailed || nearby.events.isNotEmpty() ||
-                        nearby.savedPlace != null
-                    ) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        WanderNearbyBlocks(
-                            nearby = nearby,
-                            contentColor = contentColor,
-                            onOpenSaved = onOpenMap,
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                Spacer(modifier = Modifier.height(TabBarReserveHeight))
-            }
-        }
-    }
-}
-
-@Composable
-private fun WeekHold(showShimmer: Boolean) {
-    if (!showShimmer) return
-    val brush = rememberWanderShimmerBrush()
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(96.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(brush),
-    )
 }
 
 @Composable
@@ -509,20 +387,25 @@ fun WanderHomeRoute(
             ?.firstOrNull()
             ?.main
             ?.takeIf { it.isNotBlank() }
-    val photo = rememberWanderConditionPhoto(weatherMain?.let(::unsplashQuery))
-    val content = state.weatherData?.takeIf { current != null }?.toWanderContent(place)
+    val liveContent = state.weatherData?.takeIf { current != null }?.toWanderContent(place)
+    val content =
+        liveContent
+            ?: placeholderWanderContent(
+                place = place.takeIf { it != CURRENT_LOCATION } ?: WANDER_PLACEHOLDER,
+                condition = WanderCondition.CLOUDS,
+            )
+    val photo = rememberWanderConditionPhoto(weatherMain?.let(::unsplashQuery), content.condition)
     val leaveBy = leaveByRow(state, viewModel)
     val shell =
-        if (content == null) {
-            WanderShell.Waiting(
-                // Before the first Room read, stay quiet: no status text or retry actions.
-                loading = state.isLoading || !state.hasCheckedCache,
-                statusMessage = state.error ?: state.offlineMessage,
-                leaveBy = leaveBy,
-            )
-        } else {
-            WanderShell.Ready(content = content, photo = photo, leaveBy = leaveBy)
-        }
+        WanderShell(
+            content = content,
+            photo = photo,
+            leaveBy = leaveBy,
+            statusMessage =
+                (state.error ?: state.offlineMessage)?.takeIf {
+                    liveContent == null && it.isNotBlank()
+                },
+        )
     val placeName = state.activeLocationName?.takeIf { it.isNotBlank() } ?: place.takeIf { it != CURRENT_LOCATION }
     LaunchedEffect(placeName) {
         if (!placeName.isNullOrBlank()) {
@@ -544,7 +427,7 @@ fun WanderHomeRoute(
                 rememberWanderChrome(
                     state = state,
                     shellState = shellState,
-                    forecastVisible = content != null,
+                    forecastVisible = liveContent != null,
                     viewModel = viewModel,
                 ),
             nearby =
