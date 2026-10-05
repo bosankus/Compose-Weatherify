@@ -23,6 +23,7 @@ import bose.ankush.storage.model.LocationPreferences
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
@@ -391,21 +392,36 @@ internal class HomeViewModel(
         return CoordinateResolution.Ready(lat, lon, isOverridden = false, overrideName = null)
     }
 
-    /** Emits the Room forecast when one exists. An empty cache leaves the loading state alone. */
+    /**
+     * Emits the Room forecast when one exists, before saved coordinates, GPS, or the network.
+     * Room keeps one global row, so the read is not gated on coordinates. Saved coordinates
+     * are attached afterward when they exist. An empty cache leaves the loading state alone.
+     * [HomeAction.CacheChecked] is dispatched either way, so the UI shows the full loading
+     * state only once Room is known to be empty.
+     */
     private suspend fun emitSavedForecast() {
-        val saved = savedCoordinates(locationPreferencesStorage.getLocationPreferencesFlow().first()) ?: return
-        val location = saved.lat to saved.lon
-        val cached = getWeatherReport(location).first() ?: return
-        val air = getAirQuality(saved.lat, saved.lon).first()
-        dispatch(
-            HomeAction.Success(
-                location = location,
-                isLocationOverridden = saved.isOverridden,
-                overrideLocationName = saved.overrideName,
-                weather = cached,
-                airQuality = air,
-            ),
-        )
+        if (_state.value.weatherData != null) return
+        try {
+            coroutineScope {
+                val prefs = async { locationPreferencesStorage.getLocationPreferencesFlow().first() }
+                val cached = getWeatherReport.cached().first() ?: return@coroutineScope
+                val air = getAirQuality.cached().first()
+                dispatch(HomeAction.Success(weather = cached, airQuality = air))
+                dispatch(HomeAction.CacheChecked)
+                val saved = savedCoordinates(prefs.await()) ?: return@coroutineScope
+                dispatch(
+                    HomeAction.Success(
+                        location = saved.lat to saved.lon,
+                        isLocationOverridden = saved.isOverridden,
+                        overrideLocationName = saved.overrideName,
+                        weather = _state.value.weatherData ?: cached,
+                        airQuality = _state.value.airQualityData ?: air,
+                    ),
+                )
+            }
+        } finally {
+            if (!_state.value.hasCheckedCache) dispatch(HomeAction.CacheChecked)
+        }
     }
 
     private suspend fun fetchWeatherData(

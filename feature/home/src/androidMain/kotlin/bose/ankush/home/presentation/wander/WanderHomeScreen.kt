@@ -486,7 +486,8 @@ fun WanderHomeRoute(
     val shell =
         if (content == null) {
             WanderShell.Waiting(
-                loading = state.isLoading,
+                // Before the first Room read, stay quiet: no status text or retry actions.
+                loading = state.isLoading || !state.hasCheckedCache,
                 statusMessage = state.error ?: state.offlineMessage,
                 leaveBy = leaveBy,
             )

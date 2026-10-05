@@ -17,6 +17,12 @@ internal class GetWeatherReport(
     operator fun invoke(location: Pair<Double, Double>): Flow<WeatherForecast?> = repository.getWeatherReport(location)
 
     /**
+     * The saved forecast, without waiting for saved or GPS coordinates. Room keeps one
+     * global forecast row and ignores the coordinates, so first paint can read it directly.
+     */
+    fun cached(): Flow<WeatherForecast?> = repository.getWeatherReport(CACHE_PROBE_LOCATION)
+
+    /**
      * Emits cached rows as soon as Room has them. Starts a single [refresh] for
      * this collection; Room pushes network writes afterward. Cancelling the
      * collector cancels the in-flight refresh.
@@ -43,4 +49,9 @@ internal class GetWeatherReport(
                 refreshJob.cancel()
             }
         }
+
+    private companion object {
+        /** Unused by the single-row Room table. Only satisfies the repository signature. */
+        val CACHE_PROBE_LOCATION = 0.0 to 0.0
+    }
 }

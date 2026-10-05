@@ -6,6 +6,8 @@ import bose.ankush.home.domain.model.WeatherForecast
 internal data class HomeState(
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
+    /** False until the first Room read on this ViewModel finishes, with or without a row. */
+    val hasCheckedCache: Boolean = false,
     val userLocation: Pair<Double, Double>? = null,
     val weatherData: WeatherForecast? = null,
     val airQualityData: AirQuality? = null,
