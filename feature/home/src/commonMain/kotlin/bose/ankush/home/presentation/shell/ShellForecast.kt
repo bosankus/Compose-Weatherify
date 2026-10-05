@@ -110,8 +110,8 @@ private fun conditionLine(now: WeatherForecast.Current?): String {
 internal fun shellSky(now: WeatherForecast.Current?): ShellSky? {
     val weather = now?.weather?.firstOrNull() ?: return null
     val text = "${weather.main} ${weather.description}".lowercase()
-    if (text.isBlank()) return null
     return when {
+        text.isBlank() -> null
         "thunder" in text -> ShellSky.Thunderstorm
         "snow" in text || "sleet" in text -> ShellSky.Snow
         "drizzle" in text || "rain" in text -> ShellSky.Rain

@@ -380,21 +380,20 @@ internal class HomeViewModel(
      * on location, reverse geocode, or Wear sync.
      */
     private fun savedCoordinates(prefs: LocationPreferences): CoordinateResolution.Ready? {
-        if (prefs.isLocationOverridden) {
-            val hasOverride = prefs.overrideLat != null && prefs.overrideLon != null
-            val lat = prefs.overrideLat ?: prefs.latitude
-            val lon = prefs.overrideLon ?: prefs.longitude
-            if (lat == null || lon == null) return null
-            return CoordinateResolution.Ready(
+        val hasOverride =
+            prefs.isLocationOverridden && prefs.overrideLat != null && prefs.overrideLon != null
+        val lat = if (prefs.isLocationOverridden) prefs.overrideLat ?: prefs.latitude else prefs.latitude
+        val lon = if (prefs.isLocationOverridden) prefs.overrideLon ?: prefs.longitude else prefs.longitude
+        return if (lat != null && lon != null) {
+            CoordinateResolution.Ready(
                 lat = lat,
                 lon = lon,
                 isOverridden = hasOverride,
                 overrideName = if (hasOverride) prefs.overrideLocationName else null,
             )
+        } else {
+            null
         }
-        val lat = prefs.latitude ?: return null
-        val lon = prefs.longitude ?: return null
-        return CoordinateResolution.Ready(lat, lon, isOverridden = false, overrideName = null)
     }
 
     /**

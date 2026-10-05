@@ -90,12 +90,18 @@ internal fun sunAlongDay(
     sunset: Long?,
     nowEpochSeconds: Long,
 ): Float {
-    if (sunrise == null || sunset == null || sunset <= sunrise) return 0f
-    if (nowEpochSeconds <= sunrise) return 0f
-    if (nowEpochSeconds >= sunset) return 1f
-    val span = (sunset - sunrise).toFloat()
-    val elapsed = (nowEpochSeconds - sunrise).toFloat()
-    return (elapsed / span).coerceIn(0f, 1f)
+    val rise = sunrise
+    val set = sunset
+    return when {
+        rise == null || set == null || set <= rise -> 0f
+        nowEpochSeconds <= rise -> 0f
+        nowEpochSeconds >= set -> 1f
+        else -> {
+            val span = (set - rise).toFloat()
+            val elapsed = (nowEpochSeconds - rise).toFloat()
+            (elapsed / span).coerceIn(0f, 1f)
+        }
+    }
 }
 
 @Composable

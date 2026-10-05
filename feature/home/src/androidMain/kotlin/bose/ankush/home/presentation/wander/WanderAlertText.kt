@@ -50,21 +50,26 @@ internal fun ParsedAlert.displaySections(): List<AlertDisplaySection> {
 
 internal fun parseAlertDescription(raw: String?): ParsedAlert {
     val text = raw?.replace("\r\n", "\n")?.replace('\r', '\n').orEmpty()
-    if (text.isBlank()) return ParsedAlert()
     val markers = SECTION_MARKER.findAll(text).toList()
-    if (markers.isEmpty()) return ParsedAlert(fallback = cleanAlertBody(text))
-    val sections = mutableListOf<AlertSection>()
-    val preamble = cleanAlertBody(text.substring(0, markers.first().range.first))
-    if (preamble.isNotEmpty()) sections += AlertSection(label = null, body = preamble)
-    markers.forEachIndexed { index, match ->
-        val end = markers.getOrNull(index + 1)?.range?.first ?: text.length
-        val label = match.groupValues[1].toSectionLabel()
-        val body = cleanAlertBody(text.substring(match.range.last + 1, end))
-        if (body.isEmpty()) return@forEachIndexed
-        val items = if (label == WHERE_LABEL) splitAlertAreas(body) else null
-        sections += AlertSection(label = label, body = body, items = items)
+    return when {
+        text.isBlank() -> ParsedAlert()
+        markers.isEmpty() -> ParsedAlert(fallback = cleanAlertBody(text))
+        else -> {
+            val sections = mutableListOf<AlertSection>()
+            val preamble = cleanAlertBody(text.substring(0, markers.first().range.first))
+            if (preamble.isNotEmpty()) sections += AlertSection(label = null, body = preamble)
+            markers.forEachIndexed { index, match ->
+                val end = markers.getOrNull(index + 1)?.range?.first ?: text.length
+                val label = match.groupValues[1].toSectionLabel()
+                val body = cleanAlertBody(text.substring(match.range.last + 1, end))
+                if (body.isNotEmpty()) {
+                    val items = if (label == WHERE_LABEL) splitAlertAreas(body) else null
+                    sections += AlertSection(label = label, body = body, items = items)
+                }
+            }
+            ParsedAlert(sections = sections)
+        }
     }
-    return ParsedAlert(sections = sections)
 }
 
 /**
@@ -83,20 +88,19 @@ internal fun cleanAlertBody(raw: String): String =
  * the split is not safe (one paragraph only, at least two non-empty areas).
  */
 internal fun splitAlertAreas(body: String): List<String>? {
-    if (body.contains('\n')) return null
     val items =
         body
-            .removeSuffix(".")
-            .split(',')
-            .map {
+            .takeUnless { it.contains('\n') }
+            ?.removeSuffix(".")
+            ?.split(',')
+            ?.map {
                 it
                     .trim()
                     .removePrefix("and ")
                     .removePrefix("And ")
                     .trim()
             }
-    if (items.size < 2 || items.any { it.isEmpty() }) return null
-    return items
+    return items?.takeIf { it.size >= 2 && it.none(String::isEmpty) }
 }
 
 private fun String.toSectionLabel(): String =
