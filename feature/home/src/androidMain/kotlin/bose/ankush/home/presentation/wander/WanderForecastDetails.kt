@@ -1,5 +1,9 @@
 package bose.ankush.home.presentation.wander
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -33,9 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -338,7 +344,8 @@ private fun HourlyCard(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = HOUR_ZOOM_INSET_X, vertical = HOUR_ZOOM_INSET_Y),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             hours.forEachIndexed { index, hour ->
@@ -365,14 +372,32 @@ private fun HourCell(
     val weather = hour.weather?.firstOrNull()
     val description = weather?.description?.formatTextCapitalization().orEmpty()
     val spoken = listOf(time, temp, description).filter { it.isNotEmpty() }.joinToString(", ")
-    val ink = if (selected) WanderOnLight else contentColor
+    val ink = contentColor
+    val scale by animateFloatAsState(
+        targetValue = if (selected) HOUR_SELECTED_SCALE else 1f,
+        animationSpec = tween(durationMillis = HOUR_ZOOM_MILLIS, easing = FastOutSlowInEasing),
+        label = "hourScale",
+    )
+    val elevation by animateDpAsState(
+        targetValue = if (selected) HOUR_SELECTED_ELEVATION else 0.dp,
+        animationSpec = tween(durationMillis = HOUR_ZOOM_MILLIS, easing = FastOutSlowInEasing),
+        label = "hourElevation",
+    )
     Column(
         modifier =
             Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(if (selected) Color.White else Color.Transparent)
-                .semantics { contentDescription = spoken }
-                .clickable(role = Role.Button, onClick = onSelect)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    shadowElevation = elevation.toPx()
+                    shape = HourCellShape
+                    clip = true
+                    ambientShadowColor = HourShadow
+                    spotShadowColor = HourShadow
+                }.semantics {
+                    contentDescription = spoken
+                    this.selected = selected
+                }.clickable(role = Role.Button, onClick = onSelect)
                 .padding(horizontal = 8.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -418,6 +443,13 @@ private fun Long.toIssuedLabel(): String {
 private val cardFill = Color.Black.copy(alpha = 0.38f)
 private val AlertYellow = Color(0xFFF5C400)
 private val SheetFill = Color(0xFF14171C)
+private val HourCellShape = RoundedCornerShape(16.dp)
+private val HourShadow = Color.Black.copy(alpha = 0.35f)
+private val HOUR_SELECTED_ELEVATION = 3.dp
+private val HOUR_ZOOM_INSET_X = 4.dp
+private val HOUR_ZOOM_INSET_Y = 6.dp
+private const val HOUR_SELECTED_SCALE = 1.07f
+private const val HOUR_ZOOM_MILLIS = 220
 private const val HOURLY_LIMIT = 24
 private const val ALERTS = "Weather alerts"
 private const val ALERT_FALLBACK_TITLE = "Weather alert"
