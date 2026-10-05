@@ -91,7 +91,12 @@ internal class HomeViewModel(
             }
         }
 
-    private var leaveByJob: Job? = null
+    /**
+     * Bumped on every leave-by refresh. An older check is never cancelled, only ignored:
+     * cancelling it from the Remote Config callback closed its Ktor response on the main
+     * thread and crashed with NetworkOnMainThreadException.
+     */
+    private var leaveByRun = 0
 
     init {
         // Initialize Firebase Remote Config. Re-check the fake door once activate finishes
@@ -173,27 +178,27 @@ internal class HomeViewModel(
      */
     @Suppress("TooGenericExceptionCaught")
     private fun refreshLeaveByEligibility() {
-        leaveByJob?.cancel()
-        leaveByJob =
-            viewModelScope.launch {
-                try {
-                    if (!remoteConfigGate.isLeaveByFakeDoorEnabled()) {
-                        publishLeaveBy(eligible = false)
-                        return@launch
-                    }
-                    val places =
-                        getSavedLocationsUseCase()
-                            .getOrNull()
-                            ?.map { LeaveByPlace(lat = it.lat, lon = it.lon) }
-                            .orEmpty()
-                    val localNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                    publishLeaveBy(LeaveByFakeDoorEligibility.isEligible(places, localNow))
-                } catch (cancelled: CancellationException) {
-                    throw cancelled
-                } catch (_: Exception) {
-                    publishLeaveBy(eligible = false)
+        val run = ++leaveByRun
+        val publishIfLatest = { eligible: Boolean -> if (run == leaveByRun) publishLeaveBy(eligible) }
+        viewModelScope.launch {
+            try {
+                if (!remoteConfigGate.isLeaveByFakeDoorEnabled()) {
+                    publishIfLatest(false)
+                    return@launch
                 }
+                val places =
+                    getSavedLocationsUseCase()
+                        .getOrNull()
+                        ?.map { LeaveByPlace(lat = it.lat, lon = it.lon) }
+                        .orEmpty()
+                val localNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+                publishIfLatest(LeaveByFakeDoorEligibility.isEligible(places, localNow))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                publishIfLatest(false)
             }
+        }
     }
 
     private fun publishLeaveBy(eligible: Boolean) {
