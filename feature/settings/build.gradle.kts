@@ -24,6 +24,9 @@ kotlin {
         }
 
         androidResources.enable = true
+
+        // Enables running commonTest on the Android host (JVM unit tests).
+        withHostTest {}
     }
 
     iosArm64()
@@ -57,10 +60,18 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel.kmp)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.coil3.compose)
+            implementation(libs.coil3.network.ktor)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         androidMain.dependencies {
             implementation(libs.koin.android)
+            implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.compose.ui.tooling)
         }
 

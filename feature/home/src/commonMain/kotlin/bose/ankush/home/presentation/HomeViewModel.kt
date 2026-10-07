@@ -493,7 +493,7 @@ internal class HomeViewModel(
     }
 
     private companion object {
-        /** Wander home is the only surface that shows this card. */
-        const val LEAVE_BY_SURFACE = "wander_home"
+        /** The home screen is the only surface that shows this card. */
+        const val LEAVE_BY_SURFACE = "home_screen"
     }
 }

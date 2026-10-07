@@ -11,13 +11,14 @@ import bose.ankush.home.di.homeDomainModule
 import bose.ankush.home.di.homePlatformModule
 import bose.ankush.home.di.homeViewModelModule
 import bose.ankush.network.di.networkDomainModule
-import bose.ankush.network.di.unsplashKoinModule
+import bose.ankush.network.di.appBackgroundSourceModule
 import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
 import bose.ankush.settings.di.settingsViewModelModule
 import bose.ankush.storage.di.storageDomainModule
 import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.base.logging.CrashlyticsTree
+import bose.ankush.weatherify.di.appNetworkConfigKoinModule
 import bose.ankush.weatherify.di.appNotificationKoinModule
 import bose.ankush.weatherify.di.appPaymentKoinModule
 import com.google.firebase.FirebaseApp
@@ -33,9 +34,6 @@ class WeatherifyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        // FirebaseApp first: it installs the uncaught-exception handler, so crashes are captured
-        // from here on regardless of the rest. Koin next, because everything below resolves
-        // ErrorReporter — the one object allowed to talk to the Crashlytics SDK.
         initializeFirebase()
         initKoin()
         initializeCrashlytics()
@@ -89,7 +87,8 @@ class WeatherifyApplication : Application() {
                     paymentDomainModule,
                     paymentViewModelModule,
                     appPaymentKoinModule,
-                    unsplashKoinModule(BuildConfig.UNSPLASH_ACCESS_KEY),
+                    appBackgroundSourceModule,
+                    appNetworkConfigKoinModule,
                     appNotificationKoinModule,
                     authViewModelModule,
                     authDomainModule,

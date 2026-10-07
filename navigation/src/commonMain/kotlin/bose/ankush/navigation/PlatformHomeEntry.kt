@@ -3,7 +3,7 @@ package bose.ankush.navigation
 import androidx.compose.runtime.Composable
 
 /**
- * Android shows the Wander home. iOS keeps the classic home.
+ * Android shows the new home screen. iOS keeps the classic home.
  * The lambdas are only composed by the platform that uses them.
  */
 @Composable

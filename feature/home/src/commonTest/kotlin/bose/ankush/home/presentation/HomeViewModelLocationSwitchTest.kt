@@ -15,7 +15,7 @@ import bose.ankush.home.domain.usecase.RefreshWeatherReport
 import bose.ankush.home.presentation.places.FakeFinder
 import bose.ankush.home.presentation.places.FakeLocationPreferences
 import bose.ankush.home.presentation.places.NoopAnalytics
-import bose.ankush.home.presentation.places.WanderPlacesIntent
+import bose.ankush.home.presentation.places.SavedPlacesIntent
 import bose.ankush.home.presentation.places.placesViewModel
 import bose.ankush.home.presentation.places.suggestion
 import bose.ankush.storage.model.LocationPreferences
@@ -36,7 +36,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Saving or picking a place on the Wander places page writes the location override, and
+ * Saving or picking a place on the saved places page writes the location override, and
  * [HomeViewModel] refetches the forecast for those coordinates without any direct call.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -57,8 +57,16 @@ class HomeViewModelLocationSwitchTest {
             advanceUntilIdle()
             assertEquals(listOf(GPS to false), repository.refreshes)
 
-            places.processIntent(WanderPlacesIntent.OpenSearch)
-            places.processIntent(WanderPlacesIntent.SaveSuggestion(suggestion("Paris", PARIS_LAT, PARIS_LON)))
+            places.processIntent(SavedPlacesIntent.OpenSearch)
+            places.processIntent(
+                SavedPlacesIntent.SaveSuggestion(
+                    suggestion(
+                        "Paris",
+                        PARIS_LAT,
+                        PARIS_LON
+                    )
+                )
+            )
             advanceUntilIdle()
 
             assertEquals(PARIS to true, repository.refreshes.last())
@@ -80,7 +88,7 @@ class HomeViewModelLocationSwitchTest {
 
             val release = CompletableDeferred<Unit>()
             repository.gate = release
-            places.processIntent(WanderPlacesIntent.Select(PARIS_PLACE))
+            places.processIntent(SavedPlacesIntent.Select(PARIS_PLACE))
             advanceUntilIdle()
 
             assertEquals(PARIS to true, repository.refreshes.last())
@@ -104,10 +112,10 @@ class HomeViewModelLocationSwitchTest {
             val home = homeViewModel(repository, preferences)
             val places = placesViewModel(finder = FakeFinder(mutableListOf(PARIS_PLACE)), preferences = preferences)
             advanceUntilIdle()
-            places.processIntent(WanderPlacesIntent.Select(PARIS_PLACE))
+            places.processIntent(SavedPlacesIntent.Select(PARIS_PLACE))
             advanceUntilIdle()
 
-            places.processIntent(WanderPlacesIntent.UseCurrentLocation)
+            places.processIntent(SavedPlacesIntent.UseCurrentLocation)
             advanceUntilIdle()
 
             assertEquals(GPS to true, repository.refreshes.last())

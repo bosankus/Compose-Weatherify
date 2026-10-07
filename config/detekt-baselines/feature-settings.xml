@@ -3,11 +3,21 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>LongParameterList:ServiceSubscriptionBottomSheet.kt$( uiState: ServiceSubscriptionState, loadService: () -&gt; Unit, onServiceSelected: (Service) -&gt; Unit, onTierSelected: (PricingTier) -&gt; Unit, onDismiss: () -&gt; Unit, onSubscribe: (service: Service, tier: PricingTier) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>LongParameterList:SettingsFeatureRoute.kt$( paymentUiState: PaymentUiState, isLoggingOut: Boolean, isLoggedOut: Boolean, versionName: String, shouldShowNotificationItem: Boolean, languageList: Array&lt;String&gt;, onLogout: () -&gt; Unit, onLoggedOutHandled: () -&gt; Unit, onStartPayment: (amountPaise: Long) -&gt; Unit, onBackNavAction: () -&gt; Unit, onLanguageNavAction: (Array&lt;String&gt;) -&gt; Unit, onNotificationNavAction: () -&gt; Unit, onBottomBarVisibilityChange: (Boolean) -&gt; Unit = {}, toastAnchorState: ToastAnchorState? = null, bottomBar: @Composable () -&gt; Unit = {}, )</ID>
-    <ID>LongParameterList:SettingsFeatureRoute.kt$( paymentUiState: PaymentUiState, isLoggingOut: Boolean, versionName: String, shouldShowNotificationItem: Boolean, state: SettingsState, onLogout: () -&gt; Unit, onBackNavAction: () -&gt; Unit, onLanguageNavAction: () -&gt; Unit, onNotificationNavAction: () -&gt; Unit, onStartPayment: (amountPaise: Long) -&gt; Unit, onBottomBarVisibilityChange: (Boolean) -&gt; Unit, onOpenPremiumSheet: () -&gt; Unit, onClosePremiumSheet: () -&gt; Unit, onOpenLogoutDialog: () -&gt; Unit, onCloseLogoutDialog: () -&gt; Unit, onOpenWebUrl: (String) -&gt; Unit, onCloseWebView: () -&gt; Unit, onDismissPremiumActivationToast: () -&gt; Unit, onLoadServices: () -&gt; Unit, onSelectService: (Service) -&gt; Unit, onSelectTier: (PricingTier) -&gt; Unit, toastAnchorState: ToastAnchorState? = null, bottomBar: @Composable () -&gt; Unit = {}, )</ID>
+      <ID>LongParameterList:SettingsFeatureRoute.kt$( paymentUiState: PaymentUiState, isLoggingOut:
+          Boolean, isLoggedOut: Boolean, versionName: String, shouldShowNotificationItem: Boolean,
+          languageList: Array&lt;String&gt;, onLogout: () -&gt; Unit, onLoggedOutHandled: () -&gt;
+          Unit, onStartPayment: (amountPaise: Long) -&gt; Unit, onBackNavAction: () -&gt; Unit,
+          onLanguageNavAction: (Array&lt;String&gt;) -&gt; Unit, onNotificationNavAction: () -&gt;
+          Unit, onBottomBarVisibilityChange: (Boolean) -&gt; Unit = {}, onRefreshPremium: () -&gt;
+          Unit = {}, toastAnchorState: ToastAnchorState? = null, bottomBar: @Composable () -&gt;
+          Unit = {}, )
+      </ID>
     <ID>UnusedPrivateMember:SettingsFeatureRoute.kt$@Preview @Composable private fun SettingsScreenContentDefaultPreview()</ID>
     <ID>UnusedPrivateMember:SettingsFeatureRoute.kt$@Preview @Composable private fun SettingsScreenContentLoggingOutPreview()</ID>
     <ID>UnusedPrivateMember:SettingsFeatureRoute.kt$@Preview @Composable private fun SettingsScreenContentLogoutDialogPreview()</ID>
+      <ID>UnusedPrivateMember:SettingsFeatureRoute.kt$@Preview @Composable private fun
+          SettingsScreenContentPhotoUploadingPreview()
+      </ID>
     <ID>UnusedPrivateMember:SettingsFeatureRoute.kt$@Preview @Composable private fun SettingsScreenContentPremiumActivationToastPreview()</ID>
     <ID>UnusedPrivateMember:SettingsFeatureRoute.kt$@Preview @Composable private fun SettingsScreenContentPremiumActivePreview()</ID>
     <ID>UnusedPrivateMember:SettingsFeatureRoute.kt$@Preview @Composable private fun SettingsScreenContentPremiumProcessingPreview()</ID>

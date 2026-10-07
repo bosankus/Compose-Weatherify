@@ -12,7 +12,6 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.androidx.room) apply false
     alias(libs.plugins.secrets.gradle.plugin) apply false
-    alias(libs.plugins.ktlint) apply false
     // Declared here (not just via buildSrc) so it shares the same portal-resolved classloader as
     // kotlin.multiplatform — detekt's KMP task registration needs KotlinMultiplatformExtension
     // visible on its own classloader, which only holds if both plugins resolve from this one place.

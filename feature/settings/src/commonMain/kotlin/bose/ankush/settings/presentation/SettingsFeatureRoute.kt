@@ -1,25 +1,20 @@
 package bose.ankush.settings.presentation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,22 +23,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.components.ToastType
+import bose.ankush.commonui.theme.LightSystemBarIcons
+import bose.ankush.commonui.theme.WarningYellow
 import bose.ankush.commonui.web.InAppWebView
 import bose.ankush.network.model.DurationType
 import bose.ankush.network.model.Feature
@@ -60,19 +61,44 @@ import bose.ankush.settings.generated.resources.logout_btn_txt
 import bose.ankush.settings.generated.resources.logout_confirmation_txt
 import bose.ankush.settings.generated.resources.premium_activated_msg_txt
 import bose.ankush.settings.generated.resources.premium_activated_title_txt
+import bose.ankush.settings.generated.resources.profile_photo_read_failed_txt
+import bose.ankush.settings.generated.resources.profile_photo_remove_failed_txt
+import bose.ankush.settings.generated.resources.profile_photo_removed_txt
+import bose.ankush.settings.generated.resources.profile_photo_updated_txt
+import bose.ankush.settings.generated.resources.profile_photo_upload_failed_txt
+import bose.ankush.settings.generated.resources.profile_remove_photo_body_txt
+import bose.ankush.settings.generated.resources.profile_remove_photo_title_txt
+import bose.ankush.settings.generated.resources.profile_remove_photo_txt
 import bose.ankush.settings.generated.resources.profile_title
-import bose.ankush.settings.presentation.component.LegalSection
+import bose.ankush.settings.presentation.component.AboutSection
+import bose.ankush.settings.presentation.component.PreferencesSection
 import bose.ankush.settings.presentation.component.PremiumCard
-import bose.ankush.settings.presentation.component.SettingsSection
-import kotlinx.coroutines.delay
+import bose.ankush.settings.presentation.component.ProfileHeader
+import bose.ankush.settings.presentation.component.ProfileHeaderActions
+import bose.ankush.settings.presentation.component.SettingsBackdrop
+import bose.ankush.settings.presentation.component.SettingsCardShape
+import bose.ankush.settings.presentation.component.SettingsDanger
+import bose.ankush.settings.presentation.component.SettingsInk
+import bose.ankush.settings.presentation.component.SettingsInkMuted
+import bose.ankush.settings.presentation.component.SettingsSurface
+import bose.ankush.settings.presentation.profile.PhotoOperation
+import bose.ankush.settings.presentation.profile.ProfileIntent
+import bose.ankush.settings.presentation.profile.ProfileMessage
+import bose.ankush.settings.presentation.profile.ProfileState
+import bose.ankush.settings.presentation.profile.ProfileViewModel
+import bose.ankush.settings.presentation.profile.fullText
+import bose.ankush.settings.presentation.profile.isError
+import bose.ankush.settings.presentation.profile.rememberProfilePhotoPicker
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Public entry point for the Settings feature. Bridges to the host app via plain
- * callbacks/params — [SettingsViewModel] itself stays internal, resolved through Koin and scoped
- * to wherever this route is composed (mirrors `feature:home`'s `HomeFeatureRoute`).
+ * callbacks/params. Pull to refresh refetches the account here and calls [onRefreshPremium],
+ * which the host wires to its session refresh, the only call that returns premium status.
+ * [SettingsViewModel] and [ProfileViewModel] stay internal, resolved through
+ * Koin and scoped to wherever this route is composed.
  */
 @Composable
 fun SettingsFeatureRoute(
@@ -89,12 +115,27 @@ fun SettingsFeatureRoute(
     onLanguageNavAction: (Array<String>) -> Unit,
     onNotificationNavAction: () -> Unit,
     onBottomBarVisibilityChange: (Boolean) -> Unit = {},
+    onRefreshPremium: () -> Unit = {},
     toastAnchorState: ToastAnchorState? = null,
     bottomBar: @Composable () -> Unit = {},
 ) {
     val viewModel = koinViewModel<SettingsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val profileViewModel = koinViewModel<ProfileViewModel>()
+    val profileState by profileViewModel.state.collectAsStateWithLifecycle()
+    var profileMessage by remember { mutableStateOf<ProfileMessage?>(null) }
     val previousPaymentStage = remember { mutableStateOf(paymentUiState.stage) }
+
+    val photoPicker =
+        rememberProfilePhotoPicker(
+            onPicked = { profileViewModel.onIntent(ProfileIntent.PhotoPicked(it)) },
+            onUnreadable = { profileViewModel.onIntent(ProfileIntent.PhotoUnreadable) },
+        )
+
+    LaunchedEffect(profileViewModel) {
+        profileViewModel.onIntent(ProfileIntent.Refresh)
+        profileViewModel.messages.collect { profileMessage = it }
+    }
 
     LaunchedEffect(paymentUiState.stage) {
         when (paymentUiState.stage) {
@@ -120,29 +161,55 @@ fun SettingsFeatureRoute(
     }
 
     SettingsScreenContent(
-        paymentUiState = paymentUiState,
-        isLoggingOut = isLoggingOut,
-        versionName = versionName,
-        shouldShowNotificationItem = shouldShowNotificationItem,
-        state = state,
-        onLogout = onLogout,
-        onBackNavAction = onBackNavAction,
-        onLanguageNavAction = { onLanguageNavAction(languageList) },
-        onNotificationNavAction = onNotificationNavAction,
-        onStartPayment = onStartPayment,
-        onBottomBarVisibilityChange = onBottomBarVisibilityChange,
-        onOpenPremiumSheet = { viewModel.processIntent(SettingsIntent.OpenPremiumSheet) },
-        onClosePremiumSheet = { viewModel.processIntent(SettingsIntent.ClosePremiumSheet) },
-        onOpenLogoutDialog = { viewModel.processIntent(SettingsIntent.OpenLogoutDialog) },
-        onCloseLogoutDialog = { viewModel.processIntent(SettingsIntent.CloseLogoutDialog) },
-        onOpenWebUrl = { url -> viewModel.processIntent(SettingsIntent.OpenWebUrl(url)) },
-        onCloseWebView = { viewModel.processIntent(SettingsIntent.CloseWebView) },
-        onDismissPremiumActivationToast = {
-            viewModel.processIntent(SettingsIntent.DismissPremiumActivationToast)
-        },
-        onLoadServices = { viewModel.processIntent(SettingsIntent.LoadServices) },
-        onSelectService = { viewModel.processIntent(SettingsIntent.SelectService(it)) },
-        onSelectTier = { viewModel.processIntent(SettingsIntent.SelectTier(it)) },
+        model =
+            SettingsScreenModel(
+                state = state,
+                profile =
+                    ProfileSection(
+                        state = profileState,
+                        actions =
+                            ProfileHeaderActions(
+                                onChangePhoto = photoPicker?.let { picker -> { picker.launch() } },
+                                onRemovePhoto = { profileViewModel.onIntent(ProfileIntent.RequestRemovePhoto) },
+                            ),
+                        message = profileMessage,
+                        onConfirmRemove = { profileViewModel.onIntent(ProfileIntent.ConfirmRemovePhoto) },
+                        onDismissRemove = { profileViewModel.onIntent(ProfileIntent.DismissRemovePhoto) },
+                        onDismissMessage = { profileMessage = null },
+                    ),
+                paymentUiState = paymentUiState,
+                isLoggingOut = isLoggingOut,
+                versionName = versionName,
+                shouldShowNotificationItem = shouldShowNotificationItem,
+            ),
+        actions =
+            SettingsActions(
+                onRefresh = {
+                    profileViewModel.onIntent(ProfileIntent.PullToRefresh)
+                    onRefreshPremium()
+                },
+                onLogout = onLogout,
+                onBack = onBackNavAction,
+                onLanguage = { onLanguageNavAction(languageList) },
+                onNotifications = onNotificationNavAction,
+                onBottomBarVisibilityChange = onBottomBarVisibilityChange,
+                onOpenLogoutDialog = { viewModel.processIntent(SettingsIntent.OpenLogoutDialog) },
+                onCloseLogoutDialog = { viewModel.processIntent(SettingsIntent.CloseLogoutDialog) },
+                onOpenWebUrl = { url -> viewModel.processIntent(SettingsIntent.OpenWebUrl(url)) },
+                onCloseWebView = { viewModel.processIntent(SettingsIntent.CloseWebView) },
+                premium =
+                    PremiumActions(
+                        onOpenSheet = { viewModel.processIntent(SettingsIntent.OpenPremiumSheet) },
+                        onCloseSheet = { viewModel.processIntent(SettingsIntent.ClosePremiumSheet) },
+                        onLoadServices = { viewModel.processIntent(SettingsIntent.LoadServices) },
+                        onSelectService = { viewModel.processIntent(SettingsIntent.SelectService(it)) },
+                        onSelectTier = { viewModel.processIntent(SettingsIntent.SelectTier(it)) },
+                        onStartPayment = onStartPayment,
+                        onDismissActivationToast = {
+                            viewModel.processIntent(SettingsIntent.DismissPremiumActivationToast)
+                        },
+                    ),
+            ),
         toastAnchorState = toastAnchorState,
         bottomBar = bottomBar,
     )
@@ -151,237 +218,223 @@ fun SettingsFeatureRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SettingsScreenContent(
-    paymentUiState: PaymentUiState,
-    isLoggingOut: Boolean,
-    versionName: String,
-    shouldShowNotificationItem: Boolean,
-    state: SettingsState,
-    onLogout: () -> Unit,
-    onBackNavAction: () -> Unit,
-    onLanguageNavAction: () -> Unit,
-    onNotificationNavAction: () -> Unit,
-    onStartPayment: (amountPaise: Long) -> Unit,
-    onBottomBarVisibilityChange: (Boolean) -> Unit,
-    onOpenPremiumSheet: () -> Unit,
-    onClosePremiumSheet: () -> Unit,
-    onOpenLogoutDialog: () -> Unit,
-    onCloseLogoutDialog: () -> Unit,
-    onOpenWebUrl: (String) -> Unit,
-    onCloseWebView: () -> Unit,
-    onDismissPremiumActivationToast: () -> Unit,
-    onLoadServices: () -> Unit,
-    onSelectService: (Service) -> Unit,
-    onSelectTier: (PricingTier) -> Unit,
+    model: SettingsScreenModel,
+    actions: SettingsActions,
     toastAnchorState: ToastAnchorState? = null,
     bottomBar: @Composable () -> Unit = {},
 ) {
-    val hasPlayedIntroAnimation = remember { SettingsAnimationState.hasPlayedIntroAnimation }
-    val settingsSectionState = remember { MutableTransitionState(hasPlayedIntroAnimation) }
-    val legalSectionState = remember { MutableTransitionState(hasPlayedIntroAnimation) }
-    val logoutButtonState = remember { MutableTransitionState(hasPlayedIntroAnimation) }
-
+    val state = model.state
+    val profile = model.profile
     LaunchedEffect(state.showPremiumBottomSheet) {
-        onBottomBarVisibilityChange(!state.showPremiumBottomSheet)
-    }
-
-    LaunchedEffect(Unit) {
-        if (!hasPlayedIntroAnimation) {
-            val sectionRevealState =
-                listOf(settingsSectionState, legalSectionState, logoutButtonState)
-            sectionRevealState.forEachIndexed { index, transitionState ->
-                delay(if (index == 0) 100.milliseconds else 150.milliseconds)
-                transitionState.targetState = true
-            }
-            SettingsAnimationState.hasPlayedIntroAnimation = true
-        }
+        actions.onBottomBarVisibilityChange(!state.showPremiumBottomSheet)
     }
 
     val currentWebUrl = state.currentWebUrl
     if (currentWebUrl != null) {
-        InAppWebView(
-            url = currentWebUrl,
-            onClose = onCloseWebView,
-        )
-    } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Scaffold(
-                modifier = Modifier.fillMaxSize(),
-                topBar = {
-                    CenterAlignedTopAppBar(
-                        title = {
-                            Text(
-                                stringResource(Res.string.profile_title),
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = onBackNavAction) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                    contentDescription = stringResource(Res.string.back_button_content),
-                                )
-                            }
-                        },
-                        colors =
-                            TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.surface,
-                                titleContentColor = MaterialTheme.colorScheme.onSurface,
-                            ),
+        InAppWebView(url = currentWebUrl, onClose = actions.onCloseWebView)
+        return
+    }
+
+    LightSystemBarIcons()
+    Box(modifier = Modifier.fillMaxSize().background(SettingsBackdrop)) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = Color.Transparent,
+            contentColor = SettingsInk,
+            topBar = { SettingsTopBar(onBackNavAction = actions.onBack) },
+            bottomBar = bottomBar,
+        ) { innerPadding ->
+            val pullState = rememberPullToRefreshState()
+            PullToRefreshBox(
+                isRefreshing = profile.state.isRefreshing,
+                onRefresh = actions.onRefresh,
+                state = pullState,
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                indicator = {
+                    PullToRefreshDefaults.Indicator(
+                        state = pullState,
+                        isRefreshing = profile.state.isRefreshing,
+                        containerColor = SettingsSurface,
+                        color = WarningYellow,
+                        modifier = Modifier.align(Alignment.TopCenter),
                     )
                 },
-                content = { innerPadding ->
-                    LazyColumn(
-                        modifier =
-                            Modifier
-                                .padding(innerPadding)
-                                .padding(horizontal = 16.dp),
-                    ) {
-                        item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                        item {
-                            PremiumCard(
-                                paymentUiState = paymentUiState,
-                                onClick = onOpenPremiumSheet,
-                            )
-                        }
-
-                        item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                        item {
-                            AnimatedVisibility(
-                                visibleState = settingsSectionState,
-                                enter = enterFromBottom,
-                                exit = fadeOut(),
-                            ) {
-                                SettingsSection(
-                                    shouldShowNotificationItem = shouldShowNotificationItem,
-                                    onNotificationNavAction = onNotificationNavAction,
-                                    onLanguageNavAction = onLanguageNavAction,
-                                )
-                            }
-                        }
-
-                        item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                        item {
-                            AnimatedVisibility(
-                                visibleState = legalSectionState,
-                                enter = enterFromBottom,
-                                exit = fadeOut(),
-                            ) {
-                                LegalSection(
-                                    versionName = versionName,
-                                    onUrlClick = onOpenWebUrl,
-                                )
-                            }
-                        }
-
-                        item { Spacer(modifier = Modifier.height(24.dp)) }
-
-                        item {
-                            AnimatedVisibility(
-                                visibleState = logoutButtonState,
-                                enter = enterFromBottom,
-                                exit = fadeOut(),
-                            ) {
-                                TextButton(
-                                    onClick = onOpenLogoutDialog,
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Text(
-                                        text = stringResource(Res.string.logout_btn_txt),
-                                        color = MaterialTheme.colorScheme.error,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Medium,
-                                    )
-                                }
-                            }
-                        }
-
-                        item { Spacer(modifier = Modifier.height(24.dp)) }
-                    }
-
-                    if (state.showLogoutDialog) {
-                        AlertDialog(
-                            onDismissRequest = {
-                                if (!isLoggingOut) onCloseLogoutDialog()
-                            },
-                            title = { Text(text = stringResource(Res.string.logout_btn_txt)) },
-                            text = { Text(text = stringResource(Res.string.logout_confirmation_txt)) },
-                            confirmButton = {
-                                TextButton(onClick = onLogout, enabled = !isLoggingOut) {
-                                    Text(stringResource(Res.string.confirm_btn_txt))
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(
-                                    onClick = onCloseLogoutDialog,
-                                    enabled = !isLoggingOut,
-                                ) {
-                                    Text(stringResource(Res.string.cancel_btn_txt))
-                                }
-                            },
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                ) {
+                    item { ProfileHeader(state = profile.state, actions = profile.actions) }
+                    item {
+                        PremiumCard(
+                            paymentUiState = model.paymentUiState,
+                            onClick = actions.premium.onOpenSheet
                         )
                     }
-
-                    if (state.showPremiumBottomSheet) {
-                        Box(
-                            modifier =
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Black.copy(alpha = 0.5f)),
+                    item {
+                        PreferencesSection(
+                            shouldShowNotificationItem = model.shouldShowNotificationItem,
+                            onNotificationNavAction = actions.onNotifications,
+                            onLanguageNavAction = actions.onLanguage,
+                        )
+                    }
+                    item {
+                        AboutSection(
+                            versionName = model.versionName,
+                            onUrlClick = actions.onOpenWebUrl
+                        )
+                    }
+                    item {
+                        TextButton(
+                            onClick = actions.onOpenLogoutDialog,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Spacer(
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize(0.2f)
-                                        .clickable(
-                                            indication = null,
-                                            interactionSource = remember { MutableInteractionSource() },
-                                        ) { onClosePremiumSheet() },
-                            )
-
-                            ServiceSubscriptionBottomSheet(
-                                uiState = state.serviceSubscription,
-                                loadService = onLoadServices,
-                                onServiceSelected = onSelectService,
-                                onTierSelected = onSelectTier,
-                                onDismiss = onClosePremiumSheet,
-                                onSubscribe = { _, tier ->
-                                    onStartPayment(tier.getAmountInPaise().toLong())
-                                    onClosePremiumSheet()
-                                },
-                                modifier = Modifier.align(Alignment.BottomCenter),
+                            Text(
+                                text = stringResource(Res.string.logout_btn_txt),
+                                color = SettingsDanger,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
                             )
                         }
                     }
-                },
-                bottomBar = bottomBar,
-            )
+                }
+            }
 
-            NotificationToast(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                message = stringResource(Res.string.premium_activated_msg_txt),
-                title = stringResource(Res.string.premium_activated_title_txt),
-                type = ToastType.SUCCESS,
-                isVisible = state.showPremiumActivationToast,
-                onDismiss = onDismissPremiumActivationToast,
-                anchorState = toastAnchorState,
+            if (state.showLogoutDialog) {
+                SettingsConfirmDialog(
+                    copy =
+                        ConfirmCopy(
+                            title = stringResource(Res.string.logout_btn_txt),
+                            body = stringResource(Res.string.logout_confirmation_txt),
+                            confirm = stringResource(Res.string.confirm_btn_txt),
+                        ),
+                    enabled = !model.isLoggingOut,
+                    onConfirm = actions.onLogout,
+                    onDismiss = actions.onCloseLogoutDialog,
+                )
+            }
+
+            if (profile.state.isRemoveConfirmVisible) {
+                SettingsConfirmDialog(
+                    copy =
+                        ConfirmCopy(
+                            title = stringResource(Res.string.profile_remove_photo_title_txt),
+                            body = stringResource(Res.string.profile_remove_photo_body_txt),
+                            confirm = stringResource(Res.string.profile_remove_photo_txt),
+                        ),
+                    onConfirm = profile.onConfirmRemove,
+                    onDismiss = profile.onDismissRemove,
+                )
+            }
+
+            if (state.showPremiumBottomSheet) {
+                PremiumSheetOverlay(state = state, actions = actions)
+            }
+        }
+
+        NotificationToast(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            message = stringResource(Res.string.premium_activated_msg_txt),
+            title = stringResource(Res.string.premium_activated_title_txt),
+            type = ToastType.SUCCESS,
+            isVisible = state.showPremiumActivationToast,
+            onDismiss = actions.premium.onDismissActivationToast,
+            anchorState = toastAnchorState,
+        )
+
+        val message = profile.message
+        NotificationToast(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            message = message?.fullText().orEmpty(),
+            title = stringResource(Res.string.profile_title),
+            type = if (message?.isError() == true) ToastType.ERROR else ToastType.SUCCESS,
+            isVisible = message != null,
+            onDismiss = profile.onDismissMessage,
+            anchorState = toastAnchorState,
+        )
+    }
+}
+
+@Composable
+private fun SettingsTopBar(onBackNavAction: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxWidth().statusBarsPadding()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        IconButton(onClick = onBackNavAction) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                contentDescription = stringResource(Res.string.back_button_content),
+                tint = SettingsInk,
             )
         }
     }
 }
 
-private val enterFromBottom =
-    fadeIn(animationSpec = tween(durationMillis = 500)) +
-        slideInVertically(
-            animationSpec = tween(durationMillis = 500),
-            initialOffsetY = { it / 3 },
-        )
-
-internal object SettingsAnimationState {
-    var hasPlayedIntroAnimation = false
+@Composable
+private fun SettingsConfirmDialog(
+    copy: ConfirmCopy,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    enabled: Boolean = true,
+) {
+    AlertDialog(
+        onDismissRequest = { if (enabled) onDismiss() },
+        containerColor = SettingsSurface,
+        titleContentColor = SettingsInk,
+        textContentColor = SettingsInkMuted,
+        shape = SettingsCardShape,
+        title = { Text(text = copy.title, fontWeight = FontWeight.SemiBold) },
+        text = { Text(text = copy.body) },
+        confirmButton = {
+            TextButton(onClick = onConfirm, enabled = enabled) {
+                Text(
+                    copy.confirm,
+                    color = SettingsDanger.copy(alpha = if (enabled) 1f else DISABLED_ALPHA)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = enabled) {
+                Text(stringResource(Res.string.cancel_btn_txt), color = SettingsInk)
+            }
+        },
+    )
 }
+
+@Composable
+private fun PremiumSheetOverlay(
+    state: SettingsState,
+    actions: SettingsActions,
+) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = SCRIM_ALPHA))) {
+        Spacer(
+            modifier =
+                Modifier
+                    .fillMaxSize(0.2f)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                    ) { actions.premium.onCloseSheet() },
+        )
+        ServiceSubscriptionBottomSheet(
+            uiState = state.serviceSubscription,
+            loadService = actions.premium.onLoadServices,
+            onServiceSelected = actions.premium.onSelectService,
+            onTierSelected = actions.premium.onSelectTier,
+            onDismiss = actions.premium.onCloseSheet,
+            onSubscribe = { _, tier ->
+                actions.premium.onStartPayment(tier.getAmountInPaise().toLong())
+                actions.premium.onCloseSheet()
+            },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+}
+
+private const val SCRIM_ALPHA = 0.5f
+private const val DISABLED_ALPHA = 0.4f
 
 // region Previews
 
@@ -389,30 +442,24 @@ private fun previewNoOpContent(
     paymentUiState: PaymentUiState = PaymentUiState(),
     isLoggingOut: Boolean = false,
     state: SettingsState = SettingsState(),
+    profile: ProfileState = ProfileState(email = "ankush@example.com"),
 ): @Composable () -> Unit =
     {
         SettingsScreenContent(
-            paymentUiState = paymentUiState,
-            isLoggingOut = isLoggingOut,
-            versionName = "1.0.0",
-            shouldShowNotificationItem = true,
-            state = state,
-            onLogout = {},
-            onBackNavAction = {},
-            onLanguageNavAction = {},
-            onNotificationNavAction = {},
-            onStartPayment = {},
-            onBottomBarVisibilityChange = {},
-            onOpenPremiumSheet = {},
-            onClosePremiumSheet = {},
-            onOpenLogoutDialog = {},
-            onCloseLogoutDialog = {},
-            onOpenWebUrl = {},
-            onCloseWebView = {},
-            onDismissPremiumActivationToast = {},
-            onLoadServices = {},
-            onSelectService = {},
-            onSelectTier = {},
+            model =
+                SettingsScreenModel(
+                    state = state,
+                    profile =
+                        ProfileSection(
+                            state = profile,
+                            actions = ProfileHeaderActions(onChangePhoto = {}, onRemovePhoto = {}),
+                        ),
+                    paymentUiState = paymentUiState,
+                    isLoggingOut = isLoggingOut,
+                    versionName = "1.0.0",
+                    shouldShowNotificationItem = true,
+                ),
+            actions = SettingsActions(),
         )
     }
 
@@ -589,3 +636,20 @@ private fun SettingsScreenContentPremiumActivationToastPreview() {
 }
 
 // endregion
+
+@Preview
+@Composable
+private fun SettingsScreenContentPhotoUploadingPreview() {
+    MaterialTheme {
+        Surface {
+            previewNoOpContent(
+                profile =
+                    ProfileState(
+                        email = "ankush@example.com",
+                        photoUrl = "https://example.com/photo.jpg",
+                        photoOperation = PhotoOperation.Uploading,
+                    ),
+            )()
+        }
+    }
+}

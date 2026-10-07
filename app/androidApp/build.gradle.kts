@@ -16,10 +16,9 @@ secrets {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget = JvmTarget.JVM_17
         freeCompilerArgs.addAll(
             "-XXLanguage:+PropertyParamAnnotationDefaultTargetMode",
-            "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
         )
     }
@@ -27,10 +26,14 @@ kotlin {
 
 android {
     namespace = "bose.ankush.weatherify"
-    compileSdk =
-        libs.versions.compileSdk
-            .get()
-            .toInt()
+    compileSdk {
+        version =
+            release(
+                libs.versions.compileSdk
+                    .get()
+                    .toInt(),
+            )
+    }
 
     defaultConfig {
         applicationId = "bose.ankush.weatherify"
@@ -44,23 +47,22 @@ android {
                 .toInt()
         versionCode = ConfigData.versionCode
         versionName = ConfigData.versionName
-        multiDexEnabled = ConfigData.multiDexEnabled
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     @Suppress("UnstableApiUsage")
     androidResources {
-        localeFilters.addAll(listOf("en", "hi", "iw", "bn", "kn", "ml", "ta", "te"))
+        localeFilters += listOf("en", "hi", "iw", "bn", "kn", "ml", "ta", "te")
     }
 
     packaging {
         resources {
-            excludes.add("META-INF/versions/9/previous-compilation-data.bin")
+            excludes += "META-INF/versions/9/previous-compilation-data.bin"
         }
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

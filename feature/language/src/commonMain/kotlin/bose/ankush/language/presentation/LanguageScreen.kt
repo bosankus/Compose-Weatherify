@@ -1,53 +1,68 @@
 package bose.ankush.language.presentation
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import bose.ankush.commonui.theme.LightSystemBarIcons
+import bose.ankush.commonui.theme.NightBackdrop
+import bose.ankush.commonui.theme.NightCardFill
+import bose.ankush.commonui.theme.NightCardStroke
+import bose.ankush.commonui.theme.NightInk
+import bose.ankush.commonui.theme.NightInkFaint
+import bose.ankush.commonui.theme.NightInkMuted
+import bose.ankush.commonui.theme.ToastOnWarning
+import bose.ankush.commonui.theme.WarningYellow
 import bose.ankush.language.generated.resources.Res
 import bose.ankush.language.generated.resources.language_navigate_back
 import bose.ankush.language.generated.resources.language_screen_subtitle
@@ -58,257 +73,197 @@ import bose.ankush.language.util.LocaleHelper.getCountryFlag
 import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
 import bose.ankush.language.util.LocaleHelper.getDisplayName
 import bose.ankush.language.util.customAppLocale
+import bose.ankush.language.util.matchLanguage
 import org.jetbrains.compose.resources.stringResource
 
-private const val ITEM_STAGGER_DELAY_MS = 100L
-
+/**
+ * Language picker, in the same night look as the profile screen it is opened from: round back
+ * button, title and subtitle, and one rounded card listing the languages with the active one
+ * ticked. Picking a language applies it at once.
+ */
 @Composable
 fun LanguageScreen(
     languages: List<String>,
     navAction: () -> Unit,
 ) {
-    val screenTransitionState = remember { MutableTransitionState(false) }
-    val rememberedNavAction = remember { navAction }
-    // Hoist the changedLanguage state to prevent recreation in ShowUI
-    val changedLanguage = remember { mutableStateOf(customAppLocale ?: getDefaultLanguage()) }
+    val selected =
+        remember(languages) {
+            mutableStateOf(matchLanguage(languages, customAppLocale ?: getDefaultLanguage()))
+        }
+    val reveal = remember { MutableTransitionState(false) }
+    LaunchedEffect(Unit) { reveal.targetState = true }
 
-    LaunchedEffect(Unit) {
-        screenTransitionState.targetState = true
-    }
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        Scaffold(
-            topBar = { ScreenHeader(rememberedNavAction) },
-            content = { innerPadding ->
+    LightSystemBarIcons()
+    Box(modifier = Modifier.fillMaxSize().background(NightBackdrop)) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().statusBarsPadding(),
+            contentPadding = PaddingValues(horizontal = 20.dp),
+        ) {
+            item { BackButton(onClick = navAction, modifier = Modifier.padding(top = 8.dp)) }
+            item { Header(modifier = Modifier.padding(top = 20.dp, bottom = 24.dp)) }
+            item {
                 AnimatedVisibility(
-                    visibleState = screenTransitionState,
+                    visibleState = reveal,
                     enter =
-                        fadeIn(animationSpec = tween(durationMillis = 400)) +
-                            slideInVertically(
-                                animationSpec = tween(durationMillis = 500),
-                                initialOffsetY = { it / 3 },
-                            ),
-                    exit = fadeOut(),
+                        fadeIn(tween(REVEAL_MILLIS)) +
+                                slideInVertically(tween(REVEAL_MILLIS)) { it / REVEAL_OFFSET_DIVISOR },
                 ) {
-                    Column(modifier = Modifier.padding(innerPadding)) {
-                        LanguageScreenHeader()
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        ShowUI(
-                            languages = languages,
-                            changedLanguage = changedLanguage,
-                        )
-                    }
+                    LanguageCard(languages = languages, selected = selected)
                 }
-            },
+            }
+            item {
+                Spacer(
+                    modifier = Modifier.height(24.dp)
+                        .windowInsetsBottomHeight(WindowInsets.navigationBars)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BackButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val label = stringResource(Res.string.language_navigate_back)
+    Box(
+        modifier =
+            modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(NightInkFaint)
+                .clickable(role = Role.Button, onClick = onClick)
+                .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = null,
+            tint = NightInk,
+            modifier = Modifier.size(20.dp),
         )
     }
 }
 
 @Composable
-private fun LanguageScreenHeader() {
+private fun Header(modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text = stringResource(Res.string.language_screen_title),
+            color = NightInk,
+            fontSize = 26.sp,
+            fontWeight = FontWeight.SemiBold,
+            lineHeight = 32.sp,
+        )
+        Text(
+            text = stringResource(Res.string.language_screen_subtitle),
+            color = NightInkMuted,
+            fontSize = 15.sp,
+            lineHeight = 21.sp,
+        )
+    }
+}
+
+/** One card, rows separated by hairlines, like the profile screen's sections. */
+@Composable
+private fun LanguageCard(
+    languages: List<String>,
+    selected: MutableState<String?>,
+) {
     Column(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .clip(CardShape)
+                .background(NightCardFill)
+                .border(1.dp, NightCardStroke, CardShape),
     ) {
-        Text(
-            text = stringResource(Res.string.language_screen_title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = stringResource(Res.string.language_screen_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ScreenHeader(navAction: () -> Unit) {
-    val headerTransitionState = remember { MutableTransitionState(false) }
-
-    LaunchedEffect(Unit) {
-        headerTransitionState.targetState = true
-    }
-
-    AnimatedVisibility(
-        visibleState = headerTransitionState,
-        enter =
-            fadeIn(animationSpec = tween(durationMillis = 300)) +
-                slideInVertically(
-                    animationSpec = tween(durationMillis = 300),
-                    initialOffsetY = { -it / 2 },
-                ),
-        exit = fadeOut(),
-    ) {
-        TopAppBar(
-            title = { },
-            navigationIcon = {
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-                    modifier =
-                        Modifier
-                            .padding(start = 8.dp)
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .clickable { navAction.invoke() },
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        contentDescription = stringResource(Res.string.language_navigate_back),
-                        modifier = Modifier.padding(8.dp),
-                    )
-                }
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
-        )
-    }
-}
-
-@Composable
-private fun ShowUI(
-    languages: List<String>,
-    changedLanguage: androidx.compose.runtime.MutableState<String>,
-) {
-    val listState = rememberLazyListState()
-
-    LazyColumn(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-        state = listState,
-    ) {
-        itemsIndexed(
-            items = languages,
-            key = { _, item -> item },
-        ) { _, language ->
-            LanguageItem(
+        languages.forEachIndexed { index, language ->
+            if (index > 0) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(start = 70.dp),
+                    thickness = 1.dp,
+                    color = NightCardStroke
+                )
+            }
+            LanguageRow(
                 language = language,
-                isSelected = changedLanguage.value == language,
-                onLanguageSelected =
-                    remember(language) {
-                        {
-                            changedLanguage.value = changeLanguageTo(language)
-                            customAppLocale = language
-                        }
-                    },
+                isSelected = selected.value == language,
+                onSelect = {
+                    // The platform may echo the tag back in another form (iw-IL as he-IL).
+                    selected.value =
+                        matchLanguage(languages, changeLanguageTo(language)) ?: language
+                    customAppLocale = language
+                },
             )
         }
     }
 }
 
 @Composable
-private fun LanguageItem(
+private fun LanguageRow(
     language: String,
     isSelected: Boolean,
-    onLanguageSelected: () -> Unit,
+    onSelect: () -> Unit,
 ) {
     val displayName = remember(language) { language.getDisplayName() }
-    val countryFlag = remember(language) { language.getCountryFlag() }
-
-    Card(
+    val flag = remember(language) { language.getCountryFlag() }
+    val fill by animateColorAsState(
+        targetValue = if (isSelected) WarningYellow.copy(alpha = SELECTED_FILL_ALPHA) else Color.Transparent,
+        animationSpec = tween(SELECT_MILLIS),
+        label = "languageRowFill",
+    )
+    Row(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .clickable(onClick = onLanguageSelected),
-        shape = RoundedCornerShape(16.dp),
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
-                    },
-            ),
-        elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = 0.dp,
-            ),
+                .background(fill)
+                .semantics { selected = isSelected }
+                .clickable(role = Role.RadioButton, onClick = onSelect)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+        Box(
+            modifier = Modifier.size(40.dp).clip(CircleShape).background(NightInkFaint),
+            contentAlignment = Alignment.Center,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f),
+            Text(text = flag, fontSize = 20.sp)
+        }
+        Text(
+            text = displayName,
+            color = NightInk,
+            fontSize = 16.sp,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+            modifier = Modifier.weight(1f),
+        )
+        AnimatedVisibility(
+            visible = isSelected,
+            enter = fadeIn(tween(SELECT_MILLIS)) + scaleIn(
+                tween(SELECT_MILLIS),
+                initialScale = CHECK_START_SCALE
+            ),
+            exit = scaleOut(tween(SELECT_MILLIS), targetScale = CHECK_START_SCALE),
+        ) {
+            Box(
+                modifier = Modifier.size(26.dp).clip(CircleShape).background(WarningYellow),
+                contentAlignment = Alignment.Center,
             ) {
-                LanguageFlag(countryFlag)
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = displayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color =
-                        if (isSelected) {
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = stringResource(Res.string.language_selected, displayName),
+                    tint = ToastOnWarning,
+                    modifier = Modifier.size(16.dp),
                 )
-            }
-
-            if (isSelected) {
-                SelectionCheckmark(language)
             }
         }
     }
 }
 
-@Composable
-private fun LanguageFlag(countryFlag: String) {
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.background,
-        modifier = Modifier.size(40.dp),
-    ) {
-        Text(
-            text = countryFlag,
-            fontFamily = FontFamily.Default,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(8.dp),
-        )
-    }
-}
-
-@Composable
-private fun SelectionCheckmark(language: String) {
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(32.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Check,
-            tint = MaterialTheme.colorScheme.onPrimary,
-            contentDescription = stringResource(Res.string.language_selected, language),
-            modifier = Modifier.padding(6.dp),
-        )
-    }
-}
+private val CardShape: Shape = RoundedCornerShape(20.dp)
+private const val REVEAL_MILLIS = 360
+private const val REVEAL_OFFSET_DIVISOR = 6
+private const val SELECT_MILLIS = 180
+private const val SELECTED_FILL_ALPHA = 0.10f
+private const val CHECK_START_SCALE = 0.6f

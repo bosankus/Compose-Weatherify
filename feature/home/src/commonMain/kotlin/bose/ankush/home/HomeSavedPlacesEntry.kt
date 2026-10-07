@@ -2,7 +2,7 @@ package bose.ankush.home
 
 /**
  * Cross-feature entry point to Home's own saved places page (the second page of the Android
- * Wander home pager). Lets the app's saved locations tab open that page instead of the
+ * home screen pager). Lets the app's saved locations tab open that page instead of the
  * standalone saved locations route, without a direct ViewModel reference across modules.
  */
 interface HomeSavedPlacesEntry {

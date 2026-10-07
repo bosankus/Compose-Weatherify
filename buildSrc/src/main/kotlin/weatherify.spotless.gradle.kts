@@ -2,11 +2,14 @@ plugins {
     id("com.diffplug.spotless")
 }
 
+// Single source of truth for the ktlint engine used by Spotless.
+val ktlintVersion = "1.7.1"
+
 spotless {
     kotlin {
         target("src/**/*.kt")
         targetExclude("**/build/**")
-        ktlint("1.7.1").editorConfigOverride(
+        ktlint(ktlintVersion).editorConfigOverride(
             mapOf(
                 "ktlint_code_style" to "ktlint_official",
                 "indent_size" to "4",
@@ -21,6 +24,6 @@ spotless {
     }
     kotlinGradle {
         target("*.gradle.kts")
-        ktlint("1.7.1")
+        ktlint(ktlintVersion)
     }
 }

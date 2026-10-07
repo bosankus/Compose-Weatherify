@@ -110,7 +110,7 @@ fun AppBottomBar(
                     },
                     selected = tab.route == currentRoute,
                     onClick = {
-                        // Android Wander home shows saved places on its own pager page; the
+                        // Android home screen shows saved places on its own pager page; the
                         // saved locations route stays for platforms whose home has no such page.
                         val openedOnHome = tab.route == SavedLocationsRoute && homeSavedPlaces.openSavedPlaces()
                         navigator.navigate(if (openedOnHome) HomeRoute else tab.route)

@@ -12,7 +12,7 @@ data class Account(
     val photoUrl: String? = null,
 )
 
-/** GET /account/photo. Same signed [photoUrl] as [Account], without email. */
+/** Body of POST and DELETE /account/photo: the new signed [photoUrl], or null when removed. */
 @Serializable
 data class AccountPhoto(
     val photoUrl: String? = null,

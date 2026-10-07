@@ -57,32 +57,39 @@ fun AppNavigation(
     onShowToast: (String) -> Unit,
     toastAnchorState: ToastAnchorState? = null,
 ) {
-    val navigationState = rememberAppNavigationState()
-    val navigator = remember { AppNavigator(navigationState) }
-    val platformPermissions = rememberPlatformPermissions()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
+    val platformPermissions = rememberPlatformPermissions()
+    val navigationState = rememberAppNavigationState()
+    val exitApp = rememberExitAppAction()
+
     val homeLocationCoordinator = koinInject<HomeLocationCoordinator>()
     val analyticsTracker = koinInject<AnalyticsTracker>()
     val errorReporter = koinInject<ErrorReporter>()
-    val coroutineScope = rememberCoroutineScope()
 
+    val navigator = remember { AppNavigator(navigationState) }
     var hasLocationPermission by remember { mutableStateOf(platformPermissions.hasLocationPermission()) }
     var hasNotificationPermission by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        hasNotificationPermission = platformPermissions.hasNotificationPermission()
-    }
-
     var showNotificationPermissionRequest by remember { mutableStateOf(false) }
     var notificationPermissionResult by remember {
         mutableStateOf<HomeNotificationPermissionResult?>(null)
     }
-
     var isNotificationPermissionPermanentlyDeclined by remember { mutableStateOf(false) }
-
     var locationPermissionRequestId by remember { mutableStateOf(0) }
     var showLocationPermissionRationale by remember { mutableStateOf(false) }
     var isLocationPermissionPermanentlyDeclined by remember { mutableStateOf(false) }
-    val exitApp = rememberExitAppAction()
+
+    val refreshPermissionState = {
+        hasLocationPermission = platformPermissions.hasLocationPermission()
+        coroutineScope.launch {
+            hasNotificationPermission = platformPermissions.hasNotificationPermission()
+        }
+        Unit
+    }
+
+    LaunchedEffect(Unit) {
+        hasNotificationPermission = platformPermissions.hasNotificationPermission()
+    }
 
     if (!hasLocationPermission) {
         key(locationPermissionRequestId) {
@@ -105,6 +112,7 @@ fun AppNavigation(
                             !isLocationPermissionPermanentlyDeclined -> Res.string.location_permission_rationale_txt
                             platformPermissions.requiresManualSettingsNavigationHint() ->
                                 Res.string.location_permission_declined_ios_txt
+
                             else -> Res.string.location_permission_declined_txt
                         },
                     ),
@@ -148,14 +156,6 @@ fun AppNavigation(
                 showNotificationPermissionRequest = false
             },
         )
-    }
-
-    val refreshPermissionState = {
-        hasLocationPermission = platformPermissions.hasLocationPermission()
-        coroutineScope.launch {
-            hasNotificationPermission = platformPermissions.hasNotificationPermission()
-        }
-        Unit
     }
 
     DisposableEffect(lifecycleOwner) {
@@ -204,7 +204,11 @@ fun AppNavigation(
                                 SavedLocationsFinderRoute(
                                     onLocationSelected = { lat, lon, name ->
                                         coroutineScope.launch {
-                                            homeLocationCoordinator.setDefaultLocation(lat, lon, name)
+                                            homeLocationCoordinator.setDefaultLocation(
+                                                lat,
+                                                lon,
+                                                name,
+                                            )
                                         }
                                     },
                                     onUpgradeClick = { navigator.navigate(SettingsRoute) },
@@ -214,7 +218,12 @@ fun AppNavigation(
                         )
                     }
                     entry<SavedLocationsRoute> {
-                        TrackedScreen("saved_locations", "SavedLocationsScreen", analyticsTracker, errorReporter)
+                        TrackedScreen(
+                            "saved_locations",
+                            "SavedLocationsScreen",
+                            analyticsTracker,
+                            errorReporter,
+                        )
                         SavedLocationsFinderRoute(
                             onLocationSelected = { lat, lon, name ->
                                 coroutineScope.launch {
@@ -320,6 +329,8 @@ private fun SettingsEntry(
             }
         },
         onBottomBarVisibilityChange = { isBottomBarVisible.value = it },
+        // The session refresh is the only call that returns premium status and expiry.
+        onRefreshPremium = { authViewModel.processIntent(AuthIntent.RefreshToken) },
         toastAnchorState = toastAnchorState,
         bottomBar = { AppBottomBar(isBottomBarVisible, navigator, toastAnchorState) },
     )

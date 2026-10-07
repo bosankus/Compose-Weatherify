@@ -38,3 +38,54 @@ internal actual fun PlatformSystemBarsEffect(darkTheme: Boolean) {
         onDispose { }
     }
 }
+
+/**
+ * Counted per window rather than saved and restored per call: when one dark screen opens
+ * another (profile, then language), the outgoing one's cleanup runs after the incoming one has
+ * set light icons, and a plain restore would put dark icons back on a dark screen.
+ */
+@Composable
+actual fun LightSystemBarIcons() {
+    val view = LocalView.current
+    val activity = LocalActivity.current
+    if (view.isInEditMode || activity == null) return
+    DisposableEffect(activity, view) {
+        val controller = WindowCompat.getInsetsController(activity.window, view)
+        val request = LightIconRequests.acquire(activity, controller.isAppearanceLightStatusBars)
+        controller.isAppearanceLightStatusBars = false
+        onDispose {
+            LightIconRequests.release(request)
+                ?.let { original -> controller.isAppearanceLightStatusBars = original }
+        }
+    }
+}
+
+/** Open light-icon requests per activity, and the icon style from before the first one. */
+private object LightIconRequests {
+    private class Window(
+        val originalLight: Boolean,
+    ) {
+        var count = 0
+    }
+
+    private val windows = java.util.WeakHashMap<android.app.Activity, Window>()
+
+    fun acquire(
+        activity: android.app.Activity,
+        currentLight: Boolean,
+    ): android.app.Activity {
+        windows.getOrPut(activity) { Window(currentLight) }.count++
+        return activity
+    }
+
+    /** The style to restore once the last request is gone, else null. */
+    fun release(activity: android.app.Activity): Boolean? {
+        val window = windows[activity]?.apply { count-- }
+        return if (window != null && window.count <= 0) {
+            windows.remove(activity)
+            window.originalLight
+        } else {
+            null
+        }
+    }
+}

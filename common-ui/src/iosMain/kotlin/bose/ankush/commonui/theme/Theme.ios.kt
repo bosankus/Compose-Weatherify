@@ -10,3 +10,6 @@ internal actual fun platformDynamicColorScheme(darkTheme: Boolean): ColorScheme?
 internal actual fun PlatformSystemBarsEffect(darkTheme: Boolean) {
     // System chrome is owned by the SwiftUI / UIKit host on iOS.
 }
+
+@Composable
+actual fun LightSystemBarIcons() = Unit

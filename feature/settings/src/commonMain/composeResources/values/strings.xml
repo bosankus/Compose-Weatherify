@@ -33,4 +33,18 @@
     <string name="oops_txt">Oops!</string>
     <string name="retry_btn_txt">Retry</string>
     <string name="unknown_error_txt">Unknown error</string>
+    <string name="profile_change_photo_txt">Change photo</string>
+    <string name="profile_add_photo_txt">Add photo</string>
+    <string name="profile_remove_photo_txt">Remove</string>
+    <string name="profile_remove_photo_title_txt">Remove profile photo?</string>
+    <string name="profile_remove_photo_body_txt">Your photo will be deleted. You can add a new one any time.</string>
+    <string name="profile_photo_updated_txt">Profile photo updated</string>
+    <string name="profile_photo_removed_txt">Profile photo removed</string>
+    <string name="profile_photo_upload_failed_txt">Couldn’t update your photo. Try again.</string>
+    <string name="profile_photo_remove_failed_txt">Couldn’t remove your photo. Try again.</string>
+    <string name="profile_photo_read_failed_txt">Couldn’t read that photo. Try a different one.</string>
+    <string name="profile_photo_content_desc">Profile photo</string>
+    <string name="profile_edit_photo_content_desc">Change profile photo</string>
+    <string name="settings_preferences_header_txt">Preferences</string>
+    <string name="settings_about_header_txt">About</string>
 </resources>

@@ -25,6 +25,9 @@ kotlin {
         }
 
         androidResources.enable = true
+
+        // Enables running commonTest on the Android host (JVM unit tests).
+        withHostTest {}
     }
 
     // iosX64 dropped: Compose Multiplatform stopped publishing artifacts for it
@@ -41,6 +44,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":common-ui"))
             implementation(libs.compose.multiplatform.resources)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)
@@ -49,6 +53,10 @@ kotlin {
             implementation(libs.compose.multiplatform.animation)
             implementation(libs.compose.multiplatform.materialIconsExtended)
             implementation(libs.kotlinx.serialization.json)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
 
         androidMain.dependencies {

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Holds one pending "open saved places" request until the Wander places ViewModel takes it.
+ * Holds one pending "open saved places" request until the saved places ViewModel takes it.
  * A request survives Home being off screen, so it is handled when Home is shown again.
  */
 internal class HomeSavedPlacesEntryImpl : HomeSavedPlacesEntry {

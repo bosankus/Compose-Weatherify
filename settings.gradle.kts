@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+include(":automotive")
+
+
 pluginManagement {
     repositories {
         gradlePluginPortal()

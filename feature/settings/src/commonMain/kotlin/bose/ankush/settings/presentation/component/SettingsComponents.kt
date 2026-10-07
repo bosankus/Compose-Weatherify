@@ -1,9 +1,12 @@
 package bose.ankush.settings.presentation.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Gavel
@@ -20,24 +23,23 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.WorkspacePremium
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import bose.ankush.commonui.theme.WarningYellow
 import bose.ankush.payment.presentation.PaymentStage
 import bose.ankush.payment.presentation.PaymentUiState
 import bose.ankush.settings.generated.resources.Res
@@ -54,191 +56,144 @@ import bose.ankush.settings.generated.resources.premium_processing_desc_txt
 import bose.ankush.settings.generated.resources.premium_processing_txt
 import bose.ankush.settings.generated.resources.premium_unlock_desc_txt
 import bose.ankush.settings.generated.resources.premium_upgrade_btn_txt
+import bose.ankush.settings.generated.resources.settings_about_header_txt
 import bose.ankush.settings.generated.resources.settings_language_txt
 import bose.ankush.settings.generated.resources.settings_notifications_txt
+import bose.ankush.settings.generated.resources.settings_preferences_header_txt
 import bose.ankush.settings.util.formatDate
 import org.jetbrains.compose.resources.stringResource
 
 private const val LEGAL_PRIVACY_POLICY_URL = "https://data.androidplay.in/wfy/privacy-policy"
 private const val LEGAL_TERMS_OF_USE_URL = "https://data.androidplay.in/wfy/terms-and-conditions"
 
+private val PaymentInFlight =
+    setOf(PaymentStage.CreatingOrder, PaymentStage.AwaitingPayment, PaymentStage.Verifying)
+
+/** Active plan with its expiry, or the upgrade pitch. The pitch is the only tappable state. */
 @Composable
 internal fun PremiumCard(
     paymentUiState: PaymentUiState,
     onClick: () -> Unit,
 ) {
-    val isPremiumActive =
-        paymentUiState.isPremiumActivated || paymentUiState.stage == PaymentStage.Success
-    val cardColors =
-        if (isPremiumActive) {
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        } else {
-            CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
-        }
-
-    Card(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .then(if (!isPremiumActive) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(16.dp),
-        colors = cardColors,
-    ) {
-        if (isPremiumActive) {
-            SubscribedPremiumCard(paymentUiState)
-        } else {
-            UnsubscribedPremiumCard(paymentUiState, onClick)
-        }
-    }
-}
-
-@Composable
-private fun UnsubscribedPremiumCard(
-    paymentUiState: PaymentUiState,
-    onClick: () -> Unit,
-) {
-    val loadingStages =
-        remember {
-            listOf(
-                PaymentStage.CreatingOrder,
-                PaymentStage.AwaitingPayment,
-                PaymentStage.Verifying,
-            )
-        }
-    val isLoading = paymentUiState.loading || paymentUiState.stage in loadingStages
-
+    val isActive = paymentUiState.isPremiumActivated || paymentUiState.stage == PaymentStage.Success
+    val isProcessing = paymentUiState.loading || paymentUiState.stage in PaymentInFlight
     Column(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+                .clip(SettingsCardShape)
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            WarningYellow.copy(alpha = PREMIUM_TINT_ALPHA),
+                            SettingsCardFill
+                        )
+                    ),
+                ).border(1.dp, SettingsCardStroke, SettingsCardShape)
+                .then(
+                    if (!isActive &&
+                        !isProcessing
+                    ) {
+                        Modifier.clickable(role = Role.Button, onClick = onClick)
+                    } else {
+                        Modifier
+                    },
+                ).padding(18.dp),
     ) {
-        if (isLoading) {
-            LinearProgressIndicator(
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
                 modifier =
                     Modifier
-                        .fillMaxWidth()
-                        .height(2.dp),
-                color = MaterialTheme.colorScheme.tertiary,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(WarningYellow.copy(alpha = PREMIUM_ICON_FILL_ALPHA)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.WorkspacePremium,
+                    contentDescription = stringResource(Res.string.premium_icon_content_desc),
+                    tint = WarningYellow,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text =
+                        stringResource(
+                            when {
+                                isActive -> Res.string.premium_active_txt
+                                isProcessing -> Res.string.premium_processing_txt
+                                else -> Res.string.premium_get_txt
+                            },
+                        ),
+                    color = SettingsInk,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = premiumSubtitle(paymentUiState, isActive, isProcessing),
+                    color = SettingsInkMuted,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                )
+            }
         }
-        Icon(
-            imageVector = Icons.Outlined.WorkspacePremium,
-            contentDescription = stringResource(Res.string.premium_icon_content_desc),
-            modifier = Modifier.size(56.dp),
-            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text =
-                if (isLoading) {
-                    stringResource(Res.string.premium_processing_txt)
-                } else {
-                    stringResource(Res.string.premium_get_txt)
-                },
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onTertiaryContainer,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text =
-                if (isLoading) {
-                    stringResource(Res.string.premium_processing_desc_txt)
-                } else {
-                    stringResource(Res.string.premium_unlock_desc_txt)
-                },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.8f),
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = onClick,
-            enabled = !isLoading,
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary,
-                ),
-        ) {
-            Text(
-                if (isLoading) {
-                    stringResource(Res.string.premium_processing_txt)
-                } else {
-                    stringResource(Res.string.premium_upgrade_btn_txt)
-                },
+        if (isProcessing) {
+            Spacer(modifier = Modifier.height(14.dp))
+            LinearProgressIndicator(
+                modifier = Modifier.fillMaxWidth().height(2.dp),
+                color = WarningYellow,
+                trackColor = SettingsInkFaint,
+            )
+        } else if (!isActive) {
+            Spacer(modifier = Modifier.height(14.dp))
+            PillButton(
+                text = stringResource(Res.string.premium_upgrade_btn_txt),
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+                style = PillStyle.Accent,
             )
         }
     }
 }
 
 @Composable
-private fun SubscribedPremiumCard(paymentUiState: PaymentUiState) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.WorkspacePremium,
-            contentDescription = stringResource(Res.string.premium_icon_content_desc),
-            modifier = Modifier.size(56.dp),
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(Res.string.premium_active_txt),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        val expiryTop = paymentUiState.expiryMillis
-        if (expiryTop != null) {
-            val dateStr = remember(expiryTop) { formatDate(expiryTop) }
-            Text(
-                text = stringResource(Res.string.premium_expires_txt, dateStr),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f),
-            )
-        } else {
-            Text(
-                text = stringResource(Res.string.premium_active_status_txt),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold,
-            )
+private fun premiumSubtitle(
+    paymentUiState: PaymentUiState,
+    isActive: Boolean,
+    isProcessing: Boolean,
+): String {
+    val expiry = paymentUiState.expiryMillis
+    return when {
+        isActive && expiry != null -> {
+            val date = remember(expiry) { formatDate(expiry) }
+            stringResource(Res.string.premium_expires_txt, date)
         }
+
+        isActive -> stringResource(Res.string.premium_active_status_txt)
+        isProcessing -> stringResource(Res.string.premium_processing_desc_txt)
+        else -> stringResource(Res.string.premium_unlock_desc_txt)
     }
 }
 
 @Composable
-internal fun SettingsSection(
+internal fun PreferencesSection(
     shouldShowNotificationItem: Boolean,
     onNotificationNavAction: () -> Unit,
     onLanguageNavAction: () -> Unit,
 ) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .padding(vertical = 8.dp),
-    ) {
+    SectionCard(title = stringResource(Res.string.settings_preferences_header_txt)) {
         if (shouldShowNotificationItem) {
-            SettingsItem(
+            SettingsRow(
                 icon = Icons.Outlined.Notifications,
                 title = stringResource(Res.string.settings_notifications_txt),
                 onClick = onNotificationNavAction,
             )
+            RowDivider()
         }
-        SettingsItem(
+        SettingsRow(
             icon = Icons.Outlined.Language,
             title = stringResource(Res.string.settings_language_txt),
             onClick = onLanguageNavAction,
@@ -247,88 +202,117 @@ internal fun SettingsSection(
 }
 
 @Composable
-internal fun LegalSection(
+internal fun AboutSection(
     versionName: String,
     onUrlClick: (String) -> Unit,
 ) {
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                .padding(vertical = 8.dp),
-    ) {
-        SettingsItem(
+    SectionCard(title = stringResource(Res.string.settings_about_header_txt)) {
+        SettingsRow(
             icon = Icons.Outlined.PrivacyTip,
             title = stringResource(Res.string.legal_privacy_policy_txt),
             onClick = { onUrlClick(LEGAL_PRIVACY_POLICY_URL) },
         )
-        SettingsItem(
+        RowDivider()
+        SettingsRow(
             icon = Icons.Outlined.Gavel,
             title = stringResource(Res.string.legal_terms_of_use_txt),
             onClick = { onUrlClick(LEGAL_TERMS_OF_USE_URL) },
         )
-        SettingsItem(
+        RowDivider()
+        SettingsRow(
             icon = Icons.Outlined.Info,
             title = stringResource(Res.string.legal_app_version_txt),
-            trailingContent = {
-                Text(
-                    text = versionName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                )
-            },
+            trailingText = versionName,
         )
     }
 }
 
 @Composable
-private fun SettingsItem(
+private fun SectionCard(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title.uppercase(),
+            color = SettingsInkMuted,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = 1.sp,
+            modifier = Modifier.padding(start = 6.dp, bottom = 8.dp),
+        )
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(SettingsCardShape)
+                    .background(SettingsCardFill)
+                    .border(1.dp, SettingsCardStroke, SettingsCardShape),
+            content = content,
+        )
+    }
+}
+
+@Composable
+private fun SettingsRow(
     icon: ImageVector,
     title: String,
     onClick: (() -> Unit)? = null,
-    trailingContent: @Composable (() -> Unit)? = null,
+    trailingText: String? = null,
 ) {
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .then(
+                    if (onClick != null) Modifier.clickable(
+                        role = Role.Button,
+                        onClick = onClick
+                    ) else Modifier
+                )
+                .padding(horizontal = 16.dp, vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = SettingsInkMuted,
+            modifier = Modifier.size(22.dp),
+        )
+        Text(
+            text = title,
+            color = SettingsInk,
+            fontSize = 15.sp,
             modifier = Modifier.weight(1f),
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        when {
+            trailingText != null -> Text(
+                text = trailingText,
+                color = SettingsInkMuted,
+                fontSize = 14.sp
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-        if (trailingContent != null) {
-            Spacer(modifier = Modifier.width(12.dp))
-            trailingContent()
-        } else if (onClick != null) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = stringResource(Res.string.arrow_right_icon_content),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            )
+
+            onClick != null ->
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = stringResource(Res.string.arrow_right_icon_content),
+                    tint = SettingsInkMuted,
+                )
         }
     }
 }
+
+@Composable
+private fun RowDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(start = 52.dp),
+        thickness = 1.dp,
+        color = SettingsCardStroke
+    )
+}
+
+private const val PREMIUM_TINT_ALPHA = 0.16f
+private const val PREMIUM_ICON_FILL_ALPHA = 0.16f

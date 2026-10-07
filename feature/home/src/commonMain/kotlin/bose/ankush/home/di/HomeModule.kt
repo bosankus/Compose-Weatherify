@@ -8,12 +8,18 @@ import bose.ankush.home.data.HomeSavedPlacesEntryImpl
 import bose.ankush.home.data.HomeSessionCleanerImpl
 import bose.ankush.home.data.repository.WeatherRepositoryImpl
 import bose.ankush.home.domain.repository.WeatherRepository
+import bose.ankush.home.domain.usecase.CreateNearbyEvent
+import bose.ankush.home.domain.usecase.FindNearestSavedPlace
 import bose.ankush.home.domain.usecase.GetAirQuality
+import bose.ankush.home.domain.usecase.GetNearbyEvents
 import bose.ankush.home.domain.usecase.GetWeatherReport
+import bose.ankush.home.domain.usecase.ObserveAccountPhotoUrl
+import bose.ankush.home.domain.usecase.RefreshAccount
 import bose.ankush.home.domain.usecase.RefreshWeatherReport
 import bose.ankush.home.presentation.HomeViewModel
-import bose.ankush.home.presentation.places.WanderPlacesViewModel
-import bose.ankush.home.presentation.shell.ShellViewModel
+import bose.ankush.home.presentation.account.AccountAvatarViewModel
+import bose.ankush.home.presentation.nearby.NearbyViewModel
+import bose.ankush.home.presentation.places.SavedPlacesViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
@@ -31,14 +37,20 @@ val homeDomainModule: Module =
         factory { GetWeatherReport(get()) }
         factory { RefreshWeatherReport(get()) }
         factory { GetAirQuality(get()) }
+        factory { GetNearbyEvents(get()) }
+        factory { FindNearestSavedPlace(get()) }
+        factory { CreateNearbyEvent(get()) }
+        factory { ObserveAccountPhotoUrl(get()) }
+        factory { RefreshAccount(get()) }
         single<HomeLocationCoordinator> { HomeLocationCoordinatorImpl(get()) }
         single { HomeSavedPlacesEntryImpl() } bind HomeSavedPlacesEntry::class
-        single<HomeSessionCleaner> { HomeSessionCleanerImpl(get(), get()) }
+        single<HomeSessionCleaner> { HomeSessionCleanerImpl(get(), get(), get()) }
     }
 
 val homeViewModelModule: Module =
     module {
         viewModelOf(::HomeViewModel)
-        viewModelOf(::ShellViewModel)
-        viewModelOf(::WanderPlacesViewModel)
+        viewModelOf(::NearbyViewModel)
+        viewModelOf(::AccountAvatarViewModel)
+        viewModelOf(::SavedPlacesViewModel)
     }

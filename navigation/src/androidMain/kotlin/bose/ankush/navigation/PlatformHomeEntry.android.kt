@@ -1,8 +1,8 @@
 package bose.ankush.navigation
 
 import androidx.compose.runtime.Composable
-import bose.ankush.home.presentation.wander.WanderHomeLinks
-import bose.ankush.home.presentation.wander.WanderHomeRoute
+import bose.ankush.home.presentation.screen.HomeScreenLinks
+import bose.ankush.home.presentation.screen.HomeScreenRoute
 
 @Composable
 actual fun PlatformHomeEntry(
@@ -10,9 +10,9 @@ actual fun PlatformHomeEntry(
     places: @Composable () -> Unit,
     onOpenHub: () -> Unit,
 ) {
-    WanderHomeRoute(
+    HomeScreenRoute(
         links =
-            WanderHomeLinks(
+            HomeScreenLinks(
                 weather = weather,
                 places = places,
                 onOpenHub = onOpenHub,
