@@ -74,7 +74,7 @@ leakCanary = "2.14"
 
 # Wear OS
 wearComposeMaterial3 = "1.6.2"
-wearComposeFoundation = "1.6.2"
+wearComposeFoundation = "1.7.1"
 wearComposeNavigation3 = "1.6.2"
 wearToolingPreview = "1.0.0"
 lottieCompose = "6.7.1"
