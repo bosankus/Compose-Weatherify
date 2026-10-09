@@ -50,7 +50,7 @@ internal object HomeReducer {
 
             is HomeAction.UpdateNotificationBanner -> {
                 val isNotificationBannerDismissed =
-                    if (action.resetDismissal) false else state.isNotificationBannerDismissed
+                    !action.resetDismissal && state.isNotificationBannerDismissed
                 state.copy(
                     showNotificationBanner = action.show && !isNotificationBannerDismissed,
                     isNotificationPermissionPermanentlyDeclined =
@@ -62,15 +62,5 @@ internal object HomeReducer {
 
             is HomeAction.DismissNotificationBanner ->
                 state.copy(showNotificationBanner = false, isNotificationBannerDismissed = true)
-
-            is HomeAction.UpdateLeaveByCard ->
-                state.copy(showLeaveByCard = action.show && !state.isLeaveByDismissed)
-
-            is HomeAction.DismissLeaveByCard ->
-                state.copy(showLeaveByCard = false, isLeaveByDismissed = true)
-
-            is HomeAction.JoinLeaveByList -> state.copy(hasJoinedLeaveByList = true)
-
-            is HomeAction.NoteLeaveByMisleading -> state.copy(hasNotedLeaveByMisleading = true)
         }
 }

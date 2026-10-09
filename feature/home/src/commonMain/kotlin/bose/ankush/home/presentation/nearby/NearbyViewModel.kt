@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -101,8 +99,12 @@ internal class NearbyViewModel(
                     eventsReloads.trySend(Unit)
                 },
                 onFailure = { error ->
-                    mutate(NearbyMutation.SubmitFailed(error.message?.takeIf { it.isNotBlank() }
-                        ?: SAVE_FAILED))
+                    mutate(
+                        NearbyMutation.SubmitFailed(
+                            error.message?.takeIf { it.isNotBlank() }
+                                ?: SAVE_FAILED,
+                        ),
+                    )
                 },
             )
         }

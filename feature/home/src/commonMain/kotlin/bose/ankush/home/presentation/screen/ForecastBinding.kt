@@ -57,25 +57,12 @@ internal fun placeholderHomeWeatherContent(
     )
 
 /**
- * Leave-by actions. The ViewModel still owns the Remote Config flag, eligibility,
- * and the four analytics events.
- */
-data class LeaveByActions(
-    val hasJoined: Boolean,
-    val hasNotedMisleading: Boolean,
-    val onJoin: () -> Unit,
-    val onDismiss: () -> Unit,
-    val onMisleading: () -> Unit,
-)
-
-/**
  * The home screen always uses [Ready]. Missing weather shows placeholder "--" values inside
  * the same layout; there is no separate waiting page.
  */
 data class HomeScreenShell(
     val content: HomeWeatherContent,
     val photo: BackgroundPhoto?,
-    val leaveBy: LeaveByActions? = null,
     val statusMessage: String? = null,
 )
 

@@ -71,6 +71,7 @@ private val previewNow = Clock.System.now().epochSeconds
 
 private val previewSections =
     HomeScreenSections(
+        aiSummary = AiSummaryBinding(isAvailable = true),
         nearby =
             NearbyContent(
                 showAccount = true,

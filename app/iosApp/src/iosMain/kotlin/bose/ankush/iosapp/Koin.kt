@@ -5,11 +5,16 @@ import bose.ankush.auth.di.authDomainModule
 import bose.ankush.auth.di.authViewModelModule
 import bose.ankush.finder.di.finderDomainModule
 import bose.ankush.finder.di.finderViewModelModule
+import bose.ankush.home.data.ai.BridgedOnDeviceAiClient
+import bose.ankush.home.data.ai.NativeAiBridge
 import bose.ankush.home.di.homeDomainModule
 import bose.ankush.home.di.homePlatformModule
 import bose.ankush.home.di.homeViewModelModule
 import bose.ankush.home.di.initializeFirebase
+import bose.ankush.home.domain.ai.OnDeviceAiClient
 import bose.ankush.iosapp.generated.IosSecrets
+import bose.ankush.network.config.NetworkConfig
+import bose.ankush.network.di.appBackgroundSourceModule
 import bose.ankush.network.di.networkDomainModule
 import bose.ankush.payment.di.paymentDomainModule
 import bose.ankush.payment.di.paymentViewModelModule
@@ -31,12 +36,22 @@ private val iosPaymentConfigModule =
         }
     }
 
+// Unsplash key for the home backdrop photo, from the same generated IosSecrets.
+private val iosNetworkConfigModule =
+    module {
+        single<NetworkConfig> {
+            object : NetworkConfig {
+                override val unsplashAccessKey: String get() = IosSecrets.UNSPLASH_ACCESS_KEY
+            }
+        }
+    }
+
 // Mirrors WeatherifyApplication.initKoin() on Android.
 // Named startWeatherifyKoin, not initKoin: Kotlin/Native's Objective-C exporter
 // renames any "init*" top-level function to "doInit*" to avoid clashing with
 // ObjC's `init` initializer convention — that surprised Swift call sites, so the
 // Kotlin-side name now matches what Swift actually sees.
-fun startWeatherifyKoin() {
+fun startWeatherifyKoin(nativeAi: NativeAiBridge?) {
     initializeFirebase()
     startKoin {
         modules(
@@ -44,6 +59,8 @@ fun startWeatherifyKoin() {
                 analyticsPlatformModule,
                 storageDomainModule,
                 networkDomainModule,
+                iosNetworkConfigModule,
+                appBackgroundSourceModule,
                 paymentDomainModule,
                 paymentViewModelModule,
                 iosPaymentConfigModule,
@@ -55,7 +72,16 @@ fun startWeatherifyKoin() {
                 homeDomainModule,
                 homeViewModelModule,
                 settingsViewModelModule,
-            ),
+            ) + nativeAiModules(nativeAi),
         )
     }
 }
+
+/**
+ * Swift's Foundation Models client, when the app hands one in. It replaces the "unavailable"
+ * placeholder that :feature:home binds, because modules listed later win in Koin.
+ */
+private fun nativeAiModules(nativeAi: NativeAiBridge?) =
+    listOfNotNull(
+        nativeAi?.let { bridge -> module { single<OnDeviceAiClient> { BridgedOnDeviceAiClient(bridge) } } },
+    )

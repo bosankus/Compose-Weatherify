@@ -1,8 +1,7 @@
 package bose.ankush.home.presentation.screen
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -19,13 +18,13 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +32,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -50,11 +48,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import bose.ankush.home.domain.location.HomeGeocoder
 import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.domain.nearby.GeoPoint
-import bose.ankush.home.presentation.HomeIntent
-import bose.ankush.home.presentation.HomeState
 import bose.ankush.home.presentation.HomeViewModel
 import bose.ankush.home.presentation.account.AccountAvatarIntent
 import bose.ankush.home.presentation.account.AccountAvatarViewModel
+import bose.ankush.home.presentation.ai.AiSummaryIntent
+import bose.ankush.home.presentation.ai.AiSummaryViewModel
 import bose.ankush.home.presentation.nearby.NearbyIntent
 import bose.ankush.home.presentation.nearby.NearbyViewModel
 import bose.ankush.home.presentation.places.SavedPlacesEffect
@@ -85,6 +83,12 @@ internal fun HomeScreen(
     val pager = rememberPagerState(pageCount = { HOME_PAGE_COUNT })
     val scope = rememberCoroutineScope()
     var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
+    var showAiSummary by remember { mutableStateOf(false) }
+    val aiSummary = sections.aiSummary
+    val closeAiSummary = {
+        showAiSummary = false
+        aiSummary.onDismiss()
+    }
     val selectedTab = if (pager.currentPage == PLACES_PAGE) HomeTab.MAP else HomeTab.HOME
     val showPage = { page: Int ->
         scope.launch { pager.animateScrollToPage(page) }
@@ -92,6 +96,7 @@ internal fun HomeScreen(
     }
     val onTab = { tab: HomeTab ->
         openAlert = null
+        closeAiSummary()
         when (tab) {
             HomeTab.HOME -> showPage(WEATHER_PAGE)
             HomeTab.MAP -> showPage(PLACES_PAGE)
@@ -116,6 +121,21 @@ internal fun HomeScreen(
     val photoUrl = shell.photo?.imageUrl
     val sample = rememberBackgroundImageSample(condition, photoUrl)
     val contentColor = contentColorForLuminance(sample.headerLuminance)
+    // One instance until a callback's inputs change, so the pager pages can skip.
+    val actions =
+        remember(onOpenCalendar, aiSummary, closeAiSummary, showPage) {
+            HomePagerActions(
+                onOpenCalendar = onOpenCalendar,
+                onOpenAlert = { openAlert = it },
+                onDismissAlert = { openAlert = null },
+                onOpenAiSummary = {
+                    showAiSummary = true
+                    aiSummary.onOpen()
+                },
+                onDismissAiSummary = closeAiSummary,
+                onOpenPlaces = { showPage(PLACES_PAGE) },
+            )
+        }
 
     Box(modifier = modifier.fillMaxSize()) {
         HomePager(
@@ -127,15 +147,10 @@ internal fun HomeScreen(
                     chipColors = rememberMetricChipColors(sample.averageColor),
                     cornerGlow = cornerGlowColor(sample.averageColor, sample.headerLuminance),
                     openAlert = openAlert,
+                    aiSummaryVisible = showAiSummary,
                     pager = pager,
                 ),
-            actions =
-                HomePagerActions(
-                    onOpenCalendar = onOpenCalendar,
-                    onOpenAlert = { openAlert = it },
-                    onDismissAlert = { openAlert = null },
-                    onOpenPlaces = { showPage(PLACES_PAGE) },
-                ),
+            actions = actions,
             modifier = modifier.fillMaxSize(),
         )
         HomeTabBar(
@@ -159,6 +174,7 @@ private data class HomePagerModel(
     val chipColors: MetricChipColors,
     val cornerGlow: Color,
     val openAlert: WeatherForecast.Alert?,
+    val aiSummaryVisible: Boolean,
     val pager: PagerState,
 )
 
@@ -166,6 +182,8 @@ private data class HomePagerActions(
     val onOpenCalendar: () -> Unit,
     val onOpenAlert: (WeatherForecast.Alert) -> Unit,
     val onDismissAlert: () -> Unit,
+    val onOpenAiSummary: () -> Unit,
+    val onDismissAiSummary: () -> Unit,
     val onOpenPlaces: () -> Unit,
 )
 
@@ -210,8 +228,11 @@ private fun HomePager(
                                 .padding(bottom = 40.dp),
                     ) {
                         HomeHeaderBlock(
-                            model = model,
-                            modifier = Modifier.padding(horizontal = 20.dp)
+                            content = content,
+                            chrome = chrome,
+                            nearby = model.sections.nearby,
+                            contentColor = model.contentColor,
+                            modifier = Modifier.padding(horizontal = 20.dp),
                         )
                         Spacer(modifier = Modifier.height(24.dp))
                         HorizontalPager(
@@ -230,11 +251,17 @@ private fun HomePager(
                                         modifier = pageModifier,
                                     )
 
-                                else -> WeatherPage(
-                                    model = model,
-                                    actions = actions,
-                                    modifier = pageModifier
-                                )
+                                else ->
+                                    WeatherPage(
+                                        shell = shell,
+                                        chrome = chrome,
+                                        forecast = model.sections.forecast,
+                                        nearby = model.sections.nearby,
+                                        aiSummaryAvailable = model.sections.aiSummary.isAvailable,
+                                        contentColor = model.contentColor,
+                                        actions = actions,
+                                        modifier = pageModifier,
+                                    )
                             }
                         }
                     }
@@ -262,6 +289,11 @@ private fun HomePager(
                     )
                     PlaceSearchSheet(places = places)
                     CreateEventSheet(event = model.sections.events)
+                    AiSummarySheet(
+                        visible = model.aiSummaryVisible,
+                        binding = model.sections.aiSummary,
+                        onDismiss = actions.onDismissAiSummary,
+                    )
                 }
                 Spacer(modifier = Modifier.height(TabBarReserveHeight))
             }
@@ -273,12 +305,12 @@ private fun HomePager(
 /** Observed time, location chip, and header. Stays above the pager on both pages. */
 @Composable
 private fun HomeHeaderBlock(
-    model: HomePagerModel,
+    content: HomeWeatherContent,
+    chrome: HomeScreenChrome,
+    nearby: NearbyContent,
+    contentColor: Color,
     modifier: Modifier = Modifier,
 ) {
-    val chrome = model.sections.chrome
-    val content = model.shell.content
-    val contentColor = model.contentColor
     Column(modifier = modifier.fillMaxWidth()) {
         Spacer(modifier = Modifier.height(28.dp))
         chrome.locationOverrideName?.let { name ->
@@ -313,7 +345,7 @@ private fun HomeHeaderBlock(
                     fallback = content.condition.line,
                 ),
             contentColor = contentColor,
-            nearby = model.sections.nearby,
+            nearby = nearby,
         )
     }
 }
@@ -321,15 +353,16 @@ private fun HomeHeaderBlock(
 /** First pager page: every home section below the header, unchanged. */
 @Composable
 private fun WeatherPage(
-    model: HomePagerModel,
+    shell: HomeScreenShell,
+    chrome: HomeScreenChrome,
+    forecast: ForecastDetails,
+    nearby: NearbyContent,
+    aiSummaryAvailable: Boolean,
+    contentColor: Color,
     actions: HomePagerActions,
     modifier: Modifier = Modifier,
 ) {
-    val shell = model.shell
-    val nearby = model.sections.nearby
-    val forecast = model.sections.forecast
-    val chrome = model.sections.chrome
-    val contentColor = model.contentColor
+    SideEffect { Log.d(PERF_TAG, "WeatherPage recomposed") } // TEMP(perf)
     val content = shell.content
     val photo = shell.photo
     val photoUrl = photo?.imageUrl
@@ -387,9 +420,9 @@ private fun WeatherPage(
             contentColor = contentColor,
             onOpenAlert = actions.onOpenAlert,
         )
-        shell.leaveBy?.let { leaveBy ->
+        if (aiSummaryAvailable) {
             Spacer(modifier = Modifier.height(16.dp))
-            LeaveByRow(leaveBy = leaveBy, contentColor = contentColor)
+            AiSummaryEntry(contentColor = contentColor, onClick = actions.onOpenAiSummary)
         }
         if (content.showSmallCards) {
             Spacer(modifier = Modifier.height(16.dp))
@@ -400,8 +433,9 @@ private fun WeatherPage(
                 nearby.savedPlace?.name?.isNotBlank() == true
         if (showNearby) {
             Spacer(modifier = Modifier.height(16.dp))
+            val weatherPageNearby = remember(nearby) { nearby.copy(eventsLoading = false) }
             NearbyBlocks(
-                nearby = nearby.copy(eventsLoading = false, eventsFailed = nearby.eventsFailed),
+                nearby = weatherPageNearby,
                 contentColor = contentColor,
                 onOpenSaved = actions.onOpenPlaces,
             )
@@ -482,11 +516,13 @@ fun HomeScreenRoute(
     val homeViewModel = koinViewModel<HomeViewModel>()
     val nearbyViewModel = koinViewModel<NearbyViewModel>()
     val avatarViewModel = koinViewModel<AccountAvatarViewModel>()
+    val aiSummaryViewModel = koinViewModel<AiSummaryViewModel>()
     val placesViewModel = koinViewModel<SavedPlacesViewModel>()
     val state by homeViewModel.state.collectAsStateWithLifecycle()
     val nearbyState by nearbyViewModel.state.collectAsStateWithLifecycle()
     val avatarState by avatarViewModel.state.collectAsStateWithLifecycle()
     val placesState by placesViewModel.state.collectAsStateWithLifecycle()
+    val aiSummaryState by aiSummaryViewModel.state.collectAsStateWithLifecycle()
     CollectHomeEffects(homeViewModel)
     LaunchedEffect(Unit) {
         avatarViewModel.onIntent(AccountAvatarIntent.Refresh)
@@ -497,82 +533,117 @@ fun HomeScreenRoute(
             NearbyIntent.LocationChanged(
                 GeoPoint(
                     location.first,
-                    location.second
-                )
-            )
+                    location.second,
+                ),
+            ),
         )
     }
-    val current = state.weatherData?.current
+    SideEffect { Log.d(PERF_TAG, "HomeScreenRoute recomposed") } // TEMP(perf)
+
+    // The mappings below are pure functions of the forecast, so they are remembered per forecast
+    // instead of re-run on every recomposition (places, nearby and AI state all recompose this body).
+    val weather = state.weatherData
     val place = rememberForecastPlace(state.userLocation)
     val weatherMain =
-        current
+        weather
+            ?.current
             ?.weather
             ?.firstOrNull()
             ?.main
             ?.takeIf { it.isNotBlank() }
-    val liveContent = state.weatherData?.takeIf { current != null }?.toHomeWeatherContent(place)
+    val liveContent =
+        remember(weather, place) {
+            Log.d(PERF_TAG, "toHomeWeatherContent") // TEMP(perf)
+            weather?.takeIf { it.current != null }?.toHomeWeatherContent(place)
+        }
     val content =
-        liveContent
-            ?: placeholderHomeWeatherContent(
-                place = place.takeIf { it != CURRENT_LOCATION } ?: VALUE_PLACEHOLDER,
-                condition = SkyCondition.CLOUDS,
-            )
+        remember(liveContent, place) {
+            liveContent
+                ?: placeholderHomeWeatherContent(
+                    place = place.takeIf { it != CURRENT_LOCATION } ?: VALUE_PLACEHOLDER,
+                    condition = SkyCondition.CLOUDS,
+                )
+        }
+    val extras =
+        remember(weather) {
+            Log.d(PERF_TAG, "toForecastExtras") // TEMP(perf)
+            weather?.toForecastExtras() ?: ForecastExtras()
+        }
     val photo = rememberBackgroundPhoto(weatherMain?.let(::unsplashQuery), content.condition)
-    val leaveBy = leaveByRow(state, homeViewModel)
-    val shell =
-        HomeScreenShell(
-            content = content,
-            photo = photo,
-            leaveBy = leaveBy,
-            statusMessage =
-                (state.error ?: state.offlineMessage)?.takeIf {
-                    liveContent == null && it.isNotBlank()
-                },
-        )
+    val statusMessage =
+        (state.error ?: state.offlineMessage)?.takeIf { liveContent == null && it.isNotBlank() }
+    val shell = remember(content, photo, statusMessage) { HomeScreenShell(content, photo, statusMessage) }
     val placeName = state.activeLocationName?.takeIf { it.isNotBlank() } ?: place.takeIf { it != CURRENT_LOCATION }
     LaunchedEffect(placeName) {
         if (!placeName.isNullOrBlank()) {
             nearbyViewModel.onIntent(NearbyIntent.PlaceNameChanged(placeName))
         }
     }
+    val nearby =
+        remember(nearbyState, avatarState.photoUrl, links, nearbyViewModel) {
+            nearbyState.toNearbyContent(
+                photoUrl = avatarState.photoUrl,
+                onOpenAccount = links.onOpenHub,
+                onRetryEvents = { nearbyViewModel.onIntent(NearbyIntent.RetryEvents) },
+            )
+        }
+    val forecast =
+        remember(weather, state.airQualityData, extras) {
+            ForecastDetails(
+                alerts = weather?.alerts.orEmpty(),
+                airQuality = state.airQualityData,
+                hourly = weather?.hourly.orEmpty(),
+                extras = extras,
+            )
+        }
+    val chrome =
+        rememberHomeScreenChrome(
+            state = state,
+            eventDates = nearbyState.eventDates,
+            forecastVisible = liveContent != null,
+            viewModel = homeViewModel,
+        )
+    val places =
+        remember(placesState, placesViewModel, links) {
+            SavedPlacesBinding(
+                state = placesState,
+                effects = placesViewModel.effect,
+                onIntent = placesViewModel::processIntent,
+                onUpgrade = links.onOpenHub,
+            )
+        }
+    val events =
+        remember(nearbyState, nearbyViewModel) {
+            CreateEventBinding(state = nearbyState, onIntent = nearbyViewModel::onIntent)
+        }
+    val aiSummary =
+        remember(aiSummaryState, weather, placeName, aiSummaryViewModel) {
+            AiSummaryBinding(
+                state = aiSummaryState.summary,
+                isAvailable = aiSummaryState.isAvailable && weather != null,
+                onOpen = {
+                    weather?.let { aiSummaryViewModel.onIntent(AiSummaryIntent.Open(it, placeName)) }
+                },
+                onRetry = { aiSummaryViewModel.onIntent(AiSummaryIntent.Retry) },
+                onDismiss = { aiSummaryViewModel.onIntent(AiSummaryIntent.Dismiss) },
+            )
+        }
+    val sections =
+        remember(nearby, forecast, chrome, places, events, aiSummary) {
+            HomeScreenSections(
+                nearby = nearby,
+                forecast = forecast,
+                chrome = chrome,
+                places = places,
+                events = events,
+                aiSummary = aiSummary,
+            )
+        }
     Box(modifier = modifier) {
         HomeScreen(
             links = links,
             shell = shell,
-            sections =
-                HomeScreenSections(
-                    nearby =
-                        nearbyState.toNearbyContent(
-                            photoUrl = avatarState.photoUrl,
-                            onOpenAccount = links.onOpenHub,
-                            onRetryEvents = { nearbyViewModel.onIntent(NearbyIntent.RetryEvents) },
-                        ),
-                    forecast =
-                        ForecastDetails(
-                            alerts = state.weatherData?.alerts.orEmpty(),
-                            airQuality = state.airQualityData,
-                            hourly = state.weatherData?.hourly.orEmpty(),
-                            extras = state.weatherData?.toForecastExtras() ?: ForecastExtras(),
-                        ),
-                    chrome =
-                        rememberHomeScreenChrome(
-                            state = state,
-                            eventDates = nearbyState.eventDates,
-                            forecastVisible = liveContent != null,
-                            viewModel = homeViewModel,
-                        ),
-                    places =
-                        SavedPlacesBinding(
-                            state = placesState,
-                            effects = placesViewModel.effect,
-                            onIntent = placesViewModel::processIntent,
-                            onUpgrade = links.onOpenHub,
-                        ),
-                    events = CreateEventBinding(
-                        state = nearbyState,
-                        onIntent = nearbyViewModel::onIntent
-                    ),
-                ),
+            sections = sections,
             onOpenCalendar = { nearbyViewModel.onIntent(NearbyIntent.OpenComposer) },
         )
     }
@@ -591,21 +662,8 @@ private fun rememberForecastPlace(userLocation: Pair<Double, Double>?): String {
     return place
 }
 
-private fun leaveByRow(
-    state: HomeState,
-    viewModel: HomeViewModel,
-): LeaveByActions? {
-    if (!state.showLeaveByCard) return null
-    return LeaveByActions(
-        hasJoined = state.hasJoinedLeaveByList,
-        hasNotedMisleading = state.hasNotedLeaveByMisleading,
-        onJoin = { viewModel.processIntent(HomeIntent.JoinLeaveByList) },
-        onDismiss = { viewModel.processIntent(HomeIntent.DismissLeaveByCard) },
-        onMisleading = { viewModel.processIntent(HomeIntent.NoteLeaveByMisleading) },
-    )
-}
-
 private const val CURRENT_LOCATION = "Current Location"
+private const val PERF_TAG = "HomePerf" // TEMP(perf)
 private const val OBSERVED_ALPHA = 0.72f
 private const val HOME_PAGE_COUNT = 2
 private const val WEATHER_PAGE = 0

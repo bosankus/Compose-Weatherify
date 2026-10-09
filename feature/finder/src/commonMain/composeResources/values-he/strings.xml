@@ -15,5 +15,5 @@
     <string name="set_as_default_confirm_btn">הגדר כברירת מחדל</string>
     <string name="place_search_dialog_title">חפש מיקום</string>
     <string name="place_search_hint">הקלד עיר או כתובת…</string>
-    <string name="place_search_no_results">לא נמצאו מיקומים עבור \'%1$s\'</string>
+    <string name="place_search_no_results">לא נמצאו מיקומים עבור ’%1$s’</string>
 </resources>

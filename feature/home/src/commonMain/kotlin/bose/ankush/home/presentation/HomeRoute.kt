@@ -93,7 +93,7 @@ fun HomeFeatureRoute(
     requiresNotificationSettingsNavigationHint: Boolean = false,
     onRequestNotificationPermission: () -> Unit = {},
     onRequestLocationPermission: () -> Unit = {},
-    onOpenSettings: () -> Unit = {},
+    onOpenNotificationSettings: () -> Unit = {},
     onOpenLocationSettings: () -> Unit = {},
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
@@ -132,7 +132,7 @@ fun HomeFeatureRoute(
             .collect { effect ->
                 when (effect) {
                     HomeEffect.RequestNotificationPermission -> onRequestNotificationPermission()
-                    HomeEffect.OpenSettings -> onOpenSettings()
+                    HomeEffect.OpenNotificationSettings -> onOpenNotificationSettings()
                     HomeEffect.RequestGpsPermission -> onOpenLocationSettings()
                     HomeEffect.RequestLocationPermission -> onRequestLocationPermission()
                 }

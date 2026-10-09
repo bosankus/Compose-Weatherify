@@ -56,8 +56,10 @@ import bose.ankush.home.generated.resources.enable_notification_btn
 import bose.ankush.home.generated.resources.location_override_chip_content_desc
 import bose.ankush.home.generated.resources.location_override_reset_btn
 import bose.ankush.home.generated.resources.network_unavailable_txt
+import bose.ankush.home.generated.resources.notification_permission_declined_txt
 import bose.ankush.home.generated.resources.notification_permission_message
 import bose.ankush.home.generated.resources.offline_toast_title_txt
+import bose.ankush.home.generated.resources.open_settings_btn
 import bose.ankush.home.generated.resources.retry_btn_txt
 import bose.ankush.home.presentation.HomeEffect
 import bose.ankush.home.presentation.HomeIntent
@@ -102,34 +104,37 @@ internal fun rememberHomeScreenChrome(
 ): HomeScreenChrome {
     val context = LocalContext.current
     val backgroundRefreshing by viewModel.refreshing.collectAsStateWithLifecycle()
-    return HomeScreenChrome(
-        current = state.weatherData?.current,
-        timezoneOffset = state.weatherData?.timezoneOffset,
-        todaySummary =
-            state.weatherData
-                ?.daily
-                ?.firstOrNull()
-                ?.summary,
-        refreshing = state.isRefreshing,
-        backgroundRefreshing = backgroundRefreshing,
-        onRefresh = { viewModel.processIntent(HomeIntent.Refresh) },
-        locationOverrideName = state.activeLocationName?.takeIf { state.isLocationOverridden && it.isNotBlank() },
-        onResetLocation = { viewModel.processIntent(HomeIntent.ResetLocationOverride) },
-        showNotificationPrompt = state.showNotificationBanner,
-        notificationDeclinedForever = state.isNotificationPermissionPermanentlyDeclined,
-        onEnableNotifications = { viewModel.processIntent(HomeIntent.EnableNotificationBanner) },
-        onDismissNotifications = { viewModel.processIntent(HomeIntent.DismissNotificationBanner) },
-        offlineMessage = if (forecastVisible && state.isOffline) state.offlineMessage else null,
-        // No week shimmer until Room is known to be empty, so a cached reload never flashes it.
-        forecastLoading = state.isLoading && !forecastVisible && state.hasCheckedCache,
-        forecastFailed = !forecastVisible && !state.isLoading && (state.error != null || state.isOffline),
-        onRetryForecast = { viewModel.processIntent(HomeIntent.FetchLocation) },
-        eventDates = eventDates,
-        gpsDisabled = state.isGpsDisabled,
-        locationPermissionDenied = state.isLocationPermissionDenied,
-        onEnableGps = { context.openLocationSettings() },
-        onRequestLocationPermission = { viewModel.processIntent(HomeIntent.RequestLocationPermission) },
-    )
+    // One instance per input change, so the pager pages that take it can skip recomposition.
+    return remember(state, backgroundRefreshing, eventDates, forecastVisible, viewModel, context) {
+        HomeScreenChrome(
+            current = state.weatherData?.current,
+            timezoneOffset = state.weatherData?.timezoneOffset,
+            todaySummary =
+                state.weatherData
+                    ?.daily
+                    ?.firstOrNull()
+                    ?.summary,
+            refreshing = state.isRefreshing,
+            backgroundRefreshing = backgroundRefreshing,
+            onRefresh = { viewModel.processIntent(HomeIntent.Refresh) },
+            locationOverrideName = state.activeLocationName?.takeIf { state.isLocationOverridden && it.isNotBlank() },
+            onResetLocation = { viewModel.processIntent(HomeIntent.ResetLocationOverride) },
+            showNotificationPrompt = state.showNotificationBanner,
+            notificationDeclinedForever = state.isNotificationPermissionPermanentlyDeclined,
+            onEnableNotifications = { viewModel.processIntent(HomeIntent.EnableNotificationBanner) },
+            onDismissNotifications = { viewModel.processIntent(HomeIntent.DismissNotificationBanner) },
+            offlineMessage = if (forecastVisible && state.isOffline) state.offlineMessage else null,
+            // No week shimmer until Room is known to be empty, so a cached reload never flashes it.
+            forecastLoading = state.isLoading && !forecastVisible && state.hasCheckedCache,
+            forecastFailed = !forecastVisible && !state.isLoading && (state.error != null || state.isOffline),
+            onRetryForecast = { viewModel.processIntent(HomeIntent.FetchLocation) },
+            eventDates = eventDates,
+            gpsDisabled = state.isGpsDisabled,
+            locationPermissionDenied = state.isLocationPermissionDenied,
+            onEnableGps = { context.openLocationSettings() },
+            onRequestLocationPermission = { viewModel.processIntent(HomeIntent.RequestLocationPermission) },
+        )
+    }
 }
 
 @Composable
@@ -185,7 +190,7 @@ internal fun CollectHomeEffects(viewModel: HomeViewModel) {
                         )
                     }
                 }
-                HomeEffect.OpenSettings -> context.openAppSettings()
+                HomeEffect.OpenNotificationSettings -> context.openNotificationSettings()
                 HomeEffect.RequestLocationPermission -> {
                     val activity = context.findActivity()
                     if (activity == null) {
@@ -210,12 +215,22 @@ internal fun CollectHomeEffects(viewModel: HomeViewModel) {
 @Composable
 internal fun NotificationPrompt(chrome: HomeScreenChrome) {
     if (!chrome.showNotificationPrompt) return
+    // Once declined for good the system dialog never shows again, so say where the tap goes.
+    val declined = chrome.notificationDeclinedForever
     PermissionAlertDialog(
-        descriptionText = stringResource(Res.string.notification_permission_message),
-        isPermanentlyDeclined = chrome.notificationDeclinedForever,
+        descriptionText =
+            stringResource(
+                if (declined) {
+                    Res.string.notification_permission_declined_txt
+                } else {
+                    Res.string.notification_permission_message
+                },
+            ),
+        isPermanentlyDeclined = declined,
         onPositiveAction = chrome.onEnableNotifications,
         onNegativeAction = chrome.onDismissNotifications,
-        positiveButtonLabel = stringResource(Res.string.enable_notification_btn),
+        positiveButtonLabel =
+            stringResource(if (declined) Res.string.open_settings_btn else Res.string.enable_notification_btn),
         negativeButtonLabel = stringResource(Res.string.cancel_btn_txt),
     )
 }
@@ -315,8 +330,7 @@ internal fun ForecastWaitingActions(
 }
 
 private fun Context.notificationsGranted(): Boolean {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
-    return ContextCompat.checkSelfPermission(
+    return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
         this,
         Manifest.permission.POST_NOTIFICATIONS,
     ) == PackageManager.PERMISSION_GRANTED
@@ -334,6 +348,16 @@ private fun Context.openAppSettings() {
     startActivity(
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = Uri.fromParts("package", packageName, null)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        },
+    )
+}
+
+/** This app's notification switches, not the general app info page. */
+private fun Context.openNotificationSettings() {
+    startActivity(
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         },
     )

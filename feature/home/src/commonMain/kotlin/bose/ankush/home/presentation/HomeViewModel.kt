@@ -4,11 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
-import bose.ankush.finder.domain.usecase.GetSavedLocationsUseCase
-import bose.ankush.home.domain.leaveby.LeaveByFakeDoorEligibility
-import bose.ankush.home.domain.leaveby.LeaveByPlace
-import bose.ankush.home.domain.location.LocationClient
+import bose.ankush.home.domain.location.LocationProblem
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
+import bose.ankush.home.domain.usecase.GetActiveCoordinates
 import bose.ankush.home.domain.usecase.GetAirQuality
 import bose.ankush.home.domain.usecase.GetWeatherReport
 import bose.ankush.home.domain.usecase.RefreshWeatherReport
@@ -16,14 +14,10 @@ import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.default_coordinates_txt
 import bose.ankush.home.generated.resources.general_error_txt
 import bose.ankush.home.generated.resources.location_permission_denied_txt
-import bose.ankush.home.presentation.util.CoordinateResolution
 import bose.ankush.home.presentation.util.errorMessageFromException
-import bose.ankush.storage.api.LocationPreferencesStorage
-import bose.ankush.storage.model.LocationPreferences
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
@@ -35,8 +29,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -44,25 +36,20 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
-import kotlin.time.Clock
 
 /**
- * Home's MVI ViewModel. Reactively observes [LocationPreferencesStorage] for location-override
- * changes so a location pinned from a sibling tab (via [bose.ankush.home.HomeLocationCoordinator])
- * is picked up without a direct cross-module ViewModel reference.
+ * Home's MVI ViewModel. Refetches when [GetActiveCoordinates.changes] fires, so a location pinned
+ * from a sibling tab (via [bose.ankush.home.HomeLocationCoordinator]) is picked up without a
+ * direct cross-module ViewModel reference.
  */
 internal class HomeViewModel(
     private val refreshWeatherReport: RefreshWeatherReport,
     private val getWeatherReport: GetWeatherReport,
     private val getAirQuality: GetAirQuality,
-    private val locationClient: LocationClient,
-    private val locationPreferencesStorage: LocationPreferencesStorage,
+    private val getActiveCoordinates: GetActiveCoordinates,
     private val remoteConfigGate: HomeRemoteConfigGate,
     private val analyticsTracker: AnalyticsTracker,
-    private val getSavedLocationsUseCase: GetSavedLocationsUseCase,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
@@ -74,58 +61,40 @@ internal class HomeViewModel(
     private val _refreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
 
-    private val refreshTrigger =
-        MutableSharedFlow<Boolean>(
-            extraBufferCapacity = 1,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
+    private val refreshTrigger = MutableSharedFlow<Boolean>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
 
-    private val dataFetchExceptionHandler =
-        CoroutineExceptionHandler { _, e ->
-            if (e !is CancellationException) {
-                viewModelScope.launch {
-                    val message =
-                        if (e is Exception) errorMessageFromException(e) else getString(Res.string.general_error_txt)
-                    dispatch(HomeAction.Error(message))
-                }
+    private val dataFetchExceptionHandler = CoroutineExceptionHandler { _, e ->
+        if (e !is CancellationException) {
+            viewModelScope.launch {
+                val message =
+                    if (e is Exception) errorMessageFromException(e) else getString(Res.string.general_error_txt)
+                dispatch(HomeAction.Error(message))
             }
         }
-
-    /**
-     * Bumped on every leave-by refresh. An older check is never cancelled, only ignored:
-     * cancelling it from the Remote Config callback closed its Ktor response on the main
-     * thread and crashed with NetworkOnMainThreadException.
-     */
-    private var leaveByRun = 0
+    }
 
     init {
-        // Initialize Firebase Remote Config. Re-check the fake door once activate finishes
-        // so a freshly fetched flag is not stuck on the in-app default for this session.
-        remoteConfigGate.initialize(onActivated = { refreshLeaveByEligibility() })
-        refreshLeaveByEligibility()
+        remoteConfigGate.initialize()
 
-        val overrideChanged =
-            locationPreferencesStorage
-                .getLocationPreferencesFlow()
-                .map { it.isLocationOverridden to (it.overrideLat to it.overrideLon) }
-                .distinctUntilChanged()
-                .drop(1)
-                .map { true }
+        val overrideChanged = getActiveCoordinates.changes().map { true }
 
         viewModelScope.launch(dataFetchExceptionHandler) {
             merge(refreshTrigger, overrideChanged)
                 .onStart { emit(false) }
                 .catch {
-                    if (it !is CancellationException) {
-                        val message =
-                            if (it is Exception) {
-                                errorMessageFromException(it)
-                            } else {
-                                getString(Res.string.general_error_txt)
-                            }
-                        dispatch(HomeAction.Error(message))
+                    if (it !is CancellationException) dispatch(HomeAction.Error(messageFrom(it)))
+                }.collectLatest { forceRefresh ->
+                    try {
+                        runFetch(forceRefresh)
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        dispatch(HomeAction.Error(e.message))
                     }
-                }.collectLatest { forceRefresh -> runFetch(forceRefresh) }
+                }
         }
     }
 
@@ -137,16 +106,17 @@ internal class HomeViewModel(
         when (intent) {
             HomeIntent.FetchLocation, HomeIntent.Refresh -> {
                 refreshTrigger.tryEmit(value = true)
-                refreshLeaveByEligibility()
             }
+
             HomeIntent.ResetLocationOverride -> resetLocationOverride()
             HomeIntent.RequestLocationPermission ->
                 _effect.trySend(element = HomeEffect.RequestLocationPermission)
+
             HomeIntent.EnableNotificationBanner ->
                 _effect.trySend(
                     element =
                         if (_state.value.isNotificationPermissionPermanentlyDeclined) {
-                            HomeEffect.OpenSettings
+                            HomeEffect.OpenNotificationSettings
                         } else {
                             HomeEffect.RequestNotificationPermission
                         },
@@ -161,80 +131,7 @@ internal class HomeViewModel(
                 updateNotificationBannerVisibility(hasPermission = intent.hasPermission)
 
             is HomeIntent.NotificationPermissionResult -> handlePermissionResult(intent = intent)
-
-            HomeIntent.RefreshLeaveByEligibility -> refreshLeaveByEligibility()
-
-            HomeIntent.JoinLeaveByList -> joinLeaveByList()
-
-            HomeIntent.DismissLeaveByCard -> dismissLeaveByCard()
-
-            HomeIntent.NoteLeaveByMisleading -> noteLeaveByMisleading()
         }
-    }
-
-    /**
-     * Joined / dismissed / misleading live in [HomeState] for this ViewModel session only.
-     * No preference, no network write, no notification schedule.
-     */
-    @Suppress("TooGenericExceptionCaught")
-    private fun refreshLeaveByEligibility() {
-        val run = ++leaveByRun
-        val publishIfLatest = { eligible: Boolean -> if (run == leaveByRun) publishLeaveBy(eligible) }
-        viewModelScope.launch {
-            try {
-                if (!remoteConfigGate.isLeaveByFakeDoorEnabled()) {
-                    publishIfLatest(false)
-                    return@launch
-                }
-                val places =
-                    getSavedLocationsUseCase()
-                        .getOrNull()
-                        ?.map { LeaveByPlace(lat = it.lat, lon = it.lon) }
-                        .orEmpty()
-                val localNow = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-                publishIfLatest(LeaveByFakeDoorEligibility.isEligible(places, localNow))
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (_: Exception) {
-                publishIfLatest(false)
-            }
-        }
-    }
-
-    private fun publishLeaveBy(eligible: Boolean) {
-        val current = _state.value
-        if (current.isLeaveByDismissed) {
-            if (current.showLeaveByCard) {
-                dispatch(HomeAction.UpdateLeaveByCard(show = false))
-            }
-            return
-        }
-        if (eligible && !current.showLeaveByCard) {
-            analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorImpression(surface = LEAVE_BY_SURFACE))
-        }
-        if (current.showLeaveByCard != eligible) {
-            dispatch(HomeAction.UpdateLeaveByCard(show = eligible))
-        }
-    }
-
-    private fun joinLeaveByList() {
-        val current = _state.value
-        if (!current.showLeaveByCard || current.hasJoinedLeaveByList) return
-        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorPrimaryTap(surface = LEAVE_BY_SURFACE))
-        dispatch(HomeAction.JoinLeaveByList)
-    }
-
-    private fun dismissLeaveByCard() {
-        if (!_state.value.showLeaveByCard) return
-        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorDismiss(surface = LEAVE_BY_SURFACE))
-        dispatch(HomeAction.DismissLeaveByCard)
-    }
-
-    private fun noteLeaveByMisleading() {
-        val current = _state.value
-        if (!current.showLeaveByCard || current.hasNotedLeaveByMisleading) return
-        analyticsTracker.track(AnalyticsEvent.LeaveByFakeDoorMisleadingTap(surface = LEAVE_BY_SURFACE))
-        dispatch(HomeAction.NoteLeaveByMisleading)
     }
 
     private var notificationBannerVisibilityJob: Job? = null
@@ -277,122 +174,33 @@ internal class HomeViewModel(
         dispatch(HomeAction.Loading(isRefreshing = forceRefresh))
         // Paint the Room forecast before GPS, reverse geocode, or the network refresh.
         emitSavedForecast()
-        when (val resolution = resolveCoordinates()) {
-            is CoordinateResolution.Ready ->
-                fetchWeatherData(
-                    lat = resolution.lat,
-                    lon = resolution.lon,
-                    isOverridden = resolution.isOverridden,
-                    overrideName = resolution.overrideName,
-                    forceRefresh = forceRefresh,
-                )
-
-            is CoordinateResolution.LocationError -> {
-                dispatch(
-                    HomeAction.SetOffline(
-                        message = resolution.message,
-                        isOffline = true,
-                        isGpsDisabled = resolution.isGpsDisabled,
-                        isLocationPermissionDenied = resolution.isPermissionDenied,
-                    ),
-                )
-                resolution.fallback?.let {
-                    fetchWeatherData(it.lat, it.lon, it.isOverridden, it.overrideName, forceRefresh)
-                }
-            }
-
-            CoordinateResolution.NoCoordinates ->
-                dispatch(
-                    HomeAction.Error(
-                        getString(Res.string.default_coordinates_txt),
-                    ),
-                )
-        }
-    }
-
-    private suspend fun resolveCoordinates(): CoordinateResolution {
-        val prefs = locationPreferencesStorage.getLocationPreferencesFlow().first()
-
-        if (prefs.isLocationOverridden) {
-            val hasOverride = prefs.overrideLat != null && prefs.overrideLon != null
-            val lat = prefs.overrideLat ?: prefs.latitude
-            val lon = prefs.overrideLon ?: prefs.longitude
-            return if (lat != null && lon != null) {
-                CoordinateResolution.Ready(
-                    lat = lat,
-                    lon = lon,
-                    isOverridden = hasOverride,
-                    overrideName = if (hasOverride) prefs.overrideLocationName else null,
-                )
-            } else {
-                CoordinateResolution.NoCoordinates
-            }
-        }
-
-        if (!locationClient.hasLocationPermission()) {
-            val fallback =
-                prefs.latitude?.let { lat ->
-                    prefs.longitude?.let { lon ->
-                        CoordinateResolution.Ready(lat, lon, isOverridden = false, overrideName = null)
-                    }
-                }
-            return CoordinateResolution.LocationError(
-                message = getString(Res.string.location_permission_denied_txt),
-                isGpsDisabled = false,
-                isPermissionDenied = true,
-                fallback = fallback,
+        val result = getActiveCoordinates.current()
+        result.problem?.let { issue ->
+            dispatch(
+                HomeAction.SetOffline(
+                    message = issue.toMessage(),
+                    isOffline = true,
+                    isGpsDisabled = issue is LocationProblem.GpsDisabled,
+                    isLocationPermissionDenied = issue is LocationProblem.PermissionDenied
+                ),
             )
         }
 
-        return locationClient.getCurrentLocation().fold(
-            onSuccess = { loc ->
-                locationPreferencesStorage.saveLocationPreferences(loc.latitude to loc.longitude)
-                CoordinateResolution.Ready(
-                    loc.latitude,
-                    loc.longitude,
-                    isOverridden = false,
-                    overrideName = null,
-                )
-            },
-            onFailure = { e ->
-                val isGpsDisabled = (e as? LocationClient.LocationException)?.isGpsDisabled == true
-                val message =
-                    (e as? Exception)?.let { errorMessageFromException(it) }
-                        ?: getString(Res.string.general_error_txt)
-                val fallback =
-                    prefs.latitude?.let { lat ->
-                        prefs.longitude?.let { lon ->
-                            CoordinateResolution.Ready(
-                                lat,
-                                lon,
-                                isOverridden = false,
-                                overrideName = null,
-                            )
-                        }
-                    }
-                CoordinateResolution.LocationError(message, isGpsDisabled, fallback = fallback)
-            },
-        )
-    }
-
-    /**
-     * Saved coordinates only. This does not ask for a GPS fix, so the first paint is not blocked
-     * on location, reverse geocode, or Wear sync.
-     */
-    private fun savedCoordinates(prefs: LocationPreferences): CoordinateResolution.Ready? {
-        val hasOverride =
-            prefs.isLocationOverridden && prefs.overrideLat != null && prefs.overrideLon != null
-        val lat = if (prefs.isLocationOverridden) prefs.overrideLat ?: prefs.latitude else prefs.latitude
-        val lon = if (prefs.isLocationOverridden) prefs.overrideLon ?: prefs.longitude else prefs.longitude
-        return if (lat != null && lon != null) {
-            CoordinateResolution.Ready(
-                lat = lat,
-                lon = lon,
-                isOverridden = hasOverride,
-                overrideName = if (hasOverride) prefs.overrideLocationName else null,
+        val spot = result.coordinates
+        if (spot != null) {
+            fetchWeatherData(
+                lat = spot.coordinates.latitude,
+                lon = spot.coordinates.longitude,
+                isOverridden = spot.isOverridden,
+                overrideName = spot.overrideName,
+                forceRefresh = forceRefresh,
             )
-        } else {
-            null
+        } else if (result.problem == null) {
+            dispatch(
+                HomeAction.Error(
+                    getString(Res.string.default_coordinates_txt),
+                ),
+            )
         }
     }
 
@@ -406,23 +214,20 @@ internal class HomeViewModel(
     private suspend fun emitSavedForecast() {
         if (_state.value.weatherData != null) return
         try {
-            coroutineScope {
-                val prefs = async { locationPreferencesStorage.getLocationPreferencesFlow().first() }
-                val cached = getWeatherReport.cached().first() ?: return@coroutineScope
-                val air = getAirQuality.cached().first()
-                dispatch(HomeAction.Success(weather = cached, airQuality = air))
-                dispatch(HomeAction.CacheChecked)
-                val saved = savedCoordinates(prefs.await()) ?: return@coroutineScope
-                dispatch(
-                    HomeAction.Success(
-                        location = saved.lat to saved.lon,
-                        isLocationOverridden = saved.isOverridden,
-                        overrideLocationName = saved.overrideName,
-                        weather = _state.value.weatherData ?: cached,
-                        airQuality = _state.value.airQualityData ?: air,
-                    ),
-                )
-            }
+            val cachedWeather = getWeatherReport.cached().first() ?: return
+            val cachedAQ = getAirQuality.cached().first()
+            dispatch(HomeAction.Success(weather = cachedWeather, airQuality = cachedAQ))
+            dispatch(HomeAction.CacheChecked)
+            val savedCoordinates = getActiveCoordinates.lastKnown() ?: return
+            dispatch(
+                HomeAction.Success(
+                    location = savedCoordinates.coordinates.latitude to savedCoordinates.coordinates.longitude,
+                    isLocationOverridden = savedCoordinates.isOverridden,
+                    overrideLocationName = savedCoordinates.overrideName,
+                    weather = _state.value.weatherData ?: cachedWeather,
+                    airQuality = _state.value.airQualityData ?: cachedAQ,
+                ),
+            )
         } finally {
             if (!_state.value.hasCheckedCache) dispatch(HomeAction.CacheChecked)
         }
@@ -443,8 +248,8 @@ internal class HomeViewModel(
         val current = _state.value
         val switchingLocation =
             forceRefresh &&
-                current.userLocation.let { it != null && it != location } &&
-                (isOverridden || current.isLocationOverridden)
+                    current.userLocation.let { it != null && it != location } &&
+                    (isOverridden || current.isLocationOverridden)
         coroutineScope {
             val refreshFinished = MutableStateFlow(false)
             combine(
@@ -488,12 +293,18 @@ internal class HomeViewModel(
 
     private fun resetLocationOverride() {
         viewModelScope.launch(dataFetchExceptionHandler) {
-            locationPreferencesStorage.clearLocationOverride()
+            getActiveCoordinates.reset()
         }
     }
 
-    private companion object {
-        /** The home screen is the only surface that shows this card. */
-        const val LEAVE_BY_SURFACE = "home_screen"
-    }
+    private suspend fun LocationProblem.toMessage(): String =
+        when (this) {
+            LocationProblem.PermissionDenied -> getString(Res.string.location_permission_denied_txt)
+            is LocationProblem.GpsDisabled -> messageFrom(cause)
+            is LocationProblem.Failed -> messageFrom(cause)
+        }
+
+    private suspend fun messageFrom(cause: Throwable): String =
+        (cause as? Exception)?.let { errorMessageFromException(it) }
+            ?: getString(Res.string.general_error_txt)
 }

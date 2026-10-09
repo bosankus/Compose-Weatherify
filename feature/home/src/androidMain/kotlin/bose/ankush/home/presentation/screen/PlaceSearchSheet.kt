@@ -35,18 +35,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,7 +56,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,7 +77,6 @@ import bose.ankush.home.generated.resources.saved_places_search_close
 import bose.ankush.home.generated.resources.saved_places_search_empty
 import bose.ankush.home.generated.resources.saved_places_search_error
 import bose.ankush.home.generated.resources.saved_places_search_hint
-import bose.ankush.home.generated.resources.saved_places_search_label
 import bose.ankush.home.generated.resources.saved_places_search_min
 import bose.ankush.home.generated.resources.saved_places_show_action
 import bose.ankush.home.presentation.places.SavedPlaceSearchState
@@ -180,7 +171,8 @@ private fun ColumnScope.SearchBody(
         SheetSubtitle(text = stringResource(Res.string.saved_places_add_subtitle))
         SearchField(
             query = search.query,
-            onQueryChange = { onIntent(SavedPlacesIntent.QueryChanged(it)) })
+            onQueryChange = { onIntent(SavedPlacesIntent.QueryChanged(it)) },
+        )
         SearchProgress(visible = search.isSearching || search.isSaving)
         AnimatedVisibility(
             visible = status != null,
@@ -191,9 +183,11 @@ private fun ColumnScope.SearchBody(
         }
         AnimatedVisibility(
             visible = search.results.isNotEmpty(),
-            enter = expandVertically(tween(EXPAND_MILLIS, easing = FastOutSlowInEasing)) + fadeIn(
-                tween(EXPAND_MILLIS)
-            ),
+            enter =
+                expandVertically(tween(EXPAND_MILLIS, easing = FastOutSlowInEasing)) +
+                        fadeIn(
+                            tween(EXPAND_MILLIS),
+                        ),
             exit = shrinkVertically(tween(COLLAPSE_MILLIS)) + fadeOut(tween(COLLAPSE_MILLIS)),
             modifier = Modifier.weight(1f, fill = false),
         ) {
@@ -276,7 +270,7 @@ private fun SearchField(
                 keyboardOptions =
                     KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
-                        imeAction = ImeAction.Search
+                        imeAction = ImeAction.Search,
                     ),
                 keyboardActions = KeyboardActions(onSearch = { keyboard?.hide() }),
                 clearLabel = stringResource(Res.string.saved_places_search_clear),

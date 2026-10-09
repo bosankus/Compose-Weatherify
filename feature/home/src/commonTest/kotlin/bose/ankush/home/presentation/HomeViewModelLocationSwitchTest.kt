@@ -2,13 +2,13 @@ package bose.ankush.home.presentation
 
 import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.finder.domain.model.Location
-import bose.ankush.finder.domain.usecase.GetSavedLocationsUseCase
 import bose.ankush.home.domain.location.Coordinates
 import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.domain.model.AirQuality
 import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.repository.WeatherRepository
+import bose.ankush.home.domain.usecase.GetActiveCoordinatesImpl
 import bose.ankush.home.domain.usecase.GetAirQuality
 import bose.ankush.home.domain.usecase.GetWeatherReport
 import bose.ankush.home.domain.usecase.RefreshWeatherReport
@@ -63,9 +63,9 @@ class HomeViewModelLocationSwitchTest {
                     suggestion(
                         "Paris",
                         PARIS_LAT,
-                        PARIS_LON
-                    )
-                )
+                        PARIS_LON,
+                    ),
+                ),
             )
             advanceUntilIdle()
 
@@ -131,27 +131,24 @@ class HomeViewModelLocationSwitchTest {
             refreshWeatherReport = RefreshWeatherReport(repository),
             getWeatherReport = GetWeatherReport(repository),
             getAirQuality = GetAirQuality(repository),
-            locationClient =
+            getActiveCoordinates =
+                GetActiveCoordinatesImpl(
+                    client =
                 object : LocationClient {
                     override suspend fun getCurrentLocation(): Result<Coordinates> =
                         Result.success(Coordinates(GPS_LAT, GPS_LON))
 
                     override fun hasLocationPermission(): Boolean = true
                 },
-            locationPreferencesStorage = preferences,
+                    storage = preferences,
+                ),
             remoteConfigGate =
                 object : HomeRemoteConfigGate {
                     override fun initialize(onActivated: () -> Unit) = Unit
 
                     override fun isNotificationBannerEnabled(): Boolean = false
-
-                    override fun isLeaveByFakeDoorEnabled(): Boolean = false
                 },
             analyticsTracker = NoopAnalytics as AnalyticsTracker,
-            getSavedLocationsUseCase =
-                object : GetSavedLocationsUseCase {
-                    override suspend fun invoke(): Result<List<Location>> = Result.success(emptyList())
-                },
         )
 
     /** Room's single forecast row; each refresh writes a forecast tagged with its coordinates. */

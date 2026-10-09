@@ -86,8 +86,8 @@ internal fun PremiumCard(
                     Brush.linearGradient(
                         listOf(
                             WarningYellow.copy(alpha = PREMIUM_TINT_ALPHA),
-                            SettingsCardFill
-                        )
+                            SettingsCardFill,
+                        ),
                     ),
                 ).border(1.dp, SettingsCardStroke, SettingsCardShape)
                 .then(
@@ -265,12 +265,15 @@ private fun SettingsRow(
             Modifier
                 .fillMaxWidth()
                 .then(
-                    if (onClick != null) Modifier.clickable(
-                        role = Role.Button,
-                        onClick = onClick
-                    ) else Modifier
-                )
-                .padding(horizontal = 16.dp, vertical = 15.dp),
+                    if (onClick != null) {
+                        Modifier.clickable(
+                            role = Role.Button,
+                            onClick = onClick,
+                        )
+                    } else {
+                        Modifier
+                    },
+                ).padding(horizontal = 16.dp, vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
@@ -289,11 +292,12 @@ private fun SettingsRow(
             overflow = TextOverflow.Ellipsis,
         )
         when {
-            trailingText != null -> Text(
-                text = trailingText,
-                color = SettingsInkMuted,
-                fontSize = 14.sp
-            )
+            trailingText != null ->
+                Text(
+                    text = trailingText,
+                    color = SettingsInkMuted,
+                    fontSize = 14.sp,
+                )
 
             onClick != null ->
                 Icon(
@@ -310,7 +314,7 @@ private fun RowDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(start = 52.dp),
         thickness = 1.dp,
-        color = SettingsCardStroke
+        color = SettingsCardStroke,
     )
 }
 

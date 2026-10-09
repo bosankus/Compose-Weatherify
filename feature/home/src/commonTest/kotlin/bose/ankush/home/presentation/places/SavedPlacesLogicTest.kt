@@ -24,16 +24,16 @@ class SavedPlacesLogicTest {
             SavedPlacesLogic.activePlace(
                 LocationPreferences(
                     latitude = 1.0,
-                    longitude = 2.0
-                )
-            )
+                    longitude = 2.0,
+                ),
+            ),
         )
         assertNull(
             SavedPlacesLogic.activePlace(
                 LocationPreferences(
                     isLocationOverridden = true,
-                    overrideLat = 1.0
-                )
+                    overrideLat = 1.0,
+                ),
             ),
         )
         assertEquals(
@@ -61,7 +61,7 @@ class SavedPlacesLogicTest {
         val places = listOf(paris)
         assertEquals(
             paris,
-            SavedPlacesLogic.findSaved(suggestion("Paris", 48.8566, 2.3522), places)
+            SavedPlacesLogic.findSaved(suggestion("Paris", 48.8566, 2.3522), places),
         )
         assertNull(SavedPlacesLogic.findSaved(suggestion("Lyon", 45.764, 4.8357), places))
     }

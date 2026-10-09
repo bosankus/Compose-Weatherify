@@ -32,7 +32,6 @@ import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.weather_icon_content
 import bose.ankush.home.presentation.util.formatTextCapitalization
-import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -112,9 +111,6 @@ private fun currentSkyIcon(current: WeatherForecast.Current): ImageVector {
         SkyKind.Mist -> Icons.Outlined.Dehaze
     }
 }
-
-/** Device-zone clock, as before. Home screen sun times use [toClock] with [forecastZone]. */
-internal fun Long.toClock(): String = toClock(TimeZone.currentSystemDefault())
 
 private val cardFill = Color.Black.copy(alpha = 0.38f)
 private const val CURRENT_WEATHER = "Current weather"

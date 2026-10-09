@@ -16,11 +16,11 @@
     <string name="cancel_btn_txt">Cancel</string>
     <string name="set_as_default_dialog_title">Use as weather location?</string>
     <string name="set_as_default_dialog_body">Weather data will show for %1$s instead of your current GPS position.</string>
-    <string name="set_as_default_dialog_warning">Your live GPS location won\'t update while this is active.</string>
+    <string name="set_as_default_dialog_warning">Your live GPS location won’t update while this is active.</string>
     <string name="set_as_default_confirm_btn">Set as Default</string>
     <!--Place Search Dialog-->
     <string name="place_search_dialog_title">Search for a Place</string>
     <string name="place_search_hint">Type a city or address…</string>
-    <string name="place_search_no_results">No places found for \'%1$s\'</string>
+    <string name="place_search_no_results">No places found for ’%1$s’</string>
     <string name="place_search_error">Unable to fetch places. Please try again.</string>
 </resources>

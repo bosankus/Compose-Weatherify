@@ -54,7 +54,8 @@ actual fun LightSystemBarIcons() {
         val request = LightIconRequests.acquire(activity, controller.isAppearanceLightStatusBars)
         controller.isAppearanceLightStatusBars = false
         onDispose {
-            LightIconRequests.release(request)
+            LightIconRequests
+                .release(request)
                 ?.let { original -> controller.isAppearanceLightStatusBars = original }
         }
     }

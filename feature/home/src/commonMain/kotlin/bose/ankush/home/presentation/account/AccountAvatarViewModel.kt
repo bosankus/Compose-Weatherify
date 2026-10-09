@@ -37,7 +37,7 @@ internal class AccountAvatarViewModel(
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                AccountAvatarState()
+                AccountAvatarState(),
             )
 
     private val refreshes = Channel<Unit>(Channel.CONFLATED)

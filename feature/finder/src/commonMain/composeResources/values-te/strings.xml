@@ -15,5 +15,5 @@
     <string name="set_as_default_confirm_btn">డిఫాల్ట్‌గా సెట్ చేయండి</string>
     <string name="place_search_dialog_title">ఒక ప్రదేశం కోసం వెతకండి</string>
     <string name="place_search_hint">నగరం లేదా చిరునామా టైప్ చేయండి…</string>
-    <string name="place_search_no_results">\'%1$s\'కు ఎటువంటి ప్రదేశాలు కనుగొనబడలేదు</string>
+    <string name="place_search_no_results">’%1$s’కు ఎటువంటి ప్రదేశాలు కనుగొనబడలేదు</string>
 </resources>

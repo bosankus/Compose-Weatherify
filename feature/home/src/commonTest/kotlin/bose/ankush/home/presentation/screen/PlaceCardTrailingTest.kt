@@ -8,7 +8,7 @@ class PlaceCardTrailingTest {
     fun activePlaceShowsTickInsteadOfRemove() {
         assertEquals(
             PlaceCardTrailing.Selected,
-            placeCardTrailing(isActive = true, canDelete = true)
+            placeCardTrailing(isActive = true, canDelete = true),
         )
     }
 
@@ -16,7 +16,7 @@ class PlaceCardTrailingTest {
     fun activeGpsCardShowsTick() {
         assertEquals(
             PlaceCardTrailing.Selected,
-            placeCardTrailing(isActive = true, canDelete = false)
+            placeCardTrailing(isActive = true, canDelete = false),
         )
     }
 
@@ -24,7 +24,7 @@ class PlaceCardTrailingTest {
     fun inactiveRemovablePlaceKeepsRemoveButton() {
         assertEquals(
             PlaceCardTrailing.Remove,
-            placeCardTrailing(isActive = false, canDelete = true)
+            placeCardTrailing(isActive = false, canDelete = true),
         )
     }
 

@@ -6,6 +6,9 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.compose.multiplatform)
+    // Turns the framework's Kotlin API into idiomatic Swift for the SwiftUI screens: StateFlow
+    // becomes an AsyncSequence, Kotlin enums and sealed types become exhaustive Swift enums.
+    alias(libs.plugins.skie)
 }
 
 // Prefix of the `swiftPMImport.<group>.<module>.*` namespace the SwiftPM cinterop bindings are
@@ -13,7 +16,7 @@ plugins {
 group = "bose.ankush"
 
 // There's no iOS-native equivalent of the secrets-gradle-plugin androidApp uses to
-// expose RAZORPAY_KEY via BuildConfig, so this mirrors it by hand: read the same
+// expose RAZORPAY_KEY and UNSPLASH_ACCESS_KEY via BuildConfig, so this mirrors it by hand: read the same
 // secrets.properties (developer-local, gitignored) falling back to the committed
 // secrets.defaults.properties placeholder, and emit a tiny generated Kotlin object.
 // Runs eagerly at configuration time (cheap, single small file) so the generated
@@ -34,6 +37,7 @@ run {
             secretsFile.inputStream().use { load(it) }
         }
     val razorpayKey = properties.getProperty("RAZORPAY_KEY", "").trim('"')
+    val unsplashAccessKey = properties.getProperty("UNSPLASH_ACCESS_KEY", "").trim('"')
     val packageDir = generatedIosSecretsRoot.resolve("bose/ankush/iosapp/generated")
     packageDir.mkdirs()
     packageDir.resolve("IosSecrets.kt").writeText(
@@ -42,6 +46,7 @@ run {
 
         internal object IosSecrets {
             const val RAZORPAY_KEY: String = "$razorpayKey"
+            const val UNSPLASH_ACCESS_KEY: String = "$unsplashAccessKey"
         }
 
         """.trimIndent(),
@@ -92,6 +97,13 @@ kotlin {
             // this framework's symbols.
             baseName = "ComposeApp"
             isStatic = true
+            // The SwiftUI screens bind to these modules' iOS facades (HomeScreenController,
+            // SettingsScreenController, LanguageScreenController, LoginScreenController and their
+            // UI models). Exporting keeps the names unprefixed in Swift.
+            export(project(":feature:home"))
+            export(project(":feature:settings"))
+            export(project(":feature:language"))
+            export(project(":feature:auth"))
         }
     }
 

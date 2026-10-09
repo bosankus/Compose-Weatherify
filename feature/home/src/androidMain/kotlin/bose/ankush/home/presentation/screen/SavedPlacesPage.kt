@@ -134,7 +134,7 @@ private fun SavedPlacesSection(
         state.places.isEmpty() ->
             MessageCard(
                 text = stringResource(Res.string.saved_places_empty),
-                contentColor = contentColor
+                contentColor = contentColor,
             )
         else ->
             state.places.forEach { place ->
@@ -381,7 +381,7 @@ internal fun AddPlaceButton(
         ) {
             Icon(
                 imageVector = Icons.Filled.Add,
-                contentDescription = stringResource(Res.string.saved_places_add)
+                contentDescription = stringResource(Res.string.saved_places_add),
             )
         }
     }

@@ -50,6 +50,15 @@ private class AndroidPlatformPermissions(
         )
     }
 
+    override fun openNotificationSettings() {
+        context.startActivity(
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            },
+        )
+    }
+
     override fun openLocationSettings() {
         context.startActivity(
             Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).apply {

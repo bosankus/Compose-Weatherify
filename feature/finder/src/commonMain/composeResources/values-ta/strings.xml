@@ -15,5 +15,5 @@
     <string name="set_as_default_confirm_btn">இயல்புநிலையாக அமைக்கவும்</string>
     <string name="place_search_dialog_title">ஒரு இடத்திற்கு தேடுக</string>
     <string name="place_search_hint">நகரம் அல்லது முகவரி உள்ளிடவும்…</string>
-    <string name="place_search_no_results">\'%1$s\'க்கு இடங்கள் கிடைக்கவில்லை</string>
+    <string name="place_search_no_results">’%1$s’க்கு இடங்கள் கிடைக்கவில்லை</string>
 </resources>

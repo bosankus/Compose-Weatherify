@@ -23,43 +23,49 @@ internal object NearbyReducer {
             is NearbyMutation.EventsLoaded -> state.copy(events = SectionState.Loaded(mutation.events))
             NearbyMutation.EventsFailed -> state.copy(events = SectionState.Failed)
             NearbyMutation.FeaturedPlaceLoading -> state.copy(featuredPlace = SectionState.Loading)
-            is NearbyMutation.FeaturedPlaceLoaded -> state.copy(
-                featuredPlace = SectionState.Loaded(
-                    mutation.place
+            is NearbyMutation.FeaturedPlaceLoaded ->
+                state.copy(
+                    featuredPlace =
+                        SectionState.Loaded(
+                            mutation.place,
+                        ),
                 )
-            )
 
             NearbyMutation.FeaturedPlaceFailed -> state.copy(featuredPlace = SectionState.Failed)
-            NearbyMutation.ComposerOpened -> state.withComposer {
-                it.copy(
-                    isVisible = true,
-                    error = null
-                )
-            }
+            NearbyMutation.ComposerOpened ->
+                state.withComposer {
+                    it.copy(
+                        isVisible = true,
+                        error = null,
+                    )
+                }
 
             NearbyMutation.ComposerDismissed ->
                 state.withComposer {
                     it.copy(
                         isVisible = false,
                         isSubmitting = false,
-                        error = null
+                        error = null,
                     )
                 }
 
-            is NearbyMutation.DraftEdited -> state.withComposer {
-                it.copy(
-                    draft = it.draft.edit(
-                        mutation
+            is NearbyMutation.DraftEdited ->
+                state.withComposer {
+                    it.copy(
+                        draft =
+                            it.draft.edit(
+                                mutation,
+                            ),
                     )
-                )
-            }
+                }
 
-            NearbyMutation.Submitting -> state.withComposer {
-                it.copy(
-                    isSubmitting = true,
-                    error = null
-                )
-            }
+            NearbyMutation.Submitting ->
+                state.withComposer {
+                    it.copy(
+                        isSubmitting = true,
+                        error = null,
+                    )
+                }
 
             is NearbyMutation.SubmitFailed ->
                 state.withComposer { it.copy(isSubmitting = false, error = mutation.message) }

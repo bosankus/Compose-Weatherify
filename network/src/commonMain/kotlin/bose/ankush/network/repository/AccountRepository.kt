@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * The signed-in account. [account] is the single in-memory copy every screen observes, so a
  * photo changed on one screen shows on the others without a refetch. Photo URLs are signed and
- * short-lived, so nothing here is persisted.
+ * short-lived, so nothing here is persisted; the photo itself lives in [AccountPhotoStore].
  */
 interface AccountRepository {
     /** Last account the server returned this session, or null before the first fetch. */

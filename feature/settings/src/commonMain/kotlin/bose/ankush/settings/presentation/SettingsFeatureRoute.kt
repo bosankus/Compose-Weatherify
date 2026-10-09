@@ -61,11 +61,6 @@ import bose.ankush.settings.generated.resources.logout_btn_txt
 import bose.ankush.settings.generated.resources.logout_confirmation_txt
 import bose.ankush.settings.generated.resources.premium_activated_msg_txt
 import bose.ankush.settings.generated.resources.premium_activated_title_txt
-import bose.ankush.settings.generated.resources.profile_photo_read_failed_txt
-import bose.ankush.settings.generated.resources.profile_photo_remove_failed_txt
-import bose.ankush.settings.generated.resources.profile_photo_removed_txt
-import bose.ankush.settings.generated.resources.profile_photo_updated_txt
-import bose.ankush.settings.generated.resources.profile_photo_upload_failed_txt
 import bose.ankush.settings.generated.resources.profile_remove_photo_body_txt
 import bose.ankush.settings.generated.resources.profile_remove_photo_title_txt
 import bose.ankush.settings.generated.resources.profile_remove_photo_txt
@@ -75,6 +70,7 @@ import bose.ankush.settings.presentation.component.PreferencesSection
 import bose.ankush.settings.presentation.component.PremiumCard
 import bose.ankush.settings.presentation.component.ProfileHeader
 import bose.ankush.settings.presentation.component.ProfileHeaderActions
+import bose.ankush.settings.presentation.component.ProfilePhotoOptionsSheet
 import bose.ankush.settings.presentation.component.SettingsBackdrop
 import bose.ankush.settings.presentation.component.SettingsCardShape
 import bose.ankush.settings.presentation.component.SettingsDanger
@@ -89,7 +85,6 @@ import bose.ankush.settings.presentation.profile.ProfileViewModel
 import bose.ankush.settings.presentation.profile.fullText
 import bose.ankush.settings.presentation.profile.isError
 import bose.ankush.settings.presentation.profile.rememberProfilePhotoPicker
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -169,10 +164,18 @@ fun SettingsFeatureRoute(
                         state = profileState,
                         actions =
                             ProfileHeaderActions(
-                                onChangePhoto = photoPicker?.let { picker -> { picker.launch() } },
-                                onRemovePhoto = { profileViewModel.onIntent(ProfileIntent.RequestRemovePhoto) },
+                                onChangePhoto =
+                                    photoPicker?.let { picker ->
+                                        {
+                                            profileViewModel.onIntent(ProfileIntent.DismissPhotoOptions)
+                                            picker.launch()
+                                        }
+                                    },
+                                onOpenPhotoOptions = { profileViewModel.onIntent(ProfileIntent.OpenPhotoOptions) },
                             ),
                         message = profileMessage,
+                        onRequestRemove = { profileViewModel.onIntent(ProfileIntent.RequestRemovePhoto) },
+                        onDismissPhotoOptions = { profileViewModel.onIntent(ProfileIntent.DismissPhotoOptions) },
                         onConfirmRemove = { profileViewModel.onIntent(ProfileIntent.ConfirmRemovePhoto) },
                         onDismissRemove = { profileViewModel.onIntent(ProfileIntent.DismissRemovePhoto) },
                         onDismissMessage = { profileMessage = null },
@@ -269,7 +272,7 @@ internal fun SettingsScreenContent(
                     item {
                         PremiumCard(
                             paymentUiState = model.paymentUiState,
-                            onClick = actions.premium.onOpenSheet
+                            onClick = actions.premium.onOpenSheet,
                         )
                     }
                     item {
@@ -282,13 +285,13 @@ internal fun SettingsScreenContent(
                     item {
                         AboutSection(
                             versionName = model.versionName,
-                            onUrlClick = actions.onOpenWebUrl
+                            onUrlClick = actions.onOpenWebUrl,
                         )
                     }
                     item {
                         TextButton(
                             onClick = actions.onOpenLogoutDialog,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
                             Text(
                                 text = stringResource(Res.string.logout_btn_txt),
@@ -312,6 +315,15 @@ internal fun SettingsScreenContent(
                     enabled = !model.isLoggingOut,
                     onConfirm = actions.onLogout,
                     onDismiss = actions.onCloseLogoutDialog,
+                )
+            }
+
+            val changePhoto = profile.actions.onChangePhoto
+            if (profile.state.isPhotoOptionsVisible && changePhoto != null) {
+                ProfilePhotoOptionsSheet(
+                    onChangePhoto = changePhoto,
+                    onRemovePhoto = profile.onRequestRemove,
+                    onDismiss = profile.onDismissPhotoOptions,
                 )
             }
 
@@ -359,8 +371,11 @@ internal fun SettingsScreenContent(
 @Composable
 private fun SettingsTopBar(onBackNavAction: () -> Unit) {
     Box(
-        modifier = Modifier.fillMaxWidth().statusBarsPadding()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
         IconButton(onClick = onBackNavAction) {
             Icon(
@@ -391,7 +406,7 @@ private fun SettingsConfirmDialog(
             TextButton(onClick = onConfirm, enabled = enabled) {
                 Text(
                     copy.confirm,
-                    color = SettingsDanger.copy(alpha = if (enabled) 1f else DISABLED_ALPHA)
+                    color = SettingsDanger.copy(alpha = if (enabled) 1f else DISABLED_ALPHA),
                 )
             }
         },
@@ -452,7 +467,9 @@ private fun previewNoOpContent(
                     profile =
                         ProfileSection(
                             state = profile,
-                            actions = ProfileHeaderActions(onChangePhoto = {}, onRemovePhoto = {}),
+                            actions = ProfileHeaderActions(
+                                onChangePhoto = {},
+                                onOpenPhotoOptions = {}),
                         ),
                     paymentUiState = paymentUiState,
                     isLoggingOut = isLoggingOut,

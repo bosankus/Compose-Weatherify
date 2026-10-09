@@ -62,3 +62,41 @@ private fun String.abbreviated(): String =
         .replaceFirstChar { it.uppercaseChar() }
 
 private const val ABBREV = 3
+
+/** Device-zone clock, as before. Home screen sun times use [toClock] with [forecastZone]. */
+internal fun Long.toClock(): String = toClock(TimeZone.currentSystemDefault())
+
+internal fun Long.toIssuedLabel(): String {
+    val local = Instant.fromEpochSeconds(this).toLocalDateTime(TimeZone.currentSystemDefault())
+    val month =
+        local.month.name
+            .take(MONTH_ABBREV)
+            .lowercase()
+            .replaceFirstChar { it.uppercaseChar() }
+    return "$month ${local.day}, ${toClock()}"
+}
+
+/**
+ * 0 at sunrise and earlier, 1 at sunset and later.
+ * Missing or inverted times stay at the sunrise end.
+ */
+internal fun sunAlongDay(
+    sunrise: Long?,
+    sunset: Long?,
+    nowEpochSeconds: Long,
+): Float {
+    val rise = sunrise
+    val set = sunset
+    return when {
+        rise == null || set == null || set <= rise -> 0f
+        nowEpochSeconds <= rise -> 0f
+        nowEpochSeconds >= set -> 1f
+        else -> {
+            val span = (set - rise).toFloat()
+            val elapsed = (nowEpochSeconds - rise).toFloat()
+            (elapsed / span).coerceIn(0f, 1f)
+        }
+    }
+}
+
+private const val MONTH_ABBREV = 3

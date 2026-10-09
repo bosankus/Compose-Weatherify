@@ -11,8 +11,10 @@ import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
+import platform.UIKit.UIApplicationOpenNotificationSettingsURLString
 import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UserNotifications.UNAuthorizationStatusAuthorized
+import platform.UserNotifications.UNAuthorizationStatusDenied
 import platform.UserNotifications.UNAuthorizationStatusProvisional
 import platform.UserNotifications.UNUserNotificationCenter
 import kotlin.coroutines.resume
@@ -49,13 +51,26 @@ private class IosPlatformPermissions : PlatformPermissions {
     // iOS has exposed per-app language via the general Settings page since iOS 13.
     override fun supportsPerAppLocaleSettings(): Boolean = true
 
-    // The Location/Notifications row lives inline on the app's settings page, but the user still
-    // has to tap into it (e.g. pick "While Using the App", or toggle "Allow Notifications") — no
-    // public API can land them past this point.
+    // Location still lands on the app's settings page, where the user has to tap into the
+    // Location row; notifications have their own deep link (openNotificationSettings).
     override fun requiresManualSettingsNavigationHint(): Boolean = true
 
-    override fun openAppSystemSettings() {
-        val url = NSURL.URLWithString(UIApplicationOpenSettingsURLString) ?: return
+    override suspend fun isNotificationPermissionDenied(): Boolean =
+        suspendCancellableCoroutine { continuation ->
+            UNUserNotificationCenter
+                .currentNotificationCenter()
+                .getNotificationSettingsWithCompletionHandler { settings ->
+                    continuation.resume(settings?.authorizationStatus == UNAuthorizationStatusDenied)
+                }
+        }
+
+    // Lands on this app's Notifications page (iOS 16+), not the general app settings list.
+    override fun openNotificationSettings() = open(UIApplicationOpenNotificationSettingsURLString)
+
+    override fun openAppSystemSettings() = open(UIApplicationOpenSettingsURLString)
+
+    private fun open(urlString: String) {
+        val url = NSURL.URLWithString(urlString) ?: return
         // The no-completion-handler openURL: overload is deprecated (iOS 10+) and unreliable through
         // K/N's Obj-C interop; use the options/completionHandler overload Apple recommends instead.
         UIApplication.sharedApplication.openURL(url, options = emptyMap<Any?, Any?>(), completionHandler = null)

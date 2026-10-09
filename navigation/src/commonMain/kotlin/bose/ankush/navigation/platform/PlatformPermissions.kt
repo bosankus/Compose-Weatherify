@@ -31,6 +31,16 @@ interface PlatformPermissions {
 
     fun openAppSystemSettings()
 
+    /** Opens this app's own notification settings, where the user can turn notifications back on. */
+    fun openNotificationSettings()
+
+    /**
+     * True when notifications are known to be off for good, so asking again shows no dialog and
+     * only [openNotificationSettings] can help. iOS knows this up front; Android only learns it
+     * from a request result, so it reports false here.
+     */
+    suspend fun isNotificationPermissionDenied(): Boolean = false
+
     fun openLocationSettings()
 
     fun openAppLocaleSettings()

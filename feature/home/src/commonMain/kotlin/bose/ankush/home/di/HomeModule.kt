@@ -7,9 +7,14 @@ import bose.ankush.home.data.HomeLocationCoordinatorImpl
 import bose.ankush.home.data.HomeSavedPlacesEntryImpl
 import bose.ankush.home.data.HomeSessionCleanerImpl
 import bose.ankush.home.data.repository.WeatherRepositoryImpl
+import bose.ankush.home.domain.ai.SummarizeWeather
+import bose.ankush.home.domain.ai.WeatherPromptBuilder
+import bose.ankush.home.domain.ai.WeatherRules
 import bose.ankush.home.domain.repository.WeatherRepository
 import bose.ankush.home.domain.usecase.CreateNearbyEvent
 import bose.ankush.home.domain.usecase.FindNearestSavedPlace
+import bose.ankush.home.domain.usecase.GetActiveCoordinates
+import bose.ankush.home.domain.usecase.GetActiveCoordinatesImpl
 import bose.ankush.home.domain.usecase.GetAirQuality
 import bose.ankush.home.domain.usecase.GetNearbyEvents
 import bose.ankush.home.domain.usecase.GetWeatherReport
@@ -18,9 +23,11 @@ import bose.ankush.home.domain.usecase.RefreshAccount
 import bose.ankush.home.domain.usecase.RefreshWeatherReport
 import bose.ankush.home.presentation.HomeViewModel
 import bose.ankush.home.presentation.account.AccountAvatarViewModel
+import bose.ankush.home.presentation.ai.AiSummaryViewModel
 import bose.ankush.home.presentation.nearby.NearbyViewModel
 import bose.ankush.home.presentation.places.SavedPlacesViewModel
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -42,9 +49,11 @@ val homeDomainModule: Module =
         factory { CreateNearbyEvent(get()) }
         factory { ObserveAccountPhotoUrl(get()) }
         factory { RefreshAccount(get()) }
+        factory { SummarizeWeather(get(), WeatherRules(), WeatherPromptBuilder()) }
         single<HomeLocationCoordinator> { HomeLocationCoordinatorImpl(get()) }
         single { HomeSavedPlacesEntryImpl() } bind HomeSavedPlacesEntry::class
         single<HomeSessionCleaner> { HomeSessionCleanerImpl(get(), get(), get()) }
+        factory<GetActiveCoordinates> { GetActiveCoordinatesImpl(get(), get()) }
     }
 
 val homeViewModelModule: Module =
@@ -53,4 +62,5 @@ val homeViewModelModule: Module =
         viewModelOf(::NearbyViewModel)
         viewModelOf(::AccountAvatarViewModel)
         viewModelOf(::SavedPlacesViewModel)
+        viewModel { AiSummaryViewModel(get(), get()) }
     }

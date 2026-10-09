@@ -48,16 +48,20 @@ class AlertRowContentTest {
 
     @Test
     fun missingEventNameFallsBackToWeatherAlertNotDescription() {
-        val row = listOf(alert(event = null, description = "Strong winds expected")).toAlertRows()
-            .single()
+        val row =
+            listOf(alert(event = null, description = "Strong winds expected"))
+                .toAlertRows()
+                .single()
 
         assertEquals("Weather alert", row.title)
     }
 
     @Test
     fun blankEventNameFallsBackToWeatherAlertNotDescription() {
-        val row = listOf(alert(event = "   ", description = "Strong winds expected")).toAlertRows()
-            .single()
+        val row =
+            listOf(alert(event = "   ", description = "Strong winds expected"))
+                .toAlertRows()
+                .single()
 
         assertEquals("Weather alert", row.title)
     }

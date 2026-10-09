@@ -72,8 +72,6 @@ import bose.ankush.auth.generated.resources.login_toggle_to_register_txt
 import bose.ankush.auth.generated.resources.login_welcome_back_title
 import org.jetbrains.compose.resources.stringResource
 
-private val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
-
 @Composable
 fun LoginScreen(
     onLoginClick: (email: String, password: String) -> Unit,
@@ -111,37 +109,22 @@ fun LoginScreen(
     val termsAgreementText =
         stringResource(Res.string.login_terms_agreement_txt, termsLinkText, privacyLinkText)
 
-    val isEmailValid = { input: String -> EMAIL_REGEX.matches(input) }
-    val isPasswordValid = { input: String -> input.length >= 6 }
-
     val validateInputs = {
-        when {
-            email.isBlank() -> {
-                errorMessage = emailEmptyError
-                false
+        errorMessage =
+            when (validateLogin(email, password)) {
+                LoginInputError.EMAIL_EMPTY -> emailEmptyError
+                LoginInputError.EMAIL_INVALID -> emailInvalidError
+                LoginInputError.PASSWORD_EMPTY -> passwordEmptyError
+                LoginInputError.PASSWORD_SHORT -> passwordShortError
+                null -> null
             }
-            !isEmailValid(email) -> {
-                errorMessage = emailInvalidError
-                false
-            }
-            password.isBlank() -> {
-                errorMessage = passwordEmptyError
-                false
-            }
-            !isPasswordValid(password) -> {
-                errorMessage = passwordShortError
-                false
-            }
-            else -> {
-                errorMessage = null
-                true
-            }
-        }
+        errorMessage == null
     }
 
     val handleSubmit = {
         if (!isLoading && validateInputs()) {
-            if (isLoginMode) onLoginClick(email, password) else onRegisterClick(email, password)
+            val trimmed = email.trim()
+            if (isLoginMode) onLoginClick(trimmed, password) else onRegisterClick(trimmed, password)
         }
     }
 

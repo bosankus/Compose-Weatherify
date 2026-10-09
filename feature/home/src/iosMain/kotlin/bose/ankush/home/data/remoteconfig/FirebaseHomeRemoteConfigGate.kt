@@ -31,9 +31,6 @@ internal class FirebaseHomeRemoteConfigGate : HomeRemoteConfigGate {
     override fun isNotificationBannerEnabled(): Boolean =
         remoteConfig?.configValueForKey(ENABLE_NOTIFICATION_KEY)?.boolValue ?: false
 
-    // Android-only product. Do not surface the card on iOS even if the key is on.
-    override fun isLeaveByFakeDoorEnabled(): Boolean = false
-
     companion object {
         private const val DEFAULT_MINIMUM_FETCH_INTERVAL_SECONDS = 3600.0
         private const val ENABLE_NOTIFICATION_KEY = "enable_notification"

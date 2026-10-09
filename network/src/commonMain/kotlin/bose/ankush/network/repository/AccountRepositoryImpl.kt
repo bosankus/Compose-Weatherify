@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 
 class AccountRepositoryImpl(
     private val apiService: AccountApiService,
+    private val photoStore: AccountPhotoStore? = null,
 ) : AccountRepository {
     private val _account = MutableStateFlow<Account?>(null)
     override val account: StateFlow<Account?> = _account.asStateFlow()
@@ -29,15 +30,23 @@ class AccountRepositoryImpl(
     ): Result<String?> =
         call { apiService.uploadAccountPhoto(bytes, contentType, fileName) }
             .map { it?.photoUrl.nonBlank() }
-            .onSuccess { url -> _account.update { (it ?: Account()).copy(photoUrl = url) } }
+            .onSuccess { url ->
+                // Before publishing: whoever sees the new URL must find these bytes, not the old photo.
+                if (url != null) photoStore?.store(url, bytes)
+                _account.update { (it ?: Account()).copy(photoUrl = url) }
+            }
 
     override suspend fun deletePhoto(): Result<Unit> =
         call { apiService.deleteAccountPhoto() }
             .map { }
-            .onSuccess { _account.update { it?.copy(photoUrl = null) } }
+            .onSuccess {
+                _account.value?.photoUrl?.let { photoStore?.remove(it) }
+                _account.update { it?.copy(photoUrl = null) }
+            }
 
     override fun clear() {
         _account.value = null
+        photoStore?.clear()
     }
 
     /** Unwraps the envelope. Cancellation is rethrown, never reported as a failed call. */
@@ -45,11 +54,15 @@ class AccountRepositoryImpl(
     private suspend fun <T> call(request: suspend () -> ApiResponse<T>): Result<T?> =
         try {
             val response = request()
-            if (response.status) Result.success(response.data) else Result.failure(
-                Exception(
-                    response.message
+            if (response.status) {
+                Result.success(response.data)
+            } else {
+                Result.failure(
+                    Exception(
+                        response.message,
+                    ),
                 )
-            )
+            }
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

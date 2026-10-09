@@ -15,5 +15,5 @@
     <string name="set_as_default_confirm_btn">ডিফল্ট হিসেবে সেট করুন</string>
     <string name="place_search_dialog_title">কোনো স্থান খুঁজুন</string>
     <string name="place_search_hint">শহর বা ঠিকানা টাইপ করুন…</string>
-    <string name="place_search_no_results">\'%1$s\'এর জন্য কোনো স্থান পাওয়া যায়নি</string>
+    <string name="place_search_no_results">’%1$s’এর জন্য কোনো স্থান পাওয়া যায়নি</string>
 </resources>

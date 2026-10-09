@@ -15,5 +15,5 @@
     <string name="set_as_default_confirm_btn">डिफ़ॉल्ट के रूप में सेट करें</string>
     <string name="place_search_dialog_title">किसी स्थान को खोजें</string>
     <string name="place_search_hint">शहर या पता टाइप करें…</string>
-    <string name="place_search_no_results">\'%1$s\' के लिए कोई स्थान नहीं मिला</string>
+    <string name="place_search_no_results">’%1$s’ के लिए कोई स्थान नहीं मिला</string>
 </resources>

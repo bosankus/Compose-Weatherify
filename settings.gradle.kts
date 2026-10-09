@@ -1,7 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-include(":automotive")
-
 
 pluginManagement {
     repositories {
@@ -29,6 +27,7 @@ include(
     ":app:androidApp",
     ":app:iosApp",
     ":app:wearApp",
+    ":automotive",
     ":analytics",
     ":common-ui",
     ":feature:auth",

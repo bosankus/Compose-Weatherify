@@ -16,6 +16,7 @@ cmp-animation = "1.12.1"
 cmp-material3 = "1.9.0"
 cmp-ui = "1.12.1"
 cmp-materialIconsExtended = "1.7.3"
+skie = "0.10.15"
 
 # Gradle plugins
 agp = "9.4.1"
@@ -42,6 +43,7 @@ googlePlayLocation = "21.4.0"
 googlePlayServicesWearable = "20.0.1"
 dataStore = "1.2.1"
 splashScreen = "1.2.0"
+mlkitGenaiPrompt = "1.0.0-beta4"
 securityCrypto = "1.1.0"
 activityCompose = "1.13.0"
 
@@ -113,6 +115,7 @@ google-material = { module = "com.google.android.material:material", version.ref
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 google-play-app-update = { module = "com.google.android.play:app-update", version.ref = "googlePlayCore" }
 google-play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "googlePlayCore" }
+google-mlkit-genai-prompt = { module = "com.google.mlkit:genai-prompt", version.ref = "mlkitGenaiPrompt" }
 google-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "googlePlayLocation" }
 google-play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "googlePlayServicesWearable" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "dataStore" }
@@ -232,3 +235,4 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 ben-manes-versions = { id = "io.github.ben-manes.versions", version.ref = "benManesVersions" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+skie = { id = "co.touchlab.skie", version.ref = "skie" }

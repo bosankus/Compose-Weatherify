@@ -45,6 +45,8 @@ kotlin {
                 implementation(libs.compose.multiplatform.ui)
                 implementation(libs.compose.multiplatform.materialIconsExtended)
                 implementation(libs.compose.multiplatform.ui.tooling.preview)
+                // AccountPhoto: the account avatar's shared request and cache, used by home and settings.
+                api(libs.coil3.compose)
             }
         }
 

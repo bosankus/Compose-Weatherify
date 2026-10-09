@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -69,7 +68,6 @@ import bose.ankush.language.generated.resources.language_screen_subtitle
 import bose.ankush.language.generated.resources.language_screen_title
 import bose.ankush.language.generated.resources.language_selected
 import bose.ankush.language.util.LocaleHelper.changeLanguageTo
-import bose.ankush.language.util.LocaleHelper.getCountryFlag
 import bose.ankush.language.util.LocaleHelper.getDefaultLanguage
 import bose.ankush.language.util.LocaleHelper.getDisplayName
 import bose.ankush.language.util.customAppLocale
@@ -113,8 +111,10 @@ fun LanguageScreen(
             }
             item {
                 Spacer(
-                    modifier = Modifier.height(24.dp)
-                        .windowInsetsBottomHeight(WindowInsets.navigationBars)
+                    modifier =
+                        Modifier
+                            .height(24.dp)
+                            .windowInsetsBottomHeight(WindowInsets.navigationBars),
                 )
             }
         }
@@ -184,7 +184,7 @@ private fun LanguageCard(
                 HorizontalDivider(
                     modifier = Modifier.padding(start = 70.dp),
                     thickness = 1.dp,
-                    color = NightCardStroke
+                    color = NightCardStroke,
                 )
             }
             LanguageRow(
@@ -208,7 +208,6 @@ private fun LanguageRow(
     onSelect: () -> Unit,
 ) {
     val displayName = remember(language) { language.getDisplayName() }
-    val flag = remember(language) { language.getCountryFlag() }
     val fill by animateColorAsState(
         targetValue = if (isSelected) WarningYellow.copy(alpha = SELECTED_FILL_ALPHA) else Color.Transparent,
         animationSpec = tween(SELECT_MILLIS),
@@ -229,7 +228,7 @@ private fun LanguageRow(
             modifier = Modifier.size(40.dp).clip(CircleShape).background(NightInkFaint),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = flag, fontSize = 20.sp)
+            FlagGlyph(languageTag = language)
         }
         Text(
             text = displayName,
@@ -240,10 +239,12 @@ private fun LanguageRow(
         )
         AnimatedVisibility(
             visible = isSelected,
-            enter = fadeIn(tween(SELECT_MILLIS)) + scaleIn(
-                tween(SELECT_MILLIS),
-                initialScale = CHECK_START_SCALE
-            ),
+            enter =
+                fadeIn(tween(SELECT_MILLIS)) +
+                        scaleIn(
+                            tween(SELECT_MILLIS),
+                            initialScale = CHECK_START_SCALE,
+                        ),
             exit = scaleOut(tween(SELECT_MILLIS), targetScale = CHECK_START_SCALE),
         ) {
             Box(

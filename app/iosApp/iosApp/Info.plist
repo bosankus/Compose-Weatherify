@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleDisplayName</key>
+    <string>Weatherify</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -23,6 +25,11 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Weatherify needs your location to show local weather conditions.</string>
 	<key>UILaunchScreen</key>
-	<dict/>
+    <dict>
+        <key>UIColorName</key>
+        <string>SplashBackground</string>
+    </dict>
+    <key>UIStatusBarHidden</key>
+    <true />
 </dict>
 </plist>

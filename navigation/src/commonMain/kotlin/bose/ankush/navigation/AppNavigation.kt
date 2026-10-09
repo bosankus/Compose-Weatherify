@@ -196,7 +196,7 @@ fun AppNavigation(
                                     onRequestLocationPermission = {
                                         locationPermissionRequestId++
                                     },
-                                    onOpenSettings = { platformPermissions.openAppSystemSettings() },
+                                    onOpenNotificationSettings = { platformPermissions.openNotificationSettings() },
                                     onOpenLocationSettings = { platformPermissions.openLocationSettings() },
                                 )
                             },
@@ -323,7 +323,7 @@ private fun SettingsEntry(
         },
         onNotificationNavAction = {
             when {
-                isNotificationPermissionPermanentlyDeclined -> platformPermissions.openAppSystemSettings()
+                isNotificationPermissionPermanentlyDeclined -> platformPermissions.openNotificationSettings()
                 !hasNotificationPermission -> onRequestNotificationPermission()
                 else -> Unit
             }

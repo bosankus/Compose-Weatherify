@@ -117,7 +117,7 @@ internal class SavedPlacesViewModel(
                         _state.update {
                             it.copy(
                                 isLoading = false,
-                                places = SavedPlacesLogic.distinctPlaces(places)
+                                places = SavedPlacesLogic.distinctPlaces(places),
                             )
                         }
                     },

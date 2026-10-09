@@ -228,9 +228,9 @@ class SavedPlacesViewModelTest {
                     suggestion(
                         "Paris",
                         PARIS.lat,
-                        PARIS.lon
-                    )
-                )
+                        PARIS.lon,
+                    ),
+                ),
             )
             advanceUntilIdle()
 
@@ -266,9 +266,9 @@ class SavedPlacesViewModelTest {
                     suggestion(
                         "Paris",
                         PARIS.lat,
-                        PARIS.lon
-                    )
-                )
+                        PARIS.lon,
+                    ),
+                ),
             )
             advanceUntilIdle()
 
@@ -295,8 +295,8 @@ class SavedPlacesViewModelTest {
                     suggestion(
                         "Paris",
                         PARIS.lat + 0.0001,
-                        PARIS.lon
-                    )
+                        PARIS.lon,
+                    ),
                 ),
             )
             advanceUntilIdle()

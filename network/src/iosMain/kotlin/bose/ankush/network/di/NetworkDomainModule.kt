@@ -76,7 +76,7 @@ actual val networkDomainModule: Module =
                 NetworkConstants.WEATHER_BASE_URL,
             )
         }
-        single<AccountRepository> { AccountRepositoryImpl(get()) }
+        single<AccountRepository> { AccountRepositoryImpl(get(), getOrNull()) }
         single<PlaceEventApiService> {
             KtorPlaceEventApiService(
                 get(),

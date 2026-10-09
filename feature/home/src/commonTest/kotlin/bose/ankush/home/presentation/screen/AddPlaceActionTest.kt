@@ -58,15 +58,15 @@ class AddPlaceActionTest {
             AddPlaceAction.showAddButton(
                 onPlacesPage = true,
                 isPremium = true,
-                sheetOpen = false
-            )
+                sheetOpen = false,
+            ),
         )
         assertFalse(
             AddPlaceAction.showAddButton(
                 onPlacesPage = true,
                 isPremium = true,
-                sheetOpen = true
-            )
+                sheetOpen = true,
+            ),
         )
     }
 
@@ -76,15 +76,15 @@ class AddPlaceActionTest {
             AddPlaceAction.showAddButton(
                 onPlacesPage = false,
                 isPremium = true,
-                sheetOpen = false
-            )
+                sheetOpen = false,
+            ),
         )
         assertFalse(
             AddPlaceAction.showAddButton(
                 onPlacesPage = true,
                 isPremium = false,
-                sheetOpen = false
-            )
+                sheetOpen = false,
+            ),
         )
     }
 

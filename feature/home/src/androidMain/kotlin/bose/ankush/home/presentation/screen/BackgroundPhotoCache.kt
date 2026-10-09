@@ -8,24 +8,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import bose.ankush.network.api.UnsplashApi
-import bose.ankush.network.model.UnsplashPhoto
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import java.util.concurrent.ConcurrentHashMap
-
-data class BackgroundPhoto(
-    val id: String,
-    val imageUrl: String,
-    val photographer: String,
-    val profileUrl: String,
-    val downloadLocation: String,
-)
 
 /**
  * Process-wide cache, keyed by the Unsplash query for the live condition.
@@ -37,6 +32,14 @@ internal object BackgroundPhotoCache {
     private val trackedIds = mutableSetOf<String>()
     private val mutex = Mutex()
 
+    /**
+     * Where downloads run. A Compose effect that restarts cancels its coroutine on the main thread,
+     * and Ktor's Android engine closes the connection inside that cancel handler, so a download
+     * started in the effect crashes with NetworkOnMainThreadException. Downloads started here are
+     * never cancelled by a screen: the caller only waits for the result.
+     */
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     fun cached(query: String): BackgroundPhoto? = photos[query]
 
     suspend fun photo(
@@ -45,7 +48,7 @@ internal object BackgroundPhotoCache {
     ): BackgroundPhoto? {
         photos[query]?.let { return it }
         val request = reserve(query)
-        if (request.leader) load(query, request.pending, api)
+        if (request.leader) scope.launch { load(query, request.pending, api) }
         return request.pending.await()
     }
 
@@ -59,13 +62,12 @@ internal object BackgroundPhotoCache {
     ) {
         val firstTime = mutex.withLock { trackedIds.add(photo.id) }
         if (!firstTime) return
-        try {
-            api.trackDownload(photo.downloadLocation)
-        } catch (cancelled: CancellationException) {
-            mutex.withLock { trackedIds.remove(photo.id) }
-            throw cancelled
-        } catch (_: Exception) {
-            // The ping was attempted. Do not call trackDownload again for this id.
+        scope.launch {
+            try {
+                api.trackDownload(photo.downloadLocation)
+            } catch (_: Exception) {
+                // The ping was attempted. Do not call trackDownload again for this id.
+            }
         }
     }
 
@@ -169,39 +171,5 @@ internal fun TrackShownBackgroundPhoto(photo: BackgroundPhoto) {
         BackgroundPhotoCache.trackShown(photo, api)
     }
 }
-
-/** OpenWeather `weather.main` to an Unsplash search. Unknown mains use one default. */
-internal fun unsplashQuery(weatherMain: String): String =
-    when (weatherMain.lowercase()) {
-        "clear" -> "clear sky landscape"
-        "clouds" -> "clouds landscape"
-        "rain", "drizzle" -> "rain landscape"
-        "snow" -> "snow landscape"
-        "thunderstorm", "squall", "tornado" -> "thunderstorm landscape"
-        "mist" -> "mist landscape"
-        "fog" -> "fog landscape"
-        else -> "weather landscape"
-    }
-
-private fun UnsplashPhoto.toBackgroundPhoto(): BackgroundPhoto =
-    BackgroundPhoto(
-        id = id,
-        imageUrl = unsplashBackgroundUrl(urls.raw),
-        photographer = user.name,
-        profileUrl = unsplashReferralUrl(user.links.html),
-        downloadLocation = links.downloadLocation,
-    )
-
-internal fun unsplashBackgroundUrl(raw: String): String {
-    val joiner = if ('?' in raw) "&" else "?"
-    return raw + joiner + "w=1080&h=1920&fit=crop&fm=jpg&dpr=2"
-}
-
-internal fun unsplashReferralUrl(profileHtml: String): String {
-    val joiner = if ('?' in profileHtml) "&" else "?"
-    return profileHtml + joiner + "utm_source=weatherify&utm_medium=referral"
-}
-
-internal const val UNSPLASH_HOME_URL = "https://unsplash.com/?utm_source=weatherify&utm_medium=referral"
 
 private val PHOTO_SEARCH_BACKOFF_MS = longArrayOf(0L, 2_000L, 5_000L, 15_000L)

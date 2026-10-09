@@ -10,7 +10,7 @@
     <string name="login_password_hide_btn">Hide</string>
     <string name="login_password_show_btn">Show</string>
     <string name="login_signin_btn">Sign In</string>
-    <string name="login_toggle_to_register_txt">Don\'t have an account? Register</string>
+    <string name="login_toggle_to_register_txt">Don’t have an account? Register</string>
     <string name="login_toggle_to_login_txt">Already registered? Login</string>
     <string name="login_terms_agreement_txt">By continuing, you agree to our %1$s &amp; %2$s</string>
     <string name="login_terms_link_txt">Terms &amp; Conditions</string>
@@ -23,7 +23,11 @@
     <!--Auth error messages: shown instead of raw exception text, which goes to crash reports-->
     <string name="auth_error_network">No internet connection. Check your connection and try again.</string>
     <string name="auth_error_timeout">The server is taking too long to respond. Please try again.</string>
-    <string name="auth_error_server">We\'re having trouble on our end. Please try again in a few minutes.</string>
+    <string name="auth_error_server">We’re having trouble on our end. Please try again in a few minutes.</string>
     <string name="auth_error_credentials">Incorrect email or password.</string>
     <string name="auth_error_generic">Something went wrong. Please try again.</string>
+    <string name="login_welcome_headline">The sky, calmly told.</string>
+    <string name="login_welcome_tagline">Forecasts, places and alerts in one quiet place.</string>
+    <string name="login_photo_credit">Photo by %1$s on Unsplash</string>
+    <string name="login_welcome_handoff">Welcome</string>
 </resources>

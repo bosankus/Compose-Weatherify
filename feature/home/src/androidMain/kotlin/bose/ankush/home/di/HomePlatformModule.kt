@@ -1,9 +1,11 @@
 package bose.ankush.home.di
 
+import bose.ankush.home.data.ai.createOnDeviceAiClient
 import bose.ankush.home.data.location.AndroidHomeGeocoder
 import bose.ankush.home.data.location.DeviceLocationClient
 import bose.ankush.home.data.remoteconfig.FirebaseHomeRemoteConfigGate
 import bose.ankush.home.data.wear.AndroidWeatherWearSync
+import bose.ankush.home.domain.ai.OnDeviceAiClient
 import bose.ankush.home.domain.location.HomeGeocoder
 import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
@@ -24,4 +26,5 @@ actual val homePlatformModule: Module =
         single<HomeRemoteConfigGate> { FirebaseHomeRemoteConfigGate() }
         single<HomeGeocoder> { AndroidHomeGeocoder(androidContext()) }
         single<WeatherWearSync> { AndroidWeatherWearSync(androidContext()) }
+        single<OnDeviceAiClient> { createOnDeviceAiClient() }
     }

@@ -3,7 +3,14 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>CyclomaticComplexMethod:WeatherIconDrawing.kt$fun mapToWeatherCondition(description: String?): WeatherCondition</ID>
-    <ID>LongParameterList:HomeRoute.kt$( bottomBar: @Composable () -&gt; Unit = {}, toastAnchorState: ToastAnchorState? = null, hasLocationPermission: Boolean = true, hasNotificationPermission: Boolean = true, notificationPermissionResult: HomeNotificationPermissionResult? = null, requiresNotificationSettingsNavigationHint: Boolean = false, onRequestNotificationPermission: () -&gt; Unit = {}, onRequestLocationPermission: () -&gt; Unit = {}, onOpenSettings: () -&gt; Unit = {}, onOpenLocationSettings: () -&gt; Unit = {}, )</ID>
+      <ID>LongParameterList:HomeRoute.kt$( bottomBar: @Composable () -&gt; Unit = {},
+          toastAnchorState: ToastAnchorState? = null, hasLocationPermission: Boolean = true,
+          hasNotificationPermission: Boolean = true, notificationPermissionResult:
+          HomeNotificationPermissionResult? = null, requiresNotificationSettingsNavigationHint:
+          Boolean = false, onRequestNotificationPermission: () -&gt; Unit = {},
+          onRequestLocationPermission: () -&gt; Unit = {}, onOpenNotificationSettings: () -&gt; Unit
+          = {}, onOpenLocationSettings: () -&gt; Unit = {}, )
+      </ID>
     <ID>LongParameterList:HomeRoute.kt$( errorText: String?, isLoading: Boolean, isGpsDisabled: Boolean, isLocationPermissionDenied: Boolean, onOpenLocationSettings: () -&gt; Unit, onRetry: () -&gt; Unit, onRequestLocationPermission: () -&gt; Unit, )</ID>
     <ID>LongParameterList:WeatherAlertCard.kt$( title: String?, description: String?, startTime: Long?, endTime: Long?, source: String?, onReadMoreClick: (() -&gt; Unit)? = null, initiallyExpanded: Boolean = false, )</ID>
     <ID>LongParameterList:WeatherHourCard.kt$( time: String, temperature: String, weatherDescription: String? = null, isSelected: Boolean = false, onClick: () -&gt; Unit = {}, iconContent: @Composable () -&gt; Unit, )</ID>

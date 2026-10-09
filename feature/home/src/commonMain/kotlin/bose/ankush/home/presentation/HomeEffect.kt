@@ -7,5 +7,6 @@ internal sealed interface HomeEffect {
 
     data object RequestGpsPermission : HomeEffect
 
-    data object OpenSettings : HomeEffect
+    /** Notifications were declined for good; only the OS notification settings can turn them on. */
+    data object OpenNotificationSettings : HomeEffect
 }

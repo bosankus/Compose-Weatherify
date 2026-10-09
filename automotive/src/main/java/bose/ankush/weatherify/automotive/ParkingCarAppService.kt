@@ -11,6 +11,4 @@ class ParkingCarAppService : CarAppService() {
         HostValidator.ALLOW_ALL_HOSTS_VALIDATOR
 
     override fun onCreateSession(): Session = ParkingSession()
-
-    override fun onDestroy() {}
 }

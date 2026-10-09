@@ -23,37 +23,24 @@ import coil3.request.crossfade
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/** Dark gradient behind the photo for each condition; shows first and whenever the photo is missing. */
+val SkyCondition.gradient: Brush
+    get() =
+        when (this) {
+            SkyCondition.CLEAR -> vertical(clearTop, clearBottom)
+            SkyCondition.CLOUDS -> vertical(cloudsTop, cloudsBottom)
+            SkyCondition.RAIN -> vertical(rainTop, rainBottom)
+            SkyCondition.FOG -> vertical(fogTop, fogBottom)
+            SkyCondition.STORM -> vertical(stormTop, stormBottom)
+            SkyCondition.SNOW -> vertical(snowTop, snowBottom)
+            SkyCondition.NIGHT -> vertical(nightTop, nightBottom)
+        }
+
 /**
  * Full-bleed home background. A dark gradient shows first. When [photoUrl] is set, Coil
  * hotlinks that URL (the one Unsplash returned). Otherwise Coil loads `drawable/background_<key>`
  * if that resource exists. Soft top and bottom scrims keep type readable.
  */
-enum class SkyCondition(
-    val key: String,
-    val line: String,
-) {
-    CLEAR("clear", "It's clear"),
-    CLOUDS("clouds", "It's cloudy"),
-    RAIN("rain", "It's raining"),
-    FOG("fog", "It's foggy"),
-    STORM("storm", "It's stormy"),
-    SNOW("snow", "It's snowing"),
-    NIGHT("night", "It's night"),
-    ;
-
-    val gradient: Brush
-        get() =
-            when (this) {
-                CLEAR -> vertical(clearTop, clearBottom)
-                CLOUDS -> vertical(cloudsTop, cloudsBottom)
-                RAIN -> vertical(rainTop, rainBottom)
-                FOG -> vertical(fogTop, fogBottom)
-                STORM -> vertical(stormTop, stormBottom)
-                SNOW -> vertical(snowTop, snowBottom)
-                NIGHT -> vertical(nightTop, nightBottom)
-            }
-}
-
 @Composable
 fun SkyConditionBackground(
     condition: SkyCondition,

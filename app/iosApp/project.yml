@@ -40,11 +40,19 @@ targets:
       path: iosApp/Info.plist
       properties:
         CADisableMinimumFrameDurationOnPhone: true
+        # The label under the home-screen icon; PRODUCT_NAME stays iosApp for the build.
+        CFBundleDisplayName: Weatherify
         NSLocationWhenInUseUsageDescription: "Weatherify needs your location to show local weather conditions."
         # Without this, xcodegen regenerates Info.plist from just this properties
         # map on every `xcodegen generate` and silently drops UILaunchScreen,
         # which causes iOS to fall back to legacy (non-full-screen) launch scaling.
-        UILaunchScreen: {}
+        # The color is the SwiftUI splash's own, so launch flows into it without a flash.
+        # Keep this a plain color: a LaunchScreen.storyboard rendered solid black on launch,
+        # and a UIImageName lockup was never drawn, so neither is used.
+        UILaunchScreen:
+          UIColorName: SplashBackground
+        # No status bar on the launch screen or the splash; it comes back with sign-in/home.
+        UIStatusBarHidden: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: bose.ankush.weatherify.ios

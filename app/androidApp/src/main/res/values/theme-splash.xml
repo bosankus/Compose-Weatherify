@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Same misty grey-green as the iOS launch screen (SplashBackground), so both platforms open alike. -->
     <style name="Theme.Weatherify.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_profile</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_leaf</item>
         <item name="postSplashScreenTheme">@style/Theme.Weatherify</item>
     </style>
 </resources>

@@ -6,7 +6,7 @@ import ComposeApp
 struct iOSApp: App {
     init() {
         FirebaseApp.configure()
-        KoinKt.startWeatherifyKoin()
+        KoinKt.startWeatherifyKoin(nativeAi: FoundationModelsBridge())
     }
 
     var body: some Scene {

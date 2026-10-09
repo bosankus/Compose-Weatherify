@@ -73,7 +73,7 @@ internal fun WeatherDetailsGrid(
                             formatAnimatedNumber(
                                 it,
                                 decimals = if (it % 1.0 == 0.0) 0 else 1,
-                                suffix = " m/s"
+                                suffix = " m/s",
                             )
                         }"
                     },

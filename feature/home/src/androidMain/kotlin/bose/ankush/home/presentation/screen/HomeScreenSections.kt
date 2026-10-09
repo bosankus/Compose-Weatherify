@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import bose.ankush.commonui.photo.rememberAccountPhotoRequest
 import bose.ankush.home.domain.nearby.NearbyEvent
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.default_avatar
@@ -36,9 +37,6 @@ import bose.ankush.home.presentation.util.SectionState
 import bose.ankush.home.presentation.util.valueOrNull
 import bose.ankush.network.model.SavedLocation
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
-import coil3.request.CachePolicy
-import coil3.request.ImageRequest
 import org.jetbrains.compose.resources.painterResource
 
 data class NearbyEventLine(
@@ -80,6 +78,7 @@ internal data class HomeScreenSections(
     val chrome: HomeScreenChrome = HomeScreenChrome(),
     val places: SavedPlacesBinding = SavedPlacesBinding(),
     val events: CreateEventBinding = CreateEventBinding(),
+    val aiSummary: AiSummaryBinding = AiSummaryBinding(),
 )
 
 internal fun NearbyState.toNearbyContent(
@@ -134,16 +133,8 @@ internal fun AccountMark(
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
-            val context = LocalPlatformContext.current
             AsyncImage(
-                model =
-                    ImageRequest
-                        .Builder(context)
-                        .data(photoUrl)
-                        .diskCachePolicy(CachePolicy.DISABLED)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
-                        .networkCachePolicy(CachePolicy.DISABLED)
-                        .build(),
+                model = rememberAccountPhotoRequest(photoUrl),
                 placeholder = avatar,
                 error = avatar,
                 contentDescription = null,

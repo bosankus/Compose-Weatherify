@@ -2,6 +2,8 @@ package bose.ankush.weatherify.presentation
 
 import android.content.Context
 import android.os.Bundle
+import android.os.SystemClock
+import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
@@ -78,11 +81,32 @@ class MainActivity :
     private var razorpayCheckout: Checkout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        holdSplashUntilAuthResolves(installSplashScreen())
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         startInAppUpdate(this)
         setContent { WeatherifyTheme(isDynamicColor = true) { AppEnvironment { AppContent() } } }
+    }
+
+    /**
+     * Keeps the system splash up until the sign-in state is known, then fades it out, so launch goes
+     * splash, then content, with no spinner screen in between. Capped so a stuck auth check can
+     * never hold the app on the splash.
+     */
+    private fun holdSplashUntilAuthResolves(splash: SplashScreen) {
+        val startedAt = SystemClock.elapsedRealtime()
+        splash.setKeepOnScreenCondition {
+            !authViewModel.isAuthInitialized.value &&
+                    SystemClock.elapsedRealtime() - startedAt < SPLASH_MAX_HOLD_MILLIS
+        }
+        splash.setOnExitAnimationListener { provider ->
+            provider.view
+                .animate()
+                .alpha(0f)
+                .setDuration(SPLASH_FADE_MILLIS)
+                .withEndAction { provider.remove() }
+                .start()
+        }
     }
 
     @Composable
@@ -91,6 +115,8 @@ class MainActivity :
         val isLoggedIn by authViewModel.isLoggedIn.collectAsState()
         val authState by authViewModel.authState.collectAsState()
         val isAuthInitialized by authViewModel.isAuthInitialized.collectAsState()
+        // Tells the system when the first real screen is up, for launch-time measurement.
+        ReportDrawnWhen { isAuthInitialized }
         val toastAnchorState = rememberToastAnchorState()
         var toastVisible by remember { mutableStateOf(false) }
         var toastMessage by remember { mutableStateOf("") }
@@ -362,3 +388,6 @@ private data class ToastController(
     val anchorState: ToastAnchorState,
     val onShowToast: (String) -> Unit,
 )
+
+private const val SPLASH_MAX_HOLD_MILLIS = 1_500L
+private const val SPLASH_FADE_MILLIS = 220L

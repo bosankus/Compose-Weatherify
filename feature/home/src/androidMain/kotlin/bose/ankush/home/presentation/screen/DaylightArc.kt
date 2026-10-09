@@ -81,29 +81,6 @@ internal fun DaylightArc(
     }
 }
 
-/**
- * 0 at sunrise and earlier, 1 at sunset and later.
- * Missing or inverted times stay at the sunrise end.
- */
-internal fun sunAlongDay(
-    sunrise: Long?,
-    sunset: Long?,
-    nowEpochSeconds: Long,
-): Float {
-    val rise = sunrise
-    val set = sunset
-    return when {
-        rise == null || set == null || set <= rise -> 0f
-        nowEpochSeconds <= rise -> 0f
-        nowEpochSeconds >= set -> 1f
-        else -> {
-            val span = (set - rise).toFloat()
-            val elapsed = (nowEpochSeconds - rise).toFloat()
-            (elapsed / span).coerceIn(0f, 1f)
-        }
-    }
-}
-
 @Composable
 private fun SunLabel(
     time: String,

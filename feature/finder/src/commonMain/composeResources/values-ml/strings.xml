@@ -15,5 +15,5 @@
     <string name="set_as_default_confirm_btn">ഡിഫോൾട്ടായി സജ്ജമാക്കുക</string>
     <string name="place_search_dialog_title">ഒരു സ്ഥാനം തിരയുക</string>
     <string name="place_search_hint">നഗരം അല്ലെങ്കിൽ വിലാസം ടൈപ്പ് ചെയ്യുക…</string>
-    <string name="place_search_no_results">\'%1$s\'ക്കായി ഒരു സ്ഥാനവും കണ്ടെത്തിയില്ല</string>
+    <string name="place_search_no_results">’%1$s’ക്കായി ഒരു സ്ഥാനവും കണ്ടെത്തിയില്ല</string>
 </resources>

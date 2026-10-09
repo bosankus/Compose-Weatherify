@@ -2,14 +2,13 @@ package bose.ankush.home.presentation
 
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
-import bose.ankush.finder.domain.model.Location
-import bose.ankush.finder.domain.usecase.GetSavedLocationsUseCase
 import bose.ankush.home.domain.location.Coordinates
 import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.domain.model.AirQuality
 import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.repository.WeatherRepository
+import bose.ankush.home.domain.usecase.GetActiveCoordinatesImpl
 import bose.ankush.home.domain.usecase.GetAirQuality
 import bose.ankush.home.domain.usecase.GetWeatherReport
 import bose.ankush.home.domain.usecase.RefreshWeatherReport
@@ -276,13 +275,15 @@ class HomeViewModelOfflineWeatherTest {
             refreshWeatherReport = RefreshWeatherReport(repository),
             getWeatherReport = GetWeatherReport(repository),
             getAirQuality = GetAirQuality(repository),
-            locationClient =
+            getActiveCoordinates =
+                GetActiveCoordinatesImpl(
+                    client =
                 object : LocationClient {
                     override suspend fun getCurrentLocation(): Result<Coordinates> = gpsFix()
 
                     override fun hasLocationPermission(): Boolean = true
                 },
-            locationPreferencesStorage =
+                    storage =
                 object : LocationPreferencesStorage {
                     override fun getLocationPreferencesFlow(): Flow<LocationPreferences> = preferencesFlow
 
@@ -304,21 +305,16 @@ class HomeViewModelOfflineWeatherTest {
 
                     override suspend fun clearAll() = Unit
                 },
+                ),
             remoteConfigGate =
                 object : HomeRemoteConfigGate {
                     override fun initialize(onActivated: () -> Unit) = Unit
 
                     override fun isNotificationBannerEnabled(): Boolean = false
-
-                    override fun isLeaveByFakeDoorEnabled(): Boolean = false
                 },
             analyticsTracker =
                 object : AnalyticsTracker {
                     override fun track(event: AnalyticsEvent) = Unit
-                },
-            getSavedLocationsUseCase =
-                object : GetSavedLocationsUseCase {
-                    override suspend fun invoke(): Result<List<Location>> = Result.success(emptyList())
                 },
         )
     }

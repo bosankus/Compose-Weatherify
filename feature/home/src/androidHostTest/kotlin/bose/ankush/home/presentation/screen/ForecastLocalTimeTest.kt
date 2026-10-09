@@ -66,7 +66,7 @@ class ForecastLocalTimeTest {
             headerSummaryLine(
                 " Expect a day of partly cloudy with clear spells ",
                 "clear sky",
-                "It's clear"
+                "It's clear",
             ),
         )
     }

@@ -100,6 +100,8 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation(libs.google.play.services.location)
+                // Gemini Nano through AICore, for the on-device weather summary.
+                implementation(libs.google.mlkit.genai.prompt)
                 implementation(libs.koin.android)
                 implementation(libs.firebase.config)
                 implementation(libs.androidx.compose.ui.tooling)

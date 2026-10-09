@@ -23,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,11 +49,8 @@ import bose.ankush.home.presentation.util.formatTextCapitalization
 import bose.ankush.home.presentation.util.getIconUrl
 import bose.ankush.home.presentation.util.toCelsius
 import coil3.compose.AsyncImage
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.time.Instant
 
 /**
  * Alerts, air quality, and the hourly list already on [bose.ankush.home.presentation.HomeState].
@@ -268,16 +264,6 @@ private fun HourCell(
     }
 }
 
-internal fun Long.toIssuedLabel(): String {
-    val local = Instant.fromEpochSeconds(this).toLocalDateTime(TimeZone.currentSystemDefault())
-    val month =
-        local.month.name
-            .take(MONTH_ABBREV)
-            .lowercase()
-            .replaceFirstChar { it.uppercaseChar() }
-    return "$month ${local.day}, ${toClock()}"
-}
-
 private val cardFill = Color.Black.copy(alpha = 0.38f)
 internal val AlertYellow = Color(0xFFF5C400)
 private val HourCellShape = RoundedCornerShape(16.dp)
@@ -289,4 +275,3 @@ private const val HOUR_SELECTED_SCALE = 1.07f
 private const val HOUR_ZOOM_MILLIS = 220
 private const val HOURLY_LIMIT = 24
 private const val ALERTS = "Weather alerts"
-private const val MONTH_ABBREV = 3
