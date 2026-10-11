@@ -12,6 +12,18 @@ internal sealed interface SettingsIntent {
 
     data object CloseLogoutDialog : SettingsIntent
 
+    data object OpenDeleteAccountDialog : SettingsIntent
+
+    /** Ignored while the request is in flight. */
+    data object CloseDeleteAccountDialog : SettingsIntent
+
+    /** Clears the last error, so it doesn't sit under a password the user is retyping. */
+    data object DeleteAccountPasswordEdited : SettingsIntent
+
+    data class ConfirmDeleteAccount(
+        val password: String,
+    ) : SettingsIntent
+
     data object PremiumActivated : SettingsIntent
 
     data object DismissPremiumActivationToast : SettingsIntent

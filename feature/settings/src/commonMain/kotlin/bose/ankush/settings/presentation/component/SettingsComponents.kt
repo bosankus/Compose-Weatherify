@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Gavel
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
@@ -44,6 +45,7 @@ import bose.ankush.payment.presentation.PaymentStage
 import bose.ankush.payment.presentation.PaymentUiState
 import bose.ankush.settings.generated.resources.Res
 import bose.ankush.settings.generated.resources.arrow_right_icon_content
+import bose.ankush.settings.generated.resources.delete_account_txt
 import bose.ankush.settings.generated.resources.legal_app_version_txt
 import bose.ankush.settings.generated.resources.legal_privacy_policy_txt
 import bose.ankush.settings.generated.resources.legal_terms_of_use_txt
@@ -57,6 +59,7 @@ import bose.ankush.settings.generated.resources.premium_processing_txt
 import bose.ankush.settings.generated.resources.premium_unlock_desc_txt
 import bose.ankush.settings.generated.resources.premium_upgrade_btn_txt
 import bose.ankush.settings.generated.resources.settings_about_header_txt
+import bose.ankush.settings.generated.resources.settings_account_header_txt
 import bose.ankush.settings.generated.resources.settings_language_txt
 import bose.ankush.settings.generated.resources.settings_notifications_txt
 import bose.ankush.settings.generated.resources.settings_preferences_header_txt
@@ -69,13 +72,17 @@ private const val LEGAL_TERMS_OF_USE_URL = "https://data.androidplay.in/wfy/term
 private val PaymentInFlight =
     setOf(PaymentStage.CreatingOrder, PaymentStage.AwaitingPayment, PaymentStage.Verifying)
 
+/** Premium is on: activated on sign-in, or just bought. */
+internal val PaymentUiState.hasPremium: Boolean
+    get() = isPremiumActivated || stage == PaymentStage.Success
+
 /** Active plan with its expiry, or the upgrade pitch. The pitch is the only tappable state. */
 @Composable
 internal fun PremiumCard(
     paymentUiState: PaymentUiState,
     onClick: () -> Unit,
 ) {
-    val isActive = paymentUiState.isPremiumActivated || paymentUiState.stage == PaymentStage.Success
+    val isActive = paymentUiState.hasPremium
     val isProcessing = paymentUiState.loading || paymentUiState.stage in PaymentInFlight
     Column(
         modifier =
@@ -228,6 +235,18 @@ internal fun AboutSection(
 }
 
 @Composable
+internal fun AccountSection(onDeleteAccount: () -> Unit) {
+    SectionCard(title = stringResource(Res.string.settings_account_header_txt)) {
+        SettingsRow(
+            icon = Icons.Outlined.DeleteForever,
+            title = stringResource(Res.string.delete_account_txt),
+            onClick = onDeleteAccount,
+            isDestructive = true,
+        )
+    }
+}
+
+@Composable
 private fun SectionCard(
     title: String,
     content: @Composable ColumnScope.() -> Unit,
@@ -259,7 +278,9 @@ private fun SettingsRow(
     title: String,
     onClick: (() -> Unit)? = null,
     trailingText: String? = null,
+    isDestructive: Boolean = false,
 ) {
+    val tint = if (isDestructive) SettingsDanger else SettingsInkMuted
     Row(
         modifier =
             Modifier
@@ -280,12 +301,12 @@ private fun SettingsRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = SettingsInkMuted,
+            tint = tint,
             modifier = Modifier.size(22.dp),
         )
         Text(
             text = title,
-            color = SettingsInk,
+            color = if (isDestructive) SettingsDanger else SettingsInk,
             fontSize = 15.sp,
             modifier = Modifier.weight(1f),
             maxLines = 2,

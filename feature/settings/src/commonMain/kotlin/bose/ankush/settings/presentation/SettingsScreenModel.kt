@@ -42,6 +42,15 @@ internal class SettingsActions(
     val onOpenWebUrl: (String) -> Unit = {},
     val onCloseWebView: () -> Unit = {},
     val premium: PremiumActions = PremiumActions(),
+    val deleteAccount: DeleteAccountActions = DeleteAccountActions(),
+)
+
+/** The Account section's delete row and its confirmation dialog. */
+internal class DeleteAccountActions(
+    val onOpen: () -> Unit = {},
+    val onClose: () -> Unit = {},
+    val onPasswordEdited: () -> Unit = {},
+    val onConfirm: (password: String) -> Unit = {},
 )
 
 /** The premium card, the plan sheet, and the activation toast. */

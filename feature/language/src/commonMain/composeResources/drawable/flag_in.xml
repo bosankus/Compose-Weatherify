@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><!-- India: saffron, white and green bands with the navy Ashoka Chakra. Square, for a round crop. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF9933"
+        android:pathData="M0,0h24v8h-24z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,8h24v8h-24z" />
+    <path
+        android:fillColor="#138808"
+        android:pathData="M0,16h24v8h-24z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M12,9.2a2.8,2.8 0,1 1,0 5.6a2.8,2.8 0,1 1,0 -5.6z"
+        android:strokeWidth="0.45"
+        android:strokeColor="#000080" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M12,9.2v5.6M9.2,12h5.6M10.02,10.02l3.96,3.96M13.98,10.02l-3.96,3.96M10.93,9.41l2.14,5.18M13.07,9.41l-2.14,5.18M9.41,10.93l5.18,2.14M9.41,13.07l5.18,-2.14"
+        android:strokeWidth="0.25"
+        android:strokeColor="#000080" />
+    <path
+        android:fillColor="#000080"
+        android:pathData="M12,11.45a0.55,0.55 0,1 1,0 1.1a0.55,0.55 0,1 1,0 -1.1z" />
+</vector>

@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
+import bose.ankush.analytics.ErrorReporter
+import bose.ankush.network.model.DeleteAccountResult
 import bose.ankush.network.repository.ServiceRepository
+import bose.ankush.settings.domain.DeleteAccount
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,12 +15,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Settings' MVI ViewModel. Owns premium-sheet/logout-dialog/web-view UI state plus the inline
- * service subscription (plan picker) state, all reduced through [SettingsReducer].
+ * Settings' MVI ViewModel. Owns premium-sheet/logout-dialog/delete-account-dialog/web-view UI
+ * state plus the inline service subscription (plan picker) state, all reduced through
+ * [SettingsReducer].
  */
 internal class SettingsViewModel(
     private val serviceRepository: ServiceRepository,
     private val analyticsTracker: AnalyticsTracker,
+    private val deleteAccount: DeleteAccount,
+    private val errorReporter: ErrorReporter,
 ) : ViewModel() {
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state.asStateFlow()
@@ -36,6 +42,14 @@ internal class SettingsViewModel(
 
             SettingsIntent.OpenLogoutDialog -> dispatch(SettingsAction.OpenLogoutDialog)
             SettingsIntent.CloseLogoutDialog -> dispatch(SettingsAction.CloseLogoutDialog)
+            SettingsIntent.OpenDeleteAccountDialog -> dispatch(SettingsAction.OpenDeleteAccountDialog)
+            SettingsIntent.CloseDeleteAccountDialog ->
+                if (_state.value.deleteAccount?.isDeleting != true) {
+                    dispatch(SettingsAction.CloseDeleteAccountDialog)
+                }
+
+            SettingsIntent.DeleteAccountPasswordEdited -> dispatch(SettingsAction.DeleteAccountErrorCleared)
+            is SettingsIntent.ConfirmDeleteAccount -> confirmDeleteAccount(intent.password)
             SettingsIntent.PremiumActivated -> dispatch(SettingsAction.ShowPremiumActivationToast)
             SettingsIntent.DismissPremiumActivationToast -> dispatch(SettingsAction.DismissPremiumActivationToast)
             is SettingsIntent.OpenWebUrl -> dispatch(SettingsAction.OpenWebUrl(intent.url))
@@ -57,6 +71,46 @@ internal class SettingsViewModel(
 
     private fun dispatch(action: SettingsAction) {
         _state.update { SettingsReducer.reduce(it, action) }
+    }
+
+    private fun confirmDeleteAccount(password: String) {
+        val dialog = _state.value.deleteAccount ?: return
+        if (dialog.isDeleting || password.isEmpty()) return
+        dispatch(SettingsAction.DeleteAccountStarted)
+        viewModelScope.launch {
+            val error =
+                when (val result = deleteAccount(password)) {
+                    // Signed out either way; the app is already on its way to sign-in.
+                    DeleteAccountResult.Deleted, DeleteAccountResult.SessionExpired -> null
+                    DeleteAccountResult.IncorrectPassword -> DeleteAccountError.INCORRECT_PASSWORD
+                    DeleteAccountResult.RateLimited -> DeleteAccountError.RATE_LIMITED
+                    DeleteAccountResult.InvalidRequest -> {
+                        errorReporter.recordError(
+                            IllegalStateException("DELETE /account rejected the request body"),
+                            "Delete account validation failed",
+                        )
+                        DeleteAccountError.GENERIC
+                    }
+
+                    is DeleteAccountResult.Failed -> {
+                        // Transport failures are already reported by the HTTP client.
+                        if (result.cause == null) {
+                            errorReporter.recordError(
+                                IllegalStateException("DELETE /account failed on the server"),
+                                "Delete account failed",
+                            )
+                        }
+                        DeleteAccountError.RETRY
+                    }
+                }
+            dispatch(
+                if (error == null) {
+                    SettingsAction.CloseDeleteAccountDialog
+                } else {
+                    SettingsAction.DeleteAccountFailed(error)
+                },
+            )
+        }
     }
 
     private fun loadServices() {

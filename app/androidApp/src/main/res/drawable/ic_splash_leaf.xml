@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><!-- The Weatherify leaf for the system splash. Same curves as the in-app leaf, in the middle of the 288dp splash canvas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="288"
+    android:viewportHeight="288">
+    <path
+        android:fillColor="#F2FFFFFF"
+        android:pathData="M117.12,170.88C107.52,132.48 139.2,110.4 174.72,113.28C177.6,148.8 151.68,180.48 117.12,170.88Z" />
+    <path
+        android:pathData="M105.6,182.4L155.52,132.48"
+        android:strokeWidth="4"
+        android:strokeColor="#FF616761"
+        android:strokeLineCap="round" />
+</vector>

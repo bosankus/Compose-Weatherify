@@ -26,6 +26,7 @@
     <string name="auth_error_server">We’re having trouble on our end. Please try again in a few minutes.</string>
     <string name="auth_error_credentials">Incorrect email or password.</string>
     <string name="auth_error_generic">Something went wrong. Please try again.</string>
+    <string name="auth_account_deleted">Your account has been deleted.</string>
     <string name="login_welcome_headline">The sky, calmly told.</string>
     <string name="login_welcome_tagline">Forecasts, places and alerts in one quiet place.</string>
     <string name="login_photo_credit">Photo by %1$s on Unsplash</string>

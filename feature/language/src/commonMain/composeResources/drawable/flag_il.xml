@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Israel: white field, two blue bands and the Star of David. Square, for a round crop. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,0h24v24h-24z" />
+    <path
+        android:fillColor="#0038B8"
+        android:pathData="M0,4h24v2.6h-24z" />
+    <path
+        android:fillColor="#0038B8"
+        android:pathData="M0,17.4h24v2.6h-24z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M12,8.2L15.29,13.9L8.71,13.9z"
+        android:strokeWidth="0.7"
+        android:strokeColor="#0038B8"
+        android:strokeLineJoin="miter" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M12,15.8L8.71,10.1L15.29,10.1z"
+        android:strokeWidth="0.7"
+        android:strokeColor="#0038B8"
+        android:strokeLineJoin="miter" />
+</vector>

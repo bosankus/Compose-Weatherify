@@ -12,6 +12,18 @@ internal sealed interface SettingsAction {
 
     data object CloseLogoutDialog : SettingsAction
 
+    data object OpenDeleteAccountDialog : SettingsAction
+
+    data object CloseDeleteAccountDialog : SettingsAction
+
+    data object DeleteAccountErrorCleared : SettingsAction
+
+    data object DeleteAccountStarted : SettingsAction
+
+    data class DeleteAccountFailed(
+        val error: DeleteAccountError,
+    ) : SettingsAction
+
     data object ShowPremiumActivationToast : SettingsAction
 
     data object DismissPremiumActivationToast : SettingsAction

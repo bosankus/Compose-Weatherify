@@ -156,4 +156,9 @@ sealed interface AnalyticsEvent {
         override val firebaseName = "logout"
         override val params get() = emptyMap<String, Any?>()
     }
+
+    data object AccountDeleted : AnalyticsEvent {
+        override val firebaseName = "account_deleted"
+        override val params get() = emptyMap<String, Any?>()
+    }
 }

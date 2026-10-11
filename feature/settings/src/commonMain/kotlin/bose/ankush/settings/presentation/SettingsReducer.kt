@@ -14,6 +14,19 @@ internal object SettingsReducer {
 
             SettingsAction.CloseLogoutDialog -> state.copy(showLogoutDialog = false)
 
+            SettingsAction.OpenDeleteAccountDialog -> state.copy(deleteAccount = DeleteAccountState())
+
+            SettingsAction.CloseDeleteAccountDialog -> state.copy(deleteAccount = null)
+
+            SettingsAction.DeleteAccountErrorCleared ->
+                state.copy(deleteAccount = state.deleteAccount?.copy(error = null))
+
+            SettingsAction.DeleteAccountStarted ->
+                state.copy(deleteAccount = DeleteAccountState(isDeleting = true))
+
+            is SettingsAction.DeleteAccountFailed ->
+                state.copy(deleteAccount = DeleteAccountState(error = action.error))
+
             SettingsAction.ShowPremiumActivationToast -> state.copy(showPremiumActivationToast = true)
 
             SettingsAction.DismissPremiumActivationToast -> state.copy(showPremiumActivationToast = false)

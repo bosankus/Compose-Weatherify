@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Single-colour leaf for themed icons (Android 13+). The vein is cut out of the leaf. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FF000000"
+        android:fillType="evenOdd"
+        android:pathData="M38.32,69.68C32.72,47.28 51.2,34.4 71.92,36.08C73.6,56.8 58.48,75.28 38.32,69.68ZM30.75,75.55L59.87,46.43L61.57,48.13L32.45,77.25Z" />
+</vector>

@@ -27,8 +27,17 @@ suspend fun HttpClient.authorizedRequest(
         return response
     }
 
+    // Reacts to 401 only: a 403 (e.g. a wrong password on DELETE /account) never refreshes or
+    // signs out. At most one refresh and one replay per call, so a 401 can't loop.
     return when (val result = tokenManager.handleUnauthorized()) {
-        is TokenResult.Valid -> block(authHeader(result.token))
+        is TokenResult.Valid -> {
+            val retried = block(authHeader(result.token))
+            // A fresh token that is still refused means the account itself is gone or
+            // deactivated; refreshing again would only repeat this.
+            if (retried.status == HttpStatusCode.Unauthorized) endSession(tokenManager)
+            retried
+        }
+
         is TokenResult.Error -> {
             AuthEventBus.tryEmit(
                 AuthEvent.Unauthorized(
@@ -39,13 +48,17 @@ suspend fun HttpClient.authorizedRequest(
         }
 
         is TokenResult.InvalidToken, is TokenResult.NoToken -> {
-            tokenManager.forceLogout()
-            AuthEventBus.tryEmit(
-                AuthEvent.Unauthorized(
-                    "For security, please log in again to continue using the app.",
-                ),
-            )
+            endSession(tokenManager)
             response
         }
     }
+}
+
+private suspend fun endSession(tokenManager: TokenManager) {
+    tokenManager.forceLogout()
+    AuthEventBus.tryEmit(
+        AuthEvent.Unauthorized(
+            "For security, please log in again to continue using the app.",
+        ),
+    )
 }

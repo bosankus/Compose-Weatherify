@@ -1,0 +1,10 @@
+<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+    <!-- Generated from feature/language/.../drawable/flag_il.xml. -->
+    <path d="M0,0h24v24h-24z" fill="#FFFFFF" />
+    <path d="M0,4h24v2.6h-24z" fill="#0038B8" />
+    <path d="M0,17.4h24v2.6h-24z" fill="#0038B8" />
+    <path d="M12,8.2L15.29,13.9L8.71,13.9z" fill="none" stroke="#0038B8" stroke-linejoin="miter"
+        stroke-width="0.7" />
+    <path d="M12,15.8L8.71,10.1L15.29,10.1z" fill="none" stroke="#0038B8" stroke-linejoin="miter"
+        stroke-width="0.7" />
+</svg>

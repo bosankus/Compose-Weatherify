@@ -18,4 +18,9 @@ sealed interface AuthState {
     data class SessionExpired(
         val message: String,
     ) : AuthState
+
+    /** The account was deleted from Settings; sign-in shows [message]. */
+    data class AccountDeleted(
+        val message: String,
+    ) : AuthState
 }

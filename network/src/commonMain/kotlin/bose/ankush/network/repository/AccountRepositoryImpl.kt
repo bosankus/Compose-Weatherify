@@ -3,6 +3,7 @@ package bose.ankush.network.repository
 import bose.ankush.network.api.AccountApiService
 import bose.ankush.network.model.Account
 import bose.ankush.network.model.ApiResponse
+import bose.ankush.network.model.DeleteAccountResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +44,20 @@ class AccountRepositoryImpl(
                 _account.value?.photoUrl?.let { photoStore?.remove(it) }
                 _account.update { it?.copy(photoUrl = null) }
             }
+
+    @Suppress("TooGenericExceptionCaught")
+    override suspend fun deleteAccount(password: String): DeleteAccountResult {
+        val result =
+            try {
+                apiService.deleteAccount(password)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                DeleteAccountResult.Failed(e)
+            }
+        if (result == DeleteAccountResult.Deleted) clear()
+        return result
+    }
 
     override fun clear() {
         _account.value = null

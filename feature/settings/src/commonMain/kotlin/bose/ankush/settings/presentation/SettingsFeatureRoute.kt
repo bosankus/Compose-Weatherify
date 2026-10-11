@@ -66,6 +66,8 @@ import bose.ankush.settings.generated.resources.profile_remove_photo_title_txt
 import bose.ankush.settings.generated.resources.profile_remove_photo_txt
 import bose.ankush.settings.generated.resources.profile_title
 import bose.ankush.settings.presentation.component.AboutSection
+import bose.ankush.settings.presentation.component.AccountSection
+import bose.ankush.settings.presentation.component.DeleteAccountDialog
 import bose.ankush.settings.presentation.component.PreferencesSection
 import bose.ankush.settings.presentation.component.PremiumCard
 import bose.ankush.settings.presentation.component.ProfileHeader
@@ -77,6 +79,7 @@ import bose.ankush.settings.presentation.component.SettingsDanger
 import bose.ankush.settings.presentation.component.SettingsInk
 import bose.ankush.settings.presentation.component.SettingsInkMuted
 import bose.ankush.settings.presentation.component.SettingsSurface
+import bose.ankush.settings.presentation.component.hasPremium
 import bose.ankush.settings.presentation.profile.PhotoOperation
 import bose.ankush.settings.presentation.profile.ProfileIntent
 import bose.ankush.settings.presentation.profile.ProfileMessage
@@ -200,6 +203,13 @@ fun SettingsFeatureRoute(
                 onCloseLogoutDialog = { viewModel.processIntent(SettingsIntent.CloseLogoutDialog) },
                 onOpenWebUrl = { url -> viewModel.processIntent(SettingsIntent.OpenWebUrl(url)) },
                 onCloseWebView = { viewModel.processIntent(SettingsIntent.CloseWebView) },
+                deleteAccount =
+                    DeleteAccountActions(
+                        onOpen = { viewModel.processIntent(SettingsIntent.OpenDeleteAccountDialog) },
+                        onClose = { viewModel.processIntent(SettingsIntent.CloseDeleteAccountDialog) },
+                        onPasswordEdited = { viewModel.processIntent(SettingsIntent.DeleteAccountPasswordEdited) },
+                        onConfirm = { viewModel.processIntent(SettingsIntent.ConfirmDeleteAccount(it)) },
+                    ),
                 premium =
                     PremiumActions(
                         onOpenSheet = { viewModel.processIntent(SettingsIntent.OpenPremiumSheet) },
@@ -288,6 +298,7 @@ internal fun SettingsScreenContent(
                             onUrlClick = actions.onOpenWebUrl,
                         )
                     }
+                    item { AccountSection(onDeleteAccount = actions.deleteAccount.onOpen) }
                     item {
                         TextButton(
                             onClick = actions.onOpenLogoutDialog,
@@ -315,6 +326,17 @@ internal fun SettingsScreenContent(
                     enabled = !model.isLoggingOut,
                     onConfirm = actions.onLogout,
                     onDismiss = actions.onCloseLogoutDialog,
+                )
+            }
+
+            val deleteAccount = state.deleteAccount
+            if (deleteAccount != null) {
+                DeleteAccountDialog(
+                    state = deleteAccount,
+                    isPremium = model.paymentUiState.hasPremium,
+                    onPasswordEdited = actions.deleteAccount.onPasswordEdited,
+                    onConfirm = actions.deleteAccount.onConfirm,
+                    onDismiss = actions.deleteAccount.onClose,
                 )
             }
 
@@ -567,6 +589,34 @@ private fun SettingsScreenContentLogoutDialogPreview() {
     MaterialTheme {
         Surface {
             previewNoOpContent(state = SettingsState(showLogoutDialog = true))()
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenContentDeleteAccountPremiumPreview() {
+    MaterialTheme {
+        Surface {
+            previewNoOpContent(
+                paymentUiState = PaymentUiState(isPremiumActivated = true),
+                state = SettingsState(deleteAccount = DeleteAccountState()),
+            )()
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsScreenContentDeleteAccountWrongPasswordPreview() {
+    MaterialTheme {
+        Surface {
+            previewNoOpContent(
+                state =
+                    SettingsState(
+                        deleteAccount = DeleteAccountState(error = DeleteAccountError.INCORRECT_PASSWORD),
+                    ),
+            )()
         }
     }
 }

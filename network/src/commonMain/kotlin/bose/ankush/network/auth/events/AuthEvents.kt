@@ -12,6 +12,9 @@ sealed class AuthEvent {
     data class Unauthorized(
         val message: String,
     ) : AuthEvent()
+
+    /** DELETE /account succeeded. The app clears everything local and returns to sign-in. */
+    data object AccountDeleted : AuthEvent()
 }
 
 object AuthEventBus {

@@ -53,12 +53,14 @@ import bose.ankush.payment.presentation.PaymentViewModel
 import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.weatherify.BuildConfig
 import bose.ankush.weatherify.base.common.startInAppUpdate
+import com.google.firebase.messaging.FirebaseMessaging
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
 import org.koin.android.ext.android.inject
+import timber.log.Timber
 import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 
 @ExperimentalCoroutinesApi
@@ -180,6 +182,11 @@ class MainActivity :
                     authViewModel.processIntent(AuthIntent.Reset)
                 }
 
+                is AuthState.AccountDeleted -> {
+                    onShowToast(authState.message, "Account deleted", ToastType.SUCCESS)
+                    authViewModel.processIntent(AuthIntent.Reset)
+                }
+
                 else -> Unit
             }
         }
@@ -196,6 +203,12 @@ class MainActivity :
                     AuthEffect.LoggedOut -> {
                         homeSessionCleaner.clearOnLogout()
                         premiumStorage.savePremiumStatus(isPremium = false, expiryMillis = null)
+                    }
+
+                    AuthEffect.AccountDeleted -> {
+                        homeSessionCleaner.clearOnLogout()
+                        premiumStorage.savePremiumStatus(isPremium = false, expiryMillis = null)
+                        clearAccountBoundDeviceState()
                     }
                 }
             }
@@ -287,6 +300,24 @@ class MainActivity :
                 isLoading = authState is AuthState.Loading,
             )
         }
+    }
+
+    /**
+     * What a deleted account leaves on the device beyond the session: the push token the server
+     * stored at registration (rotated so it can't reach this device again) and Razorpay's
+     * remembered checkout details.
+     */
+    private fun clearAccountBoundDeviceState() {
+        FirebaseMessaging
+            .getInstance()
+            .deleteToken()
+            .addOnFailureListener {
+                Timber.w(
+                    it,
+                    "Couldn't rotate the FCM token after account deletion"
+                )
+            }
+        Checkout.clearUserData(applicationContext)
     }
 
     override fun onResume() {

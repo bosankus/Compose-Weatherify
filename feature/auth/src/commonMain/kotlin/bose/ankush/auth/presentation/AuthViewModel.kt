@@ -7,6 +7,7 @@ import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.analytics.ErrorReporter
 import bose.ankush.auth.domain.DeviceInfoProvider
 import bose.ankush.auth.generated.resources.Res
+import bose.ankush.auth.generated.resources.auth_account_deleted
 import bose.ankush.auth.generated.resources.auth_error_generic
 import bose.ankush.network.auth.events.AuthEvent
 import bose.ankush.network.auth.events.AuthEventBus
@@ -61,13 +62,21 @@ class AuthViewModel(
 
         viewModelScope.launch {
             AuthEventBus.events.collect { event ->
-                if (event is AuthEvent.Unauthorized) {
-                    _authState.update {
-                        AuthState.SessionExpired(
-                            event.message.ifBlank {
-                                "You need to log in again to continue using the app for security purposes."
-                            },
-                        )
+                when (event) {
+                    is AuthEvent.Unauthorized ->
+                        _authState.update {
+                            AuthState.SessionExpired(
+                                event.message.ifBlank {
+                                    "You need to log in again to continue using the app for security purposes."
+                                },
+                            )
+                        }
+
+                    AuthEvent.AccountDeleted -> {
+                        analyticsTracker.track(AnalyticsEvent.AccountDeleted)
+                        _effect.trySend(AuthEffect.AccountDeleted)
+                        _authState.value =
+                            AuthState.AccountDeleted(getString(Res.string.auth_account_deleted))
                     }
                 }
             }

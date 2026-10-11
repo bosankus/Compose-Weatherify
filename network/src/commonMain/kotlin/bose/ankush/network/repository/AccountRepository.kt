@@ -1,6 +1,7 @@
 package bose.ankush.network.repository
 
 import bose.ankush.network.model.Account
+import bose.ankush.network.model.DeleteAccountResult
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -24,6 +25,13 @@ interface AccountRepository {
 
     /** DELETE /account/photo, then clears the photo on [account]. */
     suspend fun deletePhoto(): Result<Unit>
+
+    /**
+     * DELETE /account. On [DeleteAccountResult.Deleted] the cached account and photo are cleared;
+     * the token and the rest of local data are the caller's to clear. Never throws, except to
+     * cancel.
+     */
+    suspend fun deleteAccount(password: String): DeleteAccountResult
 
     /** Forgets the cached account, on logout. */
     fun clear()

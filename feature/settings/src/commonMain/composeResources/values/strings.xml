@@ -47,4 +47,17 @@
     <string name="profile_edit_photo_content_desc">Change profile photo</string>
     <string name="settings_preferences_header_txt">Preferences</string>
     <string name="settings_about_header_txt">About</string>
+    <string name="settings_account_header_txt">Account</string>
+    <string name="delete_account_txt">Delete account</string>
+    <string name="delete_account_title_txt">Delete your account?</string>
+    <string name="delete_account_warning_txt">This permanently deletes your account, saved places and personal data. This can’t be undone.</string>
+    <string name="delete_account_premium_warning_txt">Your premium access ends immediately and any remaining time is not refunded.</string>
+    <string name="delete_account_records_txt">We keep payment records as required by law. Everything else is deleted.</string>
+    <string name="delete_account_password_label">Current password</string>
+    <string name="delete_account_show_password_content_desc">Show password</string>
+    <string name="delete_account_hide_password_content_desc">Hide password</string>
+    <string name="delete_account_error_password_txt">Incorrect password</string>
+    <string name="delete_account_error_rate_limited_txt">Too many attempts, try again in a minute.</string>
+    <string name="delete_account_error_generic_txt">Something went wrong. Please try again.</string>
+    <string name="delete_account_error_retry_txt">Couldn’t delete your account. Check your connection and try again.</string>
 </resources>

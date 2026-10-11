@@ -9,4 +9,10 @@ sealed interface AuthEffect {
 
     /** Emitted after a successful logout — callers should clear local weather data and prefs. */
     object LoggedOut : AuthEffect
+
+    /**
+     * Emitted once the server has deleted the account. Callers clear everything [LoggedOut] does,
+     * plus anything else tied to the account (push token, checkout prefill).
+     */
+    object AccountDeleted : AuthEffect
 }
