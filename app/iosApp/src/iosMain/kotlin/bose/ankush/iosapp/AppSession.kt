@@ -10,6 +10,7 @@ import bose.ankush.auth.presentation.AuthIntent
 import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.home.HomeSessionCleaner
+import bose.ankush.home.PlaceEventSyncTrigger
 import bose.ankush.iosapp.payment.RazorpayCheckoutBridge
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
@@ -27,7 +28,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
+import platform.Foundation.NSNotificationCenter
+import platform.Foundation.NSOperationQueue
 import platform.UIKit.UIApplication
+import platform.UIKit.UIApplicationWillEnterForegroundNotification
 import platform.UIKit.UIViewController
 
 /**
@@ -103,6 +107,21 @@ class AppSession :
                 .collect { auth.processIntent(AuthIntent.Reset) }
         }
         auth.processIntent(AuthIntent.RefreshToken)
+        startPlaceEventSync()
+    }
+
+    /**
+     * Place-event sync on iOS: once at launch and whenever the app returns to the foreground.
+     * No background tasks. The observer lives as long as this app-wide session.
+     */
+    private fun startPlaceEventSync() {
+        val placeEventSync = get<PlaceEventSyncTrigger>()
+        placeEventSync.requestSync()
+        NSNotificationCenter.defaultCenter.addObserverForName(
+            name = UIApplicationWillEnterForegroundNotification,
+            `object` = null,
+            queue = NSOperationQueue.mainQueue,
+        ) { _ -> placeEventSync.requestSync() }
     }
 
     private fun launchCheckout(effect: PaymentEffect.LaunchCheckout) {
