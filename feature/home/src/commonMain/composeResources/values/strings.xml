@@ -78,6 +78,11 @@
     <string name="event_title_hint">What’s happening?</string>
     <string name="event_date_hint">YYYY-MM-DD</string>
     <string name="event_time_hint">HH:MM</string>
+    <string name="event_note_hint">Note (optional)</string>
+    <string name="event_date_pick">Pick a date</string>
+    <string name="event_time_pick">Pick a time</string>
+    <string name="event_picker_confirm">OK</string>
+    <string name="event_picker_cancel">Cancel</string>
     <string name="event_save_action">Save event</string>
     <string name="event_saving">Saving…</string>
 </resources>
