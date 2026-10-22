@@ -10,6 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
@@ -56,24 +57,55 @@ class PlaceEventSyncWorkTest {
 
     @Test
     fun aRunRetriesOnlyWhenTheEngineAsksAndAttemptsRemain() {
-        val failed = report(PlaceEventSyncOutcome.SERVER_ERROR, retryAfter = true)
-        val done = report(PlaceEventSyncOutcome.COMPLETED, retryAfter = false)
+        val failed = report(PlaceEventSyncOutcome.SERVER_ERROR, retryAfter = 2.seconds)
+        val done = report(PlaceEventSyncOutcome.COMPLETED, retryAfter = null)
 
-        assertEquals(WorkOutcome.RETRY, PlaceEventSyncWork.outcomeFor(failed, runAttemptCount = 0))
-        assertEquals(WorkOutcome.RETRY, PlaceEventSyncWork.outcomeFor(failed, runAttemptCount = 4))
-        assertEquals(WorkOutcome.SUCCESS, PlaceEventSyncWork.outcomeFor(failed, runAttemptCount = 5))
-        assertEquals(WorkOutcome.SUCCESS, PlaceEventSyncWork.outcomeFor(done, runAttemptCount = 0))
-        assertEquals(WorkOutcome.SUCCESS, PlaceEventSyncWork.outcomeFor(null, runAttemptCount = 0))
+        assertEquals(WorkOutcome.Retry, PlaceEventSyncWork.outcomeFor(failed, runAttemptCount = 0))
+        assertEquals(WorkOutcome.Retry, PlaceEventSyncWork.outcomeFor(failed, runAttemptCount = 4))
+        assertEquals(WorkOutcome.Success, PlaceEventSyncWork.outcomeFor(failed, runAttemptCount = 5))
+        assertEquals(WorkOutcome.Success, PlaceEventSyncWork.outcomeFor(done, runAttemptCount = 0))
+        assertEquals(WorkOutcome.Success, PlaceEventSyncWork.outcomeFor(null, runAttemptCount = 0))
     }
+
+    @Test
+    fun aRetryAfterLongerThanTheNextBackoffReschedulesTheOneTimeJob() {
+        val limited = rateLimited(serverRetryAfter = 120.seconds)
+
+        assertEquals(WorkOutcome.Reschedule(120.seconds), PlaceEventSyncWork.outcomeFor(limited, runAttemptCount = 0))
+        assertEquals(WorkOutcome.Reschedule(120.seconds), PlaceEventSyncWork.outcomeFor(limited, runAttemptCount = 1))
+    }
+
+    @Test
+    fun aRetryAfterWithinTheNextBackoffUsesWorkManagersRetry() {
+        assertEquals(WorkOutcome.Retry, PlaceEventSyncWork.outcomeFor(rateLimited(20.seconds), runAttemptCount = 0))
+        assertEquals(WorkOutcome.Retry, PlaceEventSyncWork.outcomeFor(rateLimited(30.seconds), runAttemptCount = 0))
+        // Run 2 retries after 120 s, which already covers a 100 s Retry-After.
+        assertEquals(WorkOutcome.Retry, PlaceEventSyncWork.outcomeFor(rateLimited(100.seconds), runAttemptCount = 2))
+        // A 429 without Retry-After, and a server error, stay on the backoff.
+        assertEquals(WorkOutcome.Retry, PlaceEventSyncWork.outcomeFor(rateLimited(null), runAttemptCount = 0))
+        assertEquals(WorkOutcome.Success, PlaceEventSyncWork.outcomeFor(rateLimited(600.seconds), runAttemptCount = 5))
+    }
+
+    @Test
+    fun theBackoffMatchesWorkManagersExponentialPolicy() {
+        assertEquals(30.seconds, PlaceEventSyncWork.backoffAfter(0))
+        assertEquals(60.seconds, PlaceEventSyncWork.backoffAfter(1))
+        assertEquals(240.seconds, PlaceEventSyncWork.backoffAfter(3))
+        assertEquals(5.hours, PlaceEventSyncWork.backoffAfter(30))
+    }
+
+    private fun rateLimited(serverRetryAfter: Duration?) =
+        PlaceEventSyncReport(
+            PlaceEventSyncOutcome.RATE_LIMITED,
+            requests = 1,
+            pushed = 0,
+            pulled = 0,
+            retryAfter = serverRetryAfter ?: 2.seconds,
+            serverRetryAfter = serverRetryAfter,
+        )
 
     private fun report(
         outcome: PlaceEventSyncOutcome,
-        retryAfter: Boolean,
-    ) = PlaceEventSyncReport(
-        outcome,
-        requests = 1,
-        pushed = 0,
-        pulled = 0,
-        retryAfter = if (retryAfter) 2.seconds else null,
-    )
+        retryAfter: Duration?,
+    ) = PlaceEventSyncReport(outcome, requests = 1, pushed = 0, pulled = 0, retryAfter = retryAfter)
 }

@@ -10,6 +10,8 @@ import org.koin.core.context.GlobalContext
  * Runs one place-event sync for WorkManager through the app's Koin graph. Created by the default
  * WorkerFactory (no custom WorkManager configuration needed): it only reads Koin when it runs,
  * and retries if Koin is not started yet (a run started before `Application.onCreate` finished).
+ * A failed run retries on WorkManager's backoff, or after a longer 429 `Retry-After`
+ * ([PlaceEventSyncWork.outcomeFor]).
  */
 internal class PlaceEventSyncWorker(
     context: Context,
@@ -18,8 +20,15 @@ internal class PlaceEventSyncWorker(
     override suspend fun doWork(): Result {
         val scheduler =
             GlobalContext.getOrNull()?.getOrNull<WorkManagerPlaceEventSyncScheduler>() ?: return Result.retry()
-        val outcome = PlaceEventSyncWork.outcomeFor(syncQuietly(scheduler), runAttemptCount)
-        return if (outcome == WorkOutcome.RETRY) Result.retry() else Result.success()
+        return when (val outcome = PlaceEventSyncWork.outcomeFor(syncQuietly(scheduler), runAttemptCount)) {
+            WorkOutcome.Success -> Result.success()
+            WorkOutcome.Retry -> Result.retry()
+            is WorkOutcome.Reschedule -> {
+                // A long Retry-After: start over after it rather than on the shorter backoff.
+                scheduler.retryLater(outcome.delay)
+                Result.success()
+            }
+        }
     }
 
     /** A run that throws (e.g. a storage error) counts as a failed run; cancellation (REPLACE) is not caught. */
