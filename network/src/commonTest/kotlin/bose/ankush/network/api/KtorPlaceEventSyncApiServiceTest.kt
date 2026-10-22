@@ -95,11 +95,37 @@ class KtorPlaceEventSyncApiServiceTest {
         }
 
     @Test
-    fun aConflictWrappedInCurrentIsReadToo() =
+    fun aConflictIsReadOnlyAsTheDtoDirectlyInData() =
         runTest {
             reply = { json(HttpStatusCode.Conflict, envelope("{\"current\":$DTO}", status = false)) }
 
-            assertEquals(ID, api.update(ID, UpdatePlaceEventBody("H", 1.0, 2.0, "L", T1)).data?.id)
+            assertNull(api.update(ID, UpdatePlaceEventBody("H", 1.0, 2.0, "L", T1)).data)
+        }
+
+    @Test
+    fun aBadRequestCarriesTheServerMessage() =
+        runTest {
+            reply = { json(HttpStatusCode.BadRequest, envelope("null", status = false, message = "title is required")) }
+
+            val post = api.create(CREATE)
+            val put = api.update(ID, UpdatePlaceEventBody("H", 1.0, 2.0, "", T1))
+
+            assertEquals(400, post.statusCode)
+            assertEquals("title is required", post.message)
+            assertNull(post.data)
+            assertEquals("title is required", put.message)
+        }
+
+    @Test
+    fun aBodyThatIsNotAnEnvelopeHasNoMessage() =
+        runTest {
+            reply = { respond("<html>busy</html>", HttpStatusCode.ServiceUnavailable) }
+
+            val result = api.changes(since = "c1")
+
+            assertEquals(503, result.statusCode)
+            assertNull(result.message)
+            assertNull(result.data)
         }
 
     @Test
@@ -111,6 +137,7 @@ class KtorPlaceEventSyncApiServiceTest {
 
             assertEquals(HttpMethod.Delete, requests.single().method)
             assertEquals(404, result.statusCode)
+            assertEquals("m", result.message)
         }
 
     @Test
@@ -172,7 +199,8 @@ class KtorPlaceEventSyncApiServiceTest {
     private fun envelope(
         data: String,
         status: Boolean = true,
-    ) = "{\"status\":$status,\"message\":\"m\",\"data\":$data}"
+        message: String = "m",
+    ) = "{\"status\":$status,\"message\":\"$message\",\"data\":$data}"
 
     private companion object {
         const val ID = "0b5d8a8e-5a3c-4c4f-9a0e-2f6f7f1d2c3b"

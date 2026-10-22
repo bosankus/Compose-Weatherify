@@ -63,11 +63,13 @@ data class PlaceEventSyncPage(
 
 /**
  * A sync call's HTTP outcome. [statusCode] decides what the caller does (201/200/204/400/404/409/429);
- * [data] is the envelope's `data` when it parsed, and [retryAfterSeconds] is a numeric
- * `Retry-After` header, if any.
+ * [data] is the envelope's `data` when it parsed (for a 409, the current server copy),
+ * [retryAfterSeconds] is a numeric `Retry-After` header, and [message] is the envelope's
+ * `message` (the reason for a 400), if any.
  */
 data class PlaceEventApiResult<out T>(
     val statusCode: Int,
     val data: T? = null,
     val retryAfterSeconds: Long? = null,
+    val message: String? = null,
 )

@@ -12,10 +12,16 @@ import bose.ankush.network.model.UpdatePlaceEventBody
  * The JWT is attached by [bose.ankush.network.auth.interceptor.authorizedRequest].
  */
 interface PlaceEventSyncApiService {
-    /** POST /place-events: 201 created, 200 already exists (maybe a tombstone), 404 foreign id, 400 bad id. */
+    /**
+     * POST /place-events: 201 created, 200 already exists (maybe a tombstone), 404 foreign id,
+     * 400 rejected ([PlaceEventApiResult.message] says why).
+     */
     suspend fun create(body: CreatePlaceEventBody): PlaceEventApiResult<PlaceEventDto>
 
-    /** PUT /place-events/{id}: 200 updated, 409 conflict ([PlaceEventApiResult.data] is the server copy), 404 gone. */
+    /**
+     * PUT /place-events/{id}: 200 updated, 409 conflict ([PlaceEventApiResult.data] is the current
+     * server copy), 404 gone, 400 rejected.
+     */
     suspend fun update(
         id: String,
         body: UpdatePlaceEventBody,
@@ -24,6 +30,9 @@ interface PlaceEventSyncApiService {
     /** DELETE /place-events/{id}: 204 deleted, 404 unknown or already gone. */
     suspend fun delete(id: String): PlaceEventApiResult<Unit>
 
-    /** GET /place-events/sync?since=: changes after [since] (null = from the beginning), tombstones included. */
+    /**
+     * GET /place-events/sync?since=: changes after [since] (null = from the beginning), tombstones
+     * included. 400: the server does not accept [since] as a cursor.
+     */
     suspend fun changes(since: String?): PlaceEventApiResult<PlaceEventSyncPage>
 }
