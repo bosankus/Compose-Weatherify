@@ -61,11 +61,12 @@ class AccountRepositoryImplTest {
     @Test
     fun aFailedUploadLeavesTheCachedPhoto() =
         runTest {
-            api.account = ApiResponse(
-                status = true,
-                message = "ok",
-                data = Account("a@b.c", "https://signed/old")
-            )
+            api.account =
+                ApiResponse(
+                    status = true,
+                    message = "ok",
+                    data = Account("a@b.c", "https://signed/old"),
+                )
             repository.getAccount()
             api.upload = ApiResponse(status = false, message = "Photo exceeds 5MB limit")
 
@@ -80,11 +81,12 @@ class AccountRepositoryImplTest {
     @Test
     fun deleteClearsThePhotoAndClearForgetsTheAccount() =
         runTest {
-            api.account = ApiResponse(
-                status = true,
-                message = "ok",
-                data = Account("a@b.c", "https://signed/old")
-            )
+            api.account =
+                ApiResponse(
+                    status = true,
+                    message = "ok",
+                    data = Account("a@b.c", "https://signed/old"),
+                )
             repository.getAccount()
 
             repository.deletePhoto().getOrThrow()
