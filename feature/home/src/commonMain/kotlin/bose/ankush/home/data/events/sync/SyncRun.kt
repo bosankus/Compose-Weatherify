@@ -24,7 +24,8 @@ internal class SyncRun(
 
     /**
      * Sends one request if the run may still send. Returns null, and stops the run, on the
-     * request cap, a transport failure, 401/403, 429 or 5xx; any other status is the caller's.
+     * request cap, a transport failure or 408 (both offline), 401/403, 429 or 5xx; any other
+     * status is the caller's.
      */
     suspend fun <T> call(block: suspend () -> PlaceEventApiResult<T>): PlaceEventApiResult<T>? {
         if (stopReason == null && requests >= maxRequests) stopReason = PlaceEventSyncOutcome.REQUEST_CAP
@@ -59,6 +60,8 @@ internal class SyncRun(
         when (status) {
             HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> PlaceEventSyncOutcome.UNAUTHORIZED
             HTTP_TOO_MANY_REQUESTS -> PlaceEventSyncOutcome.RATE_LIMITED
+            // A request timeout is transient, like a dropped connection: retried with backoff.
+            HTTP_REQUEST_TIMEOUT -> PlaceEventSyncOutcome.OFFLINE
             in HTTP_SERVER_ERRORS -> PlaceEventSyncOutcome.SERVER_ERROR
             else -> null
         }
@@ -70,7 +73,9 @@ internal const val HTTP_NO_CONTENT = 204
 internal const val HTTP_BAD_REQUEST = 400
 internal const val HTTP_NOT_FOUND = 404
 internal const val HTTP_CONFLICT = 409
+internal val HTTP_CLIENT_ERRORS = 400..499
 private const val HTTP_UNAUTHORIZED = 401
 private const val HTTP_FORBIDDEN = 403
+private const val HTTP_REQUEST_TIMEOUT = 408
 private const val HTTP_TOO_MANY_REQUESTS = 429
 private val HTTP_SERVER_ERRORS = 500..599

@@ -58,7 +58,10 @@ internal class LocalFirstPlaceEventsRepository(
     ): Result<PlaceEventItem> =
         write {
             lock.withLock {
-                val existing = storage.getEvent(id)?.takeIf { it.syncState != PlaceEventSyncState.PENDING_DELETE }
+                val existing =
+                    storage.getEvent(id)?.takeIf {
+                        it.syncState != PlaceEventSyncState.PENDING_DELETE && it.deletedAt == null
+                    }
                 val updated =
                     requireNotNull(existing) { "No event $id to edit." }
                         .withInput(input)

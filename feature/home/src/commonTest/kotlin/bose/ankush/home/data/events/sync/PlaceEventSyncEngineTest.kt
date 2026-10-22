@@ -321,6 +321,88 @@ class PlaceEventSyncEngineTest {
         }
 
     @Test
+    fun aDelete4xxMarksTheRowFailedKeepsItHiddenAndStopsRetrying() =
+        runTest {
+            storage.saveEvent(localRecord("a", PENDING_DELETE, serverUpdatedAt = T_SERVER).copy(deletedAt = T_SERVER))
+            api.onDelete = { PlaceEventApiResult(400, message = "id must be a UUID string") }
+
+            val report = engine.sync()
+
+            assertEquals(FAILED, storage.row("a")?.syncState)
+            assertEquals("id must be a UUID string", storage.row("a")?.syncError)
+            assertEquals(T_SERVER, storage.row("a")?.deletedAt)
+            assertTrue(repository.observeEvents(EventArea(input.point)).first().isEmpty())
+            assertEquals(PlaceEventSyncOutcome.COMPLETED, report.outcome)
+
+            api.calls.clear()
+            engine.sync()
+
+            assertTrue(api.calls.none { it.startsWith("DELETE") })
+        }
+
+    @Test
+    fun aDelete4xxWithoutAMessageGetsAGenericOne() =
+        runTest {
+            storage.saveEvent(localRecord("a", PENDING_DELETE, serverUpdatedAt = T_SERVER).copy(deletedAt = T_SERVER))
+            api.onDelete = { PlaceEventApiResult(422) }
+
+            engine.sync()
+
+            assertEquals(FAILED, storage.row("a")?.syncState)
+            assertEquals(REJECTED_DELETE_MESSAGE, storage.row("a")?.syncError)
+        }
+
+    @Test
+    fun aDelete5xx408OrOfflineStaysPendingAndBacksOff() =
+        runTest {
+            storage.saveEvent(localRecord("a", PENDING_DELETE, serverUpdatedAt = T_SERVER).copy(deletedAt = T_SERVER))
+
+            api.onDelete = { PlaceEventApiResult(503) }
+            val serverError = engine.sync()
+            api.onDelete = { PlaceEventApiResult(408) }
+            val timeout = engine.sync()
+            api.online = false
+            val offline = engine.sync()
+
+            assertEquals(PENDING_DELETE, storage.row("a")?.syncState)
+            assertNull(storage.row("a")?.syncError)
+            assertEquals(PlaceEventSyncOutcome.SERVER_ERROR, serverError.outcome)
+            assertEquals(PlaceEventSyncOutcome.OFFLINE, timeout.outcome)
+            assertEquals(PlaceEventSyncOutcome.OFFLINE, offline.outcome)
+            assertEquals(
+                listOf(2.seconds, 4.seconds, 8.seconds),
+                listOf(serverError, timeout, offline).map { it.retryAfter },
+            )
+        }
+
+    @Test
+    fun aPullReconcilesAFailedDeleteWithTheServerCopy() =
+        runTest {
+            storage.saveEvent(
+                localRecord("live", FAILED, serverUpdatedAt = T_SERVER).copy(deletedAt = T_SERVER, syncError = "x"),
+            )
+            storage.saveEvent(
+                localRecord("gone", FAILED, serverUpdatedAt = T_SERVER).copy(deletedAt = T_SERVER, syncError = "x"),
+            )
+            api.onChanges = { since ->
+                page(
+                    since == null,
+                    listOf(
+                        serverDto("live", title = "Still here"),
+                        serverDto("gone", deletedAt = "2026-10-22T09:30:00.000Z"),
+                    ),
+                )
+            }
+
+            engine.sync()
+
+            assertEquals(SYNCED, storage.row("live")?.syncState)
+            assertEquals("Still here", storage.row("live")?.title)
+            assertNull(storage.row("gone"))
+            assertEquals(listOf("live"), repository.observeEvents(EventArea(input.point)).first().map { it.id })
+        }
+
+    @Test
     fun aSettledDeleteStaysGoneThroughThePullAndItsOverlap() =
         runTest {
             storage.saveEvent(localRecord("a", PENDING_DELETE, serverUpdatedAt = T_SERVER))
@@ -439,12 +521,12 @@ class PlaceEventSyncEngineTest {
             storage.saveEvent(localRecord("older", PENDING_UPSERT, updatedAt = "2026-10-22T08:30:00Z", title = "Mine"))
             storage.saveEvent(localRecord("gone", PENDING_DELETE, updatedAt = "2026-10-22T08:30:00Z"))
             api.onCreate = { PlaceEventApiResult(422) }
-            api.onDelete = { PlaceEventApiResult(422) }
+            api.onDelete = { PlaceEventApiResult(302) }
             api.onChanges = { since ->
                 page(since == null, listOf(serverDto("newer"), serverDto("older"), serverDto("gone", title = "Back")))
             }
 
-            engine.sync() // pushes answer 422 (kept pending); the pull still runs
+            engine.sync() // pushes get no settling answer (kept pending); the pull still runs
 
             assertEquals("Mine", storage.row("newer")?.title)
             assertEquals(PENDING_UPSERT, storage.row("newer")?.syncState)

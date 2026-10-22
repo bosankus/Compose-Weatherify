@@ -23,7 +23,8 @@ import kotlin.time.Duration
  *
  * Merging is idempotent, by id. A server row replaces a local one only when the local one is
  * synced or older (by `updatedAt`); a pending local edit is never clobbered by older data, a
- * pending local delete is only settled by a tombstone, and a failed row is left for the user.
+ * pending local delete is only settled by a tombstone, a failed create/edit is left for the user,
+ * and a failed delete takes the server copy.
  * A tombstone removes the local row.
  */
 internal class PlaceEventPuller(
@@ -122,8 +123,10 @@ internal class PlaceEventPuller(
             PlaceEventSyncState.SYNCED -> true
             PlaceEventSyncState.PENDING_UPSERT -> isOlder(local.updatedAt, dto.updatedAt)
             PlaceEventSyncState.PENDING_DELETE -> dto.deletedAt != null
-            // Kept until the user edits or discards it; a discard resyncs to fetch the server copy.
-            PlaceEventSyncState.FAILED -> false
+            // A refused create/edit waits for the user (a discard resyncs to fetch the server
+            // copy). A refused delete yields to whatever the server has: a tombstone removes it,
+            // a live copy brings it back.
+            PlaceEventSyncState.FAILED -> local.deletedAt != null
         }
 
     /** True when [local] is before [server]; an unreadable local time loses, an unreadable server time never wins. */

@@ -185,8 +185,11 @@ class LocalFirstPlaceEventsRepositoryTest {
         runTest {
             storage.saveEvent(localRecord("gone", PENDING_DELETE))
 
+            storage.saveEvent(localRecord("refused", FAILED).copy(deletedAt = T_SERVER, syncError = "x"))
+
             assertTrue(repository.updateEvent("missing", input).isFailure)
             assertTrue(repository.updateEvent("gone", input).isFailure)
+            assertTrue(repository.updateEvent("refused", input).isFailure)
         }
 
     @Test

@@ -22,6 +22,7 @@ import bose.ankush.storage.model.PlaceEventSyncState
  *
  * A 400 on POST or PUT marks the row [PlaceEventSyncState.FAILED] with the server's message. It
  * stays visible and is not sent again until the user edits it (pending again) or discards it.
+ * A refused DELETE (a 4xx other than 404) is marked failed too, but stays hidden.
  */
 internal class PlaceEventPusher(
     private val storage: PlaceEventStorage,
@@ -48,15 +49,26 @@ internal class PlaceEventPusher(
             else -> pushUpdate(row, run)
         }
 
-    /** 204 deleted and 404 already gone both settle the delete. */
+    /**
+     * 204 deleted and 404 already gone both settle the delete: the row is removed. Any other 4xx
+     * (401/403/408/429 never get here, see [SyncRun.call]) marks it failed: still hidden as a
+     * delete, not sent again, and reconciled by a later pull. 5xx and offline stay pending.
+     */
     private suspend fun pushDelete(
         row: PlaceEventRecord,
         run: SyncRun,
     ): Boolean {
-        val status = run.call { api.delete(row.id) }?.statusCode
-        val done = status == HTTP_NO_CONTENT || status == HTTP_OK || status == HTTP_NOT_FOUND
-        if (done) run.write { storage.deleteEvent(row.id) }
-        return done
+        val result = run.call { api.delete(row.id) }
+        val status = result?.statusCode
+        return when {
+            status == HTTP_NO_CONTENT || status == HTTP_OK || status == HTTP_NOT_FOUND -> {
+                run.write { storage.deleteEvent(row.id) }
+                true
+            }
+            status != null && status in HTTP_CLIENT_ERRORS ->
+                markFailed(run, row, result?.message ?: REJECTED_DELETE_MESSAGE)
+            else -> false
+        }
     }
 
     /**
@@ -124,8 +136,19 @@ internal class PlaceEventPusher(
     ): Boolean {
         run.write {
             if (storage.getEvent(pushed.id) == pushed) {
+                // A refused delete must stay hidden, so it always carries a deletedAt.
+                val deletedAt =
+                    if (pushed.syncState == PlaceEventSyncState.PENDING_DELETE) {
+                        pushed.deletedAt ?: pushed.updatedAt
+                    } else {
+                        pushed.deletedAt
+                    }
                 storage.saveEvent(
-                    pushed.copy(syncState = PlaceEventSyncState.FAILED, syncError = message ?: REJECTED_MESSAGE),
+                    pushed.copy(
+                        syncState = PlaceEventSyncState.FAILED,
+                        syncError = message ?: REJECTED_MESSAGE,
+                        deletedAt = deletedAt,
+                    ),
                 )
             }
         }
@@ -179,3 +202,6 @@ internal class PlaceEventPusher(
 
 /** Shown when a 400 came without a message. */
 internal const val REJECTED_MESSAGE = "The server couldn't accept this event."
+
+/** Kept when a refused DELETE came without a message. */
+internal const val REJECTED_DELETE_MESSAGE = "The server couldn't delete this event."
