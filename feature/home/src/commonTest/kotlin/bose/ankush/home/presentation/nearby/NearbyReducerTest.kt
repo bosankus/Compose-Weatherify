@@ -5,8 +5,11 @@ import bose.ankush.home.domain.nearby.GeoPoint
 import bose.ankush.home.domain.nearby.NearbyEvent
 import bose.ankush.home.presentation.util.SectionState
 import bose.ankush.network.model.SavedLocation
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.atTime
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -42,10 +45,11 @@ class NearbyReducerTest {
         val failed = NearbyReducer.reduce(NearbyState(), NearbyMutation.EventsFailed)
         assertEquals(SectionState.Failed, failed.events)
 
-        val ready = NearbyReducer.reduce(
-            NearbyState(),
-            NearbyMutation.EventsLoaded(listOf(NearbyEvent("Dinner", day.atTime(18, 30))))
-        )
+        val ready =
+            NearbyReducer.reduce(
+                NearbyState(),
+                NearbyMutation.EventsLoaded(listOf(NearbyEvent("Dinner", day.atTime(18, 30)))),
+            )
         assertEquals(setOf(day), ready.eventDates)
 
         val noPlace = NearbyReducer.reduce(NearbyState(), NearbyMutation.FeaturedPlaceLoaded(null))
@@ -90,12 +94,14 @@ class NearbyReducerTest {
 
     @Test
     fun aSavedEventClosesAndClearsTheForm() {
-        val open = NearbyState(
-            composer = EventComposerState(
-                isVisible = true,
-                draft = EventDraft("Dinner")
+        val open =
+            NearbyState(
+                composer =
+                    EventComposerState(
+                        isVisible = true,
+                        draft = EventDraft("Dinner"),
+                    ),
             )
-        )
 
         val saved = NearbyReducer.reduce(open, NearbyMutation.Submitted)
 
@@ -103,14 +109,95 @@ class NearbyReducerTest {
     }
 
     @Test
-    fun saveNeedsAPlaceName() {
+    fun aMissingPlaceNameDoesNotBlockSave() {
         val state =
             NearbyState(
                 point = GeoPoint(1.0, 2.0),
                 composer = EventComposerState(draft = EventDraft("Dinner", "2026-10-04", "09:30")),
             )
 
-        assertFalse(state.canSubmitEvent)
+        assertTrue(state.canSubmitEvent)
         assertNull(state.placeName)
+        assertFalse(state.copy(point = null).canSubmitEvent)
+    }
+
+    @Test
+    fun aTappedDayOpensTheFormWithThatDateAndSelectsIt() {
+        val opened = NearbyReducer.reduce(NearbyState(), NearbyMutation.ComposerOpened(day))
+
+        assertTrue(opened.composer.isVisible)
+        assertEquals("2026-10-04", opened.composer.draft.dateText)
+        assertEquals(day, opened.selectedDate)
+    }
+
+    @Test
+    fun plusUsesTheSelectedDay() {
+        val selected = NearbyReducer.reduce(NearbyState(), NearbyMutation.DateSelected(day))
+
+        val opened = NearbyReducer.reduce(selected, NearbyMutation.ComposerOpened(null))
+
+        assertEquals("2026-10-04", opened.composer.draft.dateText)
+        assertEquals(day, opened.selectedDate)
+    }
+
+    @Test
+    fun plusWithNoSelectionKeepsTheDraftDate() {
+        val start = NearbyState(composer = EventComposerState(draft = EventDraft(dateText = "2026-10-09")))
+
+        val opened = NearbyReducer.reduce(start, NearbyMutation.ComposerOpened(null))
+
+        assertEquals("2026-10-09", opened.composer.draft.dateText)
+        assertNull(opened.selectedDate)
+    }
+
+    @Test
+    fun selectingADayFiltersTheListToThatDay() {
+        val other = day.plus(1, DateTimeUnit.DAY)
+        val loaded =
+            NearbyReducer.reduce(
+                NearbyState(),
+                NearbyMutation.EventsLoaded(
+                    listOf(NearbyEvent("Walk", other.atTime(8, 0)), NearbyEvent("Dinner", day.atTime(18, 30))),
+                    today = day,
+                ),
+            )
+
+        val selected = NearbyReducer.reduce(loaded, NearbyMutation.DateSelected(other))
+        assertEquals(listOf("Walk"), selected.visibleEvents.map { it.title })
+        // The strip still marks every upcoming day.
+        assertEquals(setOf(day, other), selected.eventDates)
+
+        val cleared = NearbyReducer.reduce(selected, NearbyMutation.DateSelected(null))
+        assertEquals(listOf("Dinner", "Walk"), cleared.visibleEvents.map { it.title })
+    }
+
+    @Test
+    fun pastEventsAreHiddenFromTheListAndTheStrip() {
+        val yesterday = day.minus(1, DateTimeUnit.DAY)
+        val loaded =
+            NearbyReducer.reduce(
+                NearbyState(),
+                NearbyMutation.EventsLoaded(
+                    listOf(
+                        NearbyEvent("Old", yesterday.atTime(23, 59)),
+                        NearbyEvent("Later", day.atTime(20, 0)),
+                        NearbyEvent("Earlier", day.atTime(7, 0)),
+                    ),
+                    today = day,
+                ),
+            )
+
+        assertEquals(listOf("Earlier", "Later"), loaded.visibleEvents.map { it.title })
+        assertEquals(setOf(day), loaded.eventDates)
+        assertEquals(3, (loaded.events as SectionState.Loaded).value.size)
+    }
+
+    @Test
+    fun noteEditsOnlyTouchTheNote() {
+        val start = NearbyState(composer = EventComposerState(draft = EventDraft(title = "Dinner")))
+
+        val reduced = NearbyReducer.reduce(start, NearbyMutation.DraftEdited(note = "Table 4"))
+
+        assertEquals(EventDraft(title = "Dinner", note = "Table 4"), reduced.composer.draft)
     }
 }

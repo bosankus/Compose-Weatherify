@@ -271,14 +271,6 @@ internal fun ActionLabel(
     )
 }
 
-private fun CalendarStripDay.rangeLabel(): String =
-    when {
-        min.isNotEmpty() && max.isNotEmpty() -> "$min / $max"
-        min.isNotEmpty() -> min
-        max.isNotEmpty() -> max
-        else -> temp
-    }
-
 private fun CalendarStripDay.eventDescription(): String {
     val whenLabel = "$label $date"
     return listOf(ADD_EVENT, whenLabel, rangeLabel(), description)

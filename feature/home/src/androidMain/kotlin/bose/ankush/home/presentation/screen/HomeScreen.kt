@@ -644,7 +644,7 @@ fun HomeScreenRoute(
             links = links,
             shell = shell,
             sections = sections,
-            onOpenCalendar = { nearbyViewModel.onIntent(NearbyIntent.OpenComposer) },
+            onOpenCalendar = { nearbyViewModel.onIntent(NearbyIntent.OpenComposer()) },
         )
     }
 }

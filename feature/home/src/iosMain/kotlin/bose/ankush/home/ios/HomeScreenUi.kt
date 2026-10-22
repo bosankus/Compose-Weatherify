@@ -172,6 +172,9 @@ data class NearbyEventUi(
     val key: String,
     val title: String,
     val whenLabel: String,
+    /** Local start, `HH:mm`. */
+    val timeLabel: String = "",
+    val note: String = "",
 )
 
 data class FeaturedPlaceUi(
@@ -226,6 +229,7 @@ data class EventComposerUi(
     val title: String,
     val dateText: String,
     val timeText: String,
+    val note: String = "",
     val error: String?,
     val isSubmitting: Boolean,
     val canSubmit: Boolean,

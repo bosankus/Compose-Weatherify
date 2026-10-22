@@ -39,11 +39,6 @@ import bose.ankush.network.model.SavedLocation
 import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 
-data class NearbyEventLine(
-    val title: String,
-    val whenLabel: String,
-)
-
 data class FeaturedSavedPlace(
     val name: String,
     val subtitle: String,
