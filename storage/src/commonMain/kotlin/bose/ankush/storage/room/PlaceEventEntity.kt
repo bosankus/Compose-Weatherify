@@ -24,6 +24,7 @@ data class PlaceEventEntity(
     val deletedAt: String?,
     val syncState: String,
     val serverUpdatedAt: String?,
+    val syncError: String?,
 )
 
 /** A sync cursor per change feed ([stream]), e.g. the place-events checkpoint. */

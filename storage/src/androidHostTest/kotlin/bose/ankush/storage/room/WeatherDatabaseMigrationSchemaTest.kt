@@ -6,6 +6,7 @@ import bose.ankush.storage.common.PLACE_EVENTS_TABLE
 import bose.ankush.storage.common.SYNC_CHECKPOINTS_TABLE
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -70,6 +71,20 @@ class WeatherDatabaseMigrationSchemaTest {
             listOf(createSql(PLACE_EVENTS_TABLE), createSql(SYNC_CHECKPOINTS_TABLE)),
             executed,
         )
+    }
+
+    @Test
+    fun placeEventsHasTheNullableSyncErrorColumnForFailedRows() {
+        val syncError =
+            entity(PLACE_EVENTS_TABLE)
+                .getValue("fields")
+                .jsonArray
+                .map { it.jsonObject }
+                .single { it.getValue("columnName").jsonPrimitive.content == "syncError" }
+
+        assertEquals("TEXT", syncError.getValue("affinity").jsonPrimitive.content)
+        assertEquals(false, syncError["notNull"]?.jsonPrimitive?.boolean ?: false)
+        assertTrue("`syncError` TEXT," in CREATE_PLACE_EVENTS_SQL)
     }
 
     @Test

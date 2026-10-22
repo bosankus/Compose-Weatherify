@@ -40,6 +40,8 @@ class PlaceEventStorageImpl(
     override suspend fun saveSyncCheckpoint(checkpoint: String) =
         checkpoints.put(SyncCheckpointEntity(PLACE_EVENTS_SYNC_STREAM, checkpoint))
 
+    override suspend fun clearSyncCheckpoint() = checkpoints.delete(PLACE_EVENTS_SYNC_STREAM)
+
     override suspend fun clearAll() = dao.clearAll()
 }
 
@@ -60,6 +62,7 @@ internal fun PlaceEventEntity.toRecord(): PlaceEventRecord =
             PlaceEventSyncState.entries.firstOrNull { it.name == syncState }
                 ?: PlaceEventSyncState.PENDING_UPSERT,
         serverUpdatedAt = serverUpdatedAt,
+        syncError = syncError,
     )
 
 internal fun PlaceEventRecord.toEntity(): PlaceEventEntity =
@@ -76,4 +79,5 @@ internal fun PlaceEventRecord.toEntity(): PlaceEventEntity =
         deletedAt = deletedAt,
         syncState = syncState.name,
         serverUpdatedAt = serverUpdatedAt,
+        syncError = syncError,
     )

@@ -15,7 +15,11 @@ interface PlaceEventStorage {
 
     suspend fun getEvent(id: String): PlaceEventRecord?
 
-    /** Rows waiting to be pushed (upserts and deletes), oldest local change first. */
+    /**
+     * Rows waiting to be pushed (upserts and deletes), oldest local change first.
+     * [bose.ankush.storage.model.PlaceEventSyncState.FAILED] rows are left out: they wait for an
+     * edit or a discard.
+     */
     suspend fun getPendingEvents(): List<PlaceEventRecord>
 
     /** Inserts or replaces the row with [PlaceEventRecord.id]. */
@@ -33,6 +37,9 @@ interface PlaceEventStorage {
     suspend fun getSyncCheckpoint(): String?
 
     suspend fun saveSyncCheckpoint(checkpoint: String)
+
+    /** Forgets the checkpoint, so the next pull starts from the beginning (a full resync). */
+    suspend fun clearSyncCheckpoint()
 
     /** Removes every event and the checkpoint (sign-out). */
     suspend fun clearAll()

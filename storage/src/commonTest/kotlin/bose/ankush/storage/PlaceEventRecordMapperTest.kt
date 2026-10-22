@@ -28,6 +28,15 @@ class PlaceEventRecordMapperTest {
     }
 
     @Test
+    fun aFailedRowKeepsItsServerMessage() {
+        val failed = record.copy(syncState = PlaceEventSyncState.FAILED, syncError = "title is required")
+
+        assertEquals(failed, failed.toEntity().toRecord())
+        assertEquals("FAILED", failed.toEntity().syncState)
+        assertEquals("title is required", failed.toEntity().syncError)
+    }
+
+    @Test
     fun anUnknownSyncStateIsKeptAsPendingSoItIsPushedNotLost() {
         val row = record.toEntity().copy(syncState = "SOMETHING_NEW")
 

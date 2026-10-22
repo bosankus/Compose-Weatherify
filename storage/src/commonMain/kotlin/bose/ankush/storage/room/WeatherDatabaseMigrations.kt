@@ -17,7 +17,9 @@ import bose.ankush.storage.common.WEATHER_DATABASE_NAME
  * weather table. Existing rows read null and fall back to the device zone until the next refresh.
  *
  * **5 → 6:** create `place_events` (offline-first home place events) and `sync_checkpoints`
- * (the GET /place-events/sync cursor). Additive only; weather and air-quality rows are untouched.
+ * (the GET /place-events/sync cursor). `place_events.syncError` holds the server's 400 message for a
+ * FAILED row. Additive only; weather and air-quality rows are untouched. Not shipped yet, so
+ * changes to these tables are folded into this step rather than a new version.
  *
  * Both platform builders register every entry of [WEATHER_DATABASE_MIGRATIONS], with destructive fallback off.
  */
@@ -41,7 +43,7 @@ internal const val CREATE_PLACE_EVENTS_SQL =
         "`id` TEXT NOT NULL, `title` TEXT NOT NULL, `startsAt` TEXT NOT NULL, `note` TEXT, " +
         "`placeName` TEXT NOT NULL, `lat` REAL NOT NULL, `lon` REAL NOT NULL, " +
         "`createdAt` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, `deletedAt` TEXT, " +
-        "`syncState` TEXT NOT NULL, `serverUpdatedAt` TEXT, PRIMARY KEY(`id`))"
+        "`syncState` TEXT NOT NULL, `serverUpdatedAt` TEXT, `syncError` TEXT, PRIMARY KEY(`id`))"
 
 /** `CREATE TABLE` for [SyncCheckpointEntity]; must equal Room's generated SQL. */
 internal const val CREATE_SYNC_CHECKPOINTS_SQL =

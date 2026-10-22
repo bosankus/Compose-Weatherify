@@ -20,7 +20,11 @@ interface PlaceEventDao {
     @Query("SELECT * FROM $PLACE_EVENTS_TABLE WHERE id = :id")
     suspend fun getById(id: String): PlaceEventEntity?
 
-    @Query("SELECT * FROM $PLACE_EVENTS_TABLE WHERE syncState != 'SYNCED' ORDER BY updatedAt")
+    /** SYNCED and FAILED rows wait; anything else (an unknown name included) is pushed. */
+    @Query(
+        "SELECT * FROM $PLACE_EVENTS_TABLE " +
+            "WHERE syncState NOT IN ('SYNCED', 'FAILED') ORDER BY updatedAt",
+    )
     suspend fun getPending(): List<PlaceEventEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -59,4 +63,7 @@ interface SyncCheckpointDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun put(checkpoint: SyncCheckpointEntity)
+
+    @Query("DELETE FROM $SYNC_CHECKPOINTS_TABLE WHERE stream = :stream")
+    suspend fun delete(stream: String)
 }
