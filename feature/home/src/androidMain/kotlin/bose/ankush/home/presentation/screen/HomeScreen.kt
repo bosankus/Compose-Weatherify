@@ -1,6 +1,5 @@
 package bose.ankush.home.presentation.screen
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -24,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -362,7 +360,6 @@ private fun WeatherPage(
     actions: HomePagerActions,
     modifier: Modifier = Modifier,
 ) {
-    SideEffect { Log.d(PERF_TAG, "WeatherPage recomposed") } // TEMP(perf)
     val content = shell.content
     val photo = shell.photo
     val photoUrl = photo?.imageUrl
@@ -538,8 +535,6 @@ fun HomeScreenRoute(
             ),
         )
     }
-    SideEffect { Log.d(PERF_TAG, "HomeScreenRoute recomposed") } // TEMP(perf)
-
     // The mappings below are pure functions of the forecast, so they are remembered per forecast
     // instead of re-run on every recomposition (places, nearby and AI state all recompose this body).
     val weather = state.weatherData
@@ -553,7 +548,6 @@ fun HomeScreenRoute(
             ?.takeIf { it.isNotBlank() }
     val liveContent =
         remember(weather, place) {
-            Log.d(PERF_TAG, "toHomeWeatherContent") // TEMP(perf)
             weather?.takeIf { it.current != null }?.toHomeWeatherContent(place)
         }
     val content =
@@ -566,7 +560,6 @@ fun HomeScreenRoute(
         }
     val extras =
         remember(weather) {
-            Log.d(PERF_TAG, "toForecastExtras") // TEMP(perf)
             weather?.toForecastExtras() ?: ForecastExtras()
         }
     val photo = rememberBackgroundPhoto(weatherMain?.let(::unsplashQuery), content.condition)
@@ -663,7 +656,6 @@ private fun rememberForecastPlace(userLocation: Pair<Double, Double>?): String {
 }
 
 private const val CURRENT_LOCATION = "Current Location"
-private const val PERF_TAG = "HomePerf" // TEMP(perf)
 private const val OBSERVED_ALPHA = 0.72f
 private const val HOME_PAGE_COUNT = 2
 private const val WEATHER_PAGE = 0
