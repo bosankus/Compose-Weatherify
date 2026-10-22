@@ -35,7 +35,9 @@ internal class DailyForestPhoto(
             try {
                 val results =
                     api.searchPhotos(query = QUERIES[day % QUERIES.size], perPage = PER_PAGE)
-                results.takeIf { it.isNotEmpty() }?.let { it[(day / QUERIES.size) % it.size] }
+                results
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { it[(day / QUERIES.size) % it.size] }
                     ?.toForestPhoto()
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -70,8 +72,10 @@ internal class DailyForestPhoto(
     /** Today's stored pick, if one was stored today with a URL and a credit. */
     private fun cached(day: Int): ForestPhoto? {
         val fields = FIELDS.map { defaults.stringForKey(KEY_PREFIX + it).orEmpty() }
-        val usable = defaults.integerForKey(KEY_DAY)
-            .toInt() == day && fields[0].isNotBlank() && fields[1].isNotBlank()
+        val usable =
+            defaults
+                .integerForKey(KEY_DAY)
+                .toInt() == day && fields[0].isNotBlank() && fields[1].isNotBlank()
         return if (usable) ForestPhoto(fields[0], fields[1], fields[2], fields[3]) else null
     }
 

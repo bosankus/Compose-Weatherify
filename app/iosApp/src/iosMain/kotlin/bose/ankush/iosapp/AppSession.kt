@@ -103,7 +103,8 @@ class AppSession :
         }
         scope.launch {
             // Settings logged out; reset so the sign-in screen starts clean (the Compose route did this).
-            auth.authState.filter { it is AuthState.LoggedOut }
+            auth.authState
+                .filter { it is AuthState.LoggedOut }
                 .collect { auth.processIntent(AuthIntent.Reset) }
         }
         auth.processIntent(AuthIntent.RefreshToken)
@@ -134,15 +135,15 @@ class AppSession :
                     PaymentIntent.VerifyPayment(
                         orderId,
                         paymentId,
-                        signature
-                    )
+                        signature,
+                    ),
                 )
             },
             onError = { message ->
                 paymentViewModel.processIntent(
                     PaymentIntent.PaymentFailed(
-                        message
-                    )
+                        message,
+                    ),
                 )
             },
         )

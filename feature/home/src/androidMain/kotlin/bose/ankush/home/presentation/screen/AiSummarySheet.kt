@@ -155,7 +155,7 @@ private fun SummaryText(
                 Text(
                     text = stringResource(Res.string.ai_summary_writing),
                     color = SheetMutedText,
-                    fontSize = 13.sp
+                    fontSize = 13.sp,
                 )
             }
         }
@@ -173,11 +173,12 @@ private fun LoadingLines() {
     )
     val brush =
         Brush.linearGradient(
-            colors = listOf(
-                SheetFieldFill,
-                WarningYellow.copy(alpha = SHIMMER_ALPHA),
-                SheetFieldFill
-            ),
+            colors =
+                listOf(
+                    SheetFieldFill,
+                    WarningYellow.copy(alpha = SHIMMER_ALPHA),
+                    SheetFieldFill,
+                ),
             start = Offset(sweep, 0f),
             end = Offset(sweep + SHIMMER_SPAN, 0f),
         )
@@ -188,7 +189,7 @@ private fun LoadingLines() {
             Text(
                 text = stringResource(Res.string.ai_summary_loading),
                 color = SheetMutedText,
-                fontSize = 14.sp
+                fontSize = 14.sp,
             )
         }
         LOADING_BAR_WIDTHS.forEach { width ->
@@ -234,8 +235,7 @@ private fun LeafSpinner(
     }
 }
 
-private fun infiniteRepeat(millis: Int) =
-    infiniteRepeatable<Float>(tween(millis, easing = LinearEasing))
+private fun infiniteRepeat(millis: Int) = infiniteRepeatable<Float>(tween(millis, easing = LinearEasing))
 
 private fun DrawScope.drawRing(spin: Float) {
     val stroke = size.minDimension * RING_STROKE
@@ -290,7 +290,7 @@ private fun DrawScope.drawLeaf(
                 segment,
                 WarningYellow,
                 alpha = fade,
-                style = Stroke(strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round)
+                style = Stroke(strokeWidth, cap = StrokeCap.Round, join = StrokeJoin.Round),
             )
             drawPath(body, WarningYellow, alpha = bloom * fade)
             measure.setPath(rib, forceClosed = false)
@@ -301,7 +301,7 @@ private fun DrawScope.drawLeaf(
                 segment,
                 ribColor,
                 alpha = fade,
-                style = Stroke(strokeWidth, cap = StrokeCap.Round)
+                style = Stroke(strokeWidth, cap = StrokeCap.Round),
             )
         }
     }
@@ -312,7 +312,10 @@ private fun leafBody(
     side: Float,
     origin: Offset,
 ): Path {
-    fun at(x: Float, y: Float) = Offset(origin.x + x * side, origin.y + y * side)
+    fun at(
+        x: Float,
+        y: Float,
+    ) = Offset(origin.x + x * side, origin.y + y * side)
     return Path().apply {
         moveTo(at(0.22f, 0.78f))
         cubicTo(at(0.12f, 0.38f), at(0.45f, 0.15f), at(0.82f, 0.18f))
@@ -326,7 +329,10 @@ private fun leafVein(
     side: Float,
     origin: Offset,
 ): Path {
-    fun at(x: Float, y: Float) = Offset(origin.x + x * side, origin.y + y * side)
+    fun at(
+        x: Float,
+        y: Float,
+    ) = Offset(origin.x + x * side, origin.y + y * side)
     return Path().apply {
         moveTo(at(0.1f, 0.9f))
         lineTo(at(0.62f, 0.38f))
@@ -384,7 +390,7 @@ private fun TipChip(tip: AiSummaryTip) {
             imageVector = tip.kind.icon(),
             contentDescription = null,
             tint = WarningYellow,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(18.dp),
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(text = tip.label, color = ContentOnDark, fontSize = 14.sp)
@@ -397,7 +403,7 @@ private fun FailedBlock(onRetry: () -> Unit) {
         Text(
             text = stringResource(Res.string.ai_summary_failed),
             color = ContentOnDark,
-            fontSize = 16.sp
+            fontSize = 16.sp,
         )
         SheetPrimaryButton(text = stringResource(Res.string.ai_summary_retry), onClick = onRetry)
     }

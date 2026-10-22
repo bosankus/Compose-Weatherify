@@ -489,9 +489,11 @@ private fun previewNoOpContent(
                     profile =
                         ProfileSection(
                             state = profile,
-                            actions = ProfileHeaderActions(
-                                onChangePhoto = {},
-                                onOpenPhotoOptions = {}),
+                            actions =
+                                ProfileHeaderActions(
+                                    onChangePhoto = {},
+                                    onOpenPhotoOptions = {},
+                                ),
                         ),
                     paymentUiState = paymentUiState,
                     isLoggingOut = isLoggingOut,

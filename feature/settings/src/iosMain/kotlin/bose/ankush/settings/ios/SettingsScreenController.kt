@@ -146,12 +146,10 @@ class SettingsScreenController(
     /** Ignored while the request is in flight. */
     fun closeDeleteAccount() = settings.processIntent(SettingsIntent.CloseDeleteAccountDialog)
 
-    fun deleteAccountPasswordEdited() =
-        settings.processIntent(SettingsIntent.DeleteAccountPasswordEdited)
+    fun deleteAccountPasswordEdited() = settings.processIntent(SettingsIntent.DeleteAccountPasswordEdited)
 
     /** On success the session ends and the app returns to sign-in on its own. */
-    fun confirmDeleteAccount(password: String) =
-        settings.processIntent(SettingsIntent.ConfirmDeleteAccount(password))
+    fun confirmDeleteAccount(password: String) = settings.processIntent(SettingsIntent.ConfirmDeleteAccount(password))
 
     // Premium plans
 
@@ -199,7 +197,7 @@ class SettingsScreenController(
                 PaymentStage.AwaitingPayment,
                 PaymentStage.Verifying,
                 PaymentStage.Failure,
-                    -> settings.processIntent(SettingsIntent.ClosePremiumSheet)
+                -> settings.processIntent(SettingsIntent.ClosePremiumSheet)
 
                 PaymentStage.Success ->
                     if (previous != PaymentStage.Success) {

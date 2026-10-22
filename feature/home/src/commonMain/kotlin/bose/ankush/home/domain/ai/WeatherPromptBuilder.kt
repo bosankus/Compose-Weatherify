@@ -40,12 +40,22 @@ class WeatherPromptBuilder {
             place?.takeIf { it.isNotBlank() }?.let { appendLine("Place: ${it.trim()}.") }
             now?.let { appendLine("Now: ${nowFacts(it).joinToString(", ")}.") }
             today?.let { day ->
-                val range = listOfNotNull(
-                    day.temp?.max?.celsius()?.let { "high $it" },
-                    day.temp?.min?.celsius()?.let { "low $it" })
-                val parts = listOfNotNull(
-                    range.takeIf { it.isNotEmpty() }?.joinToString(", "),
-                    day.summary?.trim()?.takeIf { it.isNotEmpty() })
+                val range =
+                    listOfNotNull(
+                        day.temp
+                            ?.max
+                            ?.celsius()
+                            ?.let { "high $it" },
+                        day.temp
+                            ?.min
+                            ?.celsius()
+                            ?.let { "low $it" },
+                    )
+                val parts =
+                    listOfNotNull(
+                        range.takeIf { it.isNotEmpty() }?.joinToString(", "),
+                        day.summary?.trim()?.takeIf { it.isNotEmpty() },
+                    )
                 if (parts.isNotEmpty()) appendLine("Today: ${parts.joinToString(". ")}.")
             }
             append("Summarize.")
@@ -56,7 +66,11 @@ class WeatherPromptBuilder {
         listOfNotNull(
             now.temp?.celsius(),
             now.feels_like?.celsius()?.let { "feels like $it" },
-            now.weather?.firstOrNull()?.description?.trim()?.takeIf { it.isNotEmpty() },
+            now.weather
+                ?.firstOrNull()
+                ?.description
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() },
             now.humidity?.let { "humidity $it%" },
             now.wind_speed?.let { "wind ${it.oneDecimal()} m/s" },
         )

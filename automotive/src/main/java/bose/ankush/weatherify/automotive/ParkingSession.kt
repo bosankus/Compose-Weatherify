@@ -5,6 +5,5 @@ import androidx.car.app.Screen
 import androidx.car.app.Session
 
 class ParkingSession : Session() {
-    override fun onCreateScreen(intent: Intent): Screen =
-        ParkingListScreen(carContext)
+    override fun onCreateScreen(intent: Intent): Screen = ParkingListScreen(carContext)
 }

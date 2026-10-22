@@ -65,7 +65,7 @@ class AccountAvatarViewModelTest {
         val viewModel =
             AccountAvatarViewModel(
                 ObserveAccountPhotoUrl(repository),
-                RefreshAccount(repository, dispatcher)
+                RefreshAccount(repository, dispatcher),
             )
         // WhileSubscribed: the screen collecting state is what keeps it live.
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.state.collect {} }

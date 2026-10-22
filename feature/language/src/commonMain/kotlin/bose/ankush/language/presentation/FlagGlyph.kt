@@ -39,7 +39,7 @@ internal fun FlagGlyph(
             text = region,
             color = NightInkMuted,
             fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
     }
 }

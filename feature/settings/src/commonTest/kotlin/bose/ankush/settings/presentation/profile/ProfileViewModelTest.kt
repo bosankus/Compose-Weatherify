@@ -267,8 +267,7 @@ class ProfileViewModelTest {
             return Result.success(Unit)
         }
 
-        override suspend fun deleteAccount(password: String): DeleteAccountResult =
-            DeleteAccountResult.Deleted
+        override suspend fun deleteAccount(password: String): DeleteAccountResult = DeleteAccountResult.Deleted
 
         override fun clear() {
             _account.value = null

@@ -32,16 +32,16 @@ class EventDraftTest {
     fun completeNeedsATitleAndAStartTime() {
         assertFalse(
             EventDraft(title = " ", dateText = "2026-10-04", timeText = "09:30").isComplete(
-                TimeZone.UTC
-            )
+                TimeZone.UTC,
+            ),
         )
         assertFalse(EventDraft(title = "Dinner").isComplete(TimeZone.UTC))
         assertTrue(
             EventDraft(
                 title = "Dinner",
                 dateText = "2026-10-04",
-                timeText = "09:30"
-            ).isComplete(TimeZone.UTC)
+                timeText = "09:30",
+            ).isComplete(TimeZone.UTC),
         )
     }
 }

@@ -33,7 +33,12 @@ class WeatherPromptBuilderTest {
     @Test
     fun systemInstruction_staysUnder150Words_evenWithEveryRule() {
         val all = WeatherAdvice.entries.map { RuleFinding(it, "Rain expected today: 12.5 mm.") }
-        val words = builder.build(forecast(), all).systemInstruction.split(Regex("\\s+")).size
+        val words =
+            builder
+                .build(forecast(), all)
+                .systemInstruction
+                .split(Regex("\\s+"))
+                .size
         assertTrue(words < 150, "was $words words")
     }
 
@@ -43,17 +48,19 @@ class WeatherPromptBuilderTest {
         assertTrue("Place: Mountain View." in prompt, prompt)
         assertTrue(
             "Now: 13 °C, feels like 12 °C, scattered clouds, humidity 91%, wind 1.0 m/s." in prompt,
-            prompt
+            prompt,
         )
         assertTrue("Today: high 28 °C, low 9 °C. Clear spells." in prompt, prompt)
     }
 
     @Test
     fun missingFields_areLeftOut_notGuessed() {
-        val prompt = builder.build(
-            WeatherForecast(id = 1, current = current(temp = null)),
-            emptyList()
-        ).prompt
+        val prompt =
+            builder
+                .build(
+                    WeatherForecast(id = 1, current = current(temp = null)),
+                    emptyList(),
+                ).prompt
         assertFalse("Place" in prompt)
         assertFalse("Today" in prompt)
         assertFalse("null" in prompt)

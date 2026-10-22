@@ -41,10 +41,11 @@ class NearbyReducerTest {
         val failed = NearbyReducer.reduce(NearbyState(), NearbyMutation.EventsFailed)
         assertEquals(SectionState.Failed, failed.events)
 
-        val ready = NearbyReducer.reduce(
-            NearbyState(),
-            NearbyMutation.EventsLoaded(listOf(NearbyEvent("Dinner", day)))
-        )
+        val ready =
+            NearbyReducer.reduce(
+                NearbyState(),
+                NearbyMutation.EventsLoaded(listOf(NearbyEvent("Dinner", day))),
+            )
         assertEquals(setOf(day), ready.eventDates)
 
         val noPlace = NearbyReducer.reduce(NearbyState(), NearbyMutation.FeaturedPlaceLoaded(null))
@@ -89,12 +90,14 @@ class NearbyReducerTest {
 
     @Test
     fun aSavedEventClosesAndClearsTheForm() {
-        val open = NearbyState(
-            composer = EventComposerState(
-                isVisible = true,
-                draft = EventDraft("Dinner")
+        val open =
+            NearbyState(
+                composer =
+                    EventComposerState(
+                        isVisible = true,
+                        draft = EventDraft("Dinner"),
+                    ),
             )
-        )
 
         val saved = NearbyReducer.reduce(open, NearbyMutation.Submitted)
 

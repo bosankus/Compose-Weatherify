@@ -278,33 +278,33 @@ class HomeViewModelOfflineWeatherTest {
             getActiveCoordinates =
                 GetActiveCoordinatesImpl(
                     client =
-                object : LocationClient {
-                    override suspend fun getCurrentLocation(): Result<Coordinates> = gpsFix()
+                        object : LocationClient {
+                            override suspend fun getCurrentLocation(): Result<Coordinates> = gpsFix()
 
-                    override fun hasLocationPermission(): Boolean = true
-                },
+                            override fun hasLocationPermission(): Boolean = true
+                        },
                     storage =
-                object : LocationPreferencesStorage {
-                    override fun getLocationPreferencesFlow(): Flow<LocationPreferences> = preferencesFlow
+                        object : LocationPreferencesStorage {
+                            override fun getLocationPreferencesFlow(): Flow<LocationPreferences> = preferencesFlow
 
-                    override suspend fun saveLocationPreferences(coordinates: Pair<Double, Double>) {
-                        preferences.value =
-                            preferences.value.copy(
-                                latitude = coordinates.first,
-                                longitude = coordinates.second,
-                            )
-                    }
+                            override suspend fun saveLocationPreferences(coordinates: Pair<Double, Double>) {
+                                preferences.value =
+                                    preferences.value.copy(
+                                        latitude = coordinates.first,
+                                        longitude = coordinates.second,
+                                    )
+                            }
 
-                    override suspend fun saveLocationOverride(
-                        lat: Double,
-                        lon: Double,
-                        name: String,
-                    ) = Unit
+                            override suspend fun saveLocationOverride(
+                                lat: Double,
+                                lon: Double,
+                                name: String,
+                            ) = Unit
 
-                    override suspend fun clearLocationOverride() = Unit
+                            override suspend fun clearLocationOverride() = Unit
 
-                    override suspend fun clearAll() = Unit
-                },
+                            override suspend fun clearAll() = Unit
+                        },
                 ),
             remoteConfigGate =
                 object : HomeRemoteConfigGate {

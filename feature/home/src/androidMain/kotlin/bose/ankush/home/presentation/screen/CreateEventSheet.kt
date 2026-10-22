@@ -86,12 +86,13 @@ internal fun CreateEventSheet(
                 },
                 enabled = state.canSubmitEvent,
                 busy = state.composer.isSubmitting,
-                modifier = Modifier.padding(
-                    start = 20.dp,
-                    end = 20.dp,
-                    top = 16.dp,
-                    bottom = 18.dp
-                ),
+                modifier =
+                    Modifier.padding(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 16.dp,
+                        bottom = 18.dp,
+                    ),
             )
         },
     )
@@ -129,7 +130,7 @@ private fun EventForm(
                     keyboardOptions =
                         KeyboardOptions(
                             capitalization = KeyboardCapitalization.Sentences,
-                            imeAction = ImeAction.Next
+                            imeAction = ImeAction.Next,
                         ),
                 ),
             modifier = Modifier.focusRequester(titleFocus),

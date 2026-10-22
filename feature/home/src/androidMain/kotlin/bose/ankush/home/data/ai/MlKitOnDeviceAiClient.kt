@@ -33,7 +33,7 @@ internal class MlKitOnDeviceAiClient(
             Timber.w(
                 e,
                 "Gemini Nano status check failed (AICore error code: %s)",
-                (e as? GenAiException)?.errorCode
+                (e as? GenAiException)?.errorCode,
             )
             AiAvailability.Unavailable
         }

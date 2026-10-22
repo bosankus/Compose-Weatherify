@@ -61,10 +61,10 @@ class NearbyViewModelTest {
                             SavedLocation(
                                 name = "Home",
                                 lat = 1.0,
-                                lon = 2.0
-                            )
-                        )
-                    )
+                                lon = 2.0,
+                            ),
+                        ),
+                    ),
                 )
             val viewModel = nearbyViewModel(events, places)
 
@@ -74,7 +74,7 @@ class NearbyViewModelTest {
             val state = viewModel.state.value
             assertEquals(
                 SectionState.Loaded(listOf(NearbyEvent("Dinner", LocalDate(2026, 10, 4)))),
-                state.events
+                state.events,
             )
             assertEquals("Home", (state.featuredPlace as SectionState.Loaded).value?.name)
         }
@@ -106,9 +106,9 @@ class NearbyViewModelTest {
                             listOf(
                                 PlaceEvent(
                                     startsAt = "2026-10-04T18:30:00Z",
-                                    title = title
-                                )
-                            )
+                                    title = title,
+                                ),
+                            ),
                         )
                     },
                 )
@@ -134,9 +134,13 @@ class NearbyViewModelTest {
             val events =
                 FakePlaceEventRepository(
                     events = { _, _ ->
-                        if (fail) Result.failure(IllegalStateException("offline")) else Result.success(
-                            listOf(dinner())
-                        )
+                        if (fail) {
+                            Result.failure(IllegalStateException("offline"))
+                        } else {
+                            Result.success(
+                                listOf(dinner()),
+                            )
+                        }
                     },
                 )
             val places = FakeLocationRepository()

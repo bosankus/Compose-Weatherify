@@ -56,12 +56,13 @@ internal suspend fun buildHomeScreenUi(
         strings = strings,
         header =
             HeaderUi(
-                observedLabel = current?.dt?.let {
-                    observedLabel(
-                        it,
-                        forecastZone(forecast.timezoneOffset)
-                    )
-                },
+                observedLabel =
+                    current?.dt?.let {
+                        observedLabel(
+                            it,
+                            forecastZone(forecast.timezoneOffset),
+                        )
+                    },
                 temperature = content.temperature,
                 place = content.place,
                 conditionLine =
@@ -75,7 +76,7 @@ internal suspend fun buildHomeScreenUi(
                     overrideName?.let {
                         getString(
                             Res.string.location_override_chip_content_desc,
-                            it
+                            it,
                         )
                     },
             ),
@@ -91,8 +92,11 @@ internal suspend fun buildHomeScreenUi(
                 gpsDisabled = state.isGpsDisabled,
                 locationPermissionDenied = state.isLocationPermissionDenied,
                 forecastFailed = forecastFailed,
-                statusMessage = (state.error
-                    ?: state.offlineMessage)?.takeIf { !forecastVisible && it.isNotBlank() },
+                statusMessage =
+                    (
+                        state.error
+                            ?: state.offlineMessage
+                    )?.takeIf { !forecastVisible && it.isNotBlank() },
             ),
         weather =
             WeatherPageInput(

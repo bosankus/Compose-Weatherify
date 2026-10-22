@@ -99,7 +99,7 @@ class MainActivity :
         val startedAt = SystemClock.elapsedRealtime()
         splash.setKeepOnScreenCondition {
             !authViewModel.isAuthInitialized.value &&
-                    SystemClock.elapsedRealtime() - startedAt < SPLASH_MAX_HOLD_MILLIS
+                SystemClock.elapsedRealtime() - startedAt < SPLASH_MAX_HOLD_MILLIS
         }
         splash.setOnExitAnimationListener { provider ->
             provider.view
@@ -314,7 +314,7 @@ class MainActivity :
             .addOnFailureListener {
                 Timber.w(
                     it,
-                    "Couldn't rotate the FCM token after account deletion"
+                    "Couldn't rotate the FCM token after account deletion",
                 )
             }
         Checkout.clearUserData(applicationContext)

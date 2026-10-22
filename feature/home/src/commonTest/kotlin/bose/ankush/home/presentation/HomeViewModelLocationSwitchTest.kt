@@ -134,12 +134,12 @@ class HomeViewModelLocationSwitchTest {
             getActiveCoordinates =
                 GetActiveCoordinatesImpl(
                     client =
-                object : LocationClient {
-                    override suspend fun getCurrentLocation(): Result<Coordinates> =
-                        Result.success(Coordinates(GPS_LAT, GPS_LON))
+                        object : LocationClient {
+                            override suspend fun getCurrentLocation(): Result<Coordinates> =
+                                Result.success(Coordinates(GPS_LAT, GPS_LON))
 
-                    override fun hasLocationPermission(): Boolean = true
-                },
+                            override fun hasLocationPermission(): Boolean = true
+                        },
                     storage = preferences,
                 ),
             remoteConfigGate =

@@ -33,7 +33,7 @@ class WeatherRulesTest {
         assertEquals(listOf(WeatherAdvice.Jacket), advice(forecast(feelsLikeCelsius = 11.9)))
         assertEquals(
             listOf(WeatherAdvice.Jacket),
-            advice(forecast(feelsLikeCelsius = 20.0, eveCelsius = 8.0))
+            advice(forecast(feelsLikeCelsius = 20.0, eveCelsius = 8.0)),
         )
     }
 
@@ -50,7 +50,7 @@ class WeatherRulesTest {
                 WeatherAdvice.Umbrella,
                 WeatherAdvice.Sunscreen,
                 WeatherAdvice.Wind,
-                WeatherAdvice.Jacket
+                WeatherAdvice.Jacket,
             ),
             advice(all),
         )
@@ -68,7 +68,8 @@ class WeatherRulesTest {
         val strict = WeatherRules(WeatherThresholds(rainMm = 1.0))
         assertEquals(
             listOf(WeatherAdvice.Umbrella),
-            strict.evaluate(forecast(rain = 1.5)).map { it.advice })
+            strict.evaluate(forecast(rain = 1.5)).map { it.advice },
+        )
     }
 
     private fun advice(forecast: WeatherForecast) = rules.evaluate(forecast).map { it.advice }
@@ -86,8 +87,15 @@ class WeatherRulesTest {
         daily =
             listOf(
                 WeatherForecast.Daily(
-                    clouds = null, dew_point = null, dt = null, humidity = null, pressure = null,
-                    rain = rain, summary = null, sunrise = null, sunset = null,
+                    clouds = null,
+                    dew_point = null,
+                    dt = null,
+                    humidity = null,
+                    pressure = null,
+                    rain = rain,
+                    summary = null,
+                    sunrise = null,
+                    sunset = null,
                     temp =
                         eveCelsius?.let {
                             WeatherForecast.Daily.Temp(
@@ -99,7 +107,9 @@ class WeatherRulesTest {
                                 night = null,
                             )
                         },
-                    uvi = dailyUv, wind_gust = null, wind_speed = dailyWind,
+                    uvi = dailyUv,
+                    wind_gust = null,
+                    wind_speed = dailyWind,
                 ),
             ),
         current =

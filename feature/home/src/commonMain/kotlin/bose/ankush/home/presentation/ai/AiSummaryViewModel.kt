@@ -53,7 +53,7 @@ internal class AiSummaryViewModel(
     private val tipLabel: suspend (WeatherAdvice) -> String,
 ) : ViewModel() {
     constructor(client: OnDeviceAiClient, summarizeWeather: SummarizeWeather) :
-            this(client, summarizeWeather, ::localizedTipLabel)
+        this(client, summarizeWeather, ::localizedTipLabel)
 
     private val _state = MutableStateFlow(AiSummaryScreenState())
     val state: StateFlow<AiSummaryScreenState> = _state.asStateFlow()
@@ -100,7 +100,7 @@ internal class AiSummaryViewModel(
                     _state.update {
                         AiSummaryScreenState(
                             isAvailable = false,
-                            summary = failed(next.place)
+                            summary = failed(next.place),
                         )
                     }
                 } catch (e: Exception) {
@@ -109,8 +109,7 @@ internal class AiSummaryViewModel(
             }
     }
 
-    private fun failed(place: String?) =
-        AiSummaryUiState(phase = AiSummaryPhase.Failed, place = place)
+    private fun failed(place: String?) = AiSummaryUiState(phase = AiSummaryPhase.Failed, place = place)
 
     private suspend fun WeatherSummary.toUi(place: String?) =
         AiSummaryUiState(
@@ -127,9 +126,10 @@ internal class AiSummaryViewModel(
     ) {
         /** The same weather for the same place. `lastUpdated` is a timestamp, not data, so it is ignored. */
         fun sameAs(other: Request?) =
-            other != null && place == other.place && forecast.copy(lastUpdated = 0) == other.forecast.copy(
-                lastUpdated = 0
-            )
+            other != null && place == other.place && forecast.copy(lastUpdated = 0) ==
+                other.forecast.copy(
+                    lastUpdated = 0,
+                )
     }
 }
 

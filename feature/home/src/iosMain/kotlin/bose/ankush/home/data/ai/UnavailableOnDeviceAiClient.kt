@@ -11,6 +11,5 @@ import kotlinx.coroutines.flow.flow
 internal class UnavailableOnDeviceAiClient : OnDeviceAiClient {
     override suspend fun availability(): AiAvailability = AiAvailability.Unavailable
 
-    override fun generate(request: AiRequest): Flow<String> =
-        flow { throw AiUnavailableException() }
+    override fun generate(request: AiRequest): Flow<String> = flow { throw AiUnavailableException() }
 }

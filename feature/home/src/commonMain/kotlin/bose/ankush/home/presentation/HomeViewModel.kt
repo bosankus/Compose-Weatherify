@@ -61,20 +61,22 @@ internal class HomeViewModel(
     private val _refreshing = MutableStateFlow(false)
     val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
 
-    private val refreshTrigger = MutableSharedFlow<Boolean>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST,
-    )
+    private val refreshTrigger =
+        MutableSharedFlow<Boolean>(
+            extraBufferCapacity = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST,
+        )
 
-    private val dataFetchExceptionHandler = CoroutineExceptionHandler { _, e ->
-        if (e !is CancellationException) {
-            viewModelScope.launch {
-                val message =
-                    if (e is Exception) errorMessageFromException(e) else getString(Res.string.general_error_txt)
-                dispatch(HomeAction.Error(message))
+    private val dataFetchExceptionHandler =
+        CoroutineExceptionHandler { _, e ->
+            if (e !is CancellationException) {
+                viewModelScope.launch {
+                    val message =
+                        if (e is Exception) errorMessageFromException(e) else getString(Res.string.general_error_txt)
+                    dispatch(HomeAction.Error(message))
+                }
             }
         }
-    }
 
     init {
         remoteConfigGate.initialize()
@@ -181,7 +183,7 @@ internal class HomeViewModel(
                     message = issue.toMessage(),
                     isOffline = true,
                     isGpsDisabled = issue is LocationProblem.GpsDisabled,
-                    isLocationPermissionDenied = issue is LocationProblem.PermissionDenied
+                    isLocationPermissionDenied = issue is LocationProblem.PermissionDenied,
                 ),
             )
         }
@@ -248,8 +250,8 @@ internal class HomeViewModel(
         val current = _state.value
         val switchingLocation =
             forceRefresh &&
-                    current.userLocation.let { it != null && it != location } &&
-                    (isOverridden || current.isLocationOverridden)
+                current.userLocation.let { it != null && it != location } &&
+                (isOverridden || current.isLocationOverridden)
         coroutineScope {
             val refreshFinished = MutableStateFlow(false)
             combine(

@@ -185,9 +185,9 @@ private fun ColumnScope.SearchBody(
             visible = search.results.isNotEmpty(),
             enter =
                 expandVertically(tween(EXPAND_MILLIS, easing = FastOutSlowInEasing)) +
-                        fadeIn(
-                            tween(EXPAND_MILLIS),
-                        ),
+                    fadeIn(
+                        tween(EXPAND_MILLIS),
+                    ),
             exit = shrinkVertically(tween(COLLAPSE_MILLIS)) + fadeOut(tween(COLLAPSE_MILLIS)),
             modifier = Modifier.weight(1f, fill = false),
         ) {
@@ -368,8 +368,7 @@ private fun SuggestionEnd(flags: SuggestionFlags) {
 }
 
 /** Lazy-list keys must be saveable on Android, so a string rather than the data class. */
-private fun LocationSuggestion.listKey(): String =
-    "$name|$city|$state|$country|$latitude|$longitude"
+private fun LocationSuggestion.listKey(): String = "$name|$city|$state|$country|$latitude|$longitude"
 
 @Composable
 private fun addPlaceLabel(action: AddPlaceAction): String =

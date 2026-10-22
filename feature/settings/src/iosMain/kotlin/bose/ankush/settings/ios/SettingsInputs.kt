@@ -128,8 +128,10 @@ private suspend fun ServiceSubscriptionState.selectedPlan(service: Service): Sel
         serviceName = service.displayName,
         price = tier.getDisplayPrice(),
         duration = getString(Res.string.plan_duration_txt, tier.getDisplayDuration()),
-        features = features.take(FEATURE_PREVIEW)
-            .map { PlanFeatureUi(id = it.id, text = it.description) },
+        features =
+            features
+                .take(FEATURE_PREVIEW)
+                .map { PlanFeatureUi(id = it.id, text = it.description) },
         moreFeatures =
             (features.size - FEATURE_PREVIEW)
                 .takeIf { it > 0 }

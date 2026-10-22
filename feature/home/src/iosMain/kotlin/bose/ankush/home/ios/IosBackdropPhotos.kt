@@ -88,14 +88,16 @@ internal class IosBackdropPhotos(
         conditionKey: String,
         photo: BackgroundPhoto,
     ) {
-        val values = listOf(
-            photo.id,
-            photo.imageUrl,
-            photo.photographer,
-            photo.profileUrl,
-            photo.downloadLocation
-        )
-        FIELDS.zip(values)
+        val values =
+            listOf(
+                photo.id,
+                photo.imageUrl,
+                photo.photographer,
+                photo.profileUrl,
+                photo.downloadLocation,
+            )
+        FIELDS
+            .zip(values)
             .forEach { (field, value) -> defaults.setObject(value, key(conditionKey, field)) }
     }
 

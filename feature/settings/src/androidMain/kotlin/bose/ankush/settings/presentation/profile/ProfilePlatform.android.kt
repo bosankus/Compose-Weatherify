@@ -77,8 +77,8 @@ internal object ProfilePhotoEncoder {
             ImageDecoder.decodeBitmap(
                 ImageDecoder.createSource(
                     resolver,
-                    uri
-                )
+                    uri,
+                ),
             ) { decoder, info, _ ->
                 // Software memory: hardware bitmaps cannot be compressed.
                 decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
@@ -94,13 +94,19 @@ internal object ProfilePhotoEncoder {
             }
         return try {
             val out = ByteArrayOutputStream()
-            val bytes = if (bitmap.compress(
-                    Bitmap.CompressFormat.JPEG,
-                    JPEG_QUALITY,
-                    out
-                )
-            ) out.toByteArray() else null
-            bytes?.takeIf { it.isNotEmpty() && it.size <= ProfilePhoto.MAX_BYTES }
+            val bytes =
+                if (bitmap.compress(
+                        Bitmap.CompressFormat.JPEG,
+                        JPEG_QUALITY,
+                        out,
+                    )
+                ) {
+                    out.toByteArray()
+                } else {
+                    null
+                }
+            bytes
+                ?.takeIf { it.isNotEmpty() && it.size <= ProfilePhoto.MAX_BYTES }
                 ?.let(::ProfilePhoto)
         } finally {
             bitmap.recycle()
