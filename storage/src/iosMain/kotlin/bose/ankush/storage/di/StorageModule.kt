@@ -5,9 +5,11 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import bose.ankush.storage.EncryptedTokenStorageImpl
 import bose.ankush.storage.LocationPreferencesStorageImpl
+import bose.ankush.storage.PlaceEventStorageImpl
 import bose.ankush.storage.PremiumStorageImpl
 import bose.ankush.storage.WeatherStorageImpl
 import bose.ankush.storage.api.LocationPreferencesStorage
+import bose.ankush.storage.api.PlaceEventStorage
 import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.common.LOCATION_PREFERENCES_FILE_NAME
@@ -30,6 +32,7 @@ actual val storageDomainModule: Module =
         single<WeatherDataModelConverters> { WeatherDataModelConverters() }
         single<WeatherDatabase> { createWeatherDatabase(converters = get()) }
         single<WeatherStorage> { WeatherStorageImpl(get()) }
+        single<PlaceEventStorage> { PlaceEventStorageImpl(get()) }
         single<DataStore<Preferences>> {
             PreferenceDataStoreFactory.createWithPath(
                 produceFile = { (NSHomeDirectory() + "/" + LOCATION_PREFERENCES_FILE_NAME).toPath() },
