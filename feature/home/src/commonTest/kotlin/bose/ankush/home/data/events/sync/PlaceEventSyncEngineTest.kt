@@ -643,6 +643,7 @@ class PlaceEventSyncEngineTest {
             assertEquals(listOf("DELETE a", "DELETE b"), api.calls)
             assertEquals(PlaceEventSyncOutcome.RATE_LIMITED, report.outcome)
             assertEquals(17.seconds, report.retryAfter)
+            assertEquals(17.seconds, report.serverRetryAfter)
             assertEquals(setOf("b", "c"), storage.rows.value.keys)
         }
 
@@ -656,6 +657,7 @@ class PlaceEventSyncEngineTest {
             val third = engine.sync()
 
             assertEquals(listOf(2.seconds, 4.seconds, 8.seconds), listOf(first, second, third).map { it.retryAfter })
+            assertNull(first.serverRetryAfter)
         }
 
     @Test

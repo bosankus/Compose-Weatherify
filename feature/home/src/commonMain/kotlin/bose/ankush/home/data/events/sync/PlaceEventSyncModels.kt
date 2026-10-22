@@ -48,6 +48,7 @@ internal enum class PlaceEventSyncOutcome {
 /**
  * What a run did. [retryAfter] is when the scheduler should try again by itself, or null when
  * it should wait for the next trigger (create/edit/delete, app start, foreground).
+ * [serverRetryAfter] is the 429's `Retry-After`, when the server sent one.
  */
 internal data class PlaceEventSyncReport(
     val outcome: PlaceEventSyncOutcome,
@@ -55,4 +56,5 @@ internal data class PlaceEventSyncReport(
     val pushed: Int,
     val pulled: Int,
     val retryAfter: Duration? = null,
+    val serverRetryAfter: Duration? = null,
 )

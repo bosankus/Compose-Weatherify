@@ -53,7 +53,8 @@ internal class PlaceEventSyncEngine(
                     run.retryAfterSeconds?.seconds
                 else -> backoff(consecutiveFailures)
             }
-        return PlaceEventSyncReport(outcome, run.requests, pushed, pulled, retryAfter)
+        val serverRetryAfter = run.retryAfterSeconds?.seconds?.takeIf { outcome == PlaceEventSyncOutcome.RATE_LIMITED }
+        return PlaceEventSyncReport(outcome, run.requests, pushed, pulled, retryAfter, serverRetryAfter)
     }
 
     /** [PlaceEventSyncConfig.baseBackoff] doubled per consecutive failure, capped. */
