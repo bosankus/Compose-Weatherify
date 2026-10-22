@@ -1,13 +1,16 @@
 package bose.ankush.home.data.events.sync
 
-import androidx.work.WorkManager
-import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import kotlin.time.Duration
 
 /**
  * Android place-event sync on WorkManager, so pending writes reach the server even after the
- * process is gone. [requestSync] (every write and app start) makes sure the periodic job exists
- * and enqueues the expedited one-time job; both need a connection.
+ * process is gone. Signing in enqueues the periodic job (KEEP) and one immediate run; signing
+ * out cancels both by name. [requestSync] (every write and app start) enqueues the expedited
+ * one-time job. Both need a connection.
  *
  * The one-time job uses [PlaceEventSyncWork.ONE_TIME_POLICY] = REPLACE rather than
  * APPEND_OR_REPLACE: a run reads every pending row when it starts, so one queued run covers any
@@ -17,23 +20,28 @@ import kotlin.time.Duration
  * on its own, and the engine runs one sync at a time.
  */
 internal class WorkManagerPlaceEventSyncScheduler(
-    private val workManager: () -> WorkManager,
+    private val queue: PlaceEventSyncWorkQueue,
     private val engine: PlaceEventSyncEngine,
     private val isSignedIn: suspend () -> Boolean,
+    signedInChanges: Flow<Boolean>,
+    scope: CoroutineScope,
 ) : PlaceEventSyncScheduler {
-    private val periodicEnqueued = AtomicBoolean(false)
-
-    override fun requestSync() {
-        val work = workManager()
-        if (periodicEnqueued.compareAndSet(false, true)) {
-            work.enqueueUniquePeriodicWork(
-                PlaceEventSyncWork.PERIODIC_WORK_NAME,
-                PlaceEventSyncWork.PERIODIC_POLICY,
-                PlaceEventSyncWork.periodicRequest(),
-            )
+    init {
+        // The app's session state (a stored JWT). Signing in starts both jobs; signing out
+        // cancels them, so nothing runs for an account that is gone.
+        scope.launch {
+            signedInChanges.distinctUntilChanged().collect { signedIn ->
+                if (signedIn) {
+                    queue.enqueuePeriodic()
+                    queue.enqueueNow()
+                } else {
+                    queue.cancelAll()
+                }
+            }
         }
-        enqueueOneTime(delay = null)
     }
+
+    override fun requestSync() = queue.enqueueNow()
 
     /**
      * Syncs in the caller's coroutine (the first events load). A run that asks to be retried is
@@ -41,21 +49,16 @@ internal class WorkManagerPlaceEventSyncScheduler(
      */
     override suspend fun syncNow(): PlaceEventSyncReport? {
         val report = syncInWorker()
-        report?.retryAfter?.let(::enqueueOneTime)
+        report?.retryAfter?.let(::retryLater)
         return report
     }
 
     /**
-     * One run of the shared engine for [PlaceEventSyncWorker]; null while signed out. A retry is
-     * left to WorkManager's backoff, which the worker asks for.
+     * One run of the shared engine for [PlaceEventSyncWorker]; null while signed out. The worker
+     * decides how to retry (see [PlaceEventSyncWork.outcomeFor]).
      */
     suspend fun syncInWorker(): PlaceEventSyncReport? = if (isSignedIn()) engine.sync() else null
 
-    private fun enqueueOneTime(delay: Duration?) {
-        workManager().enqueueUniqueWork(
-            PlaceEventSyncWork.ONE_TIME_WORK_NAME,
-            PlaceEventSyncWork.ONE_TIME_POLICY,
-            PlaceEventSyncWork.oneTimeRequest(delay),
-        )
-    }
+    /** Enqueues the one-time job again to start after [delay] (REPLACE). */
+    fun retryLater(delay: Duration) = queue.enqueueNow(delay)
 }
