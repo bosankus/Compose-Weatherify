@@ -34,22 +34,25 @@ internal class GetActiveCoordinatesImpl(
     override suspend fun current(): CoordinateResult {
         val pref = storage.getLocationPreferencesFlow().first()
         val savedLocation = pref.toActiveCoordinates()
-        if (pref.isLocationOverridden) return CoordinateResult(savedLocation)
-        if (!client.hasLocationPermission()) {
-            return CoordinateResult(
-                savedLocation,
-                LocationProblem.PermissionDenied,
-            )
+        return when {
+            pref.isLocationOverridden -> CoordinateResult(savedLocation)
+            !client.hasLocationPermission() ->
+                CoordinateResult(
+                    savedLocation,
+                    LocationProblem.PermissionDenied,
+                )
+
+            else ->
+                client
+                    .getCurrentLocation()
+                    .fold(
+                        onSuccess = {
+                            storage.saveLocationPreferences(it.latitude to it.longitude)
+                            CoordinateResult(ActiveCoordinates(Coordinates(it.latitude, it.longitude)))
+                        },
+                        onFailure = { CoordinateResult(savedLocation, it.toProblem()) },
+                    )
         }
-        return client
-            .getCurrentLocation()
-            .fold(
-                onSuccess = {
-                    storage.saveLocationPreferences(it.latitude to it.longitude)
-                    CoordinateResult(ActiveCoordinates(Coordinates(it.latitude, it.longitude)))
-                },
-                onFailure = { CoordinateResult(savedLocation, it.toProblem()) },
-            )
     }
 
     override suspend fun lastKnown(): ActiveCoordinates? =

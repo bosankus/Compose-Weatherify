@@ -2,6 +2,7 @@ package bose.ankush.weatherify.automotive
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.car.app.CarContext
 import androidx.car.app.CarToast
 import androidx.car.app.HostException
@@ -78,9 +79,14 @@ class ParkingDetailScreen(
         try {
             carContext.startCarApp(intent)
         } catch (e: HostException) {
+            Log.w(TAG, "No navigation app could handle the parking spot", e)
             CarToast
                 .makeText(carContext, "No navigation app available", CarToast.LENGTH_LONG)
                 .show()
         }
+    }
+
+    private companion object {
+        const val TAG = "ParkingDetailScreen"
     }
 }

@@ -71,19 +71,6 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.math.PI
 import kotlin.math.sin
 
-/** What the summary card and sheet need from [bose.ankush.home.presentation.ai.AiSummaryViewModel]. */
-internal class AiSummaryBinding(
-    val state: AiSummaryUiState = AiSummaryUiState(),
-    /** False hides the home card entirely: no model on this device, or no forecast to summarize yet. */
-    val isAvailable: Boolean = false,
-    /** The sheet just opened: start generating. */
-    val onOpen: () -> Unit = {},
-    /** The user tapped "Try again" after a failure. */
-    val onRetry: () -> Unit = {},
-    /** The sheet closed: stop generating. */
-    val onDismiss: () -> Unit = {},
-)
-
 /**
  * Weather summary in a [SheetPanel], on the same chrome as the other home sheets. Draws whatever
  * [AiSummaryUiState] says and nothing else: placeholder lines, the text as it arrives, tip chips,
@@ -312,14 +299,11 @@ private fun leafBody(
     side: Float,
     origin: Offset,
 ): Path {
-    fun at(
-        x: Float,
-        y: Float,
-    ) = Offset(origin.x + x * side, origin.y + y * side)
+    fun at(point: Offset) = Offset(origin.x + point.x * side, origin.y + point.y * side)
     return Path().apply {
-        moveTo(at(0.22f, 0.78f))
-        cubicTo(at(0.12f, 0.38f), at(0.45f, 0.15f), at(0.82f, 0.18f))
-        cubicTo(at(0.85f, 0.55f), at(0.58f, 0.88f), at(0.22f, 0.78f))
+        moveTo(at(LEAF_BASE))
+        cubicTo(at(LEAF_UPPER_CONTROL_START), at(LEAF_UPPER_CONTROL_END), at(LEAF_TIP))
+        cubicTo(at(LEAF_LOWER_CONTROL_START), at(LEAF_LOWER_CONTROL_END), at(LEAF_BASE))
         close()
     }
 }
@@ -329,13 +313,10 @@ private fun leafVein(
     side: Float,
     origin: Offset,
 ): Path {
-    fun at(
-        x: Float,
-        y: Float,
-    ) = Offset(origin.x + x * side, origin.y + y * side)
+    fun at(point: Offset) = Offset(origin.x + point.x * side, origin.y + point.y * side)
     return Path().apply {
-        moveTo(at(0.1f, 0.9f))
-        lineTo(at(0.62f, 0.38f))
+        moveTo(at(LEAF_STEM_START))
+        lineTo(at(LEAF_MIDRIB_END))
     }
 }
 
@@ -440,6 +421,16 @@ private const val VEIN_END = 0.5f
 private const val BLOOM_START = 0.4f
 private const val BLOOM_END = 0.58f
 private const val FADE_START = 0.88f
+
+// Leaf outline and vein points, as fractions of the leaf's square (x right, y down).
+private val LEAF_BASE = Offset(0.22f, 0.78f)
+private val LEAF_UPPER_CONTROL_START = Offset(0.12f, 0.38f)
+private val LEAF_UPPER_CONTROL_END = Offset(0.45f, 0.15f)
+private val LEAF_TIP = Offset(0.82f, 0.18f)
+private val LEAF_LOWER_CONTROL_START = Offset(0.85f, 0.55f)
+private val LEAF_LOWER_CONTROL_END = Offset(0.58f, 0.88f)
+private val LEAF_STEM_START = Offset(0.1f, 0.9f)
+private val LEAF_MIDRIB_END = Offset(0.62f, 0.38f)
 
 /** Comet colours from a transparent tail to a bright head; the stops stop at the arc's end (300/360). */
 private val RING_STOPS =

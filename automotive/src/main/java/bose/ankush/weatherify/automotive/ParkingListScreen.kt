@@ -2,6 +2,7 @@ package bose.ankush.weatherify.automotive
 
 import android.text.Spannable
 import android.text.SpannableString
+import android.util.Log
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.constraints.ConstraintManager
@@ -26,6 +27,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.json.JSONException
+import java.io.IOException
 
 /** What the screen is showing right now. Same idea as an MVI state. */
 private sealed interface ParkingUiState {
@@ -69,11 +72,18 @@ class ParkingListScreen(
                     ParkingUiState.Content(repository.nearby(CENTER_LAT, CENTER_LNG))
                 } catch (e: CancellationException) {
                     throw e
-                } catch (e: Exception) {
-                    ParkingUiState.Error("Couldn't load parking. Check the connection and try again.")
+                } catch (e: IOException) {
+                    loadFailed(e)
+                } catch (e: JSONException) {
+                    loadFailed(e)
                 }
             invalidate() // tells the car host to call onGetTemplate() again
         }
+    }
+
+    private fun loadFailed(cause: Exception): ParkingUiState {
+        Log.w(TAG, "Couldn't load nearby parking", cause)
+        return ParkingUiState.Error("Couldn't load parking. Check the connection and try again.")
     }
 
     override fun onGetTemplate(): Template =
@@ -168,5 +178,6 @@ class ParkingListScreen(
         // MG Road, Bangalore. A fixed search centre until we add real location (next step).
         const val CENTER_LAT = 12.9755
         const val CENTER_LNG = 77.6068
+        const val TAG = "ParkingListScreen"
     }
 }

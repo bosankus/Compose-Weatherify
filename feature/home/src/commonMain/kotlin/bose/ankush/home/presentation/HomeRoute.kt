@@ -83,6 +83,7 @@ private const val ANIMATION_STAGGER_DELAY_MS = 150L
  * [HomeViewModel] itself stays internal, resolved through Koin and scoped to wherever this route
  * is composed (mirrors `feature:finder`'s `SavedLocationsFinderRoute`).
  */
+@Suppress("LongParameterList") // Public host API: grouping params would change it and the nav call site.
 @Composable
 fun HomeFeatureRoute(
     bottomBar: @Composable () -> Unit = {},

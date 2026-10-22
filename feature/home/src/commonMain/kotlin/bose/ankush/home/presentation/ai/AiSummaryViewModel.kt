@@ -19,6 +19,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -89,24 +91,29 @@ internal class AiSummaryViewModel(
         _state.update { it.copy(summary = AiSummaryUiState(place = next.place)) }
         job =
             viewModelScope.launch {
-                try {
-                    summarizeWeather(next.forecast, next.place).collect { summary ->
-                        val ui = summary.toUi(next.place)
-                        _state.update { it.copy(summary = ui) }
-                    }
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: AiUnavailableException) {
-                    _state.update {
-                        AiSummaryScreenState(
-                            isAvailable = false,
-                            summary = failed(next.place),
-                        )
-                    }
-                } catch (e: Exception) {
-                    _state.update { it.copy(summary = failed(next.place)) }
-                }
+                summarizeWeather(next.forecast, next.place)
+                    .map { it.toUi(next.place) }
+                    .catch { failure -> onSummaryFailed(failure, next.place) }
+                    .collect { ui -> _state.update { it.copy(summary = ui) } }
             }
+    }
+
+    /**
+     * A summary that failed shows the retry state; [AiUnavailableException] also hides the card.
+     * Cancellation and non-[Exception] throwables keep propagating.
+     */
+    private fun onSummaryFailed(
+        failure: Throwable,
+        place: String?,
+    ) {
+        if (failure is CancellationException || failure !is Exception) throw failure
+        _state.update {
+            if (failure is AiUnavailableException) {
+                AiSummaryScreenState(isAvailable = false, summary = failed(place))
+            } else {
+                it.copy(summary = failed(place))
+            }
+        }
     }
 
     private fun failed(place: String?) = AiSummaryUiState(phase = AiSummaryPhase.Failed, place = place)
