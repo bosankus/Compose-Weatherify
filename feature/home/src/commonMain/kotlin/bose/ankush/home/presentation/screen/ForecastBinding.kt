@@ -21,11 +21,16 @@ data class CalendarStripDay(
     val day: LocalDate? = null,
 )
 
-/** Week strip inputs grouped so the composable stays under the param-list limit. */
+/**
+ * Week strip inputs grouped so the composable stays under the param-list limit.
+ * [showWeekShimmer] stands in for the days while the first forecast loads; [selectedDate]
+ * is the day picked for the events list.
+ */
 data class WeekCalendarStripModel(
     val days: List<CalendarStripDay>,
     val eventDates: Set<LocalDate> = emptySet(),
     val showWeekShimmer: Boolean = false,
+    val selectedDate: LocalDate? = null,
 )
 
 /** Live header, chips, and week. Preview data never goes through this. */

@@ -59,7 +59,7 @@ val homeDomainModule: Module =
 val homeViewModelModule: Module =
     module {
         viewModelOf(::HomeViewModel)
-        viewModelOf(::NearbyViewModel)
+        viewModel { NearbyViewModel(get(), get(), get()) }
         viewModelOf(::AccountAvatarViewModel)
         viewModelOf(::SavedPlacesViewModel)
         viewModel { AiSummaryViewModel(get(), get()) }

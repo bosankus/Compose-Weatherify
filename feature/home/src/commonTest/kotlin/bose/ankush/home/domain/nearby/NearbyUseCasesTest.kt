@@ -8,6 +8,8 @@ import bose.ankush.network.model.SavedLocation
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,14 +45,15 @@ class NearbyUseCasesTest {
                 GetNearbyEvents(
                     repository,
                     StandardTestDispatcher(testScheduler),
-                    timeZone = { TimeZone.UTC })
+                    timeZone = { TimeZone.UTC },
+                )
 
             val events = getNearbyEvents(GeoPoint(1.0, 2.0)).getOrThrow()
 
             assertEquals(
                 listOf(
-                    NearbyEvent(title = "Dinner", date = LocalDate(2026, 10, 4)),
-                    NearbyEvent(title = "", date = LocalDate(2026, 10, 5)),
+                    NearbyEvent(title = "Dinner", startsAt = LocalDateTime(2026, 10, 4, 18, 30)),
+                    NearbyEvent(title = "", startsAt = LocalDateTime(2026, 10, 5, 8, 0)),
                 ),
                 events,
             )
@@ -65,7 +68,8 @@ class NearbyUseCasesTest {
                 CreateNearbyEvent(
                     repository,
                     StandardTestDispatcher(testScheduler),
-                    timeZone = { TimeZone.UTC })
+                    timeZone = { TimeZone.UTC },
+                )
 
             val result =
                 create(NearbyPlace("Harbor", GeoPoint(1.0, 2.0)), EventDraft(title = "Dinner"))
@@ -82,7 +86,8 @@ class NearbyUseCasesTest {
                 CreateNearbyEvent(
                     repository,
                     StandardTestDispatcher(testScheduler),
-                    timeZone = { TimeZone.UTC })
+                    timeZone = { TimeZone.UTC },
+                )
 
             create(
                 NearbyPlace("Harbor", GeoPoint(1.0, 2.0)),
@@ -93,5 +98,53 @@ class NearbyUseCasesTest {
             assertEquals("Dinner", request.title)
             assertEquals("Harbor", request.placeName)
             assertEquals("2026-10-04T09:30:00Z", request.startsAt)
+            assertNull(request.note)
+        }
+
+    @Test
+    fun aNoteIsTrimmedAndPostedWithTheEvent() =
+        runTest {
+            val repository = FakePlaceEventRepository()
+            val create =
+                CreateNearbyEvent(
+                    repository,
+                    StandardTestDispatcher(testScheduler),
+                    timeZone = { TimeZone.UTC },
+                )
+
+            create(
+                NearbyPlace("Harbor", GeoPoint(1.0, 2.0)),
+                EventDraft(title = "Dinner", dateText = "2026-10-04", timeText = "09:30", note = "  Bring a jacket "),
+            ).getOrThrow()
+
+            assertEquals("Bring a jacket", repository.created.single().note)
+        }
+
+    @Test
+    fun nearbyEventsKeepTheLocalStartTimeAndTheNote() =
+        runTest {
+            val repository =
+                FakePlaceEventRepository(
+                    events = { _, _ ->
+                        Result.success(
+                            listOf(
+                                PlaceEvent(startsAt = "2026-10-04T18:30:00Z", title = "Dinner", note = " Table 4 "),
+                                PlaceEvent(startsAt = "2026-10-04T20:00:00Z", title = "Walk", note = "  "),
+                            ),
+                        )
+                    },
+                )
+            val kolkata = TimeZone.of("Asia/Kolkata")
+            val getNearbyEvents =
+                GetNearbyEvents(repository, StandardTestDispatcher(testScheduler), timeZone = { kolkata })
+
+            val events = getNearbyEvents(GeoPoint(1.0, 2.0)).getOrThrow()
+
+            // 18:30Z is midnight in Kolkata, so the date moves to the next day with the time.
+            assertEquals(LocalDateTime(2026, 10, 5, 0, 0), events[0].startsAt)
+            assertEquals(LocalDate(2026, 10, 5), events[0].date)
+            assertEquals("Table 4", events[0].note)
+            assertEquals(LocalTime(1, 30), events[1].startsAt.time)
+            assertNull(events[1].note)
         }
 }

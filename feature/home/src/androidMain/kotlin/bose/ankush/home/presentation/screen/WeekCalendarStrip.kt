@@ -45,13 +45,18 @@ import bose.ankush.home.generated.resources.daily_forecast_heading_txt
 import bose.ankush.home.generated.resources.ic_sunny
 import bose.ankush.home.presentation.util.getIconUrl
 import coil3.compose.AsyncImage
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * The week from the daily forecast. Tapping a day selects it and opens the new-event form on
+ * that date ([onOpen] gets the day); the "+" chip opens it on the selected day (null).
+ */
 @Composable
 fun WeekCalendarStrip(
     model: WeekCalendarStripModel,
-    onOpen: () -> Unit,
+    onOpen: (LocalDate?) -> Unit,
     modifier: Modifier = Modifier,
     contentColor: Color = ContentOnDark,
     onRetryCalendar: (() -> Unit)? = null,
@@ -83,7 +88,7 @@ fun WeekCalendarStrip(
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color.Black.copy(alpha = CARD_ALPHA))
                         .semantics { contentDescription = ADD_EVENT }
-                        .clickable(role = Role.Button, onClick = onOpen)
+                        .clickable(role = Role.Button) { onOpen(null) }
                         .padding(horizontal = 10.dp, vertical = 6.dp),
             )
             if (onRetryCalendar != null) {
@@ -109,9 +114,13 @@ fun WeekCalendarStrip(
                 days.forEach { day ->
                     DayCell(
                         day = day,
-                        marked = day.day != null && day.day in eventDates,
+                        marks =
+                            DayMarks(
+                                highlighted = day.isHighlighted(model.selectedDate),
+                                hasEvent = day.day != null && day.day in eventDates,
+                            ),
                         contentColor = contentColor,
-                        onOpen = onOpen,
+                        onOpen = { onOpen(day.day) },
                     )
                 }
             }
@@ -119,14 +128,20 @@ fun WeekCalendarStrip(
     }
 }
 
+private data class DayMarks(
+    val highlighted: Boolean,
+    val hasEvent: Boolean,
+)
+
 @Composable
 private fun DayCell(
     day: CalendarStripDay,
-    marked: Boolean,
+    marks: DayMarks,
     contentColor: Color,
     onOpen: () -> Unit,
 ) {
     val range = day.rangeLabel()
+    val highlighted = marks.highlighted
     Column(
         modifier =
             Modifier
@@ -142,18 +157,18 @@ private fun DayCell(
                 Modifier
                     .size(32.dp)
                     .clip(CircleShape)
-                    .background(if (day.selected) Color.White else Color.Transparent),
+                    .background(if (highlighted) Color.White else Color.Transparent),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 text = day.date,
-                color = if (day.selected) ContentOnLight else contentColor,
+                color = if (highlighted) ContentOnLight else contentColor,
                 fontSize = 16.sp,
-                fontWeight = if (day.selected) FontWeight.SemiBold else FontWeight.Normal,
+                fontWeight = if (highlighted) FontWeight.SemiBold else FontWeight.Normal,
             )
         }
-        if (marked) {
+        if (marks.hasEvent) {
             Spacer(modifier = Modifier.height(4.dp))
             Box(
                 modifier =
@@ -271,14 +286,6 @@ internal fun ActionLabel(
     )
 }
 
-private fun CalendarStripDay.rangeLabel(): String =
-    when {
-        min.isNotEmpty() && max.isNotEmpty() -> "$min / $max"
-        min.isNotEmpty() -> min
-        max.isNotEmpty() -> max
-        else -> temp
-    }
-
 private fun CalendarStripDay.eventDescription(): String {
     val whenLabel = "$label $date"
     return listOf(ADD_EVENT, whenLabel, rangeLabel(), description)
@@ -289,7 +296,7 @@ private fun CalendarStripDay.eventDescription(): String {
 private val DayWidth = 84.dp
 private val EventDot = Color(0xFFF5C400)
 private const val CARD_ALPHA = 0.38f
-private const val CALENDAR = "Event calendar"
+private const val CALENDAR = "+ Event"
 private const val ADD_EVENT = "Add event"
 private const val SHIMMER_DAYS = 7
 private const val SHIMMER_TRAVEL = 720f

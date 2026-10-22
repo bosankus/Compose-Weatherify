@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -24,25 +26,26 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bose.ankush.commonui.photo.rememberAccountPhotoRequest
-import bose.ankush.home.domain.nearby.NearbyEvent
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.default_avatar
+import bose.ankush.home.generated.resources.events_all_days
+import bose.ankush.home.generated.resources.events_none_on_day
+import bose.ankush.home.generated.resources.ic_sunny
 import bose.ankush.home.presentation.nearby.NearbyIntent
 import bose.ankush.home.presentation.nearby.NearbyState
 import bose.ankush.home.presentation.nearby.toDayMonthLabel
 import bose.ankush.home.presentation.util.SectionState
+import bose.ankush.home.presentation.util.getIconUrl
 import bose.ankush.home.presentation.util.valueOrNull
 import bose.ankush.network.model.SavedLocation
 import coil3.compose.AsyncImage
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.painterResource
-
-data class NearbyEventLine(
-    val title: String,
-    val whenLabel: String,
-)
+import org.jetbrains.compose.resources.stringResource
 
 data class FeaturedSavedPlace(
     val name: String,
@@ -52,7 +55,8 @@ data class FeaturedSavedPlace(
 
 /**
  * Account photo, nearby events, and one saved place already loaded for this location.
- * Empty and failed calls stay off the column. Nothing here is a placeholder title.
+ * Loading shows a shimmer and a failed call a shimmer with Retry; an empty list stays off
+ * the column unless a day is selected. Nothing here is a placeholder title.
  */
 data class NearbyContent(
     val photoUrl: String? = null,
@@ -61,9 +65,17 @@ data class NearbyContent(
     val eventsFailed: Boolean = false,
     val events: List<NearbyEventLine> = emptyList(),
     val savedPlace: FeaturedSavedPlace? = null,
+    val selectedDate: LocalDate? = null,
     val onOpenAccount: () -> Unit = {},
     val onRetryEvents: () -> Unit = {},
-)
+    val onShowAllDays: () -> Unit = {},
+) {
+    val showEventsBlock: Boolean
+        get() = eventsLoading || eventsFailed || events.isNotEmpty() || selectedDate != null
+
+    val showBlocks: Boolean
+        get() = showEventsBlock || savedPlace?.name?.isNotBlank() == true
+}
 
 /** The new-event form and where its intents go. */
 internal class CreateEventBinding(
@@ -81,24 +93,25 @@ internal data class HomeScreenSections(
     val aiSummary: AiSummaryBinding = AiSummaryBinding(),
 )
 
+/** [days] is the daily forecast; each event line picks up its day's weather from it. */
 internal fun NearbyState.toNearbyContent(
     photoUrl: String?,
     onOpenAccount: () -> Unit,
-    onRetryEvents: () -> Unit = {},
+    days: List<CalendarStripDay> = emptyList(),
+    onIntent: (NearbyIntent) -> Unit = {},
 ): NearbyContent =
     NearbyContent(
         photoUrl = photoUrl,
         showAccount = true,
         eventsLoading = events is SectionState.Loading,
         eventsFailed = events is SectionState.Failed,
-        events = events.valueOrNull().orEmpty().map { it.toNearbyEventLine() },
+        events = visibleEvents.toNearbyEventLines(days),
         savedPlace = featuredPlace.valueOrNull()?.toFeaturedSavedPlace(),
+        selectedDate = selectedDate,
         onOpenAccount = onOpenAccount,
-        onRetryEvents = onRetryEvents,
+        onRetryEvents = { onIntent(NearbyIntent.RetryEvents) },
+        onShowAllDays = { onIntent(NearbyIntent.SelectDate(null)) },
     )
-
-private fun NearbyEvent.toNearbyEventLine(): NearbyEventLine =
-    NearbyEventLine(title = title, whenLabel = date.toDayMonthLabel())
 
 private fun SavedLocation.toFeaturedSavedPlace(): FeaturedSavedPlace =
     FeaturedSavedPlace(
@@ -152,17 +165,10 @@ internal fun NearbyBlocks(
     onOpenSaved: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val showEvents = nearby.eventsLoading || nearby.eventsFailed || nearby.events.isNotEmpty()
-    if (!showEvents && nearby.savedPlace == null) return
+    if (!nearby.showEventsBlock && nearby.savedPlace == null) return
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        if (showEvents) {
-            NearbyEventsBlock(
-                loading = nearby.eventsLoading || nearby.eventsFailed,
-                failed = nearby.eventsFailed,
-                events = nearby.events,
-                contentColor = contentColor,
-                onRetry = nearby.onRetryEvents,
-            )
+        if (nearby.showEventsBlock) {
+            NearbyEventsBlock(nearby = nearby, contentColor = contentColor)
         }
         nearby.savedPlace?.let { place ->
             FeaturedSavedPlaceCard(place = place, contentColor = contentColor, onOpen = onOpenSaved)
@@ -172,12 +178,10 @@ internal fun NearbyBlocks(
 
 @Composable
 private fun NearbyEventsBlock(
-    loading: Boolean,
-    failed: Boolean,
-    events: List<NearbyEventLine>,
+    nearby: NearbyContent,
     contentColor: Color,
-    onRetry: () -> Unit,
 ) {
+    val day = nearby.selectedDate?.toDayMonthLabel()
     Column(
         modifier =
             Modifier
@@ -187,63 +191,129 @@ private fun NearbyEventsBlock(
                 .semantics { contentDescription = NEARBY_EVENTS },
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Text(
-            text = NEARBY_EVENTS,
-            color = contentColor,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-        )
-        if (loading) {
-            val brush = rememberShimmerBrush()
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth(PLACEHOLDER_WIDTH)
-                        .height(14.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(brush),
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (day != null) "$NEARBY_EVENTS · $day" else NEARBY_EVENTS,
+                color = contentColor,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(1f),
             )
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth(0.32f)
-                        .height(14.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(brush),
-            )
-            if (failed) {
+            if (day != null) {
                 ActionLabel(
-                    label = RetryLabels.EVENTS,
-                    onClick = onRetry,
+                    label = stringResource(Res.string.events_all_days),
+                    onClick = nearby.onShowAllDays,
                     contentColor = contentColor,
                 )
             }
-        } else {
-            events.forEach { event ->
-                EventLine(event = event, contentColor = contentColor)
-            }
+        }
+        when {
+            nearby.eventsLoading || nearby.eventsFailed -> EventsShimmer(nearby, contentColor)
+            nearby.events.isEmpty() && day != null ->
+                Text(
+                    text = stringResource(Res.string.events_none_on_day, day),
+                    color = contentColor,
+                    fontSize = 14.sp,
+                )
+
+            else -> nearby.events.forEach { event -> EventLine(event = event, contentColor = contentColor) }
         }
     }
 }
 
+/** Two shimmer bars while events load; a failed load keeps them and adds Retry. */
+@Composable
+private fun EventsShimmer(
+    nearby: NearbyContent,
+    contentColor: Color,
+) {
+    val brush = rememberShimmerBrush()
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth(PLACEHOLDER_WIDTH)
+                .height(14.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(brush),
+    )
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth(0.32f)
+                .height(14.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(brush),
+    )
+    if (nearby.eventsFailed) {
+        ActionLabel(
+            label = RetryLabels.EVENTS,
+            onClick = nearby.onRetryEvents,
+            contentColor = contentColor,
+        )
+    }
+}
+
+/** Title, then "4 Oct · 18:30", the note, and that day's forecast on the right. */
 @Composable
 private fun EventLine(
     event: NearbyEventLine,
     contentColor: Color,
 ) {
-    val primary = event.title.ifBlank { event.whenLabel }
-    Text(
-        text = primary,
-        color = contentColor,
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Medium,
-    )
-    if (event.title.isNotBlank()) {
-        Text(
-            text = event.whenLabel,
-            color = contentColor,
-            fontSize = 13.sp,
-        )
+    val whenText = listOf(event.whenLabel, event.timeLabel).filter { it.isNotBlank() }.joinToString(" · ")
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = event.title.ifBlank { whenText },
+                color = contentColor,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+            )
+            if (event.title.isNotBlank()) {
+                Text(text = whenText, color = contentColor, fontSize = 13.sp)
+            }
+            if (event.note.isNotBlank()) {
+                Text(
+                    text = event.note,
+                    color = contentColor.copy(alpha = NOTE_ALPHA),
+                    fontSize = 13.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+        event.weather?.let { weather -> EventWeather(weather = weather, contentColor = contentColor) }
+    }
+}
+
+@Composable
+private fun EventWeather(
+    weather: EventDayWeather,
+    contentColor: Color,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier =
+            Modifier
+                .padding(start = 8.dp)
+                .semantics {
+                    contentDescription =
+                        listOf(weather.description, weather.range).filter { it.isNotBlank() }.joinToString(", ")
+                },
+    ) {
+        if (weather.icon.isNotBlank()) {
+            AsyncImage(
+                model = weather.icon.getIconUrl(),
+                placeholder = painterResource(Res.drawable.ic_sunny),
+                error = painterResource(Res.drawable.ic_sunny),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(28.dp),
+            )
+        }
+        if (weather.range.isNotBlank()) {
+            Text(text = weather.range, color = contentColor, fontSize = 13.sp)
+        }
     }
 }
 
@@ -304,6 +374,7 @@ private val AccountMarkSize = 40.dp
 private val AccountMarkFill = Color.White
 
 private const val PLACEHOLDER_WIDTH = 0.46f
+private const val NOTE_ALPHA = 0.8f
 private const val ACCOUNT = "Account"
 private const val NEARBY_EVENTS = "Nearby events"
 private const val SAVED_PLACE = "Saved place"
