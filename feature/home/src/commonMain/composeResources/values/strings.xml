@@ -83,6 +83,8 @@
     <string name="event_time_pick">Pick a time</string>
     <string name="event_picker_confirm">OK</string>
     <string name="event_picker_cancel">Cancel</string>
+    <string name="events_all_days">All days</string>
+    <string name="events_none_on_day">No events on %1$s.</string>
     <string name="event_save_action">Save event</string>
     <string name="event_saving">Saving…</string>
 </resources>

@@ -57,6 +57,7 @@ import bose.ankush.home.presentation.places.SavedPlacesEffect
 import bose.ankush.home.presentation.places.SavedPlacesIntent
 import bose.ankush.home.presentation.places.SavedPlacesViewModel
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -75,7 +76,7 @@ internal fun HomeScreen(
     links: HomeScreenLinks,
     shell: HomeScreenShell,
     sections: HomeScreenSections,
-    onOpenCalendar: () -> Unit = {},
+    onOpenCalendar: (LocalDate?) -> Unit = {},
 ) {
     val places = sections.places
     val pager = rememberPagerState(pageCount = { HOME_PAGE_COUNT })
@@ -177,7 +178,7 @@ private data class HomePagerModel(
 )
 
 private data class HomePagerActions(
-    val onOpenCalendar: () -> Unit,
+    val onOpenCalendar: (LocalDate?) -> Unit,
     val onOpenAlert: (WeatherForecast.Alert) -> Unit,
     val onDismissAlert: () -> Unit,
     val onOpenAiSummary: () -> Unit,
@@ -390,6 +391,7 @@ private fun WeatherPage(
                         days = content.days,
                         eventDates = chrome.eventDates,
                         showWeekShimmer = chrome.forecastLoading,
+                        selectedDate = nearby.selectedDate,
                     ),
                 onOpen = actions.onOpenCalendar,
                 contentColor = contentColor,
@@ -425,14 +427,10 @@ private fun WeatherPage(
             Spacer(modifier = Modifier.height(16.dp))
             PromoSmallCards(contentColor = contentColor)
         }
-        val showNearby =
-            nearby.events.isNotEmpty() ||
-                nearby.savedPlace?.name?.isNotBlank() == true
-        if (showNearby) {
+        if (nearby.showBlocks) {
             Spacer(modifier = Modifier.height(16.dp))
-            val weatherPageNearby = remember(nearby) { nearby.copy(eventsLoading = false) }
             NearbyBlocks(
-                nearby = weatherPageNearby,
+                nearby = nearby,
                 contentColor = contentColor,
                 onOpenSaved = actions.onOpenPlaces,
             )
@@ -573,11 +571,12 @@ fun HomeScreenRoute(
         }
     }
     val nearby =
-        remember(nearbyState, avatarState.photoUrl, links, nearbyViewModel) {
+        remember(nearbyState, avatarState.photoUrl, links, content.days, nearbyViewModel) {
             nearbyState.toNearbyContent(
                 photoUrl = avatarState.photoUrl,
                 onOpenAccount = links.onOpenHub,
-                onRetryEvents = { nearbyViewModel.onIntent(NearbyIntent.RetryEvents) },
+                days = content.days,
+                onIntent = nearbyViewModel::onIntent,
             )
         }
     val forecast =
@@ -637,7 +636,7 @@ fun HomeScreenRoute(
             links = links,
             shell = shell,
             sections = sections,
-            onOpenCalendar = { nearbyViewModel.onIntent(NearbyIntent.OpenComposer()) },
+            onOpenCalendar = { date -> nearbyViewModel.onIntent(NearbyIntent.OpenComposer(date)) },
         )
     }
 }
