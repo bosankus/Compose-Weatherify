@@ -20,7 +20,10 @@ internal class ObservePlaceEvents(
         repository.observeEvents(area).flowOn(ioDispatcher)
 }
 
-/** Edits a place event locally (pending) and schedules a sync. A blank title is refused. */
+/**
+ * Edits a place event locally (pending, which re-queues one that couldn't sync) and schedules a
+ * sync. A blank title is refused.
+ */
 internal class UpdatePlaceEvent(
     private val repository: PlaceEventsRepository,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -42,4 +45,13 @@ internal class DeletePlaceEvent(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
     suspend operator fun invoke(id: String): Result<Unit> = withContext(ioDispatcher) { repository.deleteEvent(id) }
+}
+
+/** Drops a change the server refused, so the event goes back to the server's copy (or away). */
+internal class DiscardFailedPlaceEvent(
+    private val repository: PlaceEventsRepository,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) {
+    suspend operator fun invoke(id: String): Result<Unit> =
+        withContext(ioDispatcher) { repository.discardFailedEvent(id) }
 }

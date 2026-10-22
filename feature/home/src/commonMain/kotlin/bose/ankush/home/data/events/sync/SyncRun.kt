@@ -67,6 +67,7 @@ internal class SyncRun(
 internal const val HTTP_OK = 200
 internal const val HTTP_CREATED = 201
 internal const val HTTP_NO_CONTENT = 204
+internal const val HTTP_BAD_REQUEST = 400
 internal const val HTTP_NOT_FOUND = 404
 internal const val HTTP_CONFLICT = 409
 private const val HTTP_UNAUTHORIZED = 401

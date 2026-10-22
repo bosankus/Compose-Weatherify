@@ -2,6 +2,7 @@ package bose.ankush.home.data.events
 
 import bose.ankush.home.domain.events.PlaceEventInput
 import bose.ankush.home.domain.events.PlaceEventItem
+import bose.ankush.home.domain.events.PlaceEventSyncStatus
 import bose.ankush.home.domain.nearby.GeoPoint
 import bose.ankush.network.model.CreatePlaceEventBody
 import bose.ankush.network.model.PlaceEventDto
@@ -20,8 +21,16 @@ internal fun PlaceEventRecord.toItem(): PlaceEventItem? =
             note = note,
             placeName = placeName,
             point = GeoPoint(lat, lon),
-            isPendingSync = syncState != PlaceEventSyncState.SYNCED,
+            syncStatus = syncState.toStatus(),
+            syncError = syncError.takeIf { syncState == PlaceEventSyncState.FAILED },
         )
+    }
+
+private fun PlaceEventSyncState.toStatus(): PlaceEventSyncStatus =
+    when (this) {
+        PlaceEventSyncState.SYNCED -> PlaceEventSyncStatus.SYNCED
+        PlaceEventSyncState.PENDING_UPSERT, PlaceEventSyncState.PENDING_DELETE -> PlaceEventSyncStatus.PENDING
+        PlaceEventSyncState.FAILED -> PlaceEventSyncStatus.FAILED
     }
 
 /** [input] written over this row's editable fields. */
@@ -51,6 +60,13 @@ internal fun PlaceEventDto.toSyncedRecord(): PlaceEventRecord =
         syncState = PlaceEventSyncState.SYNCED,
         serverUpdatedAt = updatedAt,
     )
+
+/**
+ * A server copy whose local row is already gone (deleted before the create was acknowledged),
+ * queued for DELETE and hidden like any pending delete.
+ */
+internal fun PlaceEventDto.toPendingDelete(): PlaceEventRecord =
+    toSyncedRecord().copy(deletedAt = updatedAt, syncState = PlaceEventSyncState.PENDING_DELETE)
 
 /** True when the server copy holds the same editable fields as this row. */
 internal fun PlaceEventRecord.hasSameContentAs(dto: PlaceEventDto): Boolean =

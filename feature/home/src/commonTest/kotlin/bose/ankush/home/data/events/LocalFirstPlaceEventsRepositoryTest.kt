@@ -2,7 +2,9 @@ package bose.ankush.home.data.events
 
 import bose.ankush.home.domain.events.EventArea
 import bose.ankush.home.domain.events.PlaceEventInput
+import bose.ankush.home.domain.events.PlaceEventSyncStatus
 import bose.ankush.home.domain.nearby.GeoPoint
+import bose.ankush.storage.model.PlaceEventSyncState.FAILED
 import bose.ankush.storage.model.PlaceEventSyncState.PENDING_DELETE
 import bose.ankush.storage.model.PlaceEventSyncState.PENDING_UPSERT
 import bose.ankush.storage.model.PlaceEventSyncState.SYNCED
@@ -13,6 +15,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
@@ -77,7 +80,90 @@ class LocalFirstPlaceEventsRepositoryTest {
             repository.deleteEvent(id).getOrThrow()
 
             assertEquals(listOf(emptyList(), listOf(id), emptyList()), seen)
-            assertEquals(PENDING_DELETE, storage.row(id)?.syncState)
+        }
+
+    @Test
+    fun deletingAnEventTheServerNeverAcknowledgedRemovesItLocallyAndAsksForNoSync() =
+        runTest {
+            val id = repository.createEvent(input).getOrThrow().id
+
+            repository.deleteEvent(id).getOrThrow()
+
+            assertNull(storage.row(id))
+            assertEquals(1, scheduler.requests) // the create only
+        }
+
+    @Test
+    fun deletingASyncedEventQueuesADeleteForTheServer() =
+        runTest {
+            storage.saveEvent(localRecord("a", SYNCED, serverUpdatedAt = T_SERVER))
+
+            repository.deleteEvent("a").getOrThrow()
+
+            assertEquals(PENDING_DELETE, storage.row("a")?.syncState)
+            assertEquals(1, scheduler.requests)
+            assertTrue(repository.observeEvents(EventArea(harbor)).first().isEmpty())
+        }
+
+    @Test
+    fun aFailedRowIsShownWithItsServerMessage() =
+        runTest {
+            storage.saveEvent(localRecord("a", FAILED).copy(syncError = "title is too long"))
+
+            val item = repository.observeEvents(EventArea(harbor)).first().single()
+
+            assertEquals(PlaceEventSyncStatus.FAILED, item.syncStatus)
+            assertEquals("title is too long", item.syncError)
+            assertFalse(item.isPendingSync)
+        }
+
+    @Test
+    fun anEditQueuesAFailedRowAgainAndClearsItsMessage() =
+        runTest {
+            storage.saveEvent(localRecord("a", FAILED, serverUpdatedAt = T_SERVER).copy(syncError = "bad"))
+
+            val item = repository.updateEvent("a", input.copy(title = "Fixed")).getOrThrow()
+
+            assertEquals(PENDING_UPSERT, storage.row("a")?.syncState)
+            assertNull(storage.row("a")?.syncError)
+            assertEquals(PlaceEventSyncStatus.PENDING, item.syncStatus)
+            assertEquals(1, scheduler.requests)
+        }
+
+    @Test
+    fun discardingAFailedCreateDropsItWithNoSync() =
+        runTest {
+            storage.saveEvent(localRecord("a", FAILED).copy(syncError = "bad"))
+            storage.checkpoint = "c"
+
+            repository.discardFailedEvent("a").getOrThrow()
+
+            assertNull(storage.row("a"))
+            assertEquals("c", storage.checkpoint)
+            assertEquals(0, scheduler.requests)
+        }
+
+    @Test
+    fun discardingAFailedEditResetsTheCheckpointToFetchTheServerCopyBack() =
+        runTest {
+            storage.saveEvent(localRecord("a", FAILED, serverUpdatedAt = T_SERVER).copy(syncError = "bad"))
+            storage.checkpoint = "c"
+
+            repository.discardFailedEvent("a").getOrThrow()
+
+            assertNull(storage.row("a"))
+            assertNull(storage.checkpoint)
+            assertEquals(1, scheduler.requests)
+        }
+
+    @Test
+    fun onlyAFailedRowCanBeDiscarded() =
+        runTest {
+            storage.saveEvent(localRecord("a", PENDING_UPSERT))
+
+            assertTrue(repository.discardFailedEvent("a").isFailure)
+            assertTrue(repository.discardFailedEvent("missing").isFailure)
+            assertEquals(PENDING_UPSERT, storage.row("a")?.syncState)
         }
 
     @Test

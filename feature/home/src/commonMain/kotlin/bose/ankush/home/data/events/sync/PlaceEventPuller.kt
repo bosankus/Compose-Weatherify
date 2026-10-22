@@ -3,6 +3,7 @@ package bose.ankush.home.data.events.sync
 import bose.ankush.home.data.events.parseInstant
 import bose.ankush.home.data.events.toSyncedRecord
 import bose.ankush.network.api.PlaceEventSyncApiService
+import bose.ankush.network.model.PlaceEventApiResult
 import bose.ankush.network.model.PlaceEventDto
 import bose.ankush.network.model.PlaceEventSyncPage
 import bose.ankush.storage.api.PlaceEventStorage
@@ -16,9 +17,14 @@ import kotlin.time.Duration
  * (checkpoint - [overlap]) to catch rows the server stamped just behind the cursor; that pull
  * never moves the checkpoint.
  *
+ * A 400 means the server no longer accepts the cursor: the checkpoint is dropped and the same run
+ * pulls everything from the beginning, once. A 5xx or a network error stops the run (see
+ * [SyncRun]) and keeps the checkpoint, so the retry resumes where this run stopped.
+ *
  * Merging is idempotent, by id. A server row replaces a local one only when the local one is
- * synced or older (by `updatedAt`); a pending local edit is never clobbered by older data, and a
- * pending local delete is only settled by a tombstone. A tombstone removes the local row.
+ * synced or older (by `updatedAt`); a pending local edit is never clobbered by older data, a
+ * pending local delete is only settled by a tombstone, and a failed row is left for the user.
+ * A tombstone removes the local row.
  */
 internal class PlaceEventPuller(
     private val storage: PlaceEventStorage,
@@ -27,18 +33,50 @@ internal class PlaceEventPuller(
 ) {
     /** Returns how many server rows changed the local store. */
     suspend fun pull(run: SyncRun): Int {
-        var since = storage.getSyncCheckpoint()
-        var applied = 0
-        var reachedEnd = false
-        while (!reachedEnd) {
-            val page = fetch(run, since) ?: break
-            applied += merge(run, page.items)
-            page.checkpoint?.let { checkpoint -> run.write { storage.saveSyncCheckpoint(checkpoint) } }
-            val next = page.nextSince
-            reachedEnd = !page.hasMore || next == null || run.isStopped
-            since = next ?: since
+        val cursor = PullCursor(storage.getSyncCheckpoint())
+        while (cursor.fetching && !run.isStopped) {
+            val result = run.call { api.changes(cursor.since) }
+            cursor.applied += handle(run, cursor, result)
         }
-        return applied + if (reachedEnd && !run.isStopped) overlapPull(run) else 0
+        return cursor.applied + if (cursor.reachedEnd && !run.isStopped) overlapPull(run) else 0
+    }
+
+    /** Applies one answer to [cursor] and returns how many rows it changed. */
+    private suspend fun handle(
+        run: SyncRun,
+        cursor: PullCursor,
+        result: PlaceEventApiResult<PlaceEventSyncPage>?,
+    ): Int {
+        val page = result?.data?.takeIf { result.statusCode == HTTP_OK }
+        return when {
+            page != null -> applyPage(run, cursor, page)
+            result?.statusCode == HTTP_BAD_REQUEST && cursor.canReset -> {
+                run.write { storage.clearSyncCheckpoint() }
+                cursor.resetToFullResync()
+                0
+            }
+            else -> {
+                cursor.fetching = false
+                0
+            }
+        }
+    }
+
+    private suspend fun applyPage(
+        run: SyncRun,
+        cursor: PullCursor,
+        page: PlaceEventSyncPage,
+    ): Int {
+        val applied = merge(run, page.items)
+        page.checkpoint?.let { checkpoint -> run.write { storage.saveSyncCheckpoint(checkpoint) } }
+        val next = page.nextSince
+        if (!page.hasMore || next == null) {
+            cursor.reachedEnd = true
+            cursor.fetching = false
+        } else {
+            cursor.since = next
+        }
+        return applied
     }
 
     private suspend fun overlapPull(run: SyncRun): Int {
@@ -47,18 +85,12 @@ internal class PlaceEventPuller(
                 .getSyncCheckpoint()
                 ?.let { parseInstant(it.substringBefore(CURSOR_SEPARATOR)) }
                 ?.minus(overlap)
-        val page = from?.let { fetch(run, it.toString()) }
+        val page =
+            from?.let { start ->
+                run.call { api.changes(start.toString()) }?.takeIf { it.statusCode == HTTP_OK }?.data
+            }
         return page?.let { merge(run, it.items) } ?: 0
     }
-
-    private suspend fun fetch(
-        run: SyncRun,
-        since: String?,
-    ): PlaceEventSyncPage? =
-        run
-            .call { api.changes(since) }
-            ?.takeIf { it.statusCode == HTTP_OK }
-            ?.data
 
     private suspend fun merge(
         run: SyncRun,
@@ -90,6 +122,8 @@ internal class PlaceEventPuller(
             PlaceEventSyncState.SYNCED -> true
             PlaceEventSyncState.PENDING_UPSERT -> isOlder(local.updatedAt, dto.updatedAt)
             PlaceEventSyncState.PENDING_DELETE -> dto.deletedAt != null
+            // Kept until the user edits or discards it; a discard resyncs to fetch the server copy.
+            PlaceEventSyncState.FAILED -> false
         }
 
     /** True when [local] is before [server]; an unreadable local time loses, an unreadable server time never wins. */
@@ -100,6 +134,23 @@ internal class PlaceEventPuller(
         val serverTime = parseInstant(server)
         val localTime = parseInstant(local)
         return serverTime != null && (localTime == null || localTime < serverTime)
+    }
+
+    /** Where one pull stands. [canReset] allows a single full resync per run after a 400. */
+    private class PullCursor(
+        var since: String?,
+    ) {
+        var applied = 0
+        var fetching = true
+        var reachedEnd = false
+        private var wasReset = false
+
+        val canReset: Boolean get() = since != null && !wasReset
+
+        fun resetToFullResync() {
+            since = null
+            wasReset = true
+        }
     }
 
     private companion object {

@@ -33,7 +33,7 @@ internal class FakePlaceEventStorage : PlaceEventStorage {
 
     override suspend fun getPendingEvents(): List<PlaceEventRecord> =
         rows.value.values
-            .filter { it.syncState != PlaceEventSyncState.SYNCED }
+            .filter { it.syncState != PlaceEventSyncState.SYNCED && it.syncState != PlaceEventSyncState.FAILED }
             .sortedBy { it.updatedAt }
 
     override suspend fun saveEvent(record: PlaceEventRecord) {
@@ -55,6 +55,10 @@ internal class FakePlaceEventStorage : PlaceEventStorage {
 
     override suspend fun saveSyncCheckpoint(checkpoint: String) {
         this.checkpoint = checkpoint
+    }
+
+    override suspend fun clearSyncCheckpoint() {
+        checkpoint = null
     }
 
     override suspend fun clearAll() {

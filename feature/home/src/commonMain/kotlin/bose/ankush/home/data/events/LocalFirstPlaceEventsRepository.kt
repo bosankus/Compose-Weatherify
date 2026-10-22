@@ -15,7 +15,8 @@ import kotlinx.coroutines.flow.map
 
 /**
  * [PlaceEventsRepository] over Room. Reads filter the stored events by distance on the client;
- * writes go to Room first, marked pending, then ask [sync] to push them.
+ * writes go to Room first, marked pending, then ask [sync] to push them. Work that needs no
+ * request (deleting an event the server never acknowledged) asks for no sync.
  */
 internal class LocalFirstPlaceEventsRepository(
     private val storage: PlaceEventStorage,
@@ -61,40 +62,75 @@ internal class LocalFirstPlaceEventsRepository(
                 val updated =
                     requireNotNull(existing) { "No event $id to edit." }
                         .withInput(input)
-                        .copy(updatedAt = clock.now().toString(), syncState = PlaceEventSyncState.PENDING_UPSERT)
+                        .copy(
+                            updatedAt = clock.now().toString(),
+                            // A failed row is queued again by an edit.
+                            syncState = PlaceEventSyncState.PENDING_UPSERT,
+                            syncError = null,
+                        )
                 storage.saveEvent(updated)
                 updated
             }
         }.mapCatching { it.toItemOrThrow() }
 
     override suspend fun deleteEvent(id: String): Result<Unit> =
-        write {
+        write(needsSync = { it }) {
             lock.withLock {
-                storage.getEvent(id)?.let { existing ->
-                    val now = clock.now().toString()
-                    // Kept as a pending delete even if it never reached the server: a POST whose
-                    // response was lost may have created it there. DELETE's 404 settles that case.
-                    storage.saveEvent(
-                        existing.copy(
-                            updatedAt = now,
-                            deletedAt = now,
-                            syncState = PlaceEventSyncState.PENDING_DELETE,
-                        ),
-                    )
+                val existing = storage.getEvent(id)
+                when {
+                    existing == null -> false
+                    // Never acknowledged by the server: nothing to delete there. If its POST is in
+                    // flight right now, the pusher queues the new server copy for DELETE.
+                    existing.serverUpdatedAt == null -> {
+                        storage.deleteEvent(id)
+                        false
+                    }
+                    else -> {
+                        val now = clock.now().toString()
+                        storage.saveEvent(
+                            existing.copy(
+                                updatedAt = now,
+                                deletedAt = now,
+                                syncState = PlaceEventSyncState.PENDING_DELETE,
+                                syncError = null,
+                            ),
+                        )
+                        true
+                    }
                 }
             }
-        }
+        }.map { }
+
+    override suspend fun discardFailedEvent(id: String): Result<Unit> =
+        write(needsSync = { it }) {
+            lock.withLock {
+                val existing = storage.getEvent(id)
+                require(existing?.syncState == PlaceEventSyncState.FAILED) { "Event $id has no failed change." }
+                storage.deleteEvent(id)
+                // The server still has its own copy of an edited event, which is behind the
+                // checkpoint by now: resync from the beginning to fetch it back.
+                val hadServerCopy = existing?.serverUpdatedAt != null
+                if (hadServerCopy) storage.clearSyncCheckpoint()
+                hadServerCopy
+            }
+        }.map { }
 
     override suspend fun hasSynced(): Boolean = storage.getSyncCheckpoint() != null
 
     override suspend fun clearAll() = lock.clear { storage.clearAll() }
 
-    /** Runs a local write, then asks for a sync. Storage errors become a failed [Result]. */
+    /**
+     * Runs a local write, then asks for a sync when [needsSync] says the result has something to
+     * send. Storage errors and refused writes become a failed [Result].
+     */
     @Suppress("TooGenericExceptionCaught")
-    private suspend fun <T> write(block: suspend () -> T): Result<T> =
+    private suspend fun <T> write(
+        needsSync: (T) -> Boolean = { true },
+        block: suspend () -> T,
+    ): Result<T> =
         try {
             val saved = block()
-            sync.requestSync()
+            if (needsSync(saved)) sync.requestSync()
             Result.success(saved)
         } catch (e: CancellationException) {
             throw e
