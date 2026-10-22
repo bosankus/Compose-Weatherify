@@ -28,12 +28,16 @@ internal class MlKitOnDeviceAiClient(
             model.availability().also { Timber.i("Gemini Nano availability: %s", it) }
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
+        } catch (
+            // AICore surfaces binding and setup failures as more than GenAiException; any failed status
+            // check must read as "no model" so the home card is hidden instead of crashing home.
+            @Suppress("TooGenericExceptionCaught") e: Exception,
+        ) {
             // GenAiException carries AICore's own code (e.g. 601 binding failure, 606 feature not found).
             Timber.w(
                 e,
                 "Gemini Nano status check failed (AICore error code: %s)",
-                (e as? GenAiException)?.errorCode
+                (e as? GenAiException)?.errorCode,
             )
             AiAvailability.Unavailable
         }

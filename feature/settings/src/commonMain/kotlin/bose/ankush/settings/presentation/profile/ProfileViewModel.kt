@@ -49,7 +49,7 @@ internal class ProfileViewModel(
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-            ProfileState()
+            ProfileState(),
         )
 
     private val _messages = Channel<ProfileMessage>(Channel.BUFFERED)
@@ -86,7 +86,7 @@ internal class ProfileViewModel(
                 local.update {
                     it.copy(
                         isPhotoOptionsVisible = false,
-                        isRemoveConfirmVisible = state.value.canRemovePhoto
+                        isRemoveConfirmVisible = state.value.canRemovePhoto,
                     )
                 }
 
@@ -106,7 +106,7 @@ internal class ProfileViewModel(
                     report(
                         error,
                         "Profile photo upload failed",
-                        mapOf("bytes" to photo.bytes.size.toString())
+                        mapOf("bytes" to photo.bytes.size.toString()),
                     )
                     _messages.trySend(ProfileMessage.UploadFailed(error.reasonOrNull()))
                 }

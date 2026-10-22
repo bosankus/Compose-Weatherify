@@ -17,6 +17,8 @@ kotlin {
             libs.versions.minSdk
                 .get()
                 .toInt()
+        // Runs commonTest on the JVM (Ktor MockEngine contract tests).
+        withHostTest {}
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)

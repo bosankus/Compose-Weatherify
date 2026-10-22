@@ -17,8 +17,7 @@ internal fun forecastTimeZone(offsetSeconds: Int?): TimeZone =
  * Zone the home screen formats sunrise, sunset, and the observation time in: the forecast
  * location's [timezoneOffset] (seconds), or the device zone when the forecast has none.
  */
-internal fun forecastZone(timezoneOffset: Int?): TimeZone =
-    forecastTimeZone(offsetSeconds = timezoneOffset)
+internal fun forecastZone(timezoneOffset: Int?): TimeZone = forecastTimeZone(offsetSeconds = timezoneOffset)
 
 /** 12-hour clock in [zone], e.g. "7:06 AM". */
 internal fun Long.toClock(zone: TimeZone): String {

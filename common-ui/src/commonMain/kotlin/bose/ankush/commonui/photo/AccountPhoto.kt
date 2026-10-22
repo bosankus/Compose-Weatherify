@@ -10,8 +10,7 @@ import coil3.request.ImageRequest
  * The account photo's cache key. The server signs a new URL on every fetch, so the full URL
  * changes while the photo does not; the path before the query names the stored object.
  */
-fun accountPhotoCacheKey(photoUrl: String): String =
-    ACCOUNT_PHOTO_KEY_PREFIX + photoUrl.substringBefore('?')
+fun accountPhotoCacheKey(photoUrl: String): String = ACCOUNT_PHOTO_KEY_PREFIX + photoUrl.substringBefore('?')
 
 /**
  * Loads the account photo once and serves it from memory and disk after that, until logout

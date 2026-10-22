@@ -8,8 +8,14 @@ internal data class ActiveCoordinates(
 
 internal sealed interface LocationProblem {
     data object PermissionDenied : LocationProblem
-    data class GpsDisabled(val cause: Throwable) : LocationProblem
-    data class Failed(val cause: Throwable) : LocationProblem
+
+    data class GpsDisabled(
+        val cause: Throwable,
+    ) : LocationProblem
+
+    data class Failed(
+        val cause: Throwable,
+    ) : LocationProblem
 }
 
 internal data class CoordinateResult(

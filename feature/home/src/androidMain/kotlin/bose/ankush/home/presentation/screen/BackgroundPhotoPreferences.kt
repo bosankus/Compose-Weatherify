@@ -11,8 +11,7 @@ internal class BackgroundPhotoPreferences(
 ) {
     private val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
-    fun read(conditionKey: String): BackgroundPhoto? =
-        readKey(KEY_PREFIX + conditionKey) ?: readKey(KEY_LAST)
+    fun read(conditionKey: String): BackgroundPhoto? = readKey(KEY_PREFIX + conditionKey) ?: readKey(KEY_LAST)
 
     fun write(
         conditionKey: String,

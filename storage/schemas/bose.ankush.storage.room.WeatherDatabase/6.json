@@ -1,0 +1,280 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 6,
+    "identityHash": "026daf13204433ffd0ed20d1d89732b4",
+    "entities": [
+      {
+        "tableName": "central_weather_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `alerts` TEXT, `daily` TEXT, `hourly` TEXT, `lastUpdated` INTEGER NOT NULL DEFAULT 0, `timezoneOffset` INTEGER, `clouds` INTEGER, `dt` INTEGER, `feels_like` REAL, `humidity` INTEGER, `pressure` INTEGER, `sunrise` INTEGER, `sunset` INTEGER, `temp` REAL, `uvi` REAL, `weather` TEXT, `wind_gust` REAL, `wind_speed` REAL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "alerts",
+            "columnName": "alerts",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "daily",
+            "columnName": "daily",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hourly",
+            "columnName": "hourly",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "lastUpdated",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "timezoneOffset",
+            "columnName": "timezoneOffset",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "current.clouds",
+            "columnName": "clouds",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "current.dt",
+            "columnName": "dt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "current.feels_like",
+            "columnName": "feels_like",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "current.humidity",
+            "columnName": "humidity",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "current.pressure",
+            "columnName": "pressure",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "current.sunrise",
+            "columnName": "sunrise",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "current.sunset",
+            "columnName": "sunset",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "current.temp",
+            "columnName": "temp",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "current.uvi",
+            "columnName": "uvi",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "current.weather",
+            "columnName": "weather",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "current.wind_gust",
+            "columnName": "wind_gust",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "current.wind_speed",
+            "columnName": "wind_speed",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "central_aq_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `aqi` INTEGER, `co` REAL, `no2` REAL, `o3` REAL, `so2` REAL, `pm10` REAL, `pm25` REAL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "aqi",
+            "columnName": "aqi",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "co",
+            "columnName": "co",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "no2",
+            "columnName": "no2",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "o3",
+            "columnName": "o3",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "so2",
+            "columnName": "so2",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "pm10",
+            "columnName": "pm10",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "pm25",
+            "columnName": "pm25",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "place_events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `startsAt` TEXT NOT NULL, `note` TEXT, `placeName` TEXT NOT NULL, `lat` REAL NOT NULL, `lon` REAL NOT NULL, `createdAt` TEXT NOT NULL, `updatedAt` TEXT NOT NULL, `deletedAt` TEXT, `syncState` TEXT NOT NULL, `serverUpdatedAt` TEXT, `syncError` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startsAt",
+            "columnName": "startsAt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "placeName",
+            "columnName": "placeName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lat",
+            "columnName": "lat",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lon",
+            "columnName": "lon",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deletedAt",
+            "columnName": "deletedAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "syncState",
+            "columnName": "syncState",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serverUpdatedAt",
+            "columnName": "serverUpdatedAt",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "syncError",
+            "columnName": "syncError",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "sync_checkpoints",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`stream` TEXT NOT NULL, `checkpoint` TEXT NOT NULL, PRIMARY KEY(`stream`))",
+        "fields": [
+          {
+            "fieldPath": "stream",
+            "columnName": "stream",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "checkpoint",
+            "columnName": "checkpoint",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "stream"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '026daf13204433ffd0ed20d1d89732b4')"
+    ]
+  }
+}

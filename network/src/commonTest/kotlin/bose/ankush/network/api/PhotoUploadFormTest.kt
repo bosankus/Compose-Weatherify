@@ -34,11 +34,12 @@ class PhotoUploadFormTest {
 
             client.submitFormWithBinaryData(
                 url = "https://example.test/account/photo",
-                formData = photoUploadForm(
-                    byteArrayOf(0xFF.toByte(), 0xD8.toByte()),
-                    "image/jpeg",
-                    "profile.jpg"
-                ),
+                formData =
+                    photoUploadForm(
+                        byteArrayOf(0xFF.toByte(), 0xD8.toByte()),
+                        "image/jpeg",
+                        "profile.jpg",
+                    ),
             )
 
             assertTrue(contentType.startsWith("multipart/form-data"), contentType)

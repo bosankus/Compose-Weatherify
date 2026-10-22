@@ -98,6 +98,7 @@ import org.koin.compose.viewmodel.koinViewModel
  * [SettingsViewModel] and [ProfileViewModel] stay internal, resolved through
  * Koin and scoped to wherever this route is composed.
  */
+@Suppress("LongParameterList") // Public host API: grouping params would change it and the nav call site.
 @Composable
 fun SettingsFeatureRoute(
     paymentUiState: PaymentUiState,
@@ -489,9 +490,11 @@ private fun previewNoOpContent(
                     profile =
                         ProfileSection(
                             state = profile,
-                            actions = ProfileHeaderActions(
-                                onChangePhoto = {},
-                                onOpenPhotoOptions = {}),
+                            actions =
+                                ProfileHeaderActions(
+                                    onChangePhoto = {},
+                                    onOpenPhotoOptions = {},
+                                ),
                         ),
                     paymentUiState = paymentUiState,
                     isLoggingOut = isLoggingOut,
@@ -595,7 +598,7 @@ private fun SettingsScreenContentLogoutDialogPreview() {
 
 @Preview
 @Composable
-private fun SettingsScreenContentDeleteAccountPremiumPreview() {
+internal fun SettingsScreenContentDeleteAccountPremiumPreview() {
     MaterialTheme {
         Surface {
             previewNoOpContent(
@@ -608,7 +611,7 @@ private fun SettingsScreenContentDeleteAccountPremiumPreview() {
 
 @Preview
 @Composable
-private fun SettingsScreenContentDeleteAccountWrongPasswordPreview() {
+internal fun SettingsScreenContentDeleteAccountWrongPasswordPreview() {
     MaterialTheme {
         Surface {
             previewNoOpContent(
@@ -706,7 +709,7 @@ private fun SettingsScreenContentPremiumActivationToastPreview() {
 
 @Preview
 @Composable
-private fun SettingsScreenContentPhotoUploadingPreview() {
+internal fun SettingsScreenContentPhotoUploadingPreview() {
     MaterialTheme {
         Surface {
             previewNoOpContent(

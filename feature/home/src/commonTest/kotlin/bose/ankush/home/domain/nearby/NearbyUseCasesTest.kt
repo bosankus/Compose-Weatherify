@@ -43,7 +43,8 @@ class NearbyUseCasesTest {
                 GetNearbyEvents(
                     repository,
                     StandardTestDispatcher(testScheduler),
-                    timeZone = { TimeZone.UTC })
+                    timeZone = { TimeZone.UTC },
+                )
 
             val events = getNearbyEvents(GeoPoint(1.0, 2.0)).getOrThrow()
 
@@ -65,7 +66,8 @@ class NearbyUseCasesTest {
                 CreateNearbyEvent(
                     repository,
                     StandardTestDispatcher(testScheduler),
-                    timeZone = { TimeZone.UTC })
+                    timeZone = { TimeZone.UTC },
+                )
 
             val result =
                 create(NearbyPlace("Harbor", GeoPoint(1.0, 2.0)), EventDraft(title = "Dinner"))
@@ -82,7 +84,8 @@ class NearbyUseCasesTest {
                 CreateNearbyEvent(
                     repository,
                     StandardTestDispatcher(testScheduler),
-                    timeZone = { TimeZone.UTC })
+                    timeZone = { TimeZone.UTC },
+                )
 
             create(
                 NearbyPlace("Harbor", GeoPoint(1.0, 2.0)),

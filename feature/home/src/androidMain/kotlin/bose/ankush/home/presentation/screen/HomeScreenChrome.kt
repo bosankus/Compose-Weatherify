@@ -329,12 +329,11 @@ internal fun ForecastWaitingActions(
     }
 }
 
-private fun Context.notificationsGranted(): Boolean {
-    return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
+private fun Context.notificationsGranted(): Boolean =
+    Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || ContextCompat.checkSelfPermission(
         this,
         Manifest.permission.POST_NOTIFICATIONS,
     ) == PackageManager.PERMISSION_GRANTED
-}
 
 private fun Context.hasLocationPermission(): Boolean =
     listOf(

@@ -2,6 +2,7 @@ package bose.ankush.weatherify.automotive
 
 import android.text.Spannable
 import android.text.SpannableString
+import android.util.Log
 import androidx.car.app.CarContext
 import androidx.car.app.Screen
 import androidx.car.app.constraints.ConstraintManager
@@ -26,16 +27,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.json.JSONException
+import java.io.IOException
 
 /** What the screen is showing right now. Same idea as an MVI state. */
 private sealed interface ParkingUiState {
     data object Loading : ParkingUiState
-    data class Content(val spots: List<ParkingSpot>) : ParkingUiState
-    data class Error(val message: String) : ParkingUiState
+
+    data class Content(
+        val spots: List<ParkingSpot>,
+    ) : ParkingUiState
+
+    data class Error(
+        val message: String,
+    ) : ParkingUiState
 }
 
-class ParkingListScreen(carContext: CarContext) : Screen(carContext) {
-
+class ParkingListScreen(
+    carContext: CarContext,
+) : Screen(carContext) {
     private val repository = ParkingRepository()
     private var state: ParkingUiState = ParkingUiState.Loading
 
@@ -43,11 +53,13 @@ class ParkingListScreen(carContext: CarContext) : Screen(carContext) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     init {
-        lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
-                scope.cancel()
-            }
-        })
+        lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    scope.cancel()
+                }
+            },
+        )
         load()
     }
 
@@ -55,74 +67,89 @@ class ParkingListScreen(carContext: CarContext) : Screen(carContext) {
         state = ParkingUiState.Loading
         invalidate()
         scope.launch {
-            state = try {
-                ParkingUiState.Content(repository.nearby(CENTER_LAT, CENTER_LNG))
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                ParkingUiState.Error("Couldn't load parking. Check the connection and try again.")
-            }
-            invalidate()   // tells the car host to call onGetTemplate() again
+            state =
+                try {
+                    ParkingUiState.Content(repository.nearby(CENTER_LAT, CENTER_LNG))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: IOException) {
+                    loadFailed(e)
+                } catch (e: JSONException) {
+                    loadFailed(e)
+                }
+            invalidate() // tells the car host to call onGetTemplate() again
         }
     }
 
-    override fun onGetTemplate(): Template = when (val current = state) {
-        is ParkingUiState.Loading ->
-            PlaceListMapTemplate.Builder()
-                .setTitle("Nearby parking")
-                .setLoading(true)
-                .build()
-
-        is ParkingUiState.Error ->
-            MessageTemplate.Builder(current.message)
-                .setTitle("Nearby parking")
-                .setIcon(CarIcon.ERROR)
-                .addAction(
-                    Action.Builder()
-                        .setTitle("Retry")
-                        .setOnClickListener { load() }
-                        .build()
-                )
-                .build()
-
-        is ParkingUiState.Content ->
-            if (current.spots.isEmpty()) {
-                MessageTemplate.Builder("No parking found nearby.")
-                    .setTitle("Nearby parking")
-                    .build()
-            } else {
-                contentTemplate(current.spots)
-            }
+    private fun loadFailed(cause: Exception): ParkingUiState {
+        Log.w(TAG, "Couldn't load nearby parking", cause)
+        return ParkingUiState.Error("Couldn't load parking. Check the connection and try again.")
     }
+
+    override fun onGetTemplate(): Template =
+        when (val current = state) {
+            is ParkingUiState.Loading ->
+                PlaceListMapTemplate
+                    .Builder()
+                    .setTitle("Nearby parking")
+                    .setLoading(true)
+                    .build()
+
+            is ParkingUiState.Error ->
+                MessageTemplate
+                    .Builder(current.message)
+                    .setTitle("Nearby parking")
+                    .setIcon(CarIcon.ERROR)
+                    .addAction(
+                        Action
+                            .Builder()
+                            .setTitle("Retry")
+                            .setOnClickListener { load() }
+                            .build(),
+                    ).build()
+
+            is ParkingUiState.Content ->
+                if (current.spots.isEmpty()) {
+                    MessageTemplate
+                        .Builder("No parking found nearby.")
+                        .setTitle("Nearby parking")
+                        .build()
+                } else {
+                    contentTemplate(current.spots)
+                }
+        }
 
     private fun contentTemplate(spots: List<ParkingSpot>): Template {
         // The car host limits how many rows may be shown. Ask it, don't guess.
-        val limit = carContext.getCarService(ConstraintManager::class.java)
-            .getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST)
+        val limit =
+            carContext
+                .getCarService(ConstraintManager::class.java)
+                .getContentLimit(ConstraintManager.CONTENT_LIMIT_TYPE_PLACE_LIST)
 
         val list = ItemList.Builder()
         spots.take(limit).forEach { spot ->
             list.addItem(
-                Row.Builder()
+                Row
+                    .Builder()
                     .setTitle(spot.name)
                     .addText(detailText(spot))
                     .setMetadata(
-                        Metadata.Builder()
+                        Metadata
+                            .Builder()
                             .setPlace(
-                                Place.Builder(CarLocation.create(spot.lat, spot.lng))
+                                Place
+                                    .Builder(CarLocation.create(spot.lat, spot.lng))
                                     .setMarker(PlaceMarker.Builder().build())
-                                    .build()
-                            )
-                            .build()
-                    )
-                    .setOnClickListener {
+                                    .build(),
+                            ).build(),
+                    ).setOnClickListener {
                         screenManager.push(ParkingDetailScreen(carContext, spot))
-                    }
-                    .build()
+                    }.build(),
             )
         }
 
-        return PlaceListMapTemplate.Builder()
+        return PlaceListMapTemplate
+            .Builder()
             .setTitle("Nearby parking")
             .setItemList(list.build())
             .build()
@@ -131,10 +158,11 @@ class ParkingListScreen(carContext: CarContext) : Screen(carContext) {
     // The first character is a placeholder. The host replaces it with the
     // formatted distance (for example "0.4 km").
     private fun detailText(spot: ParkingSpot): CharSequence {
-        val facts = listOfNotNull(
-            spot.capacity?.let { "$it spaces" },
-            spot.isPaid?.let { if (it) "Paid" else "Free" },
-        ).joinToString(" · ").ifEmpty { "Parking" }
+        val facts =
+            listOfNotNull(
+                spot.capacity?.let { "$it spaces" },
+                spot.isPaid?.let { if (it) "Paid" else "Free" },
+            ).joinToString(" · ").ifEmpty { "Parking" }
 
         val text = SpannableString("  ·  $facts")
         text.setSpan(
@@ -150,5 +178,6 @@ class ParkingListScreen(carContext: CarContext) : Screen(carContext) {
         // MG Road, Bangalore. A fixed search centre until we add real location (next step).
         const val CENTER_LAT = 12.9755
         const val CENTER_LNG = 77.6068
+        const val TAG = "ParkingListScreen"
     }
 }

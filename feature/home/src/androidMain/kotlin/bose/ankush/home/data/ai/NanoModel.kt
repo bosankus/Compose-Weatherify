@@ -70,8 +70,14 @@ internal class GenerativeModelAdapter(
             } else {
                 generateContentRequest(TextPart(prompt)) { tune() }
             }
-        return model.generateContentStream(request)
-            .map { it.candidates.firstOrNull()?.text.orEmpty() }
+        return model
+            .generateContentStream(request)
+            .map {
+                it.candidates
+                    .firstOrNull()
+                    ?.text
+                    .orEmpty()
+            }
     }
 
     private fun com.google.mlkit.genai.prompt.GenerateContentRequest.Builder.tune() {

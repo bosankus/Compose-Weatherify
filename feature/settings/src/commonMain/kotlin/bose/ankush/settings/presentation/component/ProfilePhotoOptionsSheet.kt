@@ -96,7 +96,7 @@ private fun PhotoOption(
             imageVector = icon,
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.size(22.dp)
+            modifier = Modifier.size(22.dp),
         )
         Text(text = text, color = tint, fontSize = 15.sp, fontWeight = FontWeight.Medium)
     }

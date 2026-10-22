@@ -112,8 +112,7 @@ private suspend fun SavedPlaceSearchState.status(hasPick: Boolean): String? {
 /** Stable key for a suggestion row; also how Swift names a pick back to the controller. */
 internal fun LocationSuggestion.key(): String = "$name|$city|$state|$country|$latitude|$longitude"
 
-internal fun List<Location>.findByKey(key: String): Location? =
-    firstOrNull { SavedPlacesLogic.placeKey(it) == key }
+internal fun List<Location>.findByKey(key: String): Location? = firstOrNull { SavedPlacesLogic.placeKey(it) == key }
 
 internal suspend fun NearbyState.toComposerUi(): EventComposerUi {
     val place = placeName?.takeIf { it.isNotBlank() }
@@ -144,8 +143,10 @@ internal fun NearbyState.toNearbyUi(): NearbyUi? {
         featuredPlace.valueOrNull()?.let { place ->
             FeaturedPlaceUi(
                 name = place.name.trim(),
-                subtitle = listOf(place.city, place.state, place.country).filter { it.isNotBlank() }
-                    .joinToString(", "),
+                subtitle =
+                    listOf(place.city, place.state, place.country)
+                        .filter { it.isNotBlank() }
+                        .joinToString(", "),
             )
         }
     // Same rule as Android: the block shows once there are events or a named saved place.

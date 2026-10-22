@@ -108,7 +108,7 @@ private fun EditableAvatar(
                             Modifier.clickable(
                                 onClickLabel = editDescription,
                                 role = Role.Button,
-                                onClick = onClick
+                                onClick = onClick,
                             )
                         } else {
                             Modifier
@@ -118,8 +118,10 @@ private fun EditableAvatar(
             AvatarImage(photoUrl = photoUrl, contentDescription = description)
             if (isBusy) {
                 Box(
-                    modifier = Modifier.fillMaxSize()
-                        .background(Color.Black.copy(alpha = BUSY_SCRIM_ALPHA)),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = BUSY_SCRIM_ALPHA)),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(
@@ -142,7 +144,7 @@ private fun EditableAvatar(
                         .clickable(
                             onClickLabel = editDescription,
                             role = Role.Button,
-                            onClick = onClick
+                            onClick = onClick,
                         ),
                 contentAlignment = Alignment.Center,
             ) {

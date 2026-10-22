@@ -251,17 +251,23 @@ private fun HomePager(
                                         modifier = pageModifier,
                                     )
 
-                                else ->
+                                else -> {
+                                    val forecast = model.sections.forecast
+                                    val nearby = model.sections.nearby
+                                    val aiSummaryAvailable = model.sections.aiSummary.isAvailable
+                                    // Remembered so WeatherPage still skips when none of its slices changed.
+                                    val pageSections =
+                                        remember(chrome, forecast, nearby, aiSummaryAvailable) {
+                                            WeatherPageSections(chrome, forecast, nearby, aiSummaryAvailable)
+                                        }
                                     WeatherPage(
                                         shell = shell,
-                                        chrome = chrome,
-                                        forecast = model.sections.forecast,
-                                        nearby = model.sections.nearby,
-                                        aiSummaryAvailable = model.sections.aiSummary.isAvailable,
+                                        sections = pageSections,
                                         contentColor = model.contentColor,
                                         actions = actions,
                                         modifier = pageModifier,
                                     )
+                                }
                             }
                         }
                     }
@@ -350,18 +356,27 @@ private fun HomeHeaderBlock(
     }
 }
 
+/** The slices of [HomeScreenSections] the weather page draws. */
+private data class WeatherPageSections(
+    val chrome: HomeScreenChrome,
+    val forecast: ForecastDetails,
+    val nearby: NearbyContent,
+    val aiSummaryAvailable: Boolean,
+)
+
 /** First pager page: every home section below the header, unchanged. */
 @Composable
 private fun WeatherPage(
     shell: HomeScreenShell,
-    chrome: HomeScreenChrome,
-    forecast: ForecastDetails,
-    nearby: NearbyContent,
-    aiSummaryAvailable: Boolean,
+    sections: WeatherPageSections,
     contentColor: Color,
     actions: HomePagerActions,
     modifier: Modifier = Modifier,
 ) {
+    val chrome = sections.chrome
+    val forecast = sections.forecast
+    val nearby = sections.nearby
+    val aiSummaryAvailable = sections.aiSummaryAvailable
     SideEffect { Log.d(PERF_TAG, "WeatherPage recomposed") } // TEMP(perf)
     val content = shell.content
     val photo = shell.photo

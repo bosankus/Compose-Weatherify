@@ -58,7 +58,7 @@ class MlKitOnDeviceAiClientTest {
                         mutableListOf(
                             AiAvailability.Downloading,
                             AiAvailability.Downloading,
-                            AiAvailability.Available
+                            AiAvailability.Available,
                         ),
                 )
             client(model).generate(request).toList()
@@ -79,7 +79,7 @@ class MlKitOnDeviceAiClientTest {
             val model =
                 FakeModel(
                     statuses = mutableListOf(AiAvailability.Downloadable),
-                    downloadFailure = IllegalStateException("net")
+                    downloadFailure = IllegalStateException("net"),
                 )
             assertFailsWith<IllegalStateException> { client(model).generate(request).toList() }
         }
@@ -89,11 +89,11 @@ class MlKitOnDeviceAiClientTest {
         runTest {
             assertEquals(
                 AiAvailability.Downloadable,
-                client(FakeModel(statuses = mutableListOf(AiAvailability.Downloadable))).availability()
+                client(FakeModel(statuses = mutableListOf(AiAvailability.Downloadable))).availability(),
             )
             assertEquals(
                 AiAvailability.Unavailable,
-                client(FakeModel(statusFailure = IllegalStateException("601"))).availability()
+                client(FakeModel(statusFailure = IllegalStateException("601"))).availability(),
             )
         }
 

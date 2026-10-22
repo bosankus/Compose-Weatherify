@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal class FakePlaceEventRepository(
     var events: (lat: Double, lon: Double) -> Result<List<PlaceEvent>> = { _, _ ->
         Result.success(
-            emptyList()
+            emptyList(),
         )
     },
     var createResult: Result<Unit> = Result.success(Unit),
@@ -63,8 +63,7 @@ internal class FakeLocationRepository(
 
     override suspend fun deleteLocation(id: String): Result<Unit> = Result.success(Unit)
 
-    override suspend fun searchPlaces(query: String): Result<List<PlaceSuggestion>> =
-        Result.success(emptyList())
+    override suspend fun searchPlaces(query: String): Result<List<PlaceSuggestion>> = Result.success(emptyList())
 }
 
 internal class FakeAccountRepository(
@@ -83,8 +82,7 @@ internal class FakeAccountRepository(
 
     override suspend fun deletePhoto(): Result<Unit> = Result.success(Unit)
 
-    override suspend fun deleteAccount(password: String): DeleteAccountResult =
-        DeleteAccountResult.Deleted
+    override suspend fun deleteAccount(password: String): DeleteAccountResult = DeleteAccountResult.Deleted
 
     override fun clear() {
         _account.value = null

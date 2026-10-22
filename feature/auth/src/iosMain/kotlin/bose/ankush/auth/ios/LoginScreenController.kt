@@ -114,7 +114,7 @@ class LoginScreenController(
             LoginScreenUi(
                 strings = copy,
                 isLoading = authState is AuthState.Loading,
-                photo = backdrop
+                photo = backdrop,
             )
         }.stateIn(scope, SharingStarted.Eagerly, null)
 
@@ -139,20 +139,22 @@ class LoginScreenController(
             auth.authState.collect { authState ->
                 when (authState) {
                     is AuthState.Error -> notify(LoginNotice(authState.message, isWarning = false))
-                    is AuthState.SessionExpired -> notify(
-                        LoginNotice(
-                            authState.message,
-                            isWarning = true
+                    is AuthState.SessionExpired ->
+                        notify(
+                            LoginNotice(
+                                authState.message,
+                                isWarning = true,
+                            ),
                         )
-                    )
 
                     // Not an error: the Swift banner treats every non-warning notice as one.
-                    is AuthState.AccountDeleted -> notify(
-                        LoginNotice(
-                            authState.message,
-                            isWarning = true
+                    is AuthState.AccountDeleted ->
+                        notify(
+                            LoginNotice(
+                                authState.message,
+                                isWarning = true,
+                            ),
                         )
-                    )
 
                     else -> Unit
                 }
@@ -184,15 +186,21 @@ class LoginScreenController(
     ) {
         if (auth.authState.value is AuthState.Loading || validateLogin(
                 email,
-                password
+                password,
             ) != null
-        ) return
+        ) {
+            return
+        }
         val trimmed = email.trim()
         auth.processIntent(
-            if (register) AuthIntent.Register(trimmed, password) else AuthIntent.Login(
-                trimmed,
-                password
-            ),
+            if (register) {
+                AuthIntent.Register(trimmed, password)
+            } else {
+                AuthIntent.Login(
+                    trimmed,
+                    password,
+                )
+            },
         )
     }
 

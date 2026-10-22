@@ -37,8 +37,7 @@ internal class RefreshAccount(
     private val repository: AccountRepository,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    suspend operator fun invoke(): Result<Unit> =
-        withContext(ioDispatcher) { repository.getAccount().map { } }
+    suspend operator fun invoke(): Result<Unit> = withContext(ioDispatcher) { repository.getAccount().map { } }
 }
 
 /** POST /account/photo. A photo over the server's limit is refused before it is sent. */
@@ -61,6 +60,5 @@ internal class RemoveProfilePhoto(
     private val repository: AccountRepository,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    suspend operator fun invoke(): Result<Unit> =
-        withContext(ioDispatcher) { repository.deletePhoto() }
+    suspend operator fun invoke(): Result<Unit> = withContext(ioDispatcher) { repository.deletePhoto() }
 }

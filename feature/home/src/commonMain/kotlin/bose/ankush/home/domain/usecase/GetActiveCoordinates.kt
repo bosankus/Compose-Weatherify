@@ -31,31 +31,36 @@ internal class GetActiveCoordinatesImpl(
     private val client: LocationClient,
     private val storage: LocationPreferencesStorage,
 ) : GetActiveCoordinates {
-
     override suspend fun current(): CoordinateResult {
         val pref = storage.getLocationPreferencesFlow().first()
         val savedLocation = pref.toActiveCoordinates()
-        if (pref.isLocationOverridden) return CoordinateResult(savedLocation)
-        if (!client.hasLocationPermission()) return CoordinateResult(
-            savedLocation,
-            LocationProblem.PermissionDenied
-        )
-        return client.getCurrentLocation()
-            .fold(
-                onSuccess = {
-                    storage.saveLocationPreferences(it.latitude to it.longitude)
-                    CoordinateResult(ActiveCoordinates(Coordinates(it.latitude, it.longitude)))
-                },
-                onFailure = { CoordinateResult(savedLocation, it.toProblem()) }
-            )
+        return when {
+            pref.isLocationOverridden -> CoordinateResult(savedLocation)
+            !client.hasLocationPermission() ->
+                CoordinateResult(
+                    savedLocation,
+                    LocationProblem.PermissionDenied,
+                )
+
+            else ->
+                client
+                    .getCurrentLocation()
+                    .fold(
+                        onSuccess = {
+                            storage.saveLocationPreferences(it.latitude to it.longitude)
+                            CoordinateResult(ActiveCoordinates(Coordinates(it.latitude, it.longitude)))
+                        },
+                        onFailure = { CoordinateResult(savedLocation, it.toProblem()) },
+                    )
+        }
     }
 
-    override suspend fun lastKnown(): ActiveCoordinates? {
-        return storage.getLocationPreferencesFlow().first().toActiveCoordinates()
-    }
+    override suspend fun lastKnown(): ActiveCoordinates? =
+        storage.getLocationPreferencesFlow().first().toActiveCoordinates()
 
     override fun changes(): Flow<Unit> =
-        storage.getLocationPreferencesFlow()
+        storage
+            .getLocationPreferencesFlow()
             .map { Triple(it.isLocationOverridden, it.overrideLat, it.overrideLon) }
             .distinctUntilChanged()
             .drop(1)
@@ -71,18 +76,17 @@ internal class GetActiveCoordinatesImpl(
             ActiveCoordinates(
                 coordinates = Coordinates(latitude, longitude),
                 isOverridden = pinned,
-                overrideName = overrideLocationName.takeIf { pinned }
+                overrideName = overrideLocationName.takeIf { pinned },
             )
         } else {
             null
         }
     }
 
-    private fun Throwable.toProblem(): LocationProblem {
-        return if (this is LocationClient.LocationException && isGpsDisabled) {
+    private fun Throwable.toProblem(): LocationProblem =
+        if (this is LocationClient.LocationException && isGpsDisabled) {
             LocationProblem.GpsDisabled(this)
         } else {
             LocationProblem.Failed(this)
         }
-    }
 }

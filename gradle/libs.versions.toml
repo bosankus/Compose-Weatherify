@@ -46,6 +46,8 @@ splashScreen = "1.2.0"
 mlkitGenaiPrompt = "1.0.0-beta4"
 securityCrypto = "1.1.0"
 activityCompose = "1.13.0"
+# WorkManager: background place-event sync on Android (needs compileSdk 35+, AGP 8.6+)
+work = "2.12.0"
 
 # Room
 room = "2.8.5"
@@ -122,6 +124,7 @@ androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-p
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashScreen" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 
 # Compose (versions resolved via androidx-compose-bom)
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }

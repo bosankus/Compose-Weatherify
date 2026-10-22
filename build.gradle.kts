@@ -153,7 +153,10 @@ subprojects {
         autoCorrect = true
         buildUponDefaultConfig = true
         config.setFrom(rootProject.layout.projectDirectory.file("config/detekt.yml"))
-        baseline.set(detektBaselineFile)
+        // Like the detekt plugin's own tasks, only use the baseline when the module has one: an
+        // unconditional set makes Gradle fail validation ("Input file does not exist") for modules
+        // without a baseline, such as :automotive.
+        baseline.set(layout.file(provider { detektBaselineFile.takeIf { it.exists() } }))
         // Auto-correct remains best-effort; enforcement happens on the regular detekt task
         ignoreFailures = true
         parallel = true

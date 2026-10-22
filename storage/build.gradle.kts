@@ -19,6 +19,8 @@ kotlin {
             libs.versions.minSdk
                 .get()
                 .toInt()
+        // Runs commonTest and androidHostTest on the JVM (migration / schema checks).
+        withHostTest {}
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)

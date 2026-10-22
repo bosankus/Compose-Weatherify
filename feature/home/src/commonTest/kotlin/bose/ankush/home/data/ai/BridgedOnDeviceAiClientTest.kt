@@ -28,7 +28,7 @@ class BridgedOnDeviceAiClientTest {
                 assertEquals(
                     expected,
                     BridgedOnDeviceAiClient(FakeBridge(code)).availability(),
-                    "code $code"
+                    "code $code",
                 )
             }
         }
@@ -36,9 +36,12 @@ class BridgedOnDeviceAiClientTest {
     @Test
     fun snapshotsAreForwarded_andTheFlowEndsWhenSwiftIsDone() =
         runTest {
-            val bridge = FakeBridge(script = { snapshot, done ->
-                snapshot("It"); snapshot("It is mild."); done(null)
-            })
+            val bridge =
+                FakeBridge(script = { snapshot, done ->
+                    snapshot("It")
+                    snapshot("It is mild.")
+                    done(null)
+                })
             val out = BridgedOnDeviceAiClient(bridge).generate(request).toList()
             assertEquals("It is mild.", out.last())
             assertEquals("RULES" to "PROMPT", bridge.lastRequest)
@@ -48,9 +51,10 @@ class BridgedOnDeviceAiClientTest {
     fun aFailureFromSwift_becomesAnExceptionInTheFlow() =
         runTest {
             val bridge = FakeBridge(script = { _, done -> done("guardrail") })
-            val e = assertFailsWith<IllegalStateException> {
-                BridgedOnDeviceAiClient(bridge).generate(request).toList()
-            }
+            val e =
+                assertFailsWith<IllegalStateException> {
+                    BridgedOnDeviceAiClient(bridge).generate(request).toList()
+                }
             assertEquals("guardrail", e.message)
         }
 
@@ -67,7 +71,7 @@ class BridgedOnDeviceAiClientTest {
         private val code: Int = 3,
         private val script: (snapshot: (String) -> Unit, done: (String?) -> Unit) -> Unit = { _, done ->
             done(
-                null
+                null,
             )
         },
     ) : NativeAiBridge {

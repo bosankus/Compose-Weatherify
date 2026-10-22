@@ -180,8 +180,7 @@ internal fun SkyCondition.dominantBackgroundColor(): Color {
 }
 
 /** Top-of-gradient luminance for header text before a photo is sampled. */
-internal fun SkyCondition.dominantHeaderLuminance(): Double =
-    relativeLuminance(dominantGradientEnds().first)
+internal fun SkyCondition.dominantHeaderLuminance(): Double = relativeLuminance(dominantGradientEnds().first)
 
 private fun SkyCondition.dominantGradientEnds(): Pair<Color, Color> =
     when (this) {

@@ -94,22 +94,23 @@ class HomeScreenController : KoinComponent {
                 location?.let {
                     geocoder.reverseGeocode(
                         it.first,
-                        it.second
+                        it.second,
                     )
                 }
-            }
-            .stateIn(scope, SharingStarted.Eagerly, null)
+            }.stateIn(scope, SharingStarted.Eagerly, null)
 
     /** The weather summary sheet. Stays hidden until the Swift on-device client reports it is usable. */
     val aiSummaryAvailable: StateFlow<Boolean> =
         combine(
             aiSummary.state.map { it.isAvailable },
-            home.state.map { it.weatherData != null }) { available, hasForecast ->
+            home.state.map { it.weatherData != null },
+        ) { available, hasForecast ->
             available && hasForecast
         }.distinctUntilChanged().stateIn(scope, SharingStarted.Eagerly, false)
 
     val aiSummaryState: StateFlow<AiSummaryUiState> =
-        aiSummary.state.map { it.summary }
+        aiSummary.state
+            .map { it.summary }
             .stateIn(scope, SharingStarted.Eagerly, AiSummaryUiState())
 
     fun openAiSummary() {
@@ -150,7 +151,7 @@ class HomeScreenController : KoinComponent {
             home.state,
             home.refreshing,
             geocodedPlace,
-            backdrop
+            backdrop,
         ) { state, refreshing, place, backdrop ->
             HomeSide(state, refreshing, place, backdrop)
         }
@@ -161,7 +162,7 @@ class HomeScreenController : KoinComponent {
             avatar.state,
             places.state,
             pickedSuggestion,
-            onPlacesPage
+            onPlacesPage,
         ) { n, a, p, pick, page ->
             FeatureSide(n, a.photoUrl, p, pick, page)
         }
@@ -204,9 +205,9 @@ class HomeScreenController : KoinComponent {
                             NearbyIntent.LocationChanged(
                                 GeoPoint(
                                     it.first,
-                                    it.second
-                                )
-                            )
+                                    it.second,
+                                ),
+                            ),
                         )
                     }
                 }

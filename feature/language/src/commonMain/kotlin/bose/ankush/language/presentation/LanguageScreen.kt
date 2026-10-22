@@ -104,7 +104,7 @@ fun LanguageScreen(
                     visibleState = reveal,
                     enter =
                         fadeIn(tween(REVEAL_MILLIS)) +
-                                slideInVertically(tween(REVEAL_MILLIS)) { it / REVEAL_OFFSET_DIVISOR },
+                            slideInVertically(tween(REVEAL_MILLIS)) { it / REVEAL_OFFSET_DIVISOR },
                 ) {
                     LanguageCard(languages = languages, selected = selected)
                 }
@@ -241,10 +241,10 @@ private fun LanguageRow(
             visible = isSelected,
             enter =
                 fadeIn(tween(SELECT_MILLIS)) +
-                        scaleIn(
-                            tween(SELECT_MILLIS),
-                            initialScale = CHECK_START_SCALE,
-                        ),
+                    scaleIn(
+                        tween(SELECT_MILLIS),
+                        initialScale = CHECK_START_SCALE,
+                    ),
             exit = scaleOut(tween(SELECT_MILLIS), targetScale = CHECK_START_SCALE),
         ) {
             Box(

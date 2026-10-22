@@ -36,8 +36,16 @@ class AiSummaryViewModelTest {
     @Test
     fun theCard_isAvailableUnlessTheDeviceCannotRunTheModel() =
         runTest {
-            assertTrue(viewModel(FakeClient(availability = AiAvailability.Downloadable)).also { settle() }.state.value.isAvailable)
-            assertFalse(viewModel(FakeClient(availability = AiAvailability.Unavailable)).also { settle() }.state.value.isAvailable)
+            assertTrue(
+                viewModel(
+                    FakeClient(availability = AiAvailability.Downloadable),
+                ).also { settle() }.state.value.isAvailable,
+            )
+            assertFalse(
+                viewModel(
+                    FakeClient(availability = AiAvailability.Unavailable),
+                ).also { settle() }.state.value.isAvailable,
+            )
         }
 
     @Test
@@ -55,7 +63,7 @@ class AiSummaryViewModelTest {
             assertEquals("Pune", summary.place)
             assertEquals(
                 listOf(AiSummaryTip(AiSummaryTipKind.Umbrella, "label:Umbrella")),
-                summary.tips
+                summary.tips,
             )
         }
 
@@ -136,7 +144,7 @@ class AiSummaryViewModelTest {
     private fun viewModel(client: FakeClient) =
         AiSummaryViewModel(
             client,
-            SummarizeWeather(client, WeatherRules(), WeatherPromptBuilder())
+            SummarizeWeather(client, WeatherRules(), WeatherPromptBuilder()),
         ) { "label:${it.name}" }
 
     private fun rainy(rain: Double = 7.0) =

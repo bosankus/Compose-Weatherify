@@ -72,7 +72,7 @@ internal fun SheetTitleBar(
     HorizontalDivider(
         modifier = Modifier.padding(end = 12.dp),
         thickness = 1.dp,
-        color = SheetHairline
+        color = SheetHairline,
     )
 }
 
@@ -110,7 +110,7 @@ private fun RoundIconButton(
             imageVector = icon,
             contentDescription = null,
             tint = ContentOnDark,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(18.dp),
         )
     }
 }
@@ -145,7 +145,8 @@ internal fun SheetField(
                     ClearButton(
                         visible = value.isNotEmpty(),
                         label = label,
-                        onClear = { onValueChange("") })
+                        onClear = { onValueChange("") },
+                    )
                 }
             },
         keyboardOptions = spec.keyboardOptions,
@@ -212,7 +213,7 @@ internal fun SheetPrimaryButton(
             CircularProgressIndicator(
                 modifier = Modifier.size(18.dp),
                 color = SheetMutedText,
-                strokeWidth = 2.dp
+                strokeWidth = 2.dp,
             )
             Spacer(modifier = Modifier.size(10.dp))
         }

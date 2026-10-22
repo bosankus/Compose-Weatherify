@@ -19,7 +19,8 @@ class SummarizeWeatherTest {
 
             assertEquals(
                 listOf("It", "It is mild", "It is mild today.", "It is mild today."),
-                out.map { it.text })
+                out.map { it.text },
+            )
             assertEquals(listOf(false, false, false, true), out.map { it.isComplete })
             assertEquals(listOf(WeatherAdvice.Umbrella), out.last().findings.map { it.advice })
         }
@@ -39,9 +40,10 @@ class SummarizeWeatherTest {
     fun blankAnswer_isAnError() =
         runTest {
             assertFailsWith<EmptySummaryException> {
-                summarize(FakeClient(listOf("  "))).invoke(
-                    forecast()
-                ).toList()
+                summarize(FakeClient(listOf("  ")))
+                    .invoke(
+                        forecast(),
+                    ).toList()
             }
         }
 
@@ -62,8 +64,7 @@ class SummarizeWeatherTest {
             assertFailsWith<IllegalStateException> { summarize(client).invoke(forecast()).toList() }
         }
 
-    private fun summarize(client: OnDeviceAiClient) =
-        SummarizeWeather(client, WeatherRules(), WeatherPromptBuilder())
+    private fun summarize(client: OnDeviceAiClient) = SummarizeWeather(client, WeatherRules(), WeatherPromptBuilder())
 
     private fun forecast(rain: Double? = null) =
         WeatherForecast(

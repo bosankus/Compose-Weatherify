@@ -16,8 +16,7 @@ import kotlinx.coroutines.withContext
 internal class ObserveAccountPhotoUrl(
     private val repository: AccountRepository,
 ) {
-    operator fun invoke(): Flow<String?> =
-        repository.account.map { it?.photoUrl }.distinctUntilChanged()
+    operator fun invoke(): Flow<String?> = repository.account.map { it?.photoUrl }.distinctUntilChanged()
 }
 
 /**
@@ -28,6 +27,5 @@ internal class RefreshAccount(
     private val repository: AccountRepository,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
-    suspend operator fun invoke(): Result<Unit> =
-        withContext(ioDispatcher) { repository.getAccount().map { } }
+    suspend operator fun invoke(): Result<Unit> = withContext(ioDispatcher) { repository.getAccount().map { } }
 }

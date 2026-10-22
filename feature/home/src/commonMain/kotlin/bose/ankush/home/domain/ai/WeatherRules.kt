@@ -62,8 +62,10 @@ class WeatherRules(
 
 internal const val KELVIN_OFFSET = 273.15
 
+private const val TENTHS_PER_UNIT = 10
+
 internal fun Double.oneDecimal(): String {
-    val tenths = (this * 10).roundToInt()
+    val tenths = (this * TENTHS_PER_UNIT).roundToInt()
     val sign = if (tenths < 0) "-" else ""
-    return "$sign${abs(tenths) / 10}.${abs(tenths) % 10}"
+    return "$sign${abs(tenths) / TENTHS_PER_UNIT}.${abs(tenths) % TENTHS_PER_UNIT}"
 }

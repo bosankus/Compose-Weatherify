@@ -7,6 +7,7 @@ import bose.ankush.auth.di.authDomainModule
 import bose.ankush.auth.di.authViewModelModule
 import bose.ankush.finder.di.finderDomainModule
 import bose.ankush.finder.di.finderViewModelModule
+import bose.ankush.home.PlaceEventSyncTrigger
 import bose.ankush.home.di.homeDomainModule
 import bose.ankush.home.di.homePlatformModule
 import bose.ankush.home.di.homeViewModelModule
@@ -32,6 +33,7 @@ import timber.log.Timber
 class WeatherifyApplication : Application() {
     // Resolved lazily, so this is safe to declare before startKoin() runs.
     private val errorReporter: ErrorReporter by inject()
+    private val placeEventSync: PlaceEventSyncTrigger by inject()
 
     override fun onCreate() {
         super.onCreate()
@@ -40,6 +42,8 @@ class WeatherifyApplication : Application() {
         initializeCrashlytics()
         enableTimber()
         subscribeToTopics()
+        // Push events saved offline and pull changes; skipped while signed out.
+        placeEventSync.requestSync()
     }
 
     private fun initializeFirebase() {

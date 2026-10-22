@@ -2,6 +2,7 @@ package bose.ankush.weatherify.automotive
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.car.app.CarContext
 import androidx.car.app.CarToast
 import androidx.car.app.HostException
@@ -23,33 +24,46 @@ class ParkingDetailScreen(
     carContext: CarContext,
     private val spot: ParkingSpot,
 ) : Screen(carContext) {
-
     override fun onGetTemplate(): Template {
         val capacity = spot.capacity?.let { "$it spaces" } ?: "Not listed"
-        val fee = when (spot.isPaid) {
-            true -> "Paid parking"
-            false -> "Free parking"
-            null -> "Not listed"
-        }
+        val fee =
+            when (spot.isPaid) {
+                true -> "Paid parking"
+                false -> "Free parking"
+                null -> "Not listed"
+            }
 
-        val pane = Pane.Builder()
-            .addRow(Row.Builder().setTitle("Capacity").addText(capacity).build())
-            .addRow(Row.Builder().setTitle("Fee").addText(fee).build())
-            .addRow(
-                Row.Builder()
-                    .setTitle("Distance")
-                    .addText(String.format(Locale.getDefault(), "%.1f km away", spot.distanceKm))
-                    .build()
-            )
-            .addAction(
-                Action.Builder()
-                    .setTitle("Navigate")
-                    .setOnClickListener { navigateToSpot() }
-                    .build()
-            )
-            .build()
+        val pane =
+            Pane
+                .Builder()
+                .addRow(
+                    Row
+                        .Builder()
+                        .setTitle("Capacity")
+                        .addText(capacity)
+                        .build(),
+                ).addRow(
+                    Row
+                        .Builder()
+                        .setTitle("Fee")
+                        .addText(fee)
+                        .build(),
+                ).addRow(
+                    Row
+                        .Builder()
+                        .setTitle("Distance")
+                        .addText(String.format(Locale.getDefault(), "%.1f km away", spot.distanceKm))
+                        .build(),
+                ).addAction(
+                    Action
+                        .Builder()
+                        .setTitle("Navigate")
+                        .setOnClickListener { navigateToSpot() }
+                        .build(),
+                ).build()
 
-        return PaneTemplate.Builder(pane)
+        return PaneTemplate
+            .Builder(pane)
             .setTitle(spot.name)
             .setHeaderAction(Action.BACK)
             .build()
@@ -57,15 +71,22 @@ class ParkingDetailScreen(
 
     /** Hands the location to whichever navigation app the car has, if any. */
     private fun navigateToSpot() {
-        val intent = Intent(
-            CarContext.ACTION_NAVIGATE,
-            Uri.parse("geo:${spot.lat},${spot.lng}"),
-        )
+        val intent =
+            Intent(
+                CarContext.ACTION_NAVIGATE,
+                Uri.parse("geo:${spot.lat},${spot.lng}"),
+            )
         try {
             carContext.startCarApp(intent)
         } catch (e: HostException) {
-            CarToast.makeText(carContext, "No navigation app available", CarToast.LENGTH_LONG)
+            Log.w(TAG, "No navigation app could handle the parking spot", e)
+            CarToast
+                .makeText(carContext, "No navigation app available", CarToast.LENGTH_LONG)
                 .show()
         }
+    }
+
+    private companion object {
+        const val TAG = "ParkingDetailScreen"
     }
 }

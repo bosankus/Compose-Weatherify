@@ -7,11 +7,13 @@ import bose.ankush.network.api.KtorFeedbackApiService
 import bose.ankush.network.api.KtorLocationApiService
 import bose.ankush.network.api.KtorPaymentApiService
 import bose.ankush.network.api.KtorPlaceEventApiService
+import bose.ankush.network.api.KtorPlaceEventSyncApiService
 import bose.ankush.network.api.KtorServiceApiService
 import bose.ankush.network.api.KtorWeatherApiService
 import bose.ankush.network.api.LocationApiService
 import bose.ankush.network.api.PaymentApiService
 import bose.ankush.network.api.PlaceEventApiService
+import bose.ankush.network.api.PlaceEventSyncApiService
 import bose.ankush.network.api.ServiceApiService
 import bose.ankush.network.api.WeatherApiService
 import bose.ankush.network.auth.api.AuthApiService
@@ -86,6 +88,13 @@ actual val networkDomainModule: Module =
             )
         }
         single<PlaceEventRepository> { PlaceEventRepositoryImpl(get()) }
+        single<PlaceEventSyncApiService> {
+            KtorPlaceEventSyncApiService(
+                get(),
+                get(),
+                NetworkConstants.WEATHER_BASE_URL,
+            )
+        }
         single<ServiceApiService> {
             KtorServiceApiService(
                 get(),
