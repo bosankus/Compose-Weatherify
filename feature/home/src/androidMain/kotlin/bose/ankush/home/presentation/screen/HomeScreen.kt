@@ -382,14 +382,14 @@ private fun WeatherPage(
             Spacer(modifier = Modifier.height(12.dp))
             TemperatureTrend(trend = trend, contentColor = contentColor)
         }
-        if (content.days.isNotEmpty() || chrome.forecastFailed) {
+        if (content.days.isNotEmpty() || chrome.forecastFailed || chrome.forecastLoading) {
             Spacer(modifier = Modifier.height(20.dp))
             WeekCalendarStrip(
                 model =
                     WeekCalendarStripModel(
                         days = content.days,
                         eventDates = chrome.eventDates,
-                        showWeekShimmer = false,
+                        showWeekShimmer = chrome.forecastLoading,
                     ),
                 onOpen = actions.onOpenCalendar,
                 contentColor = contentColor,
