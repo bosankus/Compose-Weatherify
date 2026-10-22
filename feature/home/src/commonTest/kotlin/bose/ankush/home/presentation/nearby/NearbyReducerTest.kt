@@ -6,6 +6,7 @@ import bose.ankush.home.domain.nearby.NearbyEvent
 import bose.ankush.home.presentation.util.SectionState
 import bose.ankush.network.model.SavedLocation
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.atTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -20,7 +21,7 @@ class NearbyReducerTest {
         val start =
             NearbyState(
                 point = GeoPoint(1.0, 2.0),
-                events = SectionState.Loaded(listOf(NearbyEvent("Dinner", day))),
+                events = SectionState.Loaded(listOf(NearbyEvent("Dinner", day.atTime(18, 30)))),
                 featuredPlace = SectionState.Loaded(SavedLocation(name = "Near")),
             )
 
@@ -43,7 +44,7 @@ class NearbyReducerTest {
 
         val ready = NearbyReducer.reduce(
             NearbyState(),
-            NearbyMutation.EventsLoaded(listOf(NearbyEvent("Dinner", day)))
+            NearbyMutation.EventsLoaded(listOf(NearbyEvent("Dinner", day.atTime(18, 30))))
         )
         assertEquals(setOf(day), ready.eventDates)
 

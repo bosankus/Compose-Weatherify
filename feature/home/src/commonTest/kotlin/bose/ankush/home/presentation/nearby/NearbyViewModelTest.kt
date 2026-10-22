@@ -19,7 +19,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -73,7 +73,7 @@ class NearbyViewModelTest {
 
             val state = viewModel.state.value
             assertEquals(
-                SectionState.Loaded(listOf(NearbyEvent("Dinner", LocalDate(2026, 10, 4)))),
+                SectionState.Loaded(listOf(NearbyEvent("Dinner", LocalDateTime(2026, 10, 4, 18, 30)))),
                 state.events
             )
             assertEquals("Home", (state.featuredPlace as SectionState.Loaded).value?.name)

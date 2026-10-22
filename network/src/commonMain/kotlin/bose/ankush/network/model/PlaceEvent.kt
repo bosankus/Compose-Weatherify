@@ -16,7 +16,7 @@ data class PlaceEvent(
 )
 
 /**
- * POST /place-events. [note] is sent as null. No account id.
+ * POST /place-events. [note] is optional free text, null when left blank. No account id.
  * [startsAt] is an ISO-8601 instant supplied by the user.
  */
 @Serializable
