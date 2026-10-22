@@ -3,14 +3,12 @@ package bose.ankush.home.di
 import bose.ankush.home.HomeLocationCoordinator
 import bose.ankush.home.HomeSavedPlacesEntry
 import bose.ankush.home.HomeSessionCleaner
-import bose.ankush.home.PlaceEventSyncTrigger
 import bose.ankush.home.data.HomeLocationCoordinatorImpl
 import bose.ankush.home.data.HomeSavedPlacesEntryImpl
 import bose.ankush.home.data.HomeSessionCleanerImpl
 import bose.ankush.home.data.events.LocalFirstPlaceEventsRepository
 import bose.ankush.home.data.events.NearbyPlaceEventSource
 import bose.ankush.home.data.events.PlaceEventWriteLock
-import bose.ankush.home.data.events.sync.InProcessPlaceEventSyncScheduler
 import bose.ankush.home.data.events.sync.PlaceEventSyncEngine
 import bose.ankush.home.data.events.sync.PlaceEventSyncScheduler
 import bose.ankush.home.data.repository.WeatherRepositoryImpl
@@ -21,6 +19,7 @@ import bose.ankush.home.domain.repository.PlaceEventsRepository
 import bose.ankush.home.domain.repository.WeatherRepository
 import bose.ankush.home.domain.usecase.CreateNearbyEvent
 import bose.ankush.home.domain.usecase.DeletePlaceEvent
+import bose.ankush.home.domain.usecase.DiscardFailedPlaceEvent
 import bose.ankush.home.domain.usecase.FindNearestSavedPlace
 import bose.ankush.home.domain.usecase.GetActiveCoordinates
 import bose.ankush.home.domain.usecase.GetActiveCoordinatesImpl
@@ -38,15 +37,11 @@ import bose.ankush.home.presentation.ai.AiSummaryViewModel
 import bose.ankush.home.presentation.nearby.NearbyViewModel
 import bose.ankush.home.presentation.places.SavedPlacesViewModel
 import bose.ankush.tokenstorage.api.TokenStorage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.SupervisorJob
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.core.scope.Scope
 import org.koin.dsl.bind
-import org.koin.dsl.binds
 import org.koin.dsl.module
 
 /** Platform-specific bindings: [bose.ankush.home.domain.location.LocationClient],
@@ -54,27 +49,28 @@ import org.koin.dsl.module
 expect val homePlatformModule: Module
 
 /**
- * Offline-first place events: Room store, shared sync engine and its in-process scheduler.
- * Declared before [homeDomainModule], which includes it, so it is initialised first.
+ * Offline-first place events: Room store, shared sync engine, repository and use cases.
+ * Declared before [homeDomainModule], which includes it, so it is initialised first. The
+ * [PlaceEventSyncScheduler] (also bound as [bose.ankush.home.PlaceEventSyncTrigger]) comes from
+ * [homePlatformModule]: WorkManager on Android, in-process foreground sync on iOS.
  */
 private val placeEventsModule: Module =
     module {
         single { PlaceEventWriteLock() }
         single { PlaceEventSyncEngine(get(), get(), get()) }
-        single {
-            val tokens = get<TokenStorage>()
-            InProcessPlaceEventSyncScheduler(
-                engine = get(),
-                scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
-                isSignedIn = { !tokens.getToken().isNullOrBlank() },
-            )
-        } binds arrayOf(PlaceEventSyncScheduler::class, PlaceEventSyncTrigger::class)
         single<PlaceEventsRepository> { LocalFirstPlaceEventsRepository(get(), get(), get()) }
         single { NearbyPlaceEventSource(get(), get()) }
         factory { ObservePlaceEvents(get()) }
         factory { UpdatePlaceEvent(get()) }
         factory { DeletePlaceEvent(get()) }
+        factory { DiscardFailedPlaceEvent(get()) }
     }
+
+/** Whether a place-event sync may run: a JWT is stored. Shared by both platform schedulers. */
+internal fun Scope.placeEventSyncSignedIn(): suspend () -> Boolean {
+    val tokens = get<TokenStorage>()
+    return { !tokens.getToken().isNullOrBlank() }
+}
 
 /** Relies on `storageDomainModule` (module `:storage`) being loaded for
  * `bose.ankush.storage.api.LocationPreferencesStorage`. */

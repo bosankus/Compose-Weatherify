@@ -1,6 +1,9 @@
 package bose.ankush.home.di
 
+import bose.ankush.home.PlaceEventSyncTrigger
 import bose.ankush.home.data.ai.UnavailableOnDeviceAiClient
+import bose.ankush.home.data.events.sync.InProcessPlaceEventSyncScheduler
+import bose.ankush.home.data.events.sync.PlaceEventSyncScheduler
 import bose.ankush.home.data.location.IosHomeGeocoder
 import bose.ankush.home.data.location.IosLocationClient
 import bose.ankush.home.data.remoteconfig.FirebaseHomeRemoteConfigGate
@@ -11,7 +14,12 @@ import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.repository.WeatherWearSync
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 import org.koin.core.module.Module
+import org.koin.dsl.binds
 import org.koin.dsl.module
 import platform.Foundation.NSBundle
 import swiftPMImport.bose.ankush.feature.home.FIRApp
@@ -49,4 +57,12 @@ actual val homePlatformModule: Module =
         single<HomeGeocoder> { IosHomeGeocoder() }
         single<WeatherWearSync> { NoopWeatherWearSync() }
         single<OnDeviceAiClient> { UnavailableOnDeviceAiClient() }
+        // Foreground-only place-event sync (launch and every return to the foreground), by design.
+        single {
+            InProcessPlaceEventSyncScheduler(
+                engine = get(),
+                scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+                isSignedIn = placeEventSyncSignedIn(),
+            )
+        } binds arrayOf(PlaceEventSyncScheduler::class, PlaceEventSyncTrigger::class)
     }

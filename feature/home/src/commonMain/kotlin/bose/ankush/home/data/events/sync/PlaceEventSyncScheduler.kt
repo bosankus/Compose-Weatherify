@@ -17,12 +17,9 @@ internal interface PlaceEventSyncScheduler : PlaceEventSyncTrigger {
 }
 
 /**
- * In-process scheduler used on both platforms. Requests are conflated into one background run at
- * a time, and a failed or capped run re-requests itself after [PlaceEventSyncReport.retryAfter].
- *
- * Android has no WorkManager dependency yet, so syncs run only while the process is alive
- * (create/edit/delete, app start, the first events load); a WorkManager unique job can replace
- * this binding once the dependency is approved. iOS triggers on foreground only, by design.
+ * In-process scheduler, bound on iOS. Requests are conflated into one background run at a time,
+ * and a failed or capped run re-requests itself after [PlaceEventSyncReport.retryAfter]. iOS
+ * triggers on launch and foreground only, by design. Android binds the WorkManager scheduler.
  */
 internal class InProcessPlaceEventSyncScheduler(
     private val engine: PlaceEventSyncEngine,

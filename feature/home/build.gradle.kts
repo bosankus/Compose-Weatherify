@@ -111,6 +111,9 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.coroutines.play.services)
                 implementation(libs.timber)
+
+                // Background place-event sync (periodic + expedited on each write).
+                implementation(libs.androidx.work.runtime.ktx)
             }
         }
 
