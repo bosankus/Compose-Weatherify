@@ -10,7 +10,10 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.TimeZone
 
-/** POST /place-events for [EventDraft] at [NearbyPlace]. An incomplete draft is never sent. */
+/**
+ * POST /place-events for [EventDraft] at [NearbyPlace]. An incomplete draft is never sent.
+ * A blank note goes as null.
+ */
 internal class CreateNearbyEvent(
     private val repository: PlaceEventRepository,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -31,7 +34,7 @@ internal class CreateNearbyEvent(
                 lon = place.point.lon,
                 title = draft.title.trim(),
                 startsAt = startsAt.toString(),
-                note = null,
+                note = draft.note.trim().takeIf { it.isNotEmpty() },
             )
         return withContext(ioDispatcher) { repository.createPlaceEvent(request) }
     }

@@ -7,6 +7,8 @@ import bose.ankush.home.domain.nearby.NearbyPlace
 import bose.ankush.home.domain.usecase.CreateNearbyEvent
 import bose.ankush.home.domain.usecase.FindNearestSavedPlace
 import bose.ankush.home.domain.usecase.GetNearbyEvents
+import bose.ankush.home.generated.resources.Res
+import bose.ankush.home.generated.resources.event_pinned_location
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +21,11 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import org.jetbrains.compose.resources.getString
+import kotlin.time.Clock
 
 /**
  * MVI for [NearbyState]. The UI sends [NearbyIntent]s; work results come back as
@@ -32,6 +39,8 @@ internal class NearbyViewModel(
     private val getNearbyEvents: GetNearbyEvents,
     private val findNearestSavedPlace: FindNearestSavedPlace,
     private val createNearbyEvent: CreateNearbyEvent,
+    private val today: () -> LocalDate = { Clock.System.todayIn(TimeZone.currentSystemDefault()) },
+    private val pinnedLocationName: suspend () -> String = { getString(Res.string.event_pinned_location) },
 ) : ViewModel() {
     private val _state = MutableStateFlow(NearbyState())
     val state: StateFlow<NearbyState> = _state.asStateFlow()
@@ -57,11 +66,13 @@ internal class NearbyViewModel(
 
             is NearbyIntent.PlaceNameChanged -> mutate(NearbyMutation.PlaceNameChanged(intent.name))
             NearbyIntent.RetryEvents -> eventsReloads.trySend(Unit)
-            NearbyIntent.OpenComposer -> mutate(NearbyMutation.ComposerOpened)
+            is NearbyIntent.OpenComposer -> mutate(NearbyMutation.ComposerOpened(intent.date))
+            is NearbyIntent.SelectDate -> mutate(NearbyMutation.DateSelected(intent.date))
             NearbyIntent.DismissComposer -> mutate(NearbyMutation.ComposerDismissed)
             is NearbyIntent.TitleChanged -> mutate(NearbyMutation.DraftEdited(title = intent.value))
             is NearbyIntent.DateChanged -> mutate(NearbyMutation.DraftEdited(dateText = intent.value))
             is NearbyIntent.TimeChanged -> mutate(NearbyMutation.DraftEdited(timeText = intent.value))
+            is NearbyIntent.NoteChanged -> mutate(NearbyMutation.DraftEdited(note = intent.value))
             NearbyIntent.SubmitEvent -> submitEvent()
         }
     }
@@ -69,7 +80,7 @@ internal class NearbyViewModel(
     private suspend fun loadEvents(point: GeoPoint) {
         mutate(NearbyMutation.EventsLoading)
         getNearbyEvents(point).fold(
-            onSuccess = { mutate(NearbyMutation.EventsLoaded(it)) },
+            onSuccess = { mutate(NearbyMutation.EventsLoaded(it, today())) },
             onFailure = { mutate(NearbyMutation.EventsFailed) },
         )
     }
@@ -84,15 +95,16 @@ internal class NearbyViewModel(
 
     /**
      * Not canceled by a location change or by closing the form: the POST may already have
-     * reached the server, so its outcome is always applied.
+     * reached the server, so its outcome is always applied. With no place name yet (the
+     * geocoder has not answered), the event is pinned under [pinnedLocationName].
      */
     private fun submitEvent() {
         val current = _state.value
         val point = current.point
-        val name = current.placeName
-        if (!current.canSubmitEvent || point == null || name.isNullOrBlank()) return
+        if (!current.canSubmitEvent || point == null) return
         mutate(NearbyMutation.Submitting)
         viewModelScope.launch {
+            val name = current.placeName?.takeIf { it.isNotBlank() } ?: pinnedLocationName()
             createNearbyEvent(NearbyPlace(name, point), current.composer.draft).fold(
                 onSuccess = {
                     mutate(NearbyMutation.Submitted)

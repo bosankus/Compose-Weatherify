@@ -25,6 +25,7 @@ import bose.ankush.home.presentation.places.SavedPlacesLogic
 import bose.ankush.home.presentation.places.SavedPlacesNotice
 import bose.ankush.home.presentation.places.SavedPlacesState
 import bose.ankush.home.presentation.screen.AddPlaceAction
+import bose.ankush.home.presentation.screen.toHourMinuteLabel
 import bose.ankush.home.presentation.util.SectionState
 import bose.ankush.home.presentation.util.valueOrNull
 import org.jetbrains.compose.resources.getString
@@ -112,8 +113,7 @@ private suspend fun SavedPlaceSearchState.status(hasPick: Boolean): String? {
 /** Stable key for a suggestion row; also how Swift names a pick back to the controller. */
 internal fun LocationSuggestion.key(): String = "$name|$city|$state|$country|$latitude|$longitude"
 
-internal fun List<Location>.findByKey(key: String): Location? =
-    firstOrNull { SavedPlacesLogic.placeKey(it) == key }
+internal fun List<Location>.findByKey(key: String): Location? = firstOrNull { SavedPlacesLogic.placeKey(it) == key }
 
 internal suspend fun NearbyState.toComposerUi(): EventComposerUi {
     val place = placeName?.takeIf { it.isNotBlank() }
@@ -128,6 +128,7 @@ internal suspend fun NearbyState.toComposerUi(): EventComposerUi {
         title = composer.draft.title,
         dateText = composer.draft.dateText,
         timeText = composer.draft.timeText,
+        note = composer.draft.note,
         error = composer.error,
         isSubmitting = composer.isSubmitting,
         canSubmit = canSubmitEvent,
@@ -137,21 +138,26 @@ internal suspend fun NearbyState.toComposerUi(): EventComposerUi {
 
 /** Events and the closest saved place; null when neither has anything to show. */
 internal fun NearbyState.toNearbyUi(): NearbyUi? {
-    val loaded = events.valueOrNull().orEmpty()
+    // Past days are hidden and a selected day narrows the list, the same as Android.
+    val loaded = visibleEvents
     val eventsLoading = events is SectionState.Loading
     val eventsFailed = events is SectionState.Failed
     val saved =
         featuredPlace.valueOrNull()?.let { place ->
             FeaturedPlaceUi(
                 name = place.name.trim(),
-                subtitle = listOf(place.city, place.state, place.country).filter { it.isNotBlank() }
-                    .joinToString(", "),
+                subtitle =
+                    listOf(place.city, place.state, place.country)
+                        .filter { it.isNotBlank() }
+                        .joinToString(", "),
             )
         }
-    // Same rule as Android: the block shows once there are events or a named saved place.
-    if (loaded.isEmpty() && saved?.name?.isNotBlank() != true) return null
+    // Same rule as Android: the events block shows while loading (shimmer), on failure
+    // (shimmer and Retry), or with events; otherwise only a named saved place keeps it.
+    val showEvents = loaded.isNotEmpty() || eventsFailed || eventsLoading
+    if (!showEvents && saved?.name?.isNotBlank() != true) return null
     return NearbyUi(
-        showEvents = loaded.isNotEmpty() || eventsFailed,
+        showEvents = showEvents,
         eventsLoading = eventsLoading,
         eventsFailed = eventsFailed,
         events =
@@ -160,6 +166,8 @@ internal fun NearbyState.toNearbyUi(): NearbyUi? {
                     key = "$index-${event.date}",
                     title = event.title,
                     whenLabel = event.date.toDayMonthLabel(),
+                    timeLabel = event.startsAt.time.toHourMinuteLabel(),
+                    note = event.note.orEmpty(),
                 )
             },
         savedPlace = saved,

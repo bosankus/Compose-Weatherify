@@ -20,12 +20,15 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+private const val PINNED = "Pinned location"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NearbyViewModelTest {
@@ -61,10 +64,10 @@ class NearbyViewModelTest {
                             SavedLocation(
                                 name = "Home",
                                 lat = 1.0,
-                                lon = 2.0
-                            )
-                        )
-                    )
+                                lon = 2.0,
+                            ),
+                        ),
+                    ),
                 )
             val viewModel = nearbyViewModel(events, places)
 
@@ -73,8 +76,8 @@ class NearbyViewModelTest {
 
             val state = viewModel.state.value
             assertEquals(
-                SectionState.Loaded(listOf(NearbyEvent("Dinner", LocalDate(2026, 10, 4)))),
-                state.events
+                SectionState.Loaded(listOf(NearbyEvent("Dinner", LocalDateTime(2026, 10, 4, 18, 30)))),
+                state.events,
             )
             assertEquals("Home", (state.featuredPlace as SectionState.Loaded).value?.name)
         }
@@ -106,9 +109,9 @@ class NearbyViewModelTest {
                             listOf(
                                 PlaceEvent(
                                     startsAt = "2026-10-04T18:30:00Z",
-                                    title = title
-                                )
-                            )
+                                    title = title,
+                                ),
+                            ),
                         )
                     },
                 )
@@ -134,9 +137,13 @@ class NearbyViewModelTest {
             val events =
                 FakePlaceEventRepository(
                     events = { _, _ ->
-                        if (fail) Result.failure(IllegalStateException("offline")) else Result.success(
-                            listOf(dinner())
-                        )
+                        if (fail) {
+                            Result.failure(IllegalStateException("offline"))
+                        } else {
+                            Result.success(
+                                listOf(dinner()),
+                            )
+                        }
                     },
                 )
             val places = FakeLocationRepository()
@@ -202,10 +209,102 @@ class NearbyViewModelTest {
             assertTrue(events.created.isEmpty())
         }
 
+    @Test
+    fun withoutAPlaceNameTheEventIsSavedAsPinnedLocation() =
+        runTest {
+            val events = FakePlaceEventRepository()
+            val viewModel = nearbyViewModel(events, FakeLocationRepository())
+            viewModel.onIntent(NearbyIntent.LocationChanged(here))
+            viewModel.onIntent(NearbyIntent.OpenComposer(LocalDate(2026, 10, 4)))
+            viewModel.onIntent(NearbyIntent.TitleChanged("Dinner"))
+            viewModel.onIntent(NearbyIntent.TimeChanged("09:30"))
+            advanceUntilIdle()
+            assertTrue(viewModel.state.value.canSubmitEvent)
+
+            viewModel.onIntent(NearbyIntent.SubmitEvent)
+            advanceUntilIdle()
+
+            val request = events.created.single()
+            assertEquals(PINNED, request.placeName)
+            assertEquals(here.lat, request.lat)
+            assertEquals("2026-10-04T09:30:00Z", request.startsAt)
+        }
+
+    @Test
+    fun aTappedDayOpensTheFormOnThatDayAndFiltersTheList() =
+        runTest {
+            val events =
+                FakePlaceEventRepository(
+                    events = { _, _ ->
+                        Result.success(
+                            listOf(
+                                PlaceEvent(startsAt = "2026-10-04T18:30:00Z", title = "Dinner"),
+                                PlaceEvent(startsAt = "2026-10-05T08:00:00Z", title = "Walk"),
+                            ),
+                        )
+                    },
+                )
+            val viewModel = nearbyViewModel(events, FakeLocationRepository())
+            viewModel.onIntent(NearbyIntent.LocationChanged(here))
+            advanceUntilIdle()
+
+            viewModel.onIntent(NearbyIntent.OpenComposer(LocalDate(2026, 10, 5)))
+
+            val state = viewModel.state.value
+            assertTrue(state.composer.isVisible)
+            assertEquals("2026-10-05", state.composer.draft.dateText)
+            assertEquals(listOf("Walk"), state.visibleEvents.map { it.title })
+        }
+
+    @Test
+    fun plusAfterSelectingADayCreatesTheEventOnThatDay() =
+        runTest {
+            val events = FakePlaceEventRepository()
+            val viewModel = nearbyViewModel(events, FakeLocationRepository())
+            viewModel.onIntent(NearbyIntent.LocationChanged(here))
+            viewModel.onIntent(NearbyIntent.PlaceNameChanged("Harbor"))
+            viewModel.onIntent(NearbyIntent.SelectDate(LocalDate(2026, 10, 7)))
+            viewModel.onIntent(NearbyIntent.OpenComposer())
+            viewModel.onIntent(NearbyIntent.TitleChanged("Dinner"))
+            viewModel.onIntent(NearbyIntent.TimeChanged("19:00"))
+            viewModel.onIntent(NearbyIntent.NoteChanged("Bring a jacket"))
+            advanceUntilIdle()
+
+            viewModel.onIntent(NearbyIntent.SubmitEvent)
+            advanceUntilIdle()
+
+            val request = events.created.single()
+            assertEquals("2026-10-07T19:00:00Z", request.startsAt)
+            assertEquals("Bring a jacket", request.note)
+        }
+
+    @Test
+    fun pastEventsAreHiddenByDefault() =
+        runTest {
+            val events =
+                FakePlaceEventRepository(
+                    events = { _, _ ->
+                        Result.success(
+                            listOf(
+                                PlaceEvent(startsAt = "2026-10-03T18:30:00Z", title = "Yesterday"),
+                                PlaceEvent(startsAt = "2026-10-04T18:30:00Z", title = "Today"),
+                            ),
+                        )
+                    },
+                )
+            val viewModel = nearbyViewModel(events, FakeLocationRepository(), today = LocalDate(2026, 10, 4))
+            viewModel.onIntent(NearbyIntent.LocationChanged(here))
+            advanceUntilIdle()
+
+            val state = viewModel.state.value
+            assertEquals(listOf("Today"), state.visibleEvents.map { it.title })
+            assertEquals(setOf(LocalDate(2026, 10, 4)), state.eventDates)
+        }
+
     private fun NearbyViewModel.fillComposer() {
         onIntent(NearbyIntent.LocationChanged(here))
         onIntent(NearbyIntent.PlaceNameChanged("Harbor"))
-        onIntent(NearbyIntent.OpenComposer)
+        onIntent(NearbyIntent.OpenComposer())
         onIntent(NearbyIntent.TitleChanged("Dinner"))
         onIntent(NearbyIntent.DateChanged("2026-10-04"))
         onIntent(NearbyIntent.TimeChanged("09:30"))
@@ -216,6 +315,7 @@ class NearbyViewModelTest {
     private fun TestScope.nearbyViewModel(
         events: FakePlaceEventRepository,
         places: FakeLocationRepository,
+        today: LocalDate = LocalDate(2026, 10, 1),
     ): NearbyViewModel {
         val dispatcher = StandardTestDispatcher(testScheduler)
         Dispatchers.setMain(dispatcher)
@@ -224,6 +324,8 @@ class NearbyViewModelTest {
             getNearbyEvents = GetNearbyEvents(events, dispatcher, utc),
             findNearestSavedPlace = FindNearestSavedPlace(places, dispatcher),
             createNearbyEvent = CreateNearbyEvent(events, dispatcher, utc),
+            today = { today },
+            pinnedLocationName = { PINNED },
         )
     }
 }

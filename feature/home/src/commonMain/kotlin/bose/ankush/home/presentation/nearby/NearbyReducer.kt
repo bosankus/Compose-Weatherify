@@ -2,6 +2,7 @@ package bose.ankush.home.presentation.nearby
 
 import bose.ankush.home.domain.nearby.EventDraft
 import bose.ankush.home.presentation.util.SectionState
+import kotlinx.datetime.LocalDate
 
 /** Pure: the only place [NearbyState] changes. */
 internal object NearbyReducer {
@@ -20,7 +21,8 @@ internal object NearbyReducer {
 
             is NearbyMutation.PlaceNameChanged -> state.copy(placeName = mutation.name)
             NearbyMutation.EventsLoading -> state.copy(events = SectionState.Loading)
-            is NearbyMutation.EventsLoaded -> state.copy(events = SectionState.Loaded(mutation.events))
+            is NearbyMutation.EventsLoaded ->
+                state.copy(events = SectionState.Loaded(mutation.events), today = mutation.today ?: state.today)
             NearbyMutation.EventsFailed -> state.copy(events = SectionState.Failed)
             NearbyMutation.FeaturedPlaceLoading -> state.copy(featuredPlace = SectionState.Loading)
             is NearbyMutation.FeaturedPlaceLoaded ->
@@ -32,13 +34,8 @@ internal object NearbyReducer {
                 )
 
             NearbyMutation.FeaturedPlaceFailed -> state.copy(featuredPlace = SectionState.Failed)
-            NearbyMutation.ComposerOpened ->
-                state.withComposer {
-                    it.copy(
-                        isVisible = true,
-                        error = null,
-                    )
-                }
+            is NearbyMutation.ComposerOpened -> state.openComposer(mutation.date)
+            is NearbyMutation.DateSelected -> state.copy(selectedDate = mutation.date)
 
             NearbyMutation.ComposerDismissed ->
                 state.withComposer {
@@ -73,6 +70,23 @@ internal object NearbyReducer {
             NearbyMutation.Submitted -> state.copy(composer = EventComposerState())
         }
 
+    /**
+     * A tapped day becomes the selection; otherwise the selected day is used. Either fills the
+     * draft's date. With neither, the draft keeps whatever date it had.
+     */
+    private fun NearbyState.openComposer(tapped: LocalDate?): NearbyState {
+        val date = tapped ?: selectedDate
+        return copy(
+            selectedDate = date,
+            composer =
+                composer.copy(
+                    isVisible = true,
+                    error = null,
+                    draft = if (date != null) composer.draft.copy(dateText = date.toString()) else composer.draft,
+                ),
+        )
+    }
+
     private inline fun NearbyState.withComposer(change: (EventComposerState) -> EventComposerState): NearbyState =
         copy(composer = change(composer))
 
@@ -81,5 +95,6 @@ internal object NearbyReducer {
             title = mutation.title ?: title,
             dateText = mutation.dateText ?: dateText,
             timeText = mutation.timeText ?: timeText,
+            note = mutation.note ?: note,
         )
 }

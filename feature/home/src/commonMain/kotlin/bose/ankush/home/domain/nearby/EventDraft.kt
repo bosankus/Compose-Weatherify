@@ -8,18 +8,20 @@ import kotlinx.datetime.toInstant
 import kotlin.time.Instant
 
 /**
- * What the user typed into the new-event form. The date and time are collected as text
- * because POST /place-events needs [startsAt] as an ISO-8601 instant.
+ * What the user entered in the new-event form. The date (`YYYY-MM-DD`) and time (`HH:mm`)
+ * are held as text, filled by the pickers, because POST /place-events needs [startsAt] as an
+ * ISO-8601 instant. [note] is optional.
  */
 internal data class EventDraft(
     val title: String = "",
     val dateText: String = "",
     val timeText: String = "",
+    val note: String = "",
 ) {
     /** The start instant in [timeZone], or null until both the date and the time parse. */
     fun startsAt(timeZone: TimeZone = TimeZone.currentSystemDefault()): Instant? {
-        val date = runCatching { LocalDate.parse(dateText.trim()) }.getOrNull()
-        val time = parseTime(timeText)
+        val date = date()
+        val time = time()
         return if (date == null || time == null) {
             null
         } else {
@@ -29,6 +31,12 @@ internal data class EventDraft(
 
     fun isComplete(timeZone: TimeZone = TimeZone.currentSystemDefault()): Boolean =
         title.isNotBlank() && startsAt(timeZone) != null
+
+    /** The parsed date, or null while [dateText] is empty or malformed. */
+    fun date(): LocalDate? = runCatching { LocalDate.parse(dateText.trim()) }.getOrNull()
+
+    /** The parsed time, or null while [timeText] is empty or malformed. */
+    fun time(): LocalTime? = parseTime(timeText)
 }
 
 /** Strict `HH:mm`, 24-hour. */

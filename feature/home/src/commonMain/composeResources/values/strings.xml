@@ -72,11 +72,19 @@
     <string name="saved_places_add_subtitle">Search for a city. Saving it also switches the forecast there.</string>
     <string name="event_sheet_title">New event</string>
     <string name="event_sheet_subtitle">Add something happening around %1$s. Nothing is saved until it has a title and a time.</string>
-    <string name="event_sheet_no_place">Your current place isn’t available yet, so the event can’t be pinned to it.</string>
+    <string name="event_sheet_no_place">Your place name isn’t available yet. The event is pinned here as “Pinned location”.</string>
+    <string name="event_pinned_location">Pinned location</string>
     <string name="event_sheet_close">Close new event</string>
     <string name="event_title_hint">What’s happening?</string>
     <string name="event_date_hint">YYYY-MM-DD</string>
     <string name="event_time_hint">HH:MM</string>
+    <string name="event_note_hint">Note (optional)</string>
+    <string name="event_date_pick">Pick a date</string>
+    <string name="event_time_pick">Pick a time</string>
+    <string name="event_picker_confirm">OK</string>
+    <string name="event_picker_cancel">Cancel</string>
+    <string name="events_all_days">All days</string>
+    <string name="events_none_on_day">No events on %1$s.</string>
     <string name="event_save_action">Save event</string>
     <string name="event_saving">Saving…</string>
 </resources>

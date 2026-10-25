@@ -15,6 +15,7 @@ import kotlin.time.Instant
 /**
  * GET /place-events around [GeoPoint]. The server matches within about 1 km, so an empty list
  * means nothing is nearby. Events whose start time does not parse are dropped, never dated.
+ * The local start time and the note are kept so the list can show them.
  *
  * Runs on [ioDispatcher]. `withContext` also gives prompt cancellation: a caller that has
  * moved on to another location never receives this result.
@@ -35,5 +36,9 @@ internal class GetNearbyEvents(
 
 private fun PlaceEvent.toNearbyEvent(zone: TimeZone): NearbyEvent? {
     val instant = runCatching { Instant.parse(startsAt) }.getOrNull() ?: return null
-    return NearbyEvent(title = title.trim(), date = instant.toLocalDateTime(zone).date)
+    return NearbyEvent(
+        title = title.trim(),
+        startsAt = instant.toLocalDateTime(zone),
+        note = note?.trim()?.takeIf { it.isNotEmpty() },
+    )
 }

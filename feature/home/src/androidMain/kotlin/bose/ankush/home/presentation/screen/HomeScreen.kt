@@ -1,6 +1,5 @@
 package bose.ankush.home.presentation.screen
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -24,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +57,7 @@ import bose.ankush.home.presentation.places.SavedPlacesEffect
 import bose.ankush.home.presentation.places.SavedPlacesIntent
 import bose.ankush.home.presentation.places.SavedPlacesViewModel
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -77,7 +76,7 @@ internal fun HomeScreen(
     links: HomeScreenLinks,
     shell: HomeScreenShell,
     sections: HomeScreenSections,
-    onOpenCalendar: () -> Unit = {},
+    onOpenCalendar: (LocalDate?) -> Unit = {},
 ) {
     val places = sections.places
     val pager = rememberPagerState(pageCount = { HOME_PAGE_COUNT })
@@ -179,7 +178,7 @@ private data class HomePagerModel(
 )
 
 private data class HomePagerActions(
-    val onOpenCalendar: () -> Unit,
+    val onOpenCalendar: (LocalDate?) -> Unit,
     val onOpenAlert: (WeatherForecast.Alert) -> Unit,
     val onDismissAlert: () -> Unit,
     val onOpenAiSummary: () -> Unit,
@@ -362,7 +361,6 @@ private fun WeatherPage(
     actions: HomePagerActions,
     modifier: Modifier = Modifier,
 ) {
-    SideEffect { Log.d(PERF_TAG, "WeatherPage recomposed") } // TEMP(perf)
     val content = shell.content
     val photo = shell.photo
     val photoUrl = photo?.imageUrl
@@ -385,14 +383,15 @@ private fun WeatherPage(
             Spacer(modifier = Modifier.height(12.dp))
             TemperatureTrend(trend = trend, contentColor = contentColor)
         }
-        if (content.days.isNotEmpty() || chrome.forecastFailed) {
+        if (content.days.isNotEmpty() || chrome.forecastFailed || chrome.forecastLoading) {
             Spacer(modifier = Modifier.height(20.dp))
             WeekCalendarStrip(
                 model =
                     WeekCalendarStripModel(
                         days = content.days,
                         eventDates = chrome.eventDates,
-                        showWeekShimmer = false,
+                        showWeekShimmer = chrome.forecastLoading,
+                        selectedDate = nearby.selectedDate,
                     ),
                 onOpen = actions.onOpenCalendar,
                 contentColor = contentColor,
@@ -428,14 +427,10 @@ private fun WeatherPage(
             Spacer(modifier = Modifier.height(16.dp))
             PromoSmallCards(contentColor = contentColor)
         }
-        val showNearby =
-            nearby.events.isNotEmpty() ||
-                nearby.savedPlace?.name?.isNotBlank() == true
-        if (showNearby) {
+        if (nearby.showBlocks) {
             Spacer(modifier = Modifier.height(16.dp))
-            val weatherPageNearby = remember(nearby) { nearby.copy(eventsLoading = false) }
             NearbyBlocks(
-                nearby = weatherPageNearby,
+                nearby = nearby,
                 contentColor = contentColor,
                 onOpenSaved = actions.onOpenPlaces,
             )
@@ -538,8 +533,6 @@ fun HomeScreenRoute(
             ),
         )
     }
-    SideEffect { Log.d(PERF_TAG, "HomeScreenRoute recomposed") } // TEMP(perf)
-
     // The mappings below are pure functions of the forecast, so they are remembered per forecast
     // instead of re-run on every recomposition (places, nearby and AI state all recompose this body).
     val weather = state.weatherData
@@ -553,7 +546,6 @@ fun HomeScreenRoute(
             ?.takeIf { it.isNotBlank() }
     val liveContent =
         remember(weather, place) {
-            Log.d(PERF_TAG, "toHomeWeatherContent") // TEMP(perf)
             weather?.takeIf { it.current != null }?.toHomeWeatherContent(place)
         }
     val content =
@@ -566,7 +558,6 @@ fun HomeScreenRoute(
         }
     val extras =
         remember(weather) {
-            Log.d(PERF_TAG, "toForecastExtras") // TEMP(perf)
             weather?.toForecastExtras() ?: ForecastExtras()
         }
     val photo = rememberBackgroundPhoto(weatherMain?.let(::unsplashQuery), content.condition)
@@ -580,11 +571,12 @@ fun HomeScreenRoute(
         }
     }
     val nearby =
-        remember(nearbyState, avatarState.photoUrl, links, nearbyViewModel) {
+        remember(nearbyState, avatarState.photoUrl, links, content.days, nearbyViewModel) {
             nearbyState.toNearbyContent(
                 photoUrl = avatarState.photoUrl,
                 onOpenAccount = links.onOpenHub,
-                onRetryEvents = { nearbyViewModel.onIntent(NearbyIntent.RetryEvents) },
+                days = content.days,
+                onIntent = nearbyViewModel::onIntent,
             )
         }
     val forecast =
@@ -644,7 +636,7 @@ fun HomeScreenRoute(
             links = links,
             shell = shell,
             sections = sections,
-            onOpenCalendar = { nearbyViewModel.onIntent(NearbyIntent.OpenComposer) },
+            onOpenCalendar = { date -> nearbyViewModel.onIntent(NearbyIntent.OpenComposer(date)) },
         )
     }
 }
@@ -663,7 +655,6 @@ private fun rememberForecastPlace(userLocation: Pair<Double, Double>?): String {
 }
 
 private const val CURRENT_LOCATION = "Current Location"
-private const val PERF_TAG = "HomePerf" // TEMP(perf)
 private const val OBSERVED_ALPHA = 0.72f
 private const val HOME_PAGE_COUNT = 2
 private const val WEATHER_PAGE = 0
