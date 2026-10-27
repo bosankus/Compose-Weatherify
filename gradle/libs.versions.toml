@@ -83,7 +83,7 @@ lottieCompose = "6.7.1"
 
 # Payment module
 razorpayCheckout = "1.6.41"
-razorpayStandardCore = "1.7.17"
+razorpayStandardCore = "1.7.21"
 
 # KMP — Ktor
 ktor = "3.6.0"
