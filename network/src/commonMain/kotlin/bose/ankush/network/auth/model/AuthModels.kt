@@ -1,5 +1,7 @@
 package bose.ankush.network.auth.model
 
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,9 +23,15 @@ data class RegisterRequest(
     val firebaseToken: String? = null,
 )
 
+/**
+ * [token] is the current access token. [refreshToken] is sent only once the server has issued one:
+ * it is never encoded as null, so a server that doesn't know the field never sees it.
+ */
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class RefreshTokenRequest(
     val token: String,
+    @EncodeDefault(EncodeDefault.Mode.NEVER) val refreshToken: String? = null,
 )
 
 /**
@@ -34,6 +42,10 @@ data class RefreshTokenRequest(
 @Serializable
 data class AuthData(
     val token: String = "",
+    // Issued alongside [token] by a server that rotates refresh tokens; null on one that doesn't.
+    val refreshToken: String? = null,
+    // "DPoP" when the server bound [token] to the device key (RFC 9449); absent for a bearer token.
+    val tokenType: String? = null,
     val email: String = "",
     val isActive: Boolean = false,
     val isPremium: Boolean = false,

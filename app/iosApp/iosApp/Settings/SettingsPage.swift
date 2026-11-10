@@ -7,7 +7,9 @@ import ComposeApp
 /// over the same photo backdrop as the weather and places pages.
 struct SettingsPage: View {
     let ui: SettingsScreenUi
+    /// The profile header sits on the sky; everything under it sits on the bottom scrim.
     let ink: Color
+    let bodyInk: Color
     let model: SettingsModel
     let permissions: HomePermissions
     let onOpenLanguage: () -> Void
@@ -23,52 +25,57 @@ struct SettingsPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Spacer().frame(height: 12)
-            ProfileHeaderView(profile: ui.profile, strings: strings, ink: ink, model: model)
-            PremiumCardView(premium: ui.premium, upgrade: strings.upgrade, ink: ink, onUpgrade: controller.openPlans)
-            SettingsSection(title: strings.preferences, ink: ink) {
-                if !model.notificationsAllowed {
-                    SettingsRowView(symbol: "bell", title: strings.notifications, ink: ink) {
-                        Task {
-                            await model.enableNotifications(permissions)
+            // Each child resolves sentinel ink on its own layer.
+            Group {
+                Spacer().frame(height: 12)
+                ProfileHeaderView(profile: ui.profile, strings: strings, ink: ink, model: model)
+                PremiumCardView(premium: ui.premium, upgrade: strings.upgrade, ink: bodyInk, onUpgrade: controller.openPlans)
+                SettingsSection(title: strings.preferences, ink: bodyInk) {
+                    if !model.notificationsAllowed {
+                        SettingsRowView(symbol: "bell", title: strings.notifications, ink: bodyInk) {
+                            Task {
+                                await model.enableNotifications(permissions)
+                            }
                         }
+                        RowDivider(ink: bodyInk)
                     }
-                    RowDivider(ink: ink)
+                    SettingsRowView(symbol: "globe", title: strings.language, ink: bodyInk, action: onOpenLanguage)
                 }
-                SettingsRowView(symbol: "globe", title: strings.language, ink: ink, action: onOpenLanguage)
-            }
-            SettingsSection(title: strings.about, ink: ink) {
-                SettingsRowView(symbol: "hand.raised", title: strings.privacyPolicy, ink: ink) {
-                    safariURL = SafariLink(url: strings.privacyPolicyUrl)
-                }
-                RowDivider(ink: ink)
-                SettingsRowView(symbol: "doc.text", title: strings.termsOfUse, ink: ink) {
-                    safariURL = SafariLink(url: strings.termsOfUseUrl)
-                }
-                RowDivider(ink: ink)
-                SettingsRowView(symbol: "info.circle", title: strings.appVersion, ink: ink, trailing: Self.versionName)
-            }
-            SettingsSection(title: strings.account, ink: ink) {
-                SettingsRowView(
-                    symbol: "trash",
-                    title: strings.deleteAccount,
-                    ink: Color(hex: 0xFF6B6B),
-                    action: controller.openDeleteAccount
-                )
-            }
-            Button(role: .destructive, action: controller.openLogoutConfirm) {
-                HStack(spacing: 8) {
-                    if ui.isLoggingOut {
-                        ProgressView().tint(Color(hex: 0xFF6B6B))
+                SettingsSection(title: strings.about, ink: bodyInk) {
+                    SettingsRowView(symbol: "hand.raised", title: strings.privacyPolicy, ink: bodyInk) {
+                        safariURL = SafariLink(url: strings.privacyPolicyUrl)
                     }
-                    Text(strings.logout).font(.system(size: 16, weight: .semibold))
+                    RowDivider(ink: bodyInk)
+                    SettingsRowView(symbol: "doc.text", title: strings.termsOfUse, ink: bodyInk) {
+                        safariURL = SafariLink(url: strings.termsOfUseUrl)
+                    }
+                    RowDivider(ink: bodyInk)
+                    SettingsRowView(symbol: "info.circle", title: strings.appVersion, ink: bodyInk, trailing: Self.versionName)
                 }
-                .foregroundStyle(Color(hex: 0xFF6B6B))
-                .frame(maxWidth: .infinity, minHeight: 48)
-                .background(HomeTheme.cardFill, in: RoundedRectangle(cornerRadius: HomeTheme.cardRadius, style: .continuous))
+                SettingsSection(title: strings.account, ink: bodyInk) {
+                    SettingsRowView(
+                        symbol: "trash",
+                        title: strings.deleteAccount,
+                        ink: Color(hex: 0xFF6B6B),
+                        action: controller.openDeleteAccount
+                    )
+                }
+                Button(role: .destructive, action: controller.openLogoutConfirm) {
+                    HStack(spacing: 8) {
+                        if ui.isLoggingOut {
+                            ProgressView().tint(Color(hex: 0xFF6B6B))
+                        }
+                        Text(strings.logout).font(.system(size: 16, weight: .semibold))
+                    }
+                    .foregroundStyle(Color(hex: 0xFF6B6B))
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .adaptiveInk(surface: HomeTheme.cardFillOpacity)
+                    .background(HomeTheme.cardFill, in: RoundedRectangle(cornerRadius: HomeTheme.cardRadius, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(ui.isLoggingOut)
             }
-            .buttonStyle(.plain)
-            .disabled(ui.isLoggingOut)
+            .adaptiveInk()
         }
         .onAppear {
             model.onAppear(permissions: permissions)
@@ -137,7 +144,9 @@ struct SettingsPage: View {
 
 // MARK: - Profile
 
-/// Large round photo with a camera badge, the email, and the native photo picker.
+/// Large round photo with an edit badge and the email. As on Android (and WhatsApp): with no photo
+/// a tap goes straight to the picker; with one, a sheet offers change or remove, and removing
+/// still asks to confirm.
 private struct ProfileHeaderView: View {
     let profile: ProfileUi
     let strings: SettingsStrings
@@ -146,61 +155,67 @@ private struct ProfileHeaderView: View {
 
     @State private var pick: PhotosPickerItem?
     @State private var image: UIImage?
+    @State private var showPicker = false
+    @State private var showOptions = false
+    /// What the options sheet chose, run once it has gone so the next presentation can show.
+    @State private var afterOptions: (() -> Void)?
+
+    private var isBusy: Bool {
+        profile.isUploading || profile.isRemoving
+    }
 
     var body: some View {
         VStack(spacing: 14) {
-            PhotosPicker(selection: $pick, matching: .images, photoLibrary: .shared()) {
+            Button(action: avatarTapped) {
                 ZStack(alignment: .bottomTrailing) {
                     avatar
                     .frame(width: 104, height: 104)
                     .clipShape(Circle())
                     .overlay(Circle().strokeBorder(ink.opacity(0.18), lineWidth: 1))
                     .overlay {
-                        if profile.isUploading || profile.isRemoving {
+                        if isBusy {
                             Circle().fill(.black.opacity(0.45))
                             ProgressView().tint(.white)
                         }
                     }
                     .shadow(color: .black.opacity(image == nil ? 0 : 0.35), radius: 12, y: 6)
-                    Image(systemName: "camera.fill")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(HomeTheme.onYellow)
-                        .frame(width: 32, height: 32)
-                        .background(HomeTheme.yellow, in: Circle())
-                        .overlay(Circle().strokeBorder(.black.opacity(0.25), lineWidth: 1))
+                    if profile.canChangePhoto {
+                        Image(systemName: profile.photoUrl == nil ? "camera.fill" : "pencil")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(HomeTheme.onYellow)
+                            .frame(width: 32, height: 32)
+                            .background(HomeTheme.yellow, in: Circle())
+                            .overlay(Circle().strokeBorder(.black.opacity(0.25), lineWidth: 1))
+                            .transition(.scale.combined(with: .opacity))
+                    }
                 }
             }
             .buttonStyle(.plain)
-            .disabled(!profile.canChangePhoto)
-            .accessibilityLabel(strings.editPhoto)
+            .disabled(!profile.canChangePhoto || isBusy)
+            .accessibilityLabel(profile.photoUrl == nil ? strings.addPhoto : strings.editPhoto)
 
             if let email = profile.email {
                 Text(email).font(.system(size: 17, weight: .medium)).foregroundStyle(ink).headerShadow()
             }
-            HStack(spacing: 10) {
-                PhotosPicker(selection: $pick, matching: .images, photoLibrary: .shared()) {
-                    Text(profile.photoUrl == nil ? strings.addPhoto : strings.changePhoto)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(ink)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(HomeTheme.cardFill, in: Capsule())
-                }
-                .buttonStyle(.plain)
-                .disabled(!profile.canChangePhoto)
-                if profile.canRemovePhoto {
-                    Button(strings.removePhoto, action: model.controller.requestRemovePhoto)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Color(hex: 0xFF6B6B))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(HomeTheme.cardFill, in: Capsule())
-                        .buttonStyle(.plain)
-                }
-            }
         }
         .frame(maxWidth: .infinity)
-        .animation(.easeInOut(duration: 0.2), value: profile.canRemovePhoto)
+        .animation(.easeInOut(duration: 0.2), value: profile.canChangePhoto)
+        .photosPicker(isPresented: $showPicker, selection: $pick, matching: .images, photoLibrary: .shared())
+        .sheet(isPresented: $showOptions, onDismiss: {
+            afterOptions?()
+            afterOptions = nil
+        }) {
+            PhotoOptionsSheet(
+                strings: strings,
+                canRemove: profile.canRemovePhoto,
+                onChange: {
+                    closeOptions {
+                        showPicker = true
+                    }
+                },
+                onRemove: { closeOptions(then: model.controller.requestRemovePhoto) }
+            )
+        }
         .onChange(of: pick) { item in
             guard let item else {
                 return
@@ -220,11 +235,24 @@ private struct ProfileHeaderView: View {
         }
     }
 
+    private func avatarTapped() {
+        if profile.photoUrl == nil {
+            showPicker = true
+        } else {
+            showOptions = true
+        }
+    }
+
+    private func closeOptions(then action: @escaping () -> Void) {
+        afterOptions = action
+        showOptions = false
+    }
+
     /// The photo, or the app's line-art dog drawn straight on the backdrop in the page ink.
     @ViewBuilder
     private var avatar: some View {
         if let image {
-            Image(uiImage: image).resizable().scaledToFill()
+            Image(uiImage: image).resizable().scaledToFill().inkShield()
         } else {
             Image("DefaultAvatar")
                 .resizable()
@@ -233,6 +261,49 @@ private struct ProfileHeaderView: View {
                 .padding(8)
                 .accessibilityHidden(true)
         }
+    }
+}
+
+/// Android's `ProfilePhotoOptionsSheet`: a short sheet titled for the photo, with change and remove.
+private struct PhotoOptionsSheet: View {
+    let strings: SettingsStrings
+    let canRemove: Bool
+    let onChange: () -> Void
+    let onRemove: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(strings.photoOptionsTitle)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(HomeTheme.inkOnDark)
+                .padding(.horizontal, 24)
+                .padding(.top, 24)
+                .padding(.bottom, 8)
+            option(symbol: "photo.on.rectangle", title: strings.changePhoto, tint: HomeTheme.inkOnDark, action: onChange)
+            if canRemove {
+                option(symbol: "trash", title: strings.removePhoto, tint: Color(hex: 0xFF6B6B), action: onRemove)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(HomeTheme.sheetFill.ignoresSafeArea())
+        .presentationDetents([.height(canRemove ? 200 : 144)])
+        .presentationDragIndicator(.visible)
+    }
+
+    private func option(symbol: String, title: String, tint: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: symbol).font(.system(size: 19)).frame(width: 24)
+                Text(title).font(.system(size: 15, weight: .medium))
+                Spacer()
+            }
+            .foregroundStyle(tint)
+            .padding(.horizontal, 24)
+            .frame(minHeight: 52)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -275,6 +346,7 @@ private struct PremiumCardView: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .adaptiveInk(surface: HomeTheme.cardFillOpacity)
         .background(
             LinearGradient(
                 colors: [HomeTheme.yellow.opacity(0.22), HomeTheme.cardFill],
@@ -308,6 +380,7 @@ private struct SettingsSection<Content: View>: View {
                 .padding(.leading, 6)
                 .headerShadow()
             VStack(spacing: 0, content: content)
+                .adaptiveInk(surface: HomeTheme.cardFillOpacity)
                 .background(HomeTheme.cardFill, in: RoundedRectangle(cornerRadius: HomeTheme.cardRadius, style: .continuous))
         }
     }

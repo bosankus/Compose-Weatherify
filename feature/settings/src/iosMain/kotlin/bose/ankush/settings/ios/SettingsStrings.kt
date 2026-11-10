@@ -21,6 +21,7 @@ import bose.ankush.settings.generated.resources.premium_upgrade_btn_txt
 import bose.ankush.settings.generated.resources.profile_add_photo_txt
 import bose.ankush.settings.generated.resources.profile_change_photo_txt
 import bose.ankush.settings.generated.resources.profile_edit_photo_content_desc
+import bose.ankush.settings.generated.resources.profile_photo_content_desc
 import bose.ankush.settings.generated.resources.profile_remove_photo_body_txt
 import bose.ankush.settings.generated.resources.profile_remove_photo_title_txt
 import bose.ankush.settings.generated.resources.profile_remove_photo_txt
@@ -42,6 +43,7 @@ data class SettingsStrings(
     val addPhoto: String,
     val changePhoto: String,
     val editPhoto: String,
+    val photoOptionsTitle: String,
     val removePhoto: String,
     val removePhotoTitle: String,
     val removePhotoBody: String,
@@ -81,6 +83,7 @@ internal suspend fun loadSettingsStrings(): SettingsStrings =
         addPhoto = getString(Res.string.profile_add_photo_txt),
         changePhoto = getString(Res.string.profile_change_photo_txt),
         editPhoto = getString(Res.string.profile_edit_photo_content_desc),
+        photoOptionsTitle = getString(Res.string.profile_photo_content_desc),
         removePhoto = getString(Res.string.profile_remove_photo_txt),
         removePhotoTitle = getString(Res.string.profile_remove_photo_title_txt),
         removePhotoBody = getString(Res.string.profile_remove_photo_body_txt),

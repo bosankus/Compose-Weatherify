@@ -1,5 +1,8 @@
 import SwiftUI
-import ComposeApp
+
+// Kotlin types carry no Sendable annotations; the controller is only touched from the main actor.
+
+@preconcurrency import ComposeApp
 
 /// The three pages of the home shell, in swipe order.
 enum HomePage: Int, Hashable, CaseIterable {
@@ -77,7 +80,7 @@ final class HomeModel: ObservableObject {
     }
 
     func refresh() async {
-        try? await controller.refresh()
+        controller.refresh()
     }
 
     private func syncPermissions(askLocation: Bool) async {
@@ -118,10 +121,6 @@ final class HomeModel: ObservableObject {
             permissions.openNotificationSettings()
         case .openLocationSettings:
             permissions.openAppSettings()
-        case .showWeather:
-            withAnimation(.spring(response: 0.38, dampingFraction: 0.88)) {
-                page = .weather
-            }
         case .showPlaces:
             withAnimation(.spring(response: 0.38, dampingFraction: 0.88)) {
                 page = .places

@@ -4,6 +4,7 @@ import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.location_override_chip_content_desc
 import bose.ankush.home.presentation.HomeState
 import bose.ankush.home.presentation.nearby.NearbyState
+import bose.ankush.home.presentation.places.HomeProgress
 import bose.ankush.home.presentation.places.SavedPlacesState
 import bose.ankush.home.presentation.screen.BackgroundPhoto
 import bose.ankush.home.presentation.screen.ForecastExtras
@@ -20,8 +21,6 @@ import org.jetbrains.compose.resources.getString
 /** Forecast-side inputs of one frame. */
 internal class HomeSide(
     val state: HomeState,
-    val backgroundRefreshing: Boolean,
-    val geocodedPlace: String?,
     val backdrop: BackdropUi,
 )
 
@@ -43,15 +42,14 @@ internal suspend fun buildHomeScreenUi(
     val state = homeSide.state
     val forecast = state.weatherData
     val current = forecast?.current
-    val geocoded = homeSide.geocodedPlace
+    val placeName = state.place?.name
     val live =
-        forecast?.takeIf { current != null }?.toHomeWeatherContent(geocoded ?: CURRENT_LOCATION)
-    val content = live ?: placeholderHomeWeatherContent(place = geocoded ?: VALUE_PLACEHOLDER)
+        forecast?.takeIf { current != null }?.toHomeWeatherContent(placeName ?: CURRENT_LOCATION)
+    val content = live ?: placeholderHomeWeatherContent(place = placeName ?: VALUE_PLACEHOLDER)
     val forecastVisible = live != null
     val forecastFailed =
         !forecastVisible && !state.isLoading && (state.error != null || state.isOffline)
-    val overrideName =
-        state.activeLocationName?.takeIf { state.isLocationOverridden && it.isNotBlank() }
+    val overrideName = state.locationChipName
     return HomeScreenUi(
         strings = strings,
         header =
@@ -71,6 +69,7 @@ internal suspend fun buildHomeScreenUi(
                         fallback = content.condition.line,
                     ),
                 locationOverrideName = overrideName,
+                locationResetting = state.isResettingLocation,
                 locationOverrideDescription =
                     overrideName?.let {
                         getString(
@@ -83,11 +82,10 @@ internal suspend fun buildHomeScreenUi(
         avatarUrl = featureSide.avatarUrl,
         chrome =
             ChromeUi(
-                isRefreshing = state.isRefreshing,
-                isBackgroundRefreshing = homeSide.backgroundRefreshing,
+                isLoading = state.isLoading,
                 offlineMessage = state.offlineMessage?.takeIf { forecastVisible && state.isOffline },
-                showNotificationPrompt = state.showNotificationBanner,
-                notificationDeclinedForever = state.isNotificationPermissionPermanentlyDeclined,
+                showNotificationPrompt = state.notificationBanner.isVisible,
+                notificationDeclinedForever = state.notificationBanner.isPermanentlyDeclined,
                 gpsDisabled = state.isGpsDisabled,
                 locationPermissionDenied = state.isLocationPermissionDenied,
                 forecastFailed = forecastFailed,
@@ -100,10 +98,17 @@ internal suspend fun buildHomeScreenUi(
                 content = content,
                 extras = forecast?.toForecastExtras() ?: ForecastExtras(),
                 eventDates = featureSide.nearby.eventDates,
-                forecastFailed = forecastFailed,
                 nearby = featureSide.nearby.toNearbyUi(),
             ).toWeatherPageUi(),
-        places = featureSide.places.toPlacesPageUi(featureSide.onPlacesPage),
+        places = featureSide.places.toPlacesPageUi(
+            onPlacesPage = featureSide.onPlacesPage,
+            mapCenter = state.place?.point,
+            home = HomeProgress(
+                place = state.place,
+                isLoading = state.isLoading,
+                failed = state.notice != null
+            ),
+        ),
         search = featureSide.places.toPlaceSearchUi(featureSide.pickedSuggestion),
         composer = featureSide.nearby.toComposerUi(),
     )

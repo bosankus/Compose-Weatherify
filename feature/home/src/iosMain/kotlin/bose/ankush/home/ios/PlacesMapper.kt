@@ -2,6 +2,7 @@ package bose.ankush.home.ios
 
 import bose.ankush.finder.domain.model.Location
 import bose.ankush.finder.domain.model.LocationSuggestion
+import bose.ankush.home.domain.nearby.GeoPoint
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.event_save_action
 import bose.ankush.home.generated.resources.event_saving
@@ -20,6 +21,9 @@ import bose.ankush.home.generated.resources.saved_places_select_error
 import bose.ankush.home.generated.resources.saved_places_show_action
 import bose.ankush.home.presentation.nearby.NearbyState
 import bose.ankush.home.presentation.nearby.toDayMonthLabel
+import bose.ankush.home.presentation.places.HomeProgress
+import bose.ankush.home.presentation.places.PlacesMapTiles
+import bose.ankush.home.presentation.places.PlacesMapViewport
 import bose.ankush.home.presentation.places.SavedPlaceSearchState
 import bose.ankush.home.presentation.places.SavedPlacesLogic
 import bose.ankush.home.presentation.places.SavedPlacesNotice
@@ -29,7 +33,11 @@ import bose.ankush.home.presentation.util.SectionState
 import bose.ankush.home.presentation.util.valueOrNull
 import org.jetbrains.compose.resources.getString
 
-internal suspend fun SavedPlacesState.toPlacesPageUi(onPlacesPage: Boolean): PlacesPageUi =
+internal suspend fun SavedPlacesState.toPlacesPageUi(
+    onPlacesPage: Boolean,
+    mapCenter: GeoPoint?,
+    home: HomeProgress,
+): PlacesPageUi =
     PlacesPageUi(
         isPremium = isPremium,
         isLoading = isLoading,
@@ -41,13 +49,26 @@ internal suspend fun SavedPlacesState.toPlacesPageUi(onPlacesPage: Boolean): Pla
                 null -> null
             },
         currentIsActive = active == null,
+        currentIsSwitching =
+            SavedPlacesLogic.isSwitching(
+                isActive = active == null,
+                homeShowsIt = SavedPlacesLogic.showsCurrentLocation(home.place),
+                home = home,
+            ),
         places =
             places.map { place ->
+                val isActive = SavedPlacesLogic.isActive(place, active)
                 PlaceUi(
                     key = SavedPlacesLogic.placeKey(place),
                     title = place.name,
                     detail = SavedPlacesLogic.formatCoordinates(place.lat, place.lon),
-                    isActive = SavedPlacesLogic.isActive(place, active),
+                    isActive = isActive,
+                    isSwitching =
+                        SavedPlacesLogic.isSwitching(
+                            isActive = isActive,
+                            homeShowsIt = SavedPlacesLogic.showsPlace(home.place, place),
+                            home = home,
+                        ),
                     deleteLabel =
                         place.id
                             .takeIf { it.isNotBlank() }
@@ -60,6 +81,25 @@ internal suspend fun SavedPlacesState.toPlacesPageUi(onPlacesPage: Boolean): Pla
                 isPremium = isPremium,
                 sheetOpen = search.isOpen,
             ),
+        map = mapCenter?.let { center -> placesMapUi(center, places) },
+    )
+
+/** Same map as the Android `PlacesMapBackdrop`: Esri tiles, a pin per other saved place. */
+private fun placesMapUi(
+    center: GeoPoint,
+    places: List<Location>,
+): PlacesMapUi =
+    PlacesMapUi(
+        centerLat = center.lat,
+        centerLon = center.lon,
+        zoom = PlacesMapTiles.ZOOM,
+        focusY = PlacesMapViewport.DEFAULT_FOCUS_Y,
+        tileUrlTemplate = PlacesMapTiles.URL_TEMPLATE,
+        attribution = PlacesMapTiles.ATTRIBUTION,
+        pins =
+            places
+                .filter { GeoPoint(it.lat, it.lon) != center }
+                .map { MapPinUi(key = SavedPlacesLogic.placeKey(it), lat = it.lat, lon = it.lon) },
     )
 
 /** Same button and status rules as the Android sheet, from [AddPlaceAction] and the search state. */

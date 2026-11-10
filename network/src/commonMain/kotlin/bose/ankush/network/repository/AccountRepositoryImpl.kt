@@ -4,6 +4,7 @@ import bose.ankush.network.api.AccountApiService
 import bose.ankush.network.model.Account
 import bose.ankush.network.model.ApiResponse
 import bose.ankush.network.model.DeleteAccountResult
+import bose.ankush.network.util.ApiRejection
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,9 @@ class AccountRepositoryImpl(
         call { apiService.getAccount() }
             .mapCatching { it ?: error("Account is missing from the response") }
             .onSuccess { fetched ->
-                _account.value = fetched.copy(photoUrl = fetched.photoUrl.nonBlank())
+                val url = fetched.photoUrl.nonBlank()
+                photoStore?.keepOnly(url)
+                _account.value = fetched.copy(photoUrl = url)
             }
 
     override suspend fun uploadPhoto(
@@ -34,6 +37,7 @@ class AccountRepositoryImpl(
             .onSuccess { url ->
                 // Before publishing: whoever sees the new URL must find these bytes, not the old photo.
                 if (url != null) photoStore?.store(url, bytes)
+                photoStore?.keepOnly(url)
                 _account.update { (it ?: Account()).copy(photoUrl = url) }
             }
 
@@ -41,7 +45,7 @@ class AccountRepositoryImpl(
         call { apiService.deleteAccountPhoto() }
             .map { }
             .onSuccess {
-                _account.value?.photoUrl?.let { photoStore?.remove(it) }
+                photoStore?.keepOnly(null)
                 _account.update { it?.copy(photoUrl = null) }
             }
 
@@ -72,11 +76,7 @@ class AccountRepositoryImpl(
             if (response.status) {
                 Result.success(response.data)
             } else {
-                Result.failure(
-                    Exception(
-                        response.message,
-                    ),
-                )
+                Result.failure(ApiRejection(response.message))
             }
         } catch (e: CancellationException) {
             throw e

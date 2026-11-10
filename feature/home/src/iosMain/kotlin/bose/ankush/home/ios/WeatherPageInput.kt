@@ -33,7 +33,6 @@ internal class WeatherPageInput(
     val content: HomeWeatherContent,
     val extras: ForecastExtras,
     val eventDates: Set<LocalDate>,
-    val forecastFailed: Boolean,
     val nearby: NearbyUi?,
 )
 
@@ -44,7 +43,7 @@ internal fun WeatherPageInput.toWeatherPageUi(): WeatherPageUi {
         details = detailCells(content, current, extras),
         report = current?.toReport(forecast.timezoneOffset),
         trend = extras.temperatureTrend?.let { TrendUi(line = it.line, direction = it.direction) },
-        week = weekUi(content.days, eventDates, forecastFailed),
+        week = weekUi(content.days, eventDates),
         alerts = forecast?.alerts.orEmpty().toAlertUis(),
         airQuality = state.airQualityData?.takeIf { it.aqi > 0 }?.toAirQualityUi(),
         hourly = forecast?.hourly.orEmpty().toHourUis(),
@@ -119,9 +118,8 @@ private fun skyGlyph(
 private fun weekUi(
     days: List<CalendarStripDay>,
     eventDates: Set<LocalDate>,
-    forecastFailed: Boolean,
 ): WeekUi? {
-    if (days.isEmpty() && !forecastFailed) return null
+    if (days.isEmpty()) return null
     return WeekUi(
         days =
             days.mapIndexed { index, day ->
@@ -136,7 +134,6 @@ private fun weekUi(
                     caption = day.description,
                 )
             },
-        showRetry = forecastFailed,
     )
 }
 

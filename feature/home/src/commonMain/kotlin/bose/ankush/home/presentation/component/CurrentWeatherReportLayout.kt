@@ -21,18 +21,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import bose.ankush.home.domain.location.HomeGeocoder
 import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.degree
@@ -52,13 +47,12 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import kotlin.time.Instant
 
 @Composable
 internal fun CurrentWeatherReportLayout(
     currentWeather: WeatherForecast.Current,
-    userLocation: Pair<Double, Double>? = null,
+    placeName: String? = null,
     summary: String? = null,
 ) {
     Card(
@@ -79,7 +73,7 @@ internal fun CurrentWeatherReportLayout(
                     .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            LocationAndDateHeader(currentWeather, userLocation)
+            LocationAndDateHeader(currentWeather, placeName)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -137,16 +131,9 @@ internal fun CurrentWeatherReportLayout(
 @Composable
 private fun LocationAndDateHeader(
     currentWeather: WeatherForecast.Current,
-    userLocation: Pair<Double, Double>? = null,
+    placeName: String? = null,
 ) {
-    val geocoder = koinInject<HomeGeocoder>()
-    var locationName by remember(userLocation) { mutableStateOf("Current Location") }
-
-    LaunchedEffect(userLocation) {
-        if (userLocation != null) {
-            locationName = geocoder.reverseGeocode(userLocation.first, userLocation.second) ?: "Current Location"
-        }
-    }
+    val locationName = placeName ?: "Current Location"
 
     val formattedDate =
         remember(currentWeather.dt) {

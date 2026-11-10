@@ -13,6 +13,10 @@ import bose.ankush.storage.common.WEATHER_DATABASE_NAME
  *
  * **4 → 5:** add the nullable `timezoneOffset` column (OpenWeather `timezone_offset`) to the
  * weather table. Existing rows read null and fall back to the device zone until the next refresh.
+ *
+ * **5 → 6:** add the nullable `latitude`, `longitude`, and `placeName` columns to the weather
+ * table. Existing rows read null; home treats such a row as stale and refetches it, showing it
+ * meanwhile under the saved spot as before.
  */
 val MIGRATION_3_4: Migration =
     object : Migration(3, 4) {
@@ -25,5 +29,14 @@ val MIGRATION_4_5: Migration =
     object : Migration(4, 5) {
         override fun migrate(connection: SQLiteConnection) {
             connection.execSQL("ALTER TABLE `$WEATHER_DATABASE_NAME` ADD COLUMN `timezoneOffset` INTEGER")
+        }
+    }
+
+val MIGRATION_5_6: Migration =
+    object : Migration(5, 6) {
+        override fun migrate(connection: SQLiteConnection) {
+            connection.execSQL("ALTER TABLE `$WEATHER_DATABASE_NAME` ADD COLUMN `latitude` REAL")
+            connection.execSQL("ALTER TABLE `$WEATHER_DATABASE_NAME` ADD COLUMN `longitude` REAL")
+            connection.execSQL("ALTER TABLE `$WEATHER_DATABASE_NAME` ADD COLUMN `placeName` TEXT")
         }
     }

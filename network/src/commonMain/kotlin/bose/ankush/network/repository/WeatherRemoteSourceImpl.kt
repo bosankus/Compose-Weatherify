@@ -12,7 +12,12 @@ class WeatherRemoteSourceImpl(
 ) : WeatherRemoteSource {
     override suspend fun refreshWeatherData(coordinates: Pair<Double, Double>): Result<WeatherForecast> {
         if (!networkConnectivity.isNetworkAvailable()) {
-            return Result.failure(Exception("No internet connection"))
+            return Result.failure(
+                NetworkException(
+                    NetworkException.NETWORK_UNAVAILABLE,
+                    "No internet connection"
+                )
+            )
         }
 
         return try {

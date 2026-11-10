@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import bose.ankush.home.domain.location.HomeGeocoder
-import bose.ankush.home.domain.nearby.GeoPoint
 import bose.ankush.home.presentation.HomeEffect
 import bose.ankush.home.presentation.HomeIntent
 import bose.ankush.home.presentation.HomeViewModel
@@ -21,8 +19,10 @@ import bose.ankush.home.presentation.places.SavedPlacesIntent
 import bose.ankush.home.presentation.places.SavedPlacesViewModel
 import bose.ankush.home.presentation.screen.BackgroundPhoto
 import bose.ankush.home.presentation.screen.SkyCondition
+import bose.ankush.home.presentation.screen.backdropSlot
+import bose.ankush.home.presentation.screen.forecastZone
+import bose.ankush.home.presentation.screen.hourTicks
 import bose.ankush.home.presentation.screen.skyCondition
-import bose.ankush.home.presentation.screen.unsplashQuery
 import bose.ankush.network.api.UnsplashApi
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.MainScope
@@ -34,15 +34,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.get
 
@@ -72,7 +70,6 @@ class HomeScreenController : KoinComponent {
     private val avatar = provider[AccountAvatarViewModel::class]
     private val places = provider[SavedPlacesViewModel::class]
     private val aiSummary = provider[AiSummaryViewModel::class]
-    private val geocoder = get<HomeGeocoder>()
     private val photos = IosBackdropPhotos(get<UnsplashApi>())
 
     /** The nearby events strip and the new-event sheet. */
@@ -84,21 +81,6 @@ class HomeScreenController : KoinComponent {
 
     /** The saved places page and the add-a-place sheet. */
     val placeActions = PlaceActions(places, pickedSuggestion, onPlacesPage)
-
-    /** Reverse-geocoded name of the forecast coordinates, as on the Android header. */
-    private val geocodedPlace: StateFlow<String?> =
-        home.state
-            .map { it.userLocation }
-            .distinctUntilChanged()
-            .mapLatest { location ->
-                location?.let {
-                    geocoder.reverseGeocode(
-                        it.first,
-                        it.second
-                    )
-                }
-            }
-            .stateIn(scope, SharingStarted.Eagerly, null)
 
     /** The weather summary sheet. Stays hidden until the Swift on-device client reports it is usable. */
     val aiSummaryAvailable: StateFlow<Boolean> =
@@ -115,7 +97,7 @@ class HomeScreenController : KoinComponent {
     fun openAiSummary() {
         val state = home.state.value
         val forecast = state.weatherData ?: return
-        val place = state.activeLocationName?.takeIf { it.isNotBlank() } ?: geocodedPlace.value
+        val place = state.place?.name
         aiSummary.onIntent(AiSummaryIntent.Open(forecast, place))
     }
 
@@ -136,24 +118,38 @@ class HomeScreenController : KoinComponent {
                         ?.firstOrNull()
                         ?.main
                         ?.takeIf { it.isNotBlank() }
-                (current?.skyCondition() ?: SkyCondition.CLOUDS) to main?.let(::unsplashQuery)
+                Triple(
+                    current?.skyCondition() ?: SkyCondition.CLOUDS,
+                    main,
+                    state.weatherData?.timezoneOffset
+                )
             }.distinctUntilChanged()
-            .flatMapLatest { (condition, query) ->
-                photos.photos(condition, query).map { photo ->
-                    shownPhoto = photo
-                    BackdropUi(condition, photo?.toUi())
+            // The photo follows the part of the day at the forecast place, so the clock ticks on
+            // that place's hours.
+            .flatMapLatest { (condition, main, offset) ->
+                hourTicks(forecastZone(offset)).map { now ->
+                    backdropSlot(
+                        condition,
+                        main,
+                        offset,
+                        now
+                    )
                 }
+            }.distinctUntilChanged()
+            .flatMapLatest { slot ->
+                // The photo already on screen stays until the new slot has one of its own.
+                photos
+                    .photos(slot)
+                    .map<BackgroundPhoto, BackgroundPhoto?> { it }
+                    .onStart { emit(shownPhoto) }
+                    .map { photo ->
+                        shownPhoto = photo
+                        BackdropUi(slot.condition, photo?.toUi())
+                    }
             }.onStart { emit(BackdropUi(SkyCondition.CLOUDS, null)) }
 
     private val homeSide =
-        combine(
-            home.state,
-            home.refreshing,
-            geocodedPlace,
-            backdrop
-        ) { state, refreshing, place, backdrop ->
-            HomeSide(state, refreshing, place, backdrop)
-        }
+        combine(home.state, backdrop) { state, backdrop -> HomeSide(state, backdrop) }
 
     private val featureSide =
         combine(
@@ -185,7 +181,6 @@ class HomeScreenController : KoinComponent {
             },
             places.effect.map { effect ->
                 when (effect) {
-                    SavedPlacesEffect.ShowWeather -> HomeScreenEvent.ShowWeather
                     SavedPlacesEffect.ShowPlaces -> HomeScreenEvent.ShowPlaces
                 }
             },
@@ -196,25 +191,12 @@ class HomeScreenController : KoinComponent {
         avatar.onIntent(AccountAvatarIntent.Refresh)
         scope.launch {
             home.state
-                .map { it.userLocation }
+                .mapNotNull { it.place?.point }
                 .distinctUntilChanged()
-                .collect { location ->
-                    location?.let {
-                        nearby.onIntent(
-                            NearbyIntent.LocationChanged(
-                                GeoPoint(
-                                    it.first,
-                                    it.second
-                                )
-                            )
-                        )
-                    }
-                }
+                .collect { point -> nearby.onIntent(NearbyIntent.LocationChanged(point)) }
         }
         scope.launch {
-            combine(home.state.map { it.activeLocationName }, geocodedPlace) { active, geocoded ->
-                active?.takeIf { it.isNotBlank() } ?: geocoded
-            }.distinctUntilChanged().collect { name ->
+            home.state.map { it.place?.name }.distinctUntilChanged().collect { name ->
                 if (!name.isNullOrBlank()) nearby.onIntent(NearbyIntent.PlaceNameChanged(name))
             }
         }
@@ -228,12 +210,13 @@ class HomeScreenController : KoinComponent {
     /** The screen came back to the foreground; the account photo URL is short-lived. */
     fun onAppear() = avatar.onIntent(AccountAvatarIntent.Refresh)
 
-    /** Pull to refresh. Returns once the refresh settles, so the native spinner tracks it. */
-    suspend fun refresh() {
+    /**
+     * Pull to refresh. Returns at once, so the native pull plays its slide-down and lets go;
+     * the bottom loader follows the work, as on Android.
+     */
+    fun refresh() {
         home.processIntent(HomeIntent.Refresh)
         if (onPlacesPage.value) places.processIntent(SavedPlacesIntent.Load)
-        withTimeoutOrNull(REFRESH_START_TIMEOUT_MS) { home.state.first { it.isRefreshing } }
-        withTimeoutOrNull(REFRESH_END_TIMEOUT_MS) { home.state.first { !it.isRefreshing } }
     }
 
     fun retryForecast() = home.processIntent(HomeIntent.FetchLocation)
@@ -267,10 +250,5 @@ class HomeScreenController : KoinComponent {
     fun close() {
         scope.cancel()
         store.clear()
-    }
-
-    private companion object {
-        const val REFRESH_START_TIMEOUT_MS = 1_000L
-        const val REFRESH_END_TIMEOUT_MS = 30_000L
     }
 }

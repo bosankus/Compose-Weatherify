@@ -4,6 +4,8 @@ import bose.ankush.analytics.ErrorReporter
 import bose.ankush.network.model.Account
 import bose.ankush.network.model.DeleteAccountResult
 import bose.ankush.network.repository.AccountRepository
+import bose.ankush.network.util.ApiRejection
+import bose.ankush.network.util.NetworkConnectivity
 import bose.ankush.settings.domain.ObserveAccount
 import bose.ankush.settings.domain.ProfilePhoto
 import bose.ankush.settings.domain.RefreshAccount
@@ -120,6 +122,61 @@ class ProfileViewModelTest {
         }
 
     @Test
+    fun aServerRefusalShowsItsReasonButATransportFailureDoesNot() =
+        runTest {
+            val repository = FakeAccountRepository(Account("a@b.c"))
+            val (viewModel, messages) = profileViewModel(repository)
+
+            repository.uploadResult = Result.failure(ApiRejection("Photo exceeds 5MB limit"))
+            viewModel.onIntent(ProfileIntent.PhotoPicked(ProfilePhoto(ByteArray(8))))
+            advanceUntilIdle()
+            repository.uploadResult =
+                Result.failure(IllegalStateException("Connect timeout has expired [url=https://x/account/photo]"))
+            viewModel.onIntent(ProfileIntent.PhotoPicked(ProfilePhoto(ByteArray(8))))
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(
+                    ProfileMessage.UploadFailed("Photo exceeds 5MB limit"),
+                    ProfileMessage.UploadFailed(null)
+                ),
+                messages,
+            )
+        }
+
+    @Test
+    fun anUploadWhileOfflineIsNeverSentAndSaysSo() =
+        runTest {
+            val repository = FakeAccountRepository(Account("a@b.c"))
+            val (viewModel, messages) = profileViewModel(repository, online = false)
+
+            viewModel.onIntent(ProfileIntent.PhotoPicked(ProfilePhoto(ByteArray(8))))
+            advanceUntilIdle()
+
+            assertEquals(0, repository.uploads)
+            assertEquals(listOf(ProfileMessage.Offline), messages)
+            assertEquals(PhotoOperation.Idle, viewModel.state.value.photoOperation)
+        }
+
+    @Test
+    fun removingWhileOfflineKeepsThePhotoAndSaysSo() =
+        runTest {
+            val repository = FakeAccountRepository(Account("a@b.c", "https://p/1"))
+            val (viewModel, messages) = profileViewModel(repository, online = false)
+            repository.publish(Account("a@b.c", "https://p/1"))
+            advanceUntilIdle()
+
+            viewModel.onIntent(ProfileIntent.RequestRemovePhoto)
+            viewModel.onIntent(ProfileIntent.ConfirmRemovePhoto)
+            advanceUntilIdle()
+
+            assertFalse(viewModel.state.value.isRemoveConfirmVisible)
+            assertEquals("https://p/1", viewModel.state.value.photoUrl)
+            assertEquals(listOf(ProfileMessage.Offline), messages)
+            assertEquals(PhotoOperation.Idle, viewModel.state.value.photoOperation)
+        }
+
+    @Test
     fun photoOptionsOpenOnlyWithAPhotoAndRemoveMovesToTheConfirmation() =
         runTest {
             val repository = FakeAccountRepository(Account("a@b.c"))
@@ -178,7 +235,7 @@ class ProfileViewModelTest {
         runTest {
             val repository = FakeAccountRepository(Account("a@b.c", "https://p/old"))
             repository.uploadResult =
-                Result.failure(IllegalStateException("Photo exceeds 5MB limit"))
+                Result.failure(ApiRejection("Photo exceeds 5MB limit"))
             val (viewModel, messages) = profileViewModel(repository)
             viewModel.onIntent(ProfileIntent.Refresh)
             advanceUntilIdle()
@@ -216,6 +273,7 @@ class ProfileViewModelTest {
 
     private fun TestScope.profileViewModel(
         repository: FakeAccountRepository,
+        online: Boolean = true,
     ): Pair<ProfileViewModel, List<ProfileMessage>> {
         val dispatcher = StandardTestDispatcher(testScheduler)
         Dispatchers.setMain(dispatcher)
@@ -226,6 +284,9 @@ class ProfileViewModelTest {
                 uploadProfilePhoto = UploadProfilePhoto(repository, dispatcher),
                 removeProfilePhoto = RemoveProfilePhoto(repository, dispatcher),
                 errorReporter = reporter,
+                networkConnectivity = object : NetworkConnectivity {
+                    override fun isNetworkAvailable() = online
+                },
             )
         val messages = mutableListOf<ProfileMessage>()
         val collector = UnconfinedTestDispatcher(testScheduler)

@@ -7,5 +7,5 @@ import org.koin.dsl.module
 
 actual val authDomainModule: Module =
     module {
-        single<DeviceInfoProvider> { IosDeviceInfoProvider() }
+        single<DeviceInfoProvider> { IosDeviceInfoProvider(getOrNull()) }
     }

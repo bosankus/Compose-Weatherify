@@ -3,7 +3,6 @@ package bose.ankush.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -18,21 +17,14 @@ import androidx.navigation3.runtime.entryProvider
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.analytics.ErrorReporter
-import bose.ankush.auth.presentation.AuthIntent
-import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.commonui.components.ToastAnchorState
 import bose.ankush.commonui.permissions.PermissionAlertDialog
-import bose.ankush.finder.presentation.savedlocations.SavedLocationsFinderRoute
 import bose.ankush.home.HomeLocationCoordinator
 import bose.ankush.home.HomeNotificationPermissionResult
-import bose.ankush.home.presentation.HomeFeatureRoute
-import bose.ankush.language.presentation.LanguageScreen
-import bose.ankush.language.util.LanguageCatalog
 import bose.ankush.navigation.generated.resources.Res
 import bose.ankush.navigation.generated.resources.exit_btn_txt
 import bose.ankush.navigation.generated.resources.grant_permission_btn_txt
-import bose.ankush.navigation.generated.resources.locale_config_error_txt
 import bose.ankush.navigation.generated.resources.location_permission_declined_ios_txt
 import bose.ankush.navigation.generated.resources.location_permission_declined_txt
 import bose.ankush.navigation.generated.resources.location_permission_rationale_txt
@@ -42,12 +34,95 @@ import bose.ankush.navigation.platform.RequestLocationPermission
 import bose.ankush.navigation.platform.RequestNotificationPermission
 import bose.ankush.navigation.platform.rememberExitAppAction
 import bose.ankush.navigation.platform.rememberPlatformPermissions
-import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
-import bose.ankush.settings.presentation.SettingsFeatureRoute
+import bose.ankush.routing.HomeRoute
+import bose.ankush.routing.LanguageRoute
+import bose.ankush.routing.SavedLocationsRoute
+import bose.ankush.routing.SettingsRoute
+import bose.ankush.settings.presentation.SettingsPresentation
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+
+/**
+ * Factory for the Home tab content (three sub-tabs: weather, places, hub).
+ * Provided by the host app to keep navigation module decoupled from feature implementations.
+ */
+interface HomeTabContentFactory {
+    @Composable
+    fun Weather(
+        toastAnchorState: ToastAnchorState?,
+        hasLocationPermission: Boolean,
+        hasNotificationPermission: Boolean,
+        notificationPermissionResult: HomeNotificationPermissionResult?,
+        requiresNotificationSettingsNavigationHint: Boolean,
+        onRequestNotificationPermission: () -> Unit,
+        onRequestLocationPermission: () -> Unit,
+        onOpenNotificationSettings: () -> Unit,
+        onOpenLocationSettings: () -> Unit,
+    )
+
+    @Composable
+    fun Places(
+        onLocationSelected: (Double, Double, String) -> Unit,
+        onUpgradeClick: () -> Unit,
+    )
+
+    @Composable
+    fun Hub(
+        bottomInset: androidx.compose.ui.unit.Dp,
+        onCoverChange: ((() -> Unit)?) -> Unit,
+        authViewModel: AuthViewModel,
+        paymentViewModel: PaymentViewModel,
+        navigator: AppNavigator,
+        toastAnchorState: ToastAnchorState?,
+        versionName: String,
+        onShowToast: (String) -> Unit,
+        hasNotificationPermission: Boolean,
+        isNotificationPermissionPermanentlyDeclined: Boolean,
+        onRequestNotificationPermission: () -> Unit,
+    )
+}
+
+/**
+ * Factory for the Saved Locations tab content.
+ */
+interface SavedLocationsContentFactory {
+    @Composable
+    fun SavedLocations(
+        onLocationSelected: (Double, Double, String) -> Unit,
+        onUpgradeClick: () -> Unit,
+        bottomBar: @Composable () -> Unit,
+    )
+}
+
+/**
+ * Factory for the Settings tab content.
+ */
+interface SettingsContentFactory {
+    @Composable
+    fun Settings(
+        authViewModel: AuthViewModel,
+        paymentViewModel: PaymentViewModel,
+        navigator: AppNavigator,
+        toastAnchorState: ToastAnchorState?,
+        versionName: String,
+        onShowToast: (String) -> Unit,
+        hasNotificationPermission: Boolean,
+        isNotificationPermissionPermanentlyDeclined: Boolean,
+        onRequestNotificationPermission: () -> Unit,
+        presentation: SettingsPresentation = SettingsPresentation.Screen,
+        bottomBar: @Composable (() -> Unit)? = null,
+    )
+}
+
+/**
+ * Factory for the Language screen content.
+ */
+interface LanguageContentFactory {
+    @Composable
+    fun LanguageScreen(languages: List<String>, onBack: () -> Unit)
+}
 
 @Composable
 fun AppNavigation(
@@ -56,6 +131,11 @@ fun AppNavigation(
     versionName: String,
     onShowToast: (String) -> Unit,
     toastAnchorState: ToastAnchorState? = null,
+    // Feature content factories provided by the host app
+    homeTabContent: HomeTabContentFactory,
+    savedLocationsContent: SavedLocationsContentFactory,
+    settingsContent: SettingsContentFactory,
+    languageContent: LanguageContentFactory,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val coroutineScope = rememberCoroutineScope()
@@ -126,9 +206,6 @@ fun AppNavigation(
                     }
                 },
                 onNegativeAction = {
-                    // exitApp() is a no-op on iOS (Apple's HIG forbids programmatic quitting), so
-                    // the dialog must dismiss itself here rather than relying solely on the app
-                    // exiting — otherwise it's stuck with no escape when permission is declined.
                     showLocationPermissionRationale = false
                     exitApp()
                 },
@@ -169,9 +246,6 @@ fun AppNavigation(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // Backstop for platforms (iOS) whose LocalLifecycleOwner doesn't fire ON_RESUME on an
-    // OS-level app foreground that isn't also a view-controller re-appear — see
-    // ObserveAppForeground's kdoc.
     ObserveAppForeground(onForeground = refreshPermissionState)
 
     AppNavHost(
@@ -183,7 +257,7 @@ fun AppNavigation(
                         ExitAppOnBackPress()
                         PlatformHomeEntry(
                             weather = {
-                                HomeFeatureRoute(
+                                homeTabContent.Weather(
                                     toastAnchorState = toastAnchorState,
                                     hasLocationPermission = hasLocationPermission,
                                     hasNotificationPermission = hasNotificationPermission,
@@ -201,20 +275,37 @@ fun AppNavigation(
                                 )
                             },
                             places = {
-                                SavedLocationsFinderRoute(
+                                homeTabContent.Places(
                                     onLocationSelected = { lat, lon, name ->
                                         coroutineScope.launch {
                                             homeLocationCoordinator.setDefaultLocation(
                                                 lat,
                                                 lon,
-                                                name,
+                                                name
                                             )
                                         }
                                     },
                                     onUpgradeClick = { navigator.navigate(SettingsRoute) },
                                 )
                             },
-                            onOpenHub = { navigator.navigate(SettingsRoute) },
+                            hub = { bottomInset, onCoverChange ->
+                                homeTabContent.Hub(
+                                    bottomInset = bottomInset,
+                                    onCoverChange = onCoverChange,
+                                    authViewModel = authViewModel,
+                                    paymentViewModel = paymentViewModel,
+                                    navigator = navigator,
+                                    toastAnchorState = null,
+                                    versionName = versionName,
+                                    onShowToast = onShowToast,
+                                    hasNotificationPermission = hasNotificationPermission,
+                                    isNotificationPermissionPermanentlyDeclined =
+                                        isNotificationPermissionPermanentlyDeclined,
+                                    onRequestNotificationPermission = {
+                                        showNotificationPermissionRequest = true
+                                    },
+                                )
+                            },
                         )
                     }
                     entry<SavedLocationsRoute> {
@@ -224,7 +315,7 @@ fun AppNavigation(
                             analyticsTracker,
                             errorReporter,
                         )
-                        SavedLocationsFinderRoute(
+                        savedLocationsContent.SavedLocations(
                             onLocationSelected = { lat, lon, name ->
                                 coroutineScope.launch {
                                     homeLocationCoordinator.setDefaultLocation(lat, lon, name)
@@ -242,16 +333,16 @@ fun AppNavigation(
                     }
                     entry<SettingsRoute> {
                         TrackedScreen("settings", "SettingsScreen", analyticsTracker, errorReporter)
-                        SettingsEntry(
-                            authViewModel,
-                            paymentViewModel,
-                            navigator,
-                            toastAnchorState,
+                        settingsContent.Settings(
+                            authViewModel = authViewModel,
+                            paymentViewModel = paymentViewModel,
+                            navigator = navigator,
+                            toastAnchorState = toastAnchorState,
                             versionName = versionName,
                             onShowToast = onShowToast,
                             hasNotificationPermission = hasNotificationPermission,
                             isNotificationPermissionPermanentlyDeclined =
-                            isNotificationPermissionPermanentlyDeclined,
+                                isNotificationPermissionPermanentlyDeclined,
                             onRequestNotificationPermission = {
                                 showNotificationPermissionRequest = true
                             },
@@ -259,7 +350,10 @@ fun AppNavigation(
                     }
                     entry<LanguageRoute> { route ->
                         TrackedScreen("language", "LanguageScreen", analyticsTracker, errorReporter)
-                        LanguageScreen(languages = route.languages) { navigator.goBack() }
+                        languageContent.LanguageScreen(
+                            languages = route.languages,
+                            onBack = navigator::goBack,
+                        )
                     }
                 },
             ),
@@ -281,73 +375,4 @@ private fun TrackedScreen(
         tracker.track(AnalyticsEvent.ScreenView(screenName, screenClass))
         errorReporter.log("screen: $screenName")
     }
-}
-
-@Composable
-private fun SettingsEntry(
-    authViewModel: AuthViewModel,
-    paymentViewModel: PaymentViewModel,
-    navigator: AppNavigator,
-    toastAnchorState: ToastAnchorState?,
-    versionName: String,
-    onShowToast: (String) -> Unit,
-    onRequestNotificationPermission: () -> Unit,
-    hasNotificationPermission: Boolean,
-    isNotificationPermissionPermanentlyDeclined: Boolean,
-) {
-    val platformPermissions = rememberPlatformPermissions()
-    val authState by authViewModel.authState.collectAsState()
-    val paymentUiState by paymentViewModel.uiState.collectAsState()
-    val isBottomBarVisible = rememberSaveable { mutableStateOf(true) }
-    val languageList = rememberLanguageList(onShowToast)
-
-    SettingsFeatureRoute(
-        paymentUiState = paymentUiState,
-        isLoggingOut = authState is AuthState.LogoutLoading,
-        isLoggedOut = authState is AuthState.LoggedOut,
-        versionName = versionName,
-        shouldShowNotificationItem =
-            platformPermissions.requiresRuntimeNotificationPermission() &&
-                !hasNotificationPermission,
-        languageList = languageList,
-        onLogout = { authViewModel.processIntent(AuthIntent.Logout) },
-        onLoggedOutHandled = { authViewModel.processIntent(AuthIntent.Reset) },
-        onStartPayment = { paymentViewModel.processIntent(PaymentIntent.StartPayment(it)) },
-        onBackNavAction = navigator::goBack,
-        onLanguageNavAction = { list ->
-            if (platformPermissions.supportsPerAppLocaleSettings()) {
-                navigator.navigate(LanguageRoute(list.toList()))
-            } else {
-                platformPermissions.openAppLocaleSettings()
-            }
-        },
-        onNotificationNavAction = {
-            when {
-                isNotificationPermissionPermanentlyDeclined -> platformPermissions.openNotificationSettings()
-                !hasNotificationPermission -> onRequestNotificationPermission()
-                else -> Unit
-            }
-        },
-        onBottomBarVisibilityChange = { isBottomBarVisible.value = it },
-        // The session refresh is the only call that returns premium status and expiry.
-        onRefreshPremium = { authViewModel.processIntent(AuthIntent.RefreshToken) },
-        toastAnchorState = toastAnchorState,
-        bottomBar = { AppBottomBar(isBottomBarVisible, navigator, toastAnchorState) },
-    )
-}
-
-@Composable
-private fun rememberLanguageList(onShowToast: (String) -> Unit): Array<String> {
-    val errorMessage = stringResource(Res.string.locale_config_error_txt)
-    var list by remember { mutableStateOf(emptyArray<String>()) }
-    LaunchedEffect(Unit) {
-        list =
-            runCatching {
-                LanguageCatalog.getAvailableLanguages().toTypedArray()
-            }.getOrElse {
-                onShowToast(errorMessage)
-                emptyArray()
-            }
-    }
-    return list
 }

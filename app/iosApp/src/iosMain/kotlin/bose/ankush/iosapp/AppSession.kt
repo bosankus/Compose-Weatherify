@@ -11,6 +11,7 @@ import bose.ankush.auth.presentation.AuthState
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.home.HomeSessionCleaner
 import bose.ankush.iosapp.payment.RazorpayCheckoutBridge
+import bose.ankush.iosapp.push.NativePushTokens
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentUiState
@@ -76,16 +77,23 @@ class AppSession :
     init {
         val premiumStorage = get<PremiumStorage>()
         val homeSessionCleaner = get<HomeSessionCleaner>()
+        val pushTokens = get<NativePushTokens>()
         scope.launch {
             auth.effect.collect { effect ->
                 when (effect) {
                     is AuthEffect.PremiumStatusChanged ->
                         premiumStorage.savePremiumStatus(effect.isPremium, effect.expiryMillis)
 
-                    // No push token to rotate on iOS: registration never sends one from here.
-                    AuthEffect.LoggedOut, AuthEffect.AccountDeleted -> {
+                    AuthEffect.LoggedOut -> {
                         homeSessionCleaner.clearOnLogout()
                         premiumStorage.savePremiumStatus(isPremium = false, expiryMillis = null)
+                    }
+
+                    // A fresh FCM token, so nothing still addressed to the deleted account arrives.
+                    AuthEffect.AccountDeleted -> {
+                        homeSessionCleaner.clearOnLogout()
+                        premiumStorage.savePremiumStatus(isPremium = false, expiryMillis = null)
+                        pushTokens.deleteToken()
                     }
                 }
             }

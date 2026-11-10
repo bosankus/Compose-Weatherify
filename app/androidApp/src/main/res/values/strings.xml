@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Weatherify</string>
+    <string name="notification_channel_default_id" translatable="false">weatherify_notifications</string>
+    <string name="notification_channel_default_name">General</string>
+    <string name="notification_channel_default_description">Updates and announcements from Weatherify</string>
+    <string name="notification_channel_alerts_name">Weather alerts</string>
+    <string name="notification_channel_alerts_description">Severe weather warnings for your places</string>
 </resources>

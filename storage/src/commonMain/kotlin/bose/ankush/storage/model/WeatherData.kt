@@ -10,6 +10,11 @@ data class WeatherData(
     val hourly: List<Hourly?>? = listOf(),
     val lastUpdated: Long = 0L,
     val timezoneOffset: Int? = null,
+    /** Where this forecast was fetched. Null for rows saved before schema 6. */
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    /** The pinned name, else the reverse-geocoded one, at fetch time. Null when unknown. */
+    val placeName: String? = null,
 ) {
     data class Alert(
         val description: String?,

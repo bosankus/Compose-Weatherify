@@ -50,38 +50,68 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
     private val hasTokenState = MutableStateFlow(false)
 
     init {
-        hasTokenState.value = retrieveTokenFromKeychain() != null
+        hasTokenState.value = retrieveFromKeychain(ACCOUNT_ID) != null
     }
 
-    actual override suspend fun saveToken(token: String) {
-        val tokenData =
-            NSString.create(string = token).dataUsingEncoding(NSUTF8StringEncoding)
-                ?: throw Exception("Failed to encode token to NSData")
-
-        deleteTokenFromKeychain()
-
-        val query = buildBaseQuery()
-        CFDictionaryAddValue(query, kSecValueData, CFBridgingRetain(tokenData))
-
-        val status = SecItemAdd(query, null)
-        if (status == 0) {
-            hasTokenState.value = true
+    actual override suspend fun saveTokens(
+        accessToken: String,
+        refreshToken: String?,
+        tokenType: String?,
+    ) {
+        // Refresh token first: if the access token write then fails, the session still refreshes
+        // with the newest refresh token instead of presenting a rotated-out one.
+        if (refreshToken != null) {
+            writeToKeychain(REFRESH_ACCOUNT_ID, refreshToken)
         } else {
-            throw Exception("Failed to save token to Keychain: error code $status")
+            deleteFromKeychain(REFRESH_ACCOUNT_ID)
         }
+        if (tokenType != null) {
+            writeToKeychain(TOKEN_TYPE_ACCOUNT_ID, tokenType)
+        } else {
+            deleteFromKeychain(TOKEN_TYPE_ACCOUNT_ID)
+        }
+        writeToKeychain(ACCOUNT_ID, accessToken)
+        hasTokenState.value = true
     }
 
-    actual override suspend fun getToken(): String? = retrieveTokenFromKeychain()
+    actual override suspend fun getToken(): String? = retrieveFromKeychain(ACCOUNT_ID)
+
+    actual override suspend fun getRefreshToken(): String? =
+        retrieveFromKeychain(REFRESH_ACCOUNT_ID)
+
+    actual override suspend fun getTokenType(): String? =
+        retrieveFromKeychain(TOKEN_TYPE_ACCOUNT_ID)
 
     actual override fun hasToken(): Flow<Boolean> = hasTokenState.asStateFlow()
 
     actual override suspend fun clearToken() {
-        deleteTokenFromKeychain()
+        deleteFromKeychain(REFRESH_ACCOUNT_ID)
+        deleteFromKeychain(TOKEN_TYPE_ACCOUNT_ID)
+        deleteFromKeychain(ACCOUNT_ID)
         hasTokenState.value = false
     }
 
-    private fun retrieveTokenFromKeychain(): String? {
-        val query = buildBaseQuery()
+    private fun writeToKeychain(
+        account: String,
+        value: String,
+    ) {
+        val data =
+            NSString.create(string = value).dataUsingEncoding(NSUTF8StringEncoding)
+                ?: throw Exception("Failed to encode token to NSData")
+
+        deleteFromKeychain(account)
+
+        val query = buildBaseQuery(account)
+        CFDictionaryAddValue(query, kSecValueData, CFBridgingRetain(data))
+
+        val status = SecItemAdd(query, null)
+        if (status != 0) {
+            throw Exception("Failed to save token to Keychain: error code $status")
+        }
+    }
+
+    private fun retrieveFromKeychain(account: String): String? {
+        val query = buildBaseQuery(account)
         CFDictionaryAddValue(query, kSecReturnData, kCFBooleanTrue)
         CFDictionaryAddValue(query, kSecMatchLimit, kSecMatchLimitOne)
 
@@ -99,8 +129,8 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
         }
     }
 
-    private fun deleteTokenFromKeychain() {
-        val query = buildBaseQuery()
+    private fun deleteFromKeychain(account: String) {
+        val query = buildBaseQuery(account)
         val status = SecItemDelete(query)
         // errSecItemNotFound (-25300) is acceptable — nothing to delete
         if (status != 0 && status != -25300) {
@@ -108,7 +138,7 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
         }
     }
 
-    private fun buildBaseQuery(): CFMutableDictionaryRef {
+    private fun buildBaseQuery(account: String): CFMutableDictionaryRef {
         val dict =
             CFDictionaryCreateMutable(
                 null,
@@ -118,7 +148,7 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
             ) ?: throw Exception("Failed to create CFMutableDictionary")
         CFDictionaryAddValue(dict, kSecClass, kSecClassGenericPassword)
         CFDictionaryAddValue(dict, kSecAttrService, CFBridgingRetain(SERVICE_ID as NSString))
-        CFDictionaryAddValue(dict, kSecAttrAccount, CFBridgingRetain(ACCOUNT_ID as NSString))
+        CFDictionaryAddValue(dict, kSecAttrAccount, CFBridgingRetain(account as NSString))
         CFDictionaryAddValue(dict, kSecAttrAccessible, kSecAttrAccessibleWhenUnlockedThisDeviceOnly)
         return dict
     }
@@ -126,5 +156,7 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
     companion object {
         private const val SERVICE_ID = "com.weatherify.auth"
         private const val ACCOUNT_ID = "auth_token"
+        private const val REFRESH_ACCOUNT_ID = "refresh_token"
+        private const val TOKEN_TYPE_ACCOUNT_ID = "token_type"
     }
 }

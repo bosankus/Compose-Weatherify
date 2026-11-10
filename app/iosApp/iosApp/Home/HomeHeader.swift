@@ -15,27 +15,31 @@ struct HomeHeader: View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer().frame(height: 28)
             if let name = header.locationOverrideName {
-                Button(action: onResetLocation) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "location.fill").font(.system(size: 14))
-                        Text("\(name)  ·  \(strings.resetToGps)")
-                            .font(.system(size: 14, weight: .medium))
-                    }
-                    .foregroundStyle(ink)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(HomeTheme.cardFill, in: Capsule())
-                }
-                .buttonStyle(.plain)
+                LocationOverrideChip(
+                    name: name,
+                    resetting: header.locationResetting,
+                    resetLabel: strings.resetToGps,
+                    resettingLabel: strings.resettingToGps,
+                    ink: ink,
+                    action: onResetLocation
+                )
+                    .adaptiveInk()
                 .accessibilityLabel(header.locationOverrideDescription ?? name)
+                    .accessibilityValue(header.locationResetting ? strings.resettingToGps : "")
                 .padding(.bottom, 16)
-                .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(
+                        .asymmetric(
+                            insertion: .scale(scale: 0.9, anchor: .topLeading).combined(with: .opacity),
+                            removal: .scale(scale: 0.9, anchor: .topLeading).combined(with: .opacity)
+                        )
+                    )
             }
             if let observed = header.observedLabel {
                 Text(observed)
                     .font(.system(size: 13))
                     .foregroundStyle(ink.opacity(0.72))
                     .headerShadow()
+                    .adaptiveInk()
                     .padding(.bottom, 4)
             }
             HStack(alignment: .top, spacing: 12) {
@@ -55,13 +59,70 @@ struct HomeHeader: View {
                 }
                 .foregroundStyle(ink)
                 .headerShadow()
+                // The avatar stays outside so its photo keeps its own whites.
+                .adaptiveInk()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .animation(.easeInOut(duration: 0.5), value: header.temperature)
                 AccountMark(photoUrl: avatarUrl, label: strings.account, action: onOpenAccount)
                     .padding(.top, 8)
             }
         }
-        .animation(.easeInOut(duration: 0.25), value: header.locationOverrideName)
+        .animation(.spring(response: 0.4, dampingFraction: 0.82), value: header.locationOverrideName)
+    }
+}
+
+/// "<place> · Reset to GPS" pill. Tapping it turns the yellow pin into a spinner ("Switching to
+/// GPS…") until the GPS forecast lands, then the pill folds away (same as Android).
+private struct LocationOverrideChip: View {
+    let name: String
+    let resetting: Bool
+    let resetLabel: String
+    let resettingLabel: String
+    let ink: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle().fill(HomeTheme.yellow)
+                    if resetting {
+                        ProgressView()
+                            .controlSize(.mini)
+                            .tint(HomeTheme.onYellow)
+                            .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    } else {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(HomeTheme.onYellow)
+                            .transition(.scale(scale: 0.6).combined(with: .opacity))
+                    }
+                }
+                .frame(width: 26, height: 26)
+                Text(name)
+                    .font(.system(size: 14, weight: .medium))
+                    .lineLimit(1)
+                    .frame(maxWidth: 160, alignment: .leading)
+                Circle().fill(ink.opacity(0.5)).frame(width: 3, height: 3)
+                Text(resetting ? resettingLabel : resetLabel)
+                    .font(.system(size: 13))
+                    .foregroundStyle(ink.opacity(0.78))
+                    .lineLimit(1)
+                    .id(resetting)
+                    .transition(.opacity)
+            }
+            .foregroundStyle(ink)
+            .padding(.leading, 5)
+            .padding(.trailing, 14)
+            .padding(.vertical, 5)
+            .adaptiveInk(surface: HomeTheme.cardFillOpacity)
+            .background(HomeTheme.cardFill, in: Capsule())
+            .overlay(Capsule().strokeBorder(Color.white.opacity(0.14), lineWidth: 1))
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: resetting)
+        }
+        .buttonStyle(.plain)
+        // Ignores taps while spinning, without the disabled dimming.
+        .allowsHitTesting(!resetting)
     }
 }
 

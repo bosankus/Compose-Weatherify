@@ -7,7 +7,6 @@ import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,28 +43,34 @@ import bose.ankush.commonui.components.ToastType
 import bose.ankush.commonui.components.rememberToastAnchorState
 import bose.ankush.commonui.theme.WeatherifyTheme
 import bose.ankush.commonui.web.InAppWebView
+import bose.ankush.finder.presentation.savedlocations.SavedLocationsFinderRoute
+import bose.ankush.home.HomeFirstContent
 import bose.ankush.home.HomeSessionCleaner
 import bose.ankush.language.util.AppEnvironment
+import bose.ankush.language.util.LanguageCatalog
 import bose.ankush.navigation.AppNavigation
+import bose.ankush.navigation.HomeTabContentFactory
+import bose.ankush.navigation.LanguageContentFactory
+import bose.ankush.navigation.SavedLocationsContentFactory
+import bose.ankush.navigation.SettingsContentFactory
 import bose.ankush.payment.presentation.CheckoutParams
 import bose.ankush.payment.presentation.PaymentEffect
 import bose.ankush.payment.presentation.PaymentIntent
 import bose.ankush.payment.presentation.PaymentViewModel
+import bose.ankush.settings.presentation.SettingsFeatureRoute
+import bose.ankush.settings.presentation.SettingsPresentation
 import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.weatherify.BuildConfig
-import bose.ankush.weatherify.base.common.startInAppUpdate
+import bose.ankush.weatherify.base.common.InAppUpdateManager
 import com.google.firebase.messaging.FirebaseMessaging
 import com.razorpay.Checkout
 import com.razorpay.PaymentData
 import com.razorpay.PaymentResultWithDataListener
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.json.JSONObject
 import org.koin.android.ext.android.inject
 import timber.log.Timber
 import org.koin.androidx.viewmodel.ext.android.viewModel as koinViewModel
 
-@ExperimentalCoroutinesApi
-@ExperimentalAnimationApi
 class MainActivity :
     AppCompatActivity(),
     PaymentResultWithDataListener {
@@ -79,6 +85,8 @@ class MainActivity :
     private val homeSessionCleaner: HomeSessionCleaner by inject()
     private val analyticsTracker: AnalyticsTracker by inject()
 
+    private val inAppUpdates = InAppUpdateManager(this)
+
     // Hold a reference to the Checkout instance only during payment
     private var razorpayCheckout: Checkout? = null
 
@@ -86,20 +94,22 @@ class MainActivity :
         holdSplashUntilAuthResolves(installSplashScreen())
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        startInAppUpdate(this)
         setContent { WeatherifyTheme(isDynamicColor = true) { AppEnvironment { AppContent() } } }
     }
 
     /**
-     * Keeps the system splash up until the sign-in state is known, then fades it out, so launch goes
-     * splash, then content, with no spinner screen in between. Capped so a stuck auth check can
-     * never hold the app on the splash.
+     * Keeps the system splash up until the sign-in state is known and, when signed in, until Home
+     * has drawn its cached forecast; then fades it out, so launch goes splash, then a finished
+     * screen, with no spinner or placeholder frame in between. Capped so a stuck auth check or a
+     * slow cache read can never hold the app on the splash.
      */
     private fun holdSplashUntilAuthResolves(splash: SplashScreen) {
         val startedAt = SystemClock.elapsedRealtime()
         splash.setKeepOnScreenCondition {
-            !authViewModel.isAuthInitialized.value &&
-                    SystemClock.elapsedRealtime() - startedAt < SPLASH_MAX_HOLD_MILLIS
+            val contentReady =
+                authViewModel.isAuthInitialized.value &&
+                        (!authViewModel.isLoggedIn.value || HomeFirstContent.isReady.value)
+            !contentReady && SystemClock.elapsedRealtime() - startedAt < SPLASH_MAX_HOLD_MILLIS
         }
         splash.setOnExitAnimationListener { provider ->
             provider.view
@@ -268,13 +278,245 @@ class MainActivity :
 
     @Composable
     private fun AuthorizedContent(toastController: ToastController) {
+        val homeTabContent = remember { HomeTabContentFactoryImpl() }
+        val savedLocationsContent = remember { SavedLocationsContentFactoryImpl() }
+        val settingsContent = remember { SettingsContentFactoryImpl() }
+        val languageContent = remember { LanguageContentFactoryImpl() }
+
         AppNavigation(
             authViewModel = authViewModel,
             paymentViewModel = paymentViewModel,
             versionName = BuildConfig.VERSION_NAME,
             onShowToast = toastController.onShowToast,
             toastAnchorState = toastController.anchorState,
+            homeTabContent = homeTabContent,
+            savedLocationsContent = savedLocationsContent,
+            settingsContent = settingsContent,
+            languageContent = languageContent,
         )
+    }
+
+    private inner class HomeTabContentFactoryImpl : HomeTabContentFactory {
+        @Composable
+        override fun Weather(
+            toastAnchorState: ToastAnchorState?,
+            hasLocationPermission: Boolean,
+            hasNotificationPermission: Boolean,
+            notificationPermissionResult: bose.ankush.home.HomeNotificationPermissionResult?,
+            requiresNotificationSettingsNavigationHint: Boolean,
+            onRequestNotificationPermission: () -> Unit,
+            onRequestLocationPermission: () -> Unit,
+            onOpenNotificationSettings: () -> Unit,
+            onOpenLocationSettings: () -> Unit,
+        ) {
+            bose.ankush.home.presentation.HomeFeatureRoute(
+                toastAnchorState = toastAnchorState,
+                hasLocationPermission = hasLocationPermission,
+                hasNotificationPermission = hasNotificationPermission,
+                notificationPermissionResult = notificationPermissionResult,
+                requiresNotificationSettingsNavigationHint = requiresNotificationSettingsNavigationHint,
+                onRequestNotificationPermission = onRequestNotificationPermission,
+                onRequestLocationPermission = onRequestLocationPermission,
+                onOpenNotificationSettings = onOpenNotificationSettings,
+                onOpenLocationSettings = onOpenLocationSettings,
+            )
+        }
+
+        @Composable
+        override fun Places(
+            onLocationSelected: (Double, Double, String) -> Unit,
+            onUpgradeClick: () -> Unit,
+        ) {
+            SavedLocationsFinderRoute(
+                onLocationSelected = onLocationSelected,
+                onUpgradeClick = onUpgradeClick,
+            )
+        }
+
+        @Composable
+        override fun Hub(
+            bottomInset: androidx.compose.ui.unit.Dp,
+            onCoverChange: (close: (() -> Unit)?) -> Unit,
+            authViewModel: AuthViewModel,
+            paymentViewModel: PaymentViewModel,
+            navigator: bose.ankush.navigation.AppNavigator,
+            toastAnchorState: ToastAnchorState?,
+            versionName: String,
+            onShowToast: (String) -> Unit,
+            hasNotificationPermission: Boolean,
+            isNotificationPermissionPermanentlyDeclined: Boolean,
+            onRequestNotificationPermission: () -> Unit,
+        ) {
+            val platformPermissions = bose.ankush.navigation.platform.rememberPlatformPermissions()
+            val authState by authViewModel.authState.collectAsState()
+            val paymentUiState by paymentViewModel.uiState.collectAsState()
+            val isBottomBarVisible = rememberSaveable { mutableStateOf(true) }
+            val languageList = rememberLanguageList(onShowToast)
+
+            SettingsFeatureRoute(
+                paymentUiState = paymentUiState,
+                isLoggingOut = authState is AuthState.LogoutLoading,
+                isLoggedOut = authState is AuthState.LoggedOut,
+                versionName = versionName,
+                shouldShowNotificationItem =
+                    platformPermissions.requiresRuntimeNotificationPermission() &&
+                            !hasNotificationPermission,
+                languageList = languageList,
+                onLogout = { authViewModel.processIntent(AuthIntent.Logout) },
+                onLoggedOutHandled = { authViewModel.processIntent(AuthIntent.Reset) },
+                onStartPayment = {
+                    paymentViewModel.processIntent(
+                        PaymentIntent.StartPayment(
+                            it
+                        )
+                    )
+                },
+                onBackNavAction = navigator::goBack,
+                onLanguageNavAction = { list ->
+                    if (platformPermissions.supportsPerAppLocaleSettings()) {
+                        navigator.navigate(bose.ankush.routing.LanguageRoute(list.toList()))
+                    } else {
+                        platformPermissions.openAppLocaleSettings()
+                    }
+                },
+                onNotificationNavAction = {
+                    when {
+                        isNotificationPermissionPermanentlyDeclined -> platformPermissions.openNotificationSettings()
+                        !hasNotificationPermission -> onRequestNotificationPermission()
+                        else -> Unit
+                    }
+                },
+                onBottomBarVisibilityChange = { isBottomBarVisible.value = it },
+                onRefreshPremium = { authViewModel.processIntent(AuthIntent.RefreshToken) },
+                toastAnchorState = toastAnchorState,
+                bottomBar = {
+                    if (SettingsPresentation.Page(
+                            bottomInset,
+                            onCoverChange
+                        ) == SettingsPresentation.Screen
+                    ) {
+                        bose.ankush.navigation.AppBottomBar(
+                            isBottomBarVisible,
+                            navigator,
+                            toastAnchorState
+                        )
+                    }
+                },
+                presentation = SettingsPresentation.Page(
+                    bottomInset,
+                    onCoverChange
+                ),
+            )
+        }
+    }
+
+    private class SavedLocationsContentFactoryImpl : SavedLocationsContentFactory {
+        @Composable
+        override fun SavedLocations(
+            onLocationSelected: (Double, Double, String) -> Unit,
+            onUpgradeClick: () -> Unit,
+            bottomBar: @Composable () -> Unit,
+        ) {
+            SavedLocationsFinderRoute(
+                onLocationSelected = onLocationSelected,
+                onUpgradeClick = onUpgradeClick,
+                bottomBar = bottomBar,
+            )
+        }
+    }
+
+    private inner class SettingsContentFactoryImpl : SettingsContentFactory {
+        @Composable
+        override fun Settings(
+            authViewModel: AuthViewModel,
+            paymentViewModel: PaymentViewModel,
+            navigator: bose.ankush.navigation.AppNavigator,
+            toastAnchorState: ToastAnchorState?,
+            versionName: String,
+            onShowToast: (String) -> Unit,
+            hasNotificationPermission: Boolean,
+            isNotificationPermissionPermanentlyDeclined: Boolean,
+            onRequestNotificationPermission: () -> Unit,
+            presentation: SettingsPresentation,
+            bottomBar: @Composable (() -> Unit)?,
+        ) {
+            val platformPermissions = bose.ankush.navigation.platform.rememberPlatformPermissions()
+            val authState by authViewModel.authState.collectAsState()
+            val paymentUiState by paymentViewModel.uiState.collectAsState()
+            val isBottomBarVisible = rememberSaveable { mutableStateOf(true) }
+            val languageList = rememberLanguageList(onShowToast)
+
+            SettingsFeatureRoute(
+                paymentUiState = paymentUiState,
+                isLoggingOut = authState is AuthState.LogoutLoading,
+                isLoggedOut = authState is AuthState.LoggedOut,
+                versionName = versionName,
+                shouldShowNotificationItem =
+                    platformPermissions.requiresRuntimeNotificationPermission() &&
+                            !hasNotificationPermission,
+                languageList = languageList,
+                onLogout = { authViewModel.processIntent(AuthIntent.Logout) },
+                onLoggedOutHandled = { authViewModel.processIntent(AuthIntent.Reset) },
+                onStartPayment = {
+                    paymentViewModel.processIntent(
+                        PaymentIntent.StartPayment(
+                            it
+                        )
+                    )
+                },
+                onBackNavAction = navigator::goBack,
+                onLanguageNavAction = { list ->
+                    if (platformPermissions.supportsPerAppLocaleSettings()) {
+                        navigator.navigate(bose.ankush.routing.LanguageRoute(list.toList()))
+                    } else {
+                        platformPermissions.openAppLocaleSettings()
+                    }
+                },
+                onNotificationNavAction = {
+                    when {
+                        isNotificationPermissionPermanentlyDeclined -> platformPermissions.openNotificationSettings()
+                        !hasNotificationPermission -> onRequestNotificationPermission()
+                        else -> Unit
+                    }
+                },
+                onBottomBarVisibilityChange = { isBottomBarVisible.value = it },
+                onRefreshPremium = { authViewModel.processIntent(AuthIntent.RefreshToken) },
+                toastAnchorState = toastAnchorState,
+                bottomBar = bottomBar ?: {
+                    if (presentation == SettingsPresentation.Screen) {
+                        bose.ankush.navigation.AppBottomBar(
+                            isBottomBarVisible,
+                            navigator,
+                            toastAnchorState
+                        )
+                    }
+                },
+                presentation = presentation,
+            )
+        }
+    }
+
+    private class LanguageContentFactoryImpl : LanguageContentFactory {
+        @Composable
+        override fun LanguageScreen(languages: List<String>, onBack: () -> Unit) {
+            LanguageScreen(languages = languages) { onBack() }
+        }
+    }
+
+    @Composable
+    private fun rememberLanguageList(onShowToast: (String) -> Unit): Array<String> {
+        val errorMessage = "Failed to load languages"
+        var list by remember { mutableStateOf(emptyArray<String>()) }
+        LaunchedEffect(Unit) {
+            list =
+                runCatching {
+                    LanguageCatalog.getAvailableLanguages().toTypedArray()
+                }.getOrElse {
+                    onShowToast(errorMessage)
+                    emptyArray()
+                }
+        }
+        return list
     }
 
     @Composable
@@ -322,8 +564,8 @@ class MainActivity :
 
     override fun onResume() {
         super.onResume()
-        startInAppUpdate(this)
-        authViewModel.processIntent(AuthIntent.RefreshToken)
+        inAppUpdates.checkForUpdate()
+        authViewModel.processIntent(AuthIntent.RefreshOnForeground)
     }
 
     private fun launchCheckout(

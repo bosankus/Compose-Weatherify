@@ -11,8 +11,21 @@ internal interface LocationClient {
 
     fun hasLocationPermission(): Boolean
 
+    /** [message] is for logs; what the user reads comes from [reason]. */
     class LocationException(
         message: String,
-        val isGpsDisabled: Boolean = false,
-    ) : Exception(message)
+        val reason: Reason = Reason.NoFix,
+    ) : Exception(message) {
+        val isGpsDisabled: Boolean get() = reason == Reason.ServicesOff
+    }
+
+    enum class Reason {
+        PermissionDenied,
+
+        /** Location services (GPS) are switched off for the whole device. */
+        ServicesOff,
+
+        /** Allowed and switched on, but no usable fix arrived in time: indoors, simulator, etc. */
+        NoFix,
+    }
 }

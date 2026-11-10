@@ -12,6 +12,9 @@
     <string name="network_timeout_txt">अनुरोध का समय समाप्त हो गया। कृपया बाद में पुनः प्रयास करें।</string>
     <string name="general_error_txt">ओह! कुछ गलत हो गया है।</string>
     <string name="gps_disabled_error_txt">स्थान सेवाएं बंद हैं। अपना स्थानीय मौसम पाने के लिए GPS चालू करें।</string>
+    <string name="location_unavailable_txt">आपका स्थान नहीं मिल सका। फिर से प्रयास करें, या मौसम देखने के लिए कोई जगह चुनें।</string>
+    <string name="location_pick_place_btn">जगह चुनें</string>
+    <string name="allow_location_btn">स्थान की अनुमति दें</string>
     <string name="enable_gps_btn_txt">GPS चालू करें</string>
     <string name="default_coordinates_txt">स्थान निर्देशांक अभी तक अपडेट नहीं किए गए हैं।</string>
     <string name="cancel_btn_txt">रद्द करें</string>

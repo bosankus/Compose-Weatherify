@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import bose.ankush.storage.EncryptedTokenStorageImpl
 import bose.ankush.storage.LocationPreferencesStorageImpl
 import bose.ankush.storage.PremiumStorageImpl
+import bose.ankush.storage.SecureEnclaveDpopKey
 import bose.ankush.storage.WeatherStorageImpl
 import bose.ankush.storage.api.LocationPreferencesStorage
 import bose.ankush.storage.api.PremiumStorage
@@ -15,6 +16,7 @@ import bose.ankush.storage.common.PREMIUM_PREFERENCES_FILE_NAME
 import bose.ankush.storage.room.WeatherDataModelConverters
 import bose.ankush.storage.room.WeatherDatabase
 import bose.ankush.storage.room.createWeatherDatabase
+import bose.ankush.tokenstorage.api.DpopKey
 import bose.ankush.tokenstorage.api.TokenStorage
 import okio.Path.Companion.toPath
 import org.koin.core.module.Module
@@ -30,6 +32,7 @@ actual val storageDomainModule: Module =
         single<WeatherDataModelConverters> { WeatherDataModelConverters() }
         single<WeatherDatabase> { createWeatherDatabase(converters = get()) }
         single<WeatherStorage> { WeatherStorageImpl(get()) }
+        single<DpopKey> { SecureEnclaveDpopKey() }
         single<DataStore<Preferences>> {
             PreferenceDataStoreFactory.createWithPath(
                 produceFile = { (NSHomeDirectory() + "/" + LOCATION_PREFERENCES_FILE_NAME).toPath() },

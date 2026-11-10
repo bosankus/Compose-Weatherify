@@ -1,13 +1,11 @@
 package bose.ankush.home.presentation.screen
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,13 +23,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -71,7 +66,7 @@ import bose.ankush.home.presentation.places.SavedPlacesLogic
 import bose.ankush.home.presentation.places.SavedPlacesNotice
 import org.jetbrains.compose.resources.stringResource
 
-/** Second page of the home pager: GPS plus every saved place, as dark cards over the photo. */
+/** Second page of the home pager: GPS plus every saved place, as dark cards over the map. */
 @Composable
 internal fun SavedPlacesPage(
     places: SavedPlacesBinding,
@@ -100,11 +95,24 @@ internal fun SavedPlacesPage(
                     detail = stringResource(Res.string.saved_places_current_detail),
                     icon = Icons.Filled.MyLocation,
                     isActive = state.active == null,
+                    isSwitching =
+                        SavedPlacesLogic.isSwitching(
+                            isActive = state.active == null,
+                            homeShowsIt = SavedPlacesLogic.showsCurrentLocation(places.home.place),
+                            home = places.home,
+                        ),
                 ),
             contentColor = contentColor,
             onClick = { onIntent(SavedPlacesIntent.UseCurrentLocation) },
         )
         SavedPlacesSection(places = places, contentColor = contentColor)
+        if (places.mapCenter != null) {
+            Text(
+                text = PLACES_MAP_ATTRIBUTION,
+                color = contentColor.copy(alpha = MUTED_ALPHA),
+                fontSize = 11.sp,
+            )
+        }
         // Keeps the last card clear of the add button.
         Spacer(modifier = Modifier.height(FabClearance))
     }
@@ -139,13 +147,23 @@ private fun SavedPlacesSection(
         else ->
             state.places.forEach { place ->
                 val deleteLabel = stringResource(Res.string.saved_places_delete_desc, place.name)
+                val isActive = SavedPlacesLogic.isActive(place, state.active)
                 PlaceCard(
                     model =
                         PlaceCardModel(
                             title = place.name,
                             detail = SavedPlacesLogic.formatCoordinates(place.lat, place.lon),
                             icon = Icons.Filled.LocationOn,
-                            isActive = SavedPlacesLogic.isActive(place, state.active),
+                            isActive = isActive,
+                            isSwitching =
+                                SavedPlacesLogic.isSwitching(
+                                    isActive = isActive,
+                                    homeShowsIt = SavedPlacesLogic.showsPlace(
+                                        places.home.place,
+                                        place
+                                    ),
+                                    home = places.home,
+                                ),
                             deleteLabel = deleteLabel.takeIf { place.id.isNotBlank() },
                         ),
                     contentColor = contentColor,
@@ -161,6 +179,8 @@ private data class PlaceCardModel(
     val detail: String,
     val icon: ImageVector,
     val isActive: Boolean,
+    /** Picked, and Home is still fetching its weather. */
+    val isSwitching: Boolean = false,
     /** Null hides the remove button (GPS, or a place still being stored). */
     val deleteLabel: String? = null,
 )
@@ -215,71 +235,19 @@ private fun PlaceCard(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        PlaceCardEnd(
-            trailing = placeCardTrailing(isActive = model.isActive, canDelete = model.deleteLabel != null),
+        PlaceStatusMark(
+            trailing =
+                placeCardTrailing(
+                    isActive = model.isActive,
+                    canDelete = model.deleteLabel != null,
+                    isSwitching = model.isSwitching,
+                ),
             deleteLabel = model.deleteLabel.orEmpty(),
             contentColor = contentColor,
             onDelete = onDelete,
         )
     }
 }
-
-/**
- * Right end of a place card: a tick on the place Home is showing, otherwise the remove
- * button (or nothing). Switching between them crossfades with a small scale.
- */
-@Composable
-private fun PlaceCardEnd(
-    trailing: PlaceCardTrailing,
-    deleteLabel: String,
-    contentColor: Color,
-    onDelete: () -> Unit,
-) {
-    AnimatedContent(
-        targetState = trailing,
-        transitionSpec = {
-            (fadeIn(trailingTween()) + scaleIn(trailingTween(), initialScale = TRAILING_START_SCALE))
-                .togetherWith(fadeOut(trailingTween()) + scaleOut(trailingTween(), targetScale = TRAILING_START_SCALE))
-        },
-        contentAlignment = Alignment.Center,
-        label = "placeCardTrailing",
-    ) { state ->
-        when (state) {
-            PlaceCardTrailing.Selected -> SelectedTick()
-            PlaceCardTrailing.Remove ->
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = deleteLabel,
-                        tint = contentColor.copy(alpha = MUTED_ALPHA),
-                        modifier = Modifier.size(18.dp),
-                    )
-                }
-
-            PlaceCardTrailing.None -> Spacer(modifier = Modifier.size(8.dp))
-        }
-    }
-}
-
-@Composable
-private fun SelectedTick() {
-    // Same 48dp slot as the remove button, so the text column never jumps.
-    Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier.size(28.dp).clip(CircleShape).background(WarningYellow),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = null,
-                tint = ToastOnWarning,
-                modifier = Modifier.size(18.dp),
-            )
-        }
-    }
-}
-
-private fun <T> trailingTween() = tween<T>(durationMillis = TRAILING_ANIM_MILLIS)
 
 private fun <T> fabTween() = tween<T>(durationMillis = FAB_ANIM_MILLIS)
 
@@ -393,7 +361,5 @@ private val ActiveOutline = WarningYellow.copy(alpha = 0.8f)
 private val FabClearance = 72.dp
 private const val MUTED_ALPHA = 0.72f
 private const val NOTICE_ALPHA = 0.9f
-private const val TRAILING_ANIM_MILLIS = 200
-private const val TRAILING_START_SCALE = 0.6f
 private const val FAB_ANIM_MILLIS = 200
 private const val FAB_HIDDEN_SCALE = 0.4f

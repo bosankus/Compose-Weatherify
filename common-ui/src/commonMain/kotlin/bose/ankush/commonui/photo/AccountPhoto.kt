@@ -31,9 +31,18 @@ fun rememberAccountPhotoRequest(photoUrl: String): ImageRequest {
     }
 }
 
-/** Writes and drops the account photo in [imageLoader]'s caches, under [accountPhotoCacheKey]. */
+/** Survives restarts: the cache key of the photo the caches hold for the account, if any. */
+interface AccountPhotoKeyMemory {
+    var lastKey: String?
+}
+
+/**
+ * Writes and drops the account photo in [imageLoader]'s caches, under [accountPhotoCacheKey].
+ * [keyMemory] lets a cold start still find, and delete, a photo replaced on another device.
+ */
 class AccountPhotoCache(
     private val imageLoader: ImageLoader,
+    private val keyMemory: AccountPhotoKeyMemory,
 ) {
     /**
      * Puts just-uploaded [bytes] in the disk cache and drops the old photo from memory, so the
@@ -59,16 +68,24 @@ class AccountPhotoCache(
         }
     }
 
-    fun remove(photoUrl: String) {
-        val key = accountPhotoCacheKey(photoUrl)
-        removeFromMemory(key)
-        imageLoader.diskCache?.remove(key)
+    /** Deletes the previously remembered photo unless it is [photoUrl]'s, then remembers this one. */
+    fun keepOnly(photoUrl: String?) {
+        val key = photoUrl?.let(::accountPhotoCacheKey)
+        val previous = keyMemory.lastKey
+        if (previous != null && previous != key) remove(previous)
+        if (previous != key) keyMemory.lastKey = key
     }
 
     /** Every cached image, on logout. */
     fun clear() {
         imageLoader.memoryCache?.clear()
         imageLoader.diskCache?.clear()
+        keyMemory.lastKey = null
+    }
+
+    private fun remove(key: String) {
+        removeFromMemory(key)
+        imageLoader.diskCache?.remove(key)
     }
 
     private fun removeFromMemory(key: String) {

@@ -306,11 +306,11 @@ private fun ShowUIContainer(
             )
         }
 
-        if (state.showNotificationBanner) {
+        if (state.notificationBanner.isVisible) {
             PermissionAlertDialog(
                 descriptionText =
                     stringResource(
-                        if (state.isNotificationPermissionPermanentlyDeclined &&
+                        if (state.notificationBanner.isPermanentlyDeclined &&
                             requiresNotificationSettingsNavigationHint
                         ) {
                             Res.string.notification_permission_declined_ios_txt
@@ -318,7 +318,7 @@ private fun ShowUIContainer(
                             Res.string.notification_permission_message
                         },
                     ),
-                isPermanentlyDeclined = state.isNotificationPermissionPermanentlyDeclined,
+                isPermanentlyDeclined = state.notificationBanner.isPermanentlyDeclined,
                 onPositiveAction = actions.onEnableNotifications,
                 onNegativeAction = actions.onDismissNotificationBanner,
                 positiveButtonLabel = stringResource(Res.string.enable_notification_btn),
@@ -330,7 +330,7 @@ private fun ShowUIContainer(
             containerColor = Color.Transparent,
             content = { innerPadding ->
                 PullToRefreshBox(
-                    isRefreshing = state.isRefreshing,
+                    isRefreshing = state.isLoading,
                     onRefresh = actions.onRefresh,
                     state = pullToRefreshState,
                     modifier = Modifier.fillMaxSize(),
@@ -341,7 +341,7 @@ private fun ShowUIContainer(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         state = rememberLazyListState(),
                     ) {
-                        if (state.isLocationOverridden && state.activeLocationName != null) {
+                        state.pinnedPlaceName?.let { pinnedName ->
                             item(key = "location_override_chip") {
                                 Box(
                                     modifier =
@@ -355,7 +355,7 @@ private fun ShowUIContainer(
                                         label = {
                                             Text(
                                                 text =
-                                                    "${state.activeLocationName}  ·  ${
+                                                    "$pinnedName  ·  ${
                                                         stringResource(Res.string.location_override_reset_btn)
                                                     }",
                                             )
@@ -366,7 +366,7 @@ private fun ShowUIContainer(
                                                 contentDescription =
                                                     stringResource(
                                                         Res.string.location_override_chip_content_desc,
-                                                        state.activeLocationName,
+                                                        pinnedName,
                                                     ),
                                                 modifier = Modifier.size(AssistChipDefaults.IconSize),
                                             )
@@ -397,7 +397,7 @@ private fun ShowUIContainer(
                                 ) {
                                     CurrentWeatherReportLayout(
                                         it,
-                                        state.userLocation,
+                                        state.place?.name,
                                         weatherReports.daily?.firstOrNull()?.summary,
                                     )
                                 }

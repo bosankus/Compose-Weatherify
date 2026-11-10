@@ -27,7 +27,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
+import kotlin.time.TimeSource
 
 class AuthViewModel(
     private val authRepository: AuthRepository,
@@ -44,6 +46,8 @@ class AuthViewModel(
 
     private val _isAuthInitialized = MutableStateFlow(false)
     val isAuthInitialized: StateFlow<Boolean> = _isAuthInitialized.asStateFlow()
+
+    private var lastRefreshAt: TimeSource.Monotonic.ValueTimeMark? = null
 
     private val _effect = Channel<AuthEffect>(Channel.BUFFERED)
     val effect: Flow<AuthEffect> = _effect.receiveAsFlow()
@@ -90,6 +94,11 @@ class AuthViewModel(
             is AuthIntent.Logout -> logout()
             is AuthIntent.Reset -> _authState.value = AuthState.Initial
             is AuthIntent.RefreshToken -> refreshTokenOnForeground()
+            is AuthIntent.RefreshOnForeground ->
+                // Resuming from a dialog, the notification shade or checkout shouldn't hit the network.
+                if (lastRefreshAt?.let { it.elapsedNow() < FOREGROUND_REFRESH_INTERVAL } != true) {
+                    refreshTokenOnForeground()
+                }
         }
     }
 
@@ -135,23 +144,28 @@ class AuthViewModel(
     private fun logout() =
         viewModelScope.launch {
             _authState.value = AuthState.LogoutLoading
-            authRepository.logout().fold(
-                onSuccess = {
-                    analyticsTracker.track(AnalyticsEvent.Logout)
-                    _effect.trySend(AuthEffect.LoggedOut)
-                    _authState.value = AuthState.LoggedOut
-                },
-                onFailure = { e ->
-                    errorReporter.recordError(e, "Logout failed")
-                    _authState.value = AuthState.Error(authErrorMessage(e))
-                },
-            )
+            try {
+                // A failure here is the server revoke only; the device is signed out regardless.
+                authRepository.logout().onFailure { e ->
+                    errorReporter.recordError(e, "Server logout failed; signed out on this device")
+                }
+                analyticsTracker.track(AnalyticsEvent.Logout)
+                _effect.trySend(AuthEffect.LoggedOut)
+                _authState.value = AuthState.LoggedOut
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // Clearing the stored session itself failed, so the user is still signed in.
+                errorReporter.recordError(e, "Logout failed")
+                _authState.value = AuthState.Error(authErrorMessage(e))
+            }
         }
 
     private fun refreshTokenOnForeground() =
         viewModelScope.launch {
+            lastRefreshAt = TimeSource.Monotonic.markNow()
             try {
-                val response = authRepository.refreshToken() ?: return@launch
+                val response = tokenManager.refreshSession() ?: return@launch
                 if (response.isSuccess()) {
                     val expiryMillis = response.data?.premiumExpiresAt?.let { parseIsoToMillis(it) }
                     val active = isPremiumActive(response.data?.premiumExpiresAt)
@@ -204,3 +218,5 @@ class AuthViewModel(
             null
         }
 }
+
+private val FOREGROUND_REFRESH_INTERVAL = 5.minutes

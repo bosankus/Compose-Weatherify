@@ -2,6 +2,7 @@ package bose.ankush.home.presentation.places
 
 import bose.ankush.finder.domain.model.Location
 import bose.ankush.finder.domain.model.LocationSuggestion
+import bose.ankush.home.domain.model.ForecastPlace
 import bose.ankush.storage.model.LocationPreferences
 import kotlin.math.abs
 import kotlin.math.round
@@ -31,6 +32,31 @@ internal object SavedPlacesLogic {
         place: Location,
         active: ActivePlace?,
     ): Boolean = active != null && samePlace(place.lat, place.lon, active.lat, active.lon)
+
+    /**
+     * The selected card shows a spinner until Home shows its weather: while Home is loading,
+     * or while the forecast on screen still belongs to another place. A failed attempt stops it,
+     * so an offline switch settles on the tick instead of spinning forever.
+     */
+    fun isSwitching(
+        isActive: Boolean,
+        homeShowsIt: Boolean,
+        home: HomeProgress,
+    ): Boolean = isActive && !home.failed && (home.isLoading || !homeShowsIt)
+
+    /** Home's forecast is for this saved place. */
+    fun showsPlace(
+        shown: ForecastPlace?,
+        place: Location,
+    ): Boolean = shown != null && shown.isPinned && samePlace(
+        place.lat,
+        place.lon,
+        shown.point.lat,
+        shown.point.lon
+    )
+
+    /** Home's forecast is for GPS, not a pinned place. */
+    fun showsCurrentLocation(shown: ForecastPlace?): Boolean = shown != null && !shown.isPinned
 
     fun findSaved(
         suggestion: LocationSuggestion,

@@ -60,6 +60,7 @@ internal class SavedPlacesViewModel(
 
     private val queries = MutableStateFlow("")
     private var loadJob: Job? = null
+    private var hasLoaded = false
     private var hasTrackedSearchStart = false
 
     init {
@@ -96,6 +97,7 @@ internal class SavedPlacesViewModel(
         if (_state.value.notice != null) _state.update { it.copy(notice = null) }
         when (intent) {
             SavedPlacesIntent.Load -> load()
+            SavedPlacesIntent.PageShown -> if (!hasLoaded && loadJob?.isActive != true) load()
             is SavedPlacesIntent.Select -> select(intent.place)
             SavedPlacesIntent.UseCurrentLocation -> useCurrentLocation()
             is SavedPlacesIntent.Delete -> delete(intent.id)
@@ -114,6 +116,7 @@ internal class SavedPlacesViewModel(
                 _state.update { it.copy(isLoading = true, loadFailed = false) }
                 getSavedLocations().fold(
                     onSuccess = { places ->
+                        hasLoaded = true
                         _state.update {
                             it.copy(
                                 isLoading = false,
@@ -129,29 +132,22 @@ internal class SavedPlacesViewModel(
             }
     }
 
+    /** Activating a place fetches its weather; the page stays put, so the user keeps browsing. */
     private fun select(place: Location) {
-        if (SavedPlacesLogic.isActive(place, _state.value.active)) {
-            _effect.trySend(SavedPlacesEffect.ShowWeather)
-            return
-        }
+        if (SavedPlacesLogic.isActive(place, _state.value.active)) return
         viewModelScope.launch {
             if (activate(place.lat, place.lon, place.name)) {
                 analyticsTracker.track(AnalyticsEvent.LocationSelected(SELECT_SOURCE))
-                _effect.trySend(SavedPlacesEffect.ShowWeather)
             }
         }
     }
 
     @Suppress("TooGenericExceptionCaught")
     private fun useCurrentLocation() {
-        if (_state.value.active == null) {
-            _effect.trySend(SavedPlacesEffect.ShowWeather)
-            return
-        }
+        if (_state.value.active == null) return
         viewModelScope.launch {
             try {
                 locationPreferences.clearLocationOverride()
-                _effect.trySend(SavedPlacesEffect.ShowWeather)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
@@ -246,10 +242,9 @@ internal class SavedPlacesViewModel(
                 // Shown right away; the reload below replaces it with the stored row and its id.
                 _state.update { it.copy(places = SavedPlacesLogic.distinctPlaces(it.places + place)) }
             }
-            val activated = activate(place.lat, place.lon, place.name)
+            activate(place.lat, place.lon, place.name)
             resetSearch(open = false)
             if (existing == null) load()
-            if (activated) _effect.trySend(SavedPlacesEffect.ShowWeather)
         }
     }
 

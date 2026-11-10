@@ -10,6 +10,9 @@
     <string name="network_timeout_txt">అభ్యర్థన గడువు ముగిసింది. దయచేసి తర్వాత మళ్ళీ ప్రయత్నించండి.</string>
     <string name="general_error_txt">అయ్యో!.. ఏదో తప్పు జరిగింది.</string>
     <string name="gps_disabled_error_txt">లొకేషన్ సేవలు ఆఫ్ ఉన్నాయి. స్థానిక వాతావరణం పొందడానికి GPS ఆన్ చేయండి.</string>
+    <string name="location_unavailable_txt">మీ స్థానాన్ని కనుగొనలేకపోయాం. మళ్లీ ప్రయత్నించండి, లేదా వాతావరణం చూడటానికి ఒక ప్రదేశాన్ని ఎంచుకోండి.</string>
+    <string name="location_pick_place_btn">ప్రదేశాన్ని ఎంచుకోండి</string>
+    <string name="allow_location_btn">స్థానానికి అనుమతించండి</string>
     <string name="enable_gps_btn_txt">GPS ఆన్ చేయండి</string>
     <string name="default_coordinates_txt">లొకేషన్ కోఆర్డినేట్లు ఇంకా అప్‌డేట్ కాలేదు.</string>
     <string name="cancel_btn_txt">రద్దు చేయండి</string>

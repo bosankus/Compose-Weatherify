@@ -72,6 +72,41 @@ class SavedPlacesViewModelTest {
         }
 
     @Test
+    fun showingThePageAgainDoesNotRefetch() =
+        runTest {
+            useTestMain()
+            val finder = FakeFinder(mutableListOf(PARIS))
+            val viewModel = placesViewModel(finder = finder)
+            advanceUntilIdle()
+
+            repeat(3) {
+                viewModel.processIntent(SavedPlacesIntent.PageShown)
+                advanceUntilIdle()
+            }
+            assertEquals(1, finder.loadCalls)
+
+            viewModel.processIntent(SavedPlacesIntent.Load)
+            advanceUntilIdle()
+            assertEquals(2, finder.loadCalls)
+        }
+
+    @Test
+    fun showingThePageRetriesAFailedLoad() =
+        runTest {
+            useTestMain()
+            val finder = FakeFinder(mutableListOf(PARIS))
+            finder.loadResult = { Result.failure(IllegalStateException("offline")) }
+            val viewModel = placesViewModel(finder = finder)
+            advanceUntilIdle()
+
+            finder.loadResult = null
+            viewModel.processIntent(SavedPlacesIntent.PageShown)
+            advanceUntilIdle()
+            assertEquals(listOf(PARIS), viewModel.state.value.places)
+            assertEquals(2, finder.loadCalls)
+        }
+
+    @Test
     fun loadFailureIsShownAndRetryRecovers() =
         runTest {
             useTestMain()
@@ -107,11 +142,15 @@ class SavedPlacesViewModelTest {
             assertEquals(TOKYO.lon, prefs.overrideLon)
             assertEquals(TOKYO.name, prefs.overrideLocationName)
             assertEquals(ActivePlace(TOKYO.lat, TOKYO.lon, TOKYO.name), viewModel.state.value.active)
-            assertEquals(listOf<SavedPlacesEffect>(SavedPlacesEffect.ShowWeather), effects)
+            assertEquals(
+                emptyList<SavedPlacesEffect>(),
+                effects,
+                "the page stays where the user is"
+            )
         }
 
     @Test
-    fun selectingTheActivePlaceOnlyShowsWeather() =
+    fun selectingTheActivePlaceAgainDoesNothing() =
         runTest {
             useTestMain()
             val preferences = FakeLocationPreferences()
@@ -123,7 +162,7 @@ class SavedPlacesViewModelTest {
             advanceUntilIdle()
 
             assertEquals(1, preferences.overrideWrites)
-            assertEquals(2, effects.size)
+            assertEquals(emptyList<SavedPlacesEffect>(), effects)
         }
 
     @Test
@@ -141,7 +180,7 @@ class SavedPlacesViewModelTest {
 
             assertFalse(preferences.preferences.value.isLocationOverridden)
             assertNull(viewModel.state.value.active)
-            assertEquals(2, effects.size)
+            assertEquals(emptyList<SavedPlacesEffect>(), effects)
         }
 
     @Test
@@ -247,7 +286,11 @@ class SavedPlacesViewModelTest {
             assertEquals(listOf("Tokyo", "Paris"), state.places.map { it.name })
             assertTrue(state.places.all { it.id.isNotBlank() })
             assertEquals(2, finder.loadCalls)
-            assertEquals(listOf<SavedPlacesEffect>(SavedPlacesEffect.ShowWeather), effects)
+            assertEquals(
+                emptyList<SavedPlacesEffect>(),
+                effects,
+                "the page stays where the user is"
+            )
         }
 
     @Test

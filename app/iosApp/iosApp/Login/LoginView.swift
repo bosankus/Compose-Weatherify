@@ -1,5 +1,5 @@
 import SwiftUI
-import ComposeApp
+@preconcurrency import ComposeApp
 
 /// SwiftUI side of the shared LoginScreenController.
 @MainActor

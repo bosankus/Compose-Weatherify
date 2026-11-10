@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -93,7 +94,7 @@ internal fun PremiumCard(
                     Brush.linearGradient(
                         listOf(
                             WarningYellow.copy(alpha = PREMIUM_TINT_ALPHA),
-                            SettingsCardFill,
+                            LocalSettingsCardFill.current,
                         ),
                     ),
                 ).border(1.dp, SettingsCardStroke, SettingsCardShape)
@@ -258,6 +259,7 @@ private fun SectionCard(
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             letterSpacing = 1.sp,
+            style = TextStyle(shadow = SettingsTextShadow),
             modifier = Modifier.padding(start = 6.dp, bottom = 8.dp),
         )
         Column(
@@ -265,7 +267,7 @@ private fun SectionCard(
                 Modifier
                     .fillMaxWidth()
                     .clip(SettingsCardShape)
-                    .background(SettingsCardFill)
+                    .background(LocalSettingsCardFill.current)
                     .border(1.dp, SettingsCardStroke, SettingsCardShape),
             content = content,
         )

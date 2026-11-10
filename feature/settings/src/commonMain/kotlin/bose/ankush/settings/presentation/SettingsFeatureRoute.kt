@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,6 +28,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,16 +71,19 @@ import bose.ankush.settings.generated.resources.profile_title
 import bose.ankush.settings.presentation.component.AboutSection
 import bose.ankush.settings.presentation.component.AccountSection
 import bose.ankush.settings.presentation.component.DeleteAccountDialog
+import bose.ankush.settings.presentation.component.LocalSettingsCardFill
 import bose.ankush.settings.presentation.component.PreferencesSection
 import bose.ankush.settings.presentation.component.PremiumCard
 import bose.ankush.settings.presentation.component.ProfileHeader
 import bose.ankush.settings.presentation.component.ProfileHeaderActions
 import bose.ankush.settings.presentation.component.ProfilePhotoOptionsSheet
 import bose.ankush.settings.presentation.component.SettingsBackdrop
+import bose.ankush.settings.presentation.component.SettingsCardFill
 import bose.ankush.settings.presentation.component.SettingsCardShape
 import bose.ankush.settings.presentation.component.SettingsDanger
 import bose.ankush.settings.presentation.component.SettingsInk
 import bose.ankush.settings.presentation.component.SettingsInkMuted
+import bose.ankush.settings.presentation.component.SettingsPhotoCardFill
 import bose.ankush.settings.presentation.component.SettingsSurface
 import bose.ankush.settings.presentation.component.hasPremium
 import bose.ankush.settings.presentation.profile.PhotoOperation
@@ -116,6 +122,7 @@ fun SettingsFeatureRoute(
     onRefreshPremium: () -> Unit = {},
     toastAnchorState: ToastAnchorState? = null,
     bottomBar: @Composable () -> Unit = {},
+    presentation: SettingsPresentation = SettingsPresentation.Screen,
 ) {
     val viewModel = koinViewModel<SettingsViewModel>()
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -225,6 +232,7 @@ fun SettingsFeatureRoute(
             ),
         toastAnchorState = toastAnchorState,
         bottomBar = bottomBar,
+        presentation = presentation,
     )
 }
 
@@ -235,158 +243,213 @@ internal fun SettingsScreenContent(
     actions: SettingsActions,
     toastAnchorState: ToastAnchorState? = null,
     bottomBar: @Composable () -> Unit = {},
+    presentation: SettingsPresentation = SettingsPresentation.Screen,
 ) {
     val state = model.state
     val profile = model.profile
+    val page = presentation as? SettingsPresentation.Page
     LaunchedEffect(state.showPremiumBottomSheet) {
         actions.onBottomBarVisibilityChange(!state.showPremiumBottomSheet)
     }
 
     val currentWebUrl = state.currentWebUrl
+    if (page != null) ReportPageCover(page = page, state = state, actions = actions)
     if (currentWebUrl != null) {
         InAppWebView(url = currentWebUrl, onClose = actions.onCloseWebView)
         return
     }
 
-    LightSystemBarIcons()
-    Box(modifier = Modifier.fillMaxSize().background(SettingsBackdrop)) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color.Transparent,
-            contentColor = SettingsInk,
-            topBar = { SettingsTopBar(onBackNavAction = actions.onBack) },
-            bottomBar = bottomBar,
-        ) { innerPadding ->
-            val pullState = rememberPullToRefreshState()
-            PullToRefreshBox(
-                isRefreshing = profile.state.isRefreshing,
-                onRefresh = actions.onRefresh,
-                state = pullState,
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
-                indicator = {
-                    PullToRefreshDefaults.Indicator(
-                        state = pullState,
-                        isRefreshing = profile.state.isRefreshing,
-                        containerColor = SettingsSurface,
-                        color = WarningYellow,
-                        modifier = Modifier.align(Alignment.TopCenter),
-                    )
+    // As a page the host owns the status bar; it may be showing another page right now.
+    if (page == null) LightSystemBarIcons()
+    val bottomInset = page?.bottomInset ?: 0.dp
+    // As a page the host's weather photo is the backdrop, as on iOS; on its own, the night fill.
+    CompositionLocalProvider(
+        LocalSettingsCardFill provides if (page == null) SettingsCardFill else SettingsPhotoCardFill,
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .then(if (page == null) Modifier.background(SettingsBackdrop) else Modifier),
+        ) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                containerColor = Color.Transparent,
+                contentColor = SettingsInk,
+                topBar = {
+                    if (page == null) {
+                        SettingsTopBar(onBackNavAction = actions.onBack)
+                    } else {
+                        Spacer(modifier = Modifier.statusBarsPadding().height(PAGE_TOP_GAP))
+                    }
                 },
-            ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                bottomBar = bottomBar,
+            ) { innerPadding ->
+                val pullState = rememberPullToRefreshState()
+                PullToRefreshBox(
+                    isRefreshing = profile.state.isRefreshing,
+                    onRefresh = actions.onRefresh,
+                    state = pullState,
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
+                    indicator = {
+                        PullToRefreshDefaults.Indicator(
+                            state = pullState,
+                            isRefreshing = profile.state.isRefreshing,
+                            containerColor = SettingsSurface,
+                            color = WarningYellow,
+                            modifier = Modifier.align(Alignment.TopCenter),
+                        )
+                    },
                 ) {
-                    item { ProfileHeader(state = profile.state, actions = profile.actions) }
-                    item {
-                        PremiumCard(
-                            paymentUiState = model.paymentUiState,
-                            onClick = actions.premium.onOpenSheet,
-                        )
-                    }
-                    item {
-                        PreferencesSection(
-                            shouldShowNotificationItem = model.shouldShowNotificationItem,
-                            onNotificationNavAction = actions.onNotifications,
-                            onLanguageNavAction = actions.onLanguage,
-                        )
-                    }
-                    item {
-                        AboutSection(
-                            versionName = model.versionName,
-                            onUrlClick = actions.onOpenWebUrl,
-                        )
-                    }
-                    item { AccountSection(onDeleteAccount = actions.deleteAccount.onOpen) }
-                    item {
-                        TextButton(
-                            onClick = actions.onOpenLogoutDialog,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.logout_btn_txt),
-                                color = SettingsDanger,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Medium,
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            start = 20.dp,
+                            end = 20.dp,
+                            bottom = 24.dp + bottomInset
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(20.dp),
+                    ) {
+                        item { ProfileHeader(state = profile.state, actions = profile.actions) }
+                        item {
+                            PremiumCard(
+                                paymentUiState = model.paymentUiState,
+                                onClick = actions.premium.onOpenSheet,
                             )
+                        }
+                        item {
+                            PreferencesSection(
+                                shouldShowNotificationItem = model.shouldShowNotificationItem,
+                                onNotificationNavAction = actions.onNotifications,
+                                onLanguageNavAction = actions.onLanguage,
+                            )
+                        }
+                        item {
+                            AboutSection(
+                                versionName = model.versionName,
+                                onUrlClick = actions.onOpenWebUrl,
+                            )
+                        }
+                        item { AccountSection(onDeleteAccount = actions.deleteAccount.onOpen) }
+                        item {
+                            TextButton(
+                                onClick = actions.onOpenLogoutDialog,
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.logout_btn_txt),
+                                    color = SettingsDanger,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                            }
                         }
                     }
                 }
+
+                if (state.showLogoutDialog) {
+                    SettingsConfirmDialog(
+                        copy =
+                            ConfirmCopy(
+                                title = stringResource(Res.string.logout_btn_txt),
+                                body = stringResource(Res.string.logout_confirmation_txt),
+                                confirm = stringResource(Res.string.confirm_btn_txt),
+                            ),
+                        enabled = !model.isLoggingOut,
+                        onConfirm = actions.onLogout,
+                        onDismiss = actions.onCloseLogoutDialog,
+                    )
+                }
+
+                val deleteAccount = state.deleteAccount
+                if (deleteAccount != null) {
+                    DeleteAccountDialog(
+                        state = deleteAccount,
+                        isPremium = model.paymentUiState.hasPremium,
+                        onPasswordEdited = actions.deleteAccount.onPasswordEdited,
+                        onConfirm = actions.deleteAccount.onConfirm,
+                        onDismiss = actions.deleteAccount.onClose,
+                    )
+                }
+
+                val changePhoto = profile.actions.onChangePhoto
+                if (profile.state.isPhotoOptionsVisible && changePhoto != null) {
+                    ProfilePhotoOptionsSheet(
+                        onChangePhoto = changePhoto,
+                        onRemovePhoto = profile.onRequestRemove,
+                        onDismiss = profile.onDismissPhotoOptions,
+                    )
+                }
+
+                if (profile.state.isRemoveConfirmVisible) {
+                    SettingsConfirmDialog(
+                        copy =
+                            ConfirmCopy(
+                                title = stringResource(Res.string.profile_remove_photo_title_txt),
+                                body = stringResource(Res.string.profile_remove_photo_body_txt),
+                                confirm = stringResource(Res.string.profile_remove_photo_txt),
+                            ),
+                        onConfirm = profile.onConfirmRemove,
+                        onDismiss = profile.onDismissRemove,
+                    )
+                }
+
+                if (state.showPremiumBottomSheet) {
+                    PremiumSheetOverlay(state = state, actions = actions)
+                }
             }
 
-            if (state.showLogoutDialog) {
-                SettingsConfirmDialog(
-                    copy =
-                        ConfirmCopy(
-                            title = stringResource(Res.string.logout_btn_txt),
-                            body = stringResource(Res.string.logout_confirmation_txt),
-                            confirm = stringResource(Res.string.confirm_btn_txt),
-                        ),
-                    enabled = !model.isLoggingOut,
-                    onConfirm = actions.onLogout,
-                    onDismiss = actions.onCloseLogoutDialog,
-                )
-            }
+            NotificationToast(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                message = stringResource(Res.string.premium_activated_msg_txt),
+                title = stringResource(Res.string.premium_activated_title_txt),
+                type = ToastType.SUCCESS,
+                isVisible = state.showPremiumActivationToast,
+                onDismiss = actions.premium.onDismissActivationToast,
+                bottomOffset = bottomInset,
+                anchorState = toastAnchorState,
+            )
 
-            val deleteAccount = state.deleteAccount
-            if (deleteAccount != null) {
-                DeleteAccountDialog(
-                    state = deleteAccount,
-                    isPremium = model.paymentUiState.hasPremium,
-                    onPasswordEdited = actions.deleteAccount.onPasswordEdited,
-                    onConfirm = actions.deleteAccount.onConfirm,
-                    onDismiss = actions.deleteAccount.onClose,
-                )
-            }
-
-            val changePhoto = profile.actions.onChangePhoto
-            if (profile.state.isPhotoOptionsVisible && changePhoto != null) {
-                ProfilePhotoOptionsSheet(
-                    onChangePhoto = changePhoto,
-                    onRemovePhoto = profile.onRequestRemove,
-                    onDismiss = profile.onDismissPhotoOptions,
-                )
-            }
-
-            if (profile.state.isRemoveConfirmVisible) {
-                SettingsConfirmDialog(
-                    copy =
-                        ConfirmCopy(
-                            title = stringResource(Res.string.profile_remove_photo_title_txt),
-                            body = stringResource(Res.string.profile_remove_photo_body_txt),
-                            confirm = stringResource(Res.string.profile_remove_photo_txt),
-                        ),
-                    onConfirm = profile.onConfirmRemove,
-                    onDismiss = profile.onDismissRemove,
-                )
-            }
-
-            if (state.showPremiumBottomSheet) {
-                PremiumSheetOverlay(state = state, actions = actions)
-            }
+            val message = profile.message
+            NotificationToast(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                message = message?.fullText().orEmpty(),
+                title = stringResource(Res.string.profile_title),
+                type = if (message?.isError() == true) ToastType.ERROR else ToastType.SUCCESS,
+                isVisible = message != null,
+                onDismiss = profile.onDismissMessage,
+                bottomOffset = bottomInset,
+                anchorState = toastAnchorState,
+            )
         }
+    }
+}
 
-        NotificationToast(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            message = stringResource(Res.string.premium_activated_msg_txt),
-            title = stringResource(Res.string.premium_activated_title_txt),
-            type = ToastType.SUCCESS,
-            isVisible = state.showPremiumActivationToast,
-            onDismiss = actions.premium.onDismissActivationToast,
-            anchorState = toastAnchorState,
-        )
+/** What can cover Settings when it is a page, and so needs closing before anything else. */
+private enum class PageCover { WEB, PLANS }
 
-        val message = profile.message
-        NotificationToast(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            message = message?.fullText().orEmpty(),
-            title = stringResource(Res.string.profile_title),
-            type = if (message?.isError() == true) ToastType.ERROR else ToastType.SUCCESS,
-            isVisible = message != null,
-            onDismiss = profile.onDismissMessage,
-            anchorState = toastAnchorState,
+/** Tells the host what covers the page and how to close it; null when nothing does. */
+@Composable
+private fun ReportPageCover(
+    page: SettingsPresentation.Page,
+    state: SettingsState,
+    actions: SettingsActions,
+) {
+    val cover =
+        when {
+            state.currentWebUrl != null -> PageCover.WEB
+            state.showPremiumBottomSheet -> PageCover.PLANS
+            else -> null
+        }
+    DisposableEffect(cover, page) {
+        page.onCoverChange(
+            when (cover) {
+                PageCover.WEB -> actions.onCloseWebView
+                PageCover.PLANS -> actions.premium.onCloseSheet
+                null -> null
+            },
         )
+        onDispose { page.onCoverChange(null) }
     }
 }
 
@@ -472,6 +535,7 @@ private fun PremiumSheetOverlay(
 
 private const val SCRIM_ALPHA = 0.5f
 private const val DISABLED_ALPHA = 0.4f
+private val PAGE_TOP_GAP = 12.dp
 
 // region Previews
 

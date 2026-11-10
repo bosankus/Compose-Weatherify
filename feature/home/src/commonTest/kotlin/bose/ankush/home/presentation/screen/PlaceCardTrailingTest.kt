@@ -32,4 +32,20 @@ class PlaceCardTrailingTest {
     fun inactiveGpsCardHasNoTrailingControl() {
         assertEquals(PlaceCardTrailing.None, placeCardTrailing(isActive = false, canDelete = false))
     }
+
+    @Test
+    fun activePlaceStillLoadingShowsSpinner() {
+        assertEquals(
+            PlaceCardTrailing.Switching,
+            placeCardTrailing(isActive = true, canDelete = true, isSwitching = true),
+        )
+    }
+
+    @Test
+    fun switchingIgnoredOnInactiveCard() {
+        assertEquals(
+            PlaceCardTrailing.Remove,
+            placeCardTrailing(isActive = false, canDelete = true, isSwitching = true),
+        )
+    }
 }

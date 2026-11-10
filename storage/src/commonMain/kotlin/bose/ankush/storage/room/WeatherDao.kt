@@ -31,8 +31,18 @@ interface WeatherDao {
     @Query("SELECT * from $WEATHER_DATABASE_NAME")
     fun getWeather(): Flow<WeatherEntity?>
 
+    @Query("SELECT * from $WEATHER_DATABASE_NAME")
+    suspend fun findWeather(): WeatherEntity?
+
     @Query("SELECT * from $AQ_DATABASE_NAME")
-    fun getAirQuality(): Flow<AirQualityEntity?>
+    suspend fun findAirQuality(): AirQualityEntity?
+
+    /** Both rows from one read, so a refresh landing between them cannot mix two responses. */
+    @Transaction
+    suspend fun findWeatherWithAirQuality(): Pair<WeatherEntity, AirQualityEntity?>? {
+        val weather = findWeather() ?: return null
+        return weather to findAirQuality()
+    }
 
     @Query("DELETE from $WEATHER_DATABASE_NAME")
     suspend fun deleteAllWeatherDetails()

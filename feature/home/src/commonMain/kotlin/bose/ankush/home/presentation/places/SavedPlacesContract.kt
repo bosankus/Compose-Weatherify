@@ -2,6 +2,7 @@ package bose.ankush.home.presentation.places
 
 import bose.ankush.finder.domain.model.Location
 import bose.ankush.finder.domain.model.LocationSuggestion
+import bose.ankush.home.domain.model.ForecastPlace
 
 /** Saved places page of the home screen pager, plus the add-a-place search sheet. */
 internal data class SavedPlacesState(
@@ -13,6 +14,15 @@ internal data class SavedPlacesState(
     val active: ActivePlace? = null,
     val notice: SavedPlacesNotice? = null,
     val search: SavedPlaceSearchState = SavedPlaceSearchState(),
+)
+
+/** How far Home has got with the forecast, so the selected card can show it is still loading. */
+internal data class HomeProgress(
+    /** The place Home's forecast is for; null until one is known. */
+    val place: ForecastPlace? = null,
+    val isLoading: Boolean = false,
+    /** The latest attempt failed (offline, or no location). */
+    val failed: Boolean = false,
 )
 
 internal data class ActivePlace(
@@ -38,7 +48,14 @@ internal enum class SavedPlacesNotice {
 }
 
 internal sealed interface SavedPlacesIntent {
+    /** Fetch the list again: pull to refresh, retry. */
     data object Load : SavedPlacesIntent
+
+    /**
+     * The places page came into view. Fetches only while nothing has loaded yet (or the last
+     * try failed): saves and deletes keep the list current, so paging past it costs no call.
+     */
+    data object PageShown : SavedPlacesIntent
 
     data class Select(
         val place: Location,
@@ -64,9 +81,6 @@ internal sealed interface SavedPlacesIntent {
 }
 
 internal sealed interface SavedPlacesEffect {
-    /** The active location changed; the pager returns to the weather page. */
-    data object ShowWeather : SavedPlacesEffect
-
     /** Another screen asked for saved places; the pager jumps to the places page. */
     data object ShowPlaces : SavedPlacesEffect
 }

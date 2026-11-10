@@ -1,6 +1,6 @@
 import SwiftUI
 import PhotosUI
-import ComposeApp
+@preconcurrency import ComposeApp
 
 /// SwiftUI side of the shared SettingsScreenController: publishes each SettingsScreenUi frame and
 /// turns the controller's notices into a banner.

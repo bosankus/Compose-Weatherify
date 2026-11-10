@@ -23,7 +23,7 @@ import org.koin.compose.koinInject
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Process-wide cache, keyed by the Unsplash query for the live condition.
+ * Process-wide cache, keyed by [BackdropSlot.cacheKey] (search and day).
  * A blank key or a failed search is not cached, so the gradient stays.
  */
 internal object BackgroundPhotoCache {
@@ -40,15 +40,17 @@ internal object BackgroundPhotoCache {
      */
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    fun cached(query: String): BackgroundPhoto? = photos[query]
+    fun cached(cacheKey: String): BackgroundPhoto? = photos[cacheKey]
 
+    /** The slot's pick for its day; null when the slot has no search yet or the search fails. */
     suspend fun photo(
-        query: String,
+        slot: BackdropSlot,
         api: UnsplashApi,
     ): BackgroundPhoto? {
-        photos[query]?.let { return it }
-        val request = reserve(query)
-        if (request.leader) scope.launch { load(query, request.pending, api) }
+        val cacheKey = slot.cacheKey ?: return null
+        photos[cacheKey]?.let { return it }
+        val request = reserve(cacheKey)
+        if (request.leader) scope.launch { load(slot, cacheKey, request.pending, api) }
         return request.pending.await()
     }
 
@@ -85,6 +87,7 @@ internal object BackgroundPhotoCache {
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private suspend fun load(
+        slot: BackdropSlot,
         query: String,
         pending: CompletableDeferred<BackgroundPhoto?>,
         api: UnsplashApi,
@@ -93,7 +96,13 @@ internal object BackgroundPhotoCache {
         try {
             loaded =
                 try {
-                    api.searchPhotos(query = query, perPage = 1).firstOrNull()?.toBackgroundPhoto()
+                    api
+                        .searchPhotos(
+                            query = slot.searchQuery ?: return,
+                            perPage = BackdropSlot.RESULTS_PER_SEARCH
+                        )
+                        .let(slot::pick)
+                        ?.toBackgroundPhoto()
                 } catch (cancelled: CancellationException) {
                     throw cancelled
                 } catch (_: Exception) {
@@ -120,42 +129,35 @@ internal object BackgroundPhotoCache {
 }
 
 /**
- * Offline-first backdrop photo. Shows the last persisted URL for [condition] (Coil disk/memory)
- * immediately, then searches Unsplash for [query] and crossfades to the new photo. A blank key
- * or a failed search keeps the persisted or bundled image.
+ * Offline-first backdrop photo for [slot]. Shows the photo persisted for the slot (Coil disk or
+ * memory) immediately. If that pick is from an earlier day, searches Unsplash for today's and
+ * crossfades to it. Until a new photo is ready the one on screen stays, so moving to the next
+ * part of the day never flashes the bundled image. A blank key or a failed search keeps what is
+ * shown.
  */
 @Composable
-fun rememberBackgroundPhoto(
-    query: String?,
-    condition: SkyCondition = SkyCondition.CLOUDS,
-): BackgroundPhoto? {
+fun rememberBackgroundPhoto(slot: BackdropSlot): BackgroundPhoto? {
     val api = koinInject<UnsplashApi>()
     val context = LocalContext.current
     val prefs = remember { BackgroundPhotoPreferences(context) }
-    var photo by remember(condition.key) {
+    var photo by remember {
         mutableStateOf(
-            prefs.read(condition.key) ?: query?.let(BackgroundPhotoCache::cached),
+            prefs.read(slot.key)?.photo ?: slot.cacheKey?.let(BackgroundPhotoCache::cached)
         )
     }
-    LaunchedEffect(query, condition.key) {
-        prefs.read(condition.key)?.let { photo = it }
-        if (query == null) return@LaunchedEffect
-        BackgroundPhotoCache.cached(query)?.let {
-            photo = it
-            prefs.write(condition.key, it)
-            return@LaunchedEffect
-        }
+    LaunchedEffect(slot) {
+        val persisted = prefs.read(slot.key)
+        persisted?.let { photo = it.photo }
+        // Today's pick is already stored: no search, so a relaunch costs no API call.
+        if (persisted?.epochDay == slot.epochDay) return@LaunchedEffect
+        val cacheKey = slot.cacheKey ?: return@LaunchedEffect
         for (waitMs in PHOTO_SEARCH_BACKOFF_MS) {
             if (waitMs > 0L) delay(waitMs)
-            BackgroundPhotoCache.cached(query)?.let {
-                photo = it
-                prefs.write(condition.key, it)
-                return@LaunchedEffect
-            }
-            val result = BackgroundPhotoCache.photo(query, api)
+            val result =
+                BackgroundPhotoCache.cached(cacheKey) ?: BackgroundPhotoCache.photo(slot, api)
             if (result != null) {
                 photo = result
-                prefs.write(condition.key, result)
+                prefs.write(slot.key, slot.epochDay, result)
                 return@LaunchedEffect
             }
         }

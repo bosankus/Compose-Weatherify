@@ -13,5 +13,9 @@ interface AuthApiService {
 
     suspend fun refreshToken(request: RefreshTokenRequest): AuthResponse
 
-    suspend fun logout(token: String?): LogoutResponse
+    /** [scheme] is the Authorization scheme for [token]: "Bearer" or "DPoP". */
+    suspend fun logout(
+        token: String?,
+        scheme: String,
+    ): LogoutResponse
 }

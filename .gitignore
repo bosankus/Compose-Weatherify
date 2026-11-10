@@ -118,3 +118,5 @@ lint/tmp/
 # Claude Code local settings/state (machine-specific)
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+# SwiftPM build output
+.build/

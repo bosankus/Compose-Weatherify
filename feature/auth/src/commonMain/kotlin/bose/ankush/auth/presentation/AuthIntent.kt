@@ -15,5 +15,9 @@ sealed interface AuthIntent {
 
     object Reset : AuthIntent
 
+    /** Refreshes now, e.g. after a purchase, to pick up the new premium status. */
     object RefreshToken : AuthIntent
+
+    /** The app came to the foreground: refreshes unless it did so within the last few minutes. */
+    object RefreshOnForeground : AuthIntent
 }

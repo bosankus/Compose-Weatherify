@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  Kept out of backups and device transfer:
+  - encrypted_auth_prefs: the session tokens. Their Keystore key never leaves the device, so a
+    restored copy can't be decrypted, and a session should never move to another device anyway.
+  - fcm_topics: "already subscribed" belongs to this device's FCM token; restored elsewhere it
+    would stop the new device from ever subscribing.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude
+            domain="sharedpref"
+            path="encrypted_auth_prefs.xml" />
+        <exclude
+            domain="sharedpref"
+            path="fcm_topics.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude
+            domain="sharedpref"
+            path="encrypted_auth_prefs.xml" />
+        <exclude
+            domain="sharedpref"
+            path="fcm_topics.xml" />
+    </device-transfer>
+</data-extraction-rules>

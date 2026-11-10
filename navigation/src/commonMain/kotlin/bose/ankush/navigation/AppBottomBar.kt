@@ -34,6 +34,9 @@ import bose.ankush.navigation.generated.resources.ic_profile
 import bose.ankush.navigation.generated.resources.profile_nested_nav
 import bose.ankush.navigation.generated.resources.saved_locations_icon_content
 import bose.ankush.navigation.generated.resources.saved_locations_nested_nav
+import bose.ankush.routing.HomeRoute
+import bose.ankush.routing.SavedLocationsRoute
+import bose.ankush.routing.SettingsRoute
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

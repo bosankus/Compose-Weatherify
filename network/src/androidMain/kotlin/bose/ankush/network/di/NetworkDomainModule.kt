@@ -27,6 +27,7 @@ import bose.ankush.network.repository.LocationRepository
 import bose.ankush.network.repository.LocationRepositoryImpl
 import bose.ankush.network.repository.PlaceEventRepository
 import bose.ankush.network.repository.PlaceEventRepositoryImpl
+import bose.ankush.network.repository.PushTokenRegistration
 import bose.ankush.network.repository.ServiceRepository
 import bose.ankush.network.repository.ServiceRepositoryImpl
 import bose.ankush.network.repository.WeatherRemoteSource
@@ -42,9 +43,12 @@ import org.koin.dsl.module
 actual val networkDomainModule: Module =
     module {
         single<NetworkConnectivity> { AndroidNetworkConnectivity(androidContext()) }
-        single<HttpClient> { createHttpClient(get(), get()) }
+        single<HttpClient> { createHttpClient(get(), get(), get()) }
         single<AuthApiService> { KtorAuthApiService(get(), NetworkConstants.WEATHER_BASE_URL) }
-        single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
+        single<AuthRepository> {
+            val scope = this
+            AuthRepositoryImpl(get(), get(), get()) { scope.getOrNull<PushTokenRegistration>() }
+        }
         single<TokenManager> { TokenManager(get(), get()) }
         single<WeatherApiService> {
             KtorWeatherApiService(

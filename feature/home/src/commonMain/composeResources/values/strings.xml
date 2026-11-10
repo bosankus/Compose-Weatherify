@@ -15,6 +15,9 @@
     <string name="network_timeout_txt">Request timed out. Please try again later.</string>
     <string name="general_error_txt">Oops!..Something went wrong.</string>
     <string name="gps_disabled_error_txt">Location services are turned off. Enable GPS to get your local weather.</string>
+    <string name="location_unavailable_txt">Couldn’t find your location. Try again, or pick a place to see its weather.</string>
+    <string name="location_pick_place_btn">Pick a place</string>
+    <string name="allow_location_btn">Allow location</string>
     <string name="enable_gps_btn_txt">Enable GPS</string>
     <string name="default_coordinates_txt">Location coordinates not yet updated.</string>
     <string name="location_permission_denied_txt">Location permission not granted. Enable it to get your local weather.</string>
@@ -27,6 +30,7 @@
     <string name="open_settings_btn">Open settings</string>
     <string name="location_permission_settings_steps">Location is off for Weatherify. In Settings, tap Location and choose While Using the App.</string>
     <string name="location_override_reset_btn">Reset to GPS</string>
+    <string name="location_override_resetting">Switching to GPS…</string>
     <string name="location_override_chip_content_desc">Currently showing weather for %1$s. Tap to reset to GPS.</string>
     <string name="ai_summary_title">Weather summary</string>
     <string name="ai_summary_body">A quick, plain-language read on your day.</string>

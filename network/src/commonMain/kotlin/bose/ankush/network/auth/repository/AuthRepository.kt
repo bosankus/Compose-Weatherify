@@ -25,6 +25,7 @@ interface AuthRepository {
 
     suspend fun getToken(): String?
 
+    /** Exchanges the stored tokens for new ones. Call it through TokenManager, never directly. */
     suspend fun refreshToken(): AuthResponse?
 
     suspend fun logout(): Result<Unit>

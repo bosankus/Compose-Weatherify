@@ -16,6 +16,10 @@ import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.savedstate.serialization.SavedStateConfiguration
+import bose.ankush.routing.HomeRoute
+import bose.ankush.routing.LanguageRoute
+import bose.ankush.routing.SavedLocationsRoute
+import bose.ankush.routing.SettingsRoute
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -70,7 +74,7 @@ fun rememberAppNavigationState(): AppNavigationState {
         AppNavigationState(
             topLevelRoute = topLevelRoute,
             backStacks =
-                mapOf(
+                mapOf<NavKey, NavBackStack<NavKey>>(
                     HomeRoute to homeStack,
                     SavedLocationsRoute to savedLocationsStack,
                     SettingsRoute to settingsStack,

@@ -15,12 +15,10 @@ import bose.ankush.home.domain.usecase.CreateNearbyEvent
 import bose.ankush.home.domain.usecase.FindNearestSavedPlace
 import bose.ankush.home.domain.usecase.GetActiveCoordinates
 import bose.ankush.home.domain.usecase.GetActiveCoordinatesImpl
-import bose.ankush.home.domain.usecase.GetAirQuality
 import bose.ankush.home.domain.usecase.GetNearbyEvents
-import bose.ankush.home.domain.usecase.GetWeatherReport
 import bose.ankush.home.domain.usecase.ObserveAccountPhotoUrl
+import bose.ankush.home.domain.usecase.ObserveHomeWeather
 import bose.ankush.home.domain.usecase.RefreshAccount
-import bose.ankush.home.domain.usecase.RefreshWeatherReport
 import bose.ankush.home.presentation.HomeViewModel
 import bose.ankush.home.presentation.account.AccountAvatarViewModel
 import bose.ankush.home.presentation.ai.AiSummaryViewModel
@@ -41,9 +39,7 @@ expect val homePlatformModule: Module
 val homeDomainModule: Module =
     module {
         single<WeatherRepository> { WeatherRepositoryImpl(get(), get(), get(), get()) }
-        factory { GetWeatherReport(get()) }
-        factory { RefreshWeatherReport(get()) }
-        factory { GetAirQuality(get()) }
+        factory { ObserveHomeWeather(get(), get()) }
         factory { GetNearbyEvents(get()) }
         factory { FindNearestSavedPlace(get()) }
         factory { CreateNearbyEvent(get()) }
@@ -58,7 +54,8 @@ val homeDomainModule: Module =
 
 val homeViewModelModule: Module =
     module {
-        viewModelOf(::HomeViewModel)
+        // Not viewModelOf: it would try to resolve the defaulted errorMessage parameter too.
+        viewModel { HomeViewModel(get(), get(), get(), get(), get()) }
         viewModelOf(::NearbyViewModel)
         viewModelOf(::AccountAvatarViewModel)
         viewModelOf(::SavedPlacesViewModel)

@@ -23,6 +23,12 @@ interface AccountApiService {
     /** DELETE /account/photo */
     suspend fun deleteAccountPhoto(): ApiResponse<AccountPhoto>
 
+    /** POST /account/push-token, so account changes made elsewhere reach this device. */
+    suspend fun registerPushToken(token: String): Boolean
+
+    /** DELETE /account/push-token, before logout. */
+    suspend fun unregisterPushToken(token: String): Boolean
+
     /**
      * DELETE /account with a JSON body carrying the current password. Classified by HTTP status
      * rather than by parsing the envelope, because a 429 may not carry one.

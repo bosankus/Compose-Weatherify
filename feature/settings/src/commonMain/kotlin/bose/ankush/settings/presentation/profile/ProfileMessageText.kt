@@ -2,6 +2,7 @@ package bose.ankush.settings.presentation.profile
 
 import androidx.compose.runtime.Composable
 import bose.ankush.settings.generated.resources.Res
+import bose.ankush.settings.generated.resources.profile_offline_txt
 import bose.ankush.settings.generated.resources.profile_photo_read_failed_txt
 import bose.ankush.settings.generated.resources.profile_photo_remove_failed_txt
 import bose.ankush.settings.generated.resources.profile_photo_removed_txt
@@ -15,6 +16,7 @@ private fun ProfileMessage.text(): StringResource =
         ProfileMessage.PhotoUpdated -> Res.string.profile_photo_updated_txt
         ProfileMessage.PhotoRemoved -> Res.string.profile_photo_removed_txt
         ProfileMessage.PhotoUnreadable -> Res.string.profile_photo_read_failed_txt
+        ProfileMessage.Offline -> Res.string.profile_offline_txt
         is ProfileMessage.UploadFailed -> Res.string.profile_photo_upload_failed_txt
         is ProfileMessage.RemoveFailed -> Res.string.profile_photo_remove_failed_txt
     }
@@ -27,7 +29,8 @@ private fun ProfileMessage.reason(): String? =
     }
 
 internal fun ProfileMessage.isError(): Boolean =
-    this is ProfileMessage.UploadFailed || this is ProfileMessage.RemoveFailed || this == ProfileMessage.PhotoUnreadable
+    this is ProfileMessage.UploadFailed || this is ProfileMessage.RemoveFailed || this == ProfileMessage.PhotoUnreadable ||
+            this == ProfileMessage.Offline
 
 /** The localized line, then the server's reason under it when there is one. */
 @Composable

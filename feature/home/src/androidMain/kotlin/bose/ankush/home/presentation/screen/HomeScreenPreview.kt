@@ -47,7 +47,7 @@ internal fun HomeScreenPreview() {
     val mock = HomePreviewData.home
     HomeScreen(
         modifier = Modifier,
-        links = HomeScreenLinks(weather = {}, places = {}, onOpenHub = {}),
+        links = HomeScreenLinks(weather = {}, places = {}, hub = { _, _ -> }),
         shell =
             HomeScreenShell(
                 content =

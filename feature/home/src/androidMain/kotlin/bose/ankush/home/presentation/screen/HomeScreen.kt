@@ -2,6 +2,13 @@ package bose.ankush.home.presentation.screen
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -25,16 +32,21 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -45,9 +57,8 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import bose.ankush.home.domain.location.HomeGeocoder
+import bose.ankush.home.HomeFirstContent
 import bose.ankush.home.domain.model.WeatherForecast
-import bose.ankush.home.domain.nearby.GeoPoint
 import bose.ankush.home.presentation.HomeViewModel
 import bose.ankush.home.presentation.account.AccountAvatarIntent
 import bose.ankush.home.presentation.account.AccountAvatarViewModel
@@ -55,12 +66,13 @@ import bose.ankush.home.presentation.ai.AiSummaryIntent
 import bose.ankush.home.presentation.ai.AiSummaryViewModel
 import bose.ankush.home.presentation.nearby.NearbyIntent
 import bose.ankush.home.presentation.nearby.NearbyViewModel
+import bose.ankush.home.presentation.places.HomeProgress
 import bose.ankush.home.presentation.places.SavedPlacesEffect
 import bose.ankush.home.presentation.places.SavedPlacesIntent
 import bose.ankush.home.presentation.places.SavedPlacesViewModel
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
 
 /**
  * Android home screen. Home is this shell, bound to the forecast already loaded
@@ -78,10 +90,14 @@ internal fun HomeScreen(
     shell: HomeScreenShell,
     sections: HomeScreenSections,
     onOpenCalendar: () -> Unit = {},
+    shellPager: PagerState = rememberPagerState(pageCount = { SHELL_PAGE_COUNT }),
 ) {
     val places = sections.places
     val pager = rememberPagerState(pageCount = { HOME_PAGE_COUNT })
     val scope = rememberCoroutineScope()
+    // How to close whatever covers the hub page (plan sheet, web page); null when nothing does.
+    var hubCover by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val onHub = shellPager.currentPage == HUB_PAGE
     var openAlert by remember { mutableStateOf<WeatherForecast.Alert?>(null) }
     var showAiSummary by remember { mutableStateOf(false) }
     val aiSummary = sections.aiSummary
@@ -89,38 +105,69 @@ internal fun HomeScreen(
         showAiSummary = false
         aiSummary.onDismiss()
     }
-    val selectedTab = if (pager.currentPage == PLACES_PAGE) HomeTab.MAP else HomeTab.HOME
+    val selectedTab =
+        when {
+            onHub -> HomeTab.HUB
+            pager.currentPage == PLACES_PAGE -> HomeTab.MAP
+            else -> HomeTab.HOME
+        }
     val showPage = { page: Int ->
         scope.launch { pager.animateScrollToPage(page) }
+        Unit
+    }
+    // From the hub, the inner page is set first, so the shell slides straight onto it.
+    val showHomePage = { page: Int ->
+        scope.launch {
+            if (shellPager.currentPage == HUB_PAGE) {
+                pager.scrollToPage(page)
+                shellPager.animateScrollToPage(HOME_SHELL_PAGE)
+            } else {
+                pager.animateScrollToPage(page)
+            }
+        }
         Unit
     }
     val onTab = { tab: HomeTab ->
         openAlert = null
         closeAiSummary()
         when (tab) {
-            HomeTab.HOME -> showPage(WEATHER_PAGE)
-            HomeTab.MAP -> showPage(PLACES_PAGE)
-            HomeTab.HUB -> links.onOpenHub()
+            HomeTab.HOME -> showHomePage(WEATHER_PAGE)
+            HomeTab.MAP -> showHomePage(PLACES_PAGE)
+            HomeTab.HUB -> scope.launch { shellPager.animateScrollToPage(HUB_PAGE) }
         }
+        Unit
     }
     // Back on the places page returns to the weather page; open sheets handle back first.
-    BackHandler(enabled = pager.currentPage == PLACES_PAGE) { showPage(WEATHER_PAGE) }
+    BackHandler(enabled = pager.currentPage == PLACES_PAGE && !onHub) { showPage(WEATHER_PAGE) }
+    // Back on the hub returns to whichever home page it came from.
+    BackHandler(enabled = onHub) { scope.launch { shellPager.animateScrollToPage(HOME_SHELL_PAGE) } }
+    // Registered last so it wins: back closes what covers the hub before leaving it.
+    BackHandler(enabled = hubCover != null) { hubCover?.invoke() }
     LaunchedEffect(places.effects) {
         places.effects.collect { effect ->
             when (effect) {
-                SavedPlacesEffect.ShowWeather -> pager.animateScrollToPage(WEATHER_PAGE)
                 SavedPlacesEffect.ShowPlaces -> pager.scrollToPage(PLACES_PAGE)
             }
         }
     }
     LaunchedEffect(pager.settledPage) {
-        if (pager.settledPage == PLACES_PAGE) places.onIntent(SavedPlacesIntent.Load)
+        if (pager.settledPage == PLACES_PAGE) places.onIntent(SavedPlacesIntent.PageShown)
     }
 
     val condition = shell.content.condition
     val photoUrl = shell.photo?.imageUrl
     val sample = rememberBackgroundImageSample(condition, photoUrl)
+    // The weather page sits on the photo; the places map and the hub are dark, so their type is white.
     val contentColor = contentColorForLuminance(sample.headerLuminance)
+    // Only the header and tab bar sit over both, so only they fade between the two. They read the
+    // colour through a lambda, so the fade recomposes them alone, never the pager pages.
+    val chromeColorState =
+        animateColorAsState(
+            targetValue = if (selectedTab == HomeTab.HOME) contentColor else NightContentColor,
+            animationSpec = tween(durationMillis = CONTENT_COLOR_FADE_MILLIS),
+            label = "homeChromeColor",
+        )
+    val chromeColor = remember(chromeColorState) { { chromeColorState.value } }
     // One instance until a callback's inputs change, so the pager pages can skip.
     val actions =
         remember(onOpenCalendar, aiSummary, closeAiSummary, showPage) {
@@ -137,45 +184,95 @@ internal fun HomeScreen(
             )
         }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        HomePager(
-            model =
-                HomePagerModel(
-                    shell = shell,
-                    sections = sections,
-                    contentColor = contentColor,
-                    chipColors = rememberMetricChipColors(sample.averageColor),
-                    cornerGlow = cornerGlowColor(sample.averageColor, sample.headerLuminance),
-                    openAlert = openAlert,
-                    aiSummaryVisible = showAiSummary,
-                    pager = pager,
-                ),
-            actions = actions,
-            modifier = modifier.fillMaxSize(),
+    val homeModel =
+        HomePagerModel(
+            shell = shell,
+            sections = sections,
+            contentColor = contentColor,
+            chromeColor = chromeColor,
+            chipColors = rememberMetricChipColors(sample.averageColor),
+            cornerGlow = cornerGlowColor(sample.averageColor, sample.headerLuminance),
+            openAlert = openAlert,
+            aiSummaryVisible = showAiSummary,
+            pager = pager,
+            shellPager = shellPager,
         )
-        HomeTabBar(
-            selected = selectedTab,
-            onSelected = onTab,
-            inactiveTint = contentColor,
+    val onHubCoverChange = remember { { close: (() -> Unit)? -> hubCover = close } }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        // Behind both shell pages, as on iOS: the hub slides over the same photo, not its own fill.
+        SkyConditionBackground(condition = condition, photoUrl = photoUrl)
+        CornerGlow(color = homeModel.cornerGlow)
+        PlacesMapLayer(pager = pager, shellPager = shellPager, places = places)
+        // Outer pager: home (itself the weather and places pager) and the hub. Swiping on from the
+        // places page carries on into the hub; on the weather page the shell stays put, so a
+        // sideways drag on the header doesn't skip the places page.
+        HorizontalPager(
+            state = shellPager,
+            modifier = Modifier.fillMaxSize(),
+            beyondViewportPageCount = 1,
+            userScrollEnabled = hubCover == null && (onHub || pager.currentPage == PLACES_PAGE),
+        ) { page ->
+            when (page) {
+                HUB_PAGE -> HubPage(
+                    hub = links.hub,
+                    shellPager = shellPager,
+                    onCoverChange = onHubCoverChange
+                )
+
+                else -> HomePager(
+                    model = homeModel,
+                    actions = actions,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+        AnimatedVisibility(
+            visible = hubCover == null,
+            enter = slideInVertically { it } + fadeIn(),
+            exit = slideOutVertically { it } + fadeOut(),
             modifier =
-                modifier
+                Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .padding(horizontal = 20.dp)
                     .padding(bottom = TabBarBottomGap),
-        )
+        ) {
+            HomeTabs(selected = selectedTab, onSelected = onTab, inactiveTint = chromeColor)
+        }
     }
+}
+
+/** [HomeTabBar] reading its tint here, so a tint fade recomposes only the tab bar. */
+@Composable
+private fun HomeTabs(
+    selected: HomeTab,
+    onSelected: (HomeTab) -> Unit,
+    inactiveTint: () -> Color,
+    modifier: Modifier = Modifier,
+) {
+    HomeTabBar(
+        selected = selected,
+        onSelected = onSelected,
+        inactiveTint = inactiveTint(),
+        modifier = modifier
+    )
 }
 
 private data class HomePagerModel(
     val shell: HomeScreenShell,
     val sections: HomeScreenSections,
+    /** Type colour on the weather page, picked from the photo. */
     val contentColor: Color,
+    /** Type colour for the header, which sits over the photo and the map alike. */
+    val chromeColor: () -> Color,
     val chipColors: MetricChipColors,
     val cornerGlow: Color,
     val openAlert: WeatherForecast.Alert?,
     val aiSummaryVisible: Boolean,
     val pager: PagerState,
+    /** The outer pager: home, then the hub. */
+    val shellPager: PagerState,
 )
 
 private data class HomePagerActions(
@@ -200,11 +297,10 @@ private fun HomePager(
     val pager = model.pager
     val content = shell.content
     Box(modifier = modifier.fillMaxSize()) {
-        SkyConditionBackground(condition = content.condition, photoUrl = shell.photo?.imageUrl)
-        CornerGlow(color = model.cornerGlow)
         NotificationPrompt(chrome)
         PullToRefreshBox(
-            isRefreshing = chrome.refreshing,
+            // Never held open: the pull plays its slide-down and lets go; the bottom loader shows the work.
+            isRefreshing = false,
             onRefresh = {
                 chrome.onRefresh()
                 if (pager.currentPage == PLACES_PAGE) places.onIntent(SavedPlacesIntent.Load)
@@ -231,7 +327,7 @@ private fun HomePager(
                             content = content,
                             chrome = chrome,
                             nearby = model.sections.nearby,
-                            contentColor = model.contentColor,
+                            contentColor = model.chromeColor,
                             modifier = Modifier.padding(horizontal = 20.dp),
                         )
                         Spacer(modifier = Modifier.height(24.dp))
@@ -246,7 +342,7 @@ private fun HomePager(
                                 PLACES_PAGE ->
                                     SavedPlacesPage(
                                         places = places,
-                                        contentColor = model.contentColor,
+                                        contentColor = NightContentColor,
                                         minHeight = viewportHeight,
                                         modifier = pageModifier,
                                     )
@@ -266,14 +362,6 @@ private fun HomePager(
                         }
                     }
                     WeatherAlertPanel(alert = model.openAlert, onDismiss = actions.onDismissAlert)
-                    RefreshChip(
-                        visible = chrome.backgroundRefreshing && !chrome.refreshing,
-                        colors = model.chipColors,
-                        modifier =
-                            Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 8.dp),
-                    )
                     AddPlaceButton(
                         visible =
                             AddPlaceAction.showAddButton(
@@ -298,9 +386,62 @@ private fun HomePager(
                 Spacer(modifier = Modifier.height(TabBarReserveHeight))
             }
         }
-        OfflineToast(chrome.offlineMessage)
+        // One bottom stack, centred: the loader rides above the toast while the toast shows.
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            RefreshChip(visible = chrome.loading, colors = model.chipColors)
+            OfflineToast(chrome.offlineMessage)
+        }
     }
 }
+
+/**
+ * The map behind the places page, fixed behind both shell pages like the photo. It fades in
+ * with the swipe onto places and out again on the swipe to the hub, so neither swipe shows a
+ * hard edge where the map ends. Building it means about 40 tile images at once, so it waits
+ * for the pager to rest ([rememberBuiltAtRest]).
+ */
+@Composable
+private fun PlacesMapLayer(
+    pager: PagerState,
+    shellPager: PagerState,
+    places: SavedPlacesBinding,
+) {
+    if (!rememberBuiltAtRest(pager = pager, page = PLACES_PAGE)) return
+    // Flips only when the map starts or stops showing, so the pulse runs only while it can be
+    // seen: not on the weather page, and not once the hub has slid over it.
+    val visible by remember(pager, shellPager) {
+        derivedStateOf {
+            placesPageProgress(pager) > 0f &&
+                    (shellPager.currentPage == HOME_SHELL_PAGE || shellPager.currentPageOffsetFraction != 0f)
+        }
+    }
+    PlacesMapBackdrop(
+        center = places.mapCenter,
+        places = places.state.places,
+        visible = visible,
+        // Faded every frame of both swipes. Modulating each tile's alpha skips the full-screen
+        // offscreen pass a layer alpha costs; the tiles abut, so nothing overlaps to show through.
+        modifier =
+            Modifier.graphicsLayer {
+                alpha = placesPageProgress(pager) * (1f - hubPageProgress(shellPager))
+                compositingStrategy = CompositingStrategy.ModulateAlpha
+            },
+    )
+}
+
+/** 0 on the home page of the shell, 1 on the hub, in between mid-swipe. */
+private fun hubPageProgress(shellPager: PagerState): Float =
+    (shellPager.currentPage - HOME_SHELL_PAGE + shellPager.currentPageOffsetFraction).coerceIn(
+        0f,
+        1f
+    )
+
+/** 0 on the weather page, 1 on the places page, in between mid-swipe. */
+private fun placesPageProgress(pager: PagerState): Float =
+    (pager.currentPage - WEATHER_PAGE + pager.currentPageOffsetFraction).coerceIn(0f, 1f)
 
 /** Observed time, location chip, and header. Stays above the pager on both pages. */
 @Composable
@@ -308,24 +449,22 @@ private fun HomeHeaderBlock(
     content: HomeWeatherContent,
     chrome: HomeScreenChrome,
     nearby: NearbyContent,
-    contentColor: Color,
+    contentColor: () -> Color,
     modifier: Modifier = Modifier,
 ) {
+    val color = contentColor()
     Column(modifier = modifier.fillMaxWidth()) {
         Spacer(modifier = Modifier.height(28.dp))
-        chrome.locationOverrideName?.let { name ->
-            LocationOverrideChip(
-                label = name,
-                name = name,
-                onReset = chrome.onResetLocation,
-                contentColor = contentColor,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        LocationOverrideChip(
+            name = chrome.locationOverrideName,
+            resetting = chrome.resettingLocation,
+            onReset = chrome.onResetLocation,
+            contentColor = color,
+        )
         chrome.current?.dt?.let { observed ->
             AnimatedValueText(
                 text = observedLabel(observed, forecastZone(chrome.timezoneOffset)),
-                color = contentColor.copy(alpha = OBSERVED_ALPHA),
+                color = color.copy(alpha = OBSERVED_ALPHA),
                 fontSize = 13.sp,
                 style = TextStyle(shadow = HeaderTextShadow),
             )
@@ -344,7 +483,7 @@ private fun HomeHeaderBlock(
                             ?.description,
                     fallback = content.condition.line,
                 ),
-            contentColor = contentColor,
+            contentColor = color,
             nearby = nearby,
         )
     }
@@ -518,6 +657,13 @@ fun HomeScreenRoute(
     val avatarViewModel = koinViewModel<AccountAvatarViewModel>()
     val aiSummaryViewModel = koinViewModel<AiSummaryViewModel>()
     val placesViewModel = koinViewModel<SavedPlacesViewModel>()
+    // Hoisted here so the account mark and "upgrade" can slide the shell to the hub.
+    val shellPager = rememberPagerState(pageCount = { SHELL_PAGE_COUNT })
+    val scope = rememberCoroutineScope()
+    val openHub = remember(
+        shellPager,
+        scope
+    ) { { scope.launch { shellPager.animateScrollToPage(HUB_PAGE) }; Unit } }
     val state by homeViewModel.state.collectAsStateWithLifecycle()
     val nearbyState by nearbyViewModel.state.collectAsStateWithLifecycle()
     val avatarState by avatarViewModel.state.collectAsStateWithLifecycle()
@@ -527,23 +673,23 @@ fun HomeScreenRoute(
     LaunchedEffect(Unit) {
         avatarViewModel.onIntent(AccountAvatarIntent.Refresh)
     }
-    LaunchedEffect(state.userLocation) {
-        val location = state.userLocation ?: return@LaunchedEffect
-        nearbyViewModel.onIntent(
-            NearbyIntent.LocationChanged(
-                GeoPoint(
-                    location.first,
-                    location.second,
-                ),
-            ),
-        )
+    // Lets the host drop the splash once a frame with the cached forecast has been drawn.
+    LaunchedEffect(state.hasCheckedCache) {
+        if (state.hasCheckedCache) {
+            withFrameNanos {}
+            HomeFirstContent.markReady()
+        }
+    }
+    val placePoint = state.place?.point
+    LaunchedEffect(placePoint) {
+        nearbyViewModel.onIntent(NearbyIntent.LocationChanged(placePoint ?: return@LaunchedEffect))
     }
     SideEffect { Log.d(PERF_TAG, "HomeScreenRoute recomposed") } // TEMP(perf)
 
     // The mappings below are pure functions of the forecast, so they are remembered per forecast
     // instead of re-run on every recomposition (places, nearby and AI state all recompose this body).
     val weather = state.weatherData
-    val place = rememberForecastPlace(state.userLocation)
+    val place = state.place?.name ?: CURRENT_LOCATION
     val weatherMain =
         weather
             ?.current
@@ -569,21 +715,30 @@ fun HomeScreenRoute(
             Log.d(PERF_TAG, "toForecastExtras") // TEMP(perf)
             weather?.toForecastExtras() ?: ForecastExtras()
         }
-    val photo = rememberBackgroundPhoto(weatherMain?.let(::unsplashQuery), content.condition)
+    // The photo follows the part of the day at the forecast place, so the clock ticks on its hours.
+    val timezoneOffset = weather?.timezoneOffset
+    val now by produceState(initialValue = Clock.System.now(), timezoneOffset) {
+        hourTicks(forecastZone(timezoneOffset)).collect { value = it }
+    }
+    val backdropSlot =
+        remember(content.condition, weatherMain, timezoneOffset, now) {
+            backdropSlot(content.condition, weatherMain, timezoneOffset, now)
+        }
+    val photo = rememberBackgroundPhoto(backdropSlot)
     val statusMessage =
         (state.error ?: state.offlineMessage)?.takeIf { liveContent == null && it.isNotBlank() }
     val shell = remember(content, photo, statusMessage) { HomeScreenShell(content, photo, statusMessage) }
-    val placeName = state.activeLocationName?.takeIf { it.isNotBlank() } ?: place.takeIf { it != CURRENT_LOCATION }
+    val placeName = state.place?.name
     LaunchedEffect(placeName) {
         if (!placeName.isNullOrBlank()) {
             nearbyViewModel.onIntent(NearbyIntent.PlaceNameChanged(placeName))
         }
     }
     val nearby =
-        remember(nearbyState, avatarState.photoUrl, links, nearbyViewModel) {
+        remember(nearbyState, avatarState.photoUrl, openHub, nearbyViewModel) {
             nearbyState.toNearbyContent(
                 photoUrl = avatarState.photoUrl,
-                onOpenAccount = links.onOpenHub,
+                onOpenAccount = openHub,
                 onRetryEvents = { nearbyViewModel.onIntent(NearbyIntent.RetryEvents) },
             )
         }
@@ -603,13 +758,21 @@ fun HomeScreenRoute(
             forecastVisible = liveContent != null,
             viewModel = homeViewModel,
         )
+    val homeProgress =
+        HomeProgress(
+            place = state.place,
+            isLoading = state.isLoading,
+            failed = state.notice != null
+        )
     val places =
-        remember(placesState, placesViewModel, links) {
+        remember(placesState, placesViewModel, openHub, placePoint, homeProgress) {
             SavedPlacesBinding(
                 state = placesState,
                 effects = placesViewModel.effect,
                 onIntent = placesViewModel::processIntent,
-                onUpgrade = links.onOpenHub,
+                onUpgrade = openHub,
+                mapCenter = placePoint,
+                home = homeProgress,
             )
         }
     val events =
@@ -645,26 +808,18 @@ fun HomeScreenRoute(
             shell = shell,
             sections = sections,
             onOpenCalendar = { nearbyViewModel.onIntent(NearbyIntent.OpenComposer) },
+            shellPager = shellPager,
         )
     }
-}
-
-/** Same resolver as the forecast header: reverse-geocode the loaded coordinates. */
-@Composable
-private fun rememberForecastPlace(userLocation: Pair<Double, Double>?): String {
-    val geocoder = koinInject<HomeGeocoder>()
-    var place by remember(userLocation) { mutableStateOf(CURRENT_LOCATION) }
-    LaunchedEffect(userLocation) {
-        if (userLocation != null) {
-            place = geocoder.reverseGeocode(userLocation.first, userLocation.second) ?: CURRENT_LOCATION
-        }
-    }
-    return place
 }
 
 private const val CURRENT_LOCATION = "Current Location"
 private const val PERF_TAG = "HomePerf" // TEMP(perf)
 private const val OBSERVED_ALPHA = 0.72f
+private const val CONTENT_COLOR_FADE_MILLIS = 300
+
+/** Type on the dark pages: the places map and the hub. */
+private val NightContentColor = Color.White
 private const val HOME_PAGE_COUNT = 2
 private const val WEATHER_PAGE = 0
 private const val PLACES_PAGE = 1

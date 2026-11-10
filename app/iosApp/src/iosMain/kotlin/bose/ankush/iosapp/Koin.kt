@@ -13,6 +13,8 @@ import bose.ankush.home.di.homeViewModelModule
 import bose.ankush.home.di.initializeFirebase
 import bose.ankush.home.domain.ai.OnDeviceAiClient
 import bose.ankush.iosapp.generated.IosSecrets
+import bose.ankush.iosapp.push.NativePushTokens
+import bose.ankush.iosapp.push.iosPushModule
 import bose.ankush.network.config.NetworkConfig
 import bose.ankush.network.di.appBackgroundSourceModule
 import bose.ankush.network.di.networkDomainModule
@@ -51,7 +53,10 @@ private val iosNetworkConfigModule =
 // renames any "init*" top-level function to "doInit*" to avoid clashing with
 // ObjC's `init` initializer convention — that surprised Swift call sites, so the
 // Kotlin-side name now matches what Swift actually sees.
-fun startWeatherifyKoin(nativeAi: NativeAiBridge?) {
+fun startWeatherifyKoin(
+    nativeAi: NativeAiBridge?,
+    pushTokens: NativePushTokens,
+) {
     initializeFirebase()
     startKoin {
         modules(
@@ -72,6 +77,7 @@ fun startWeatherifyKoin(nativeAi: NativeAiBridge?) {
                 homeDomainModule,
                 homeViewModelModule,
                 settingsViewModelModule,
+                iosPushModule(pushTokens),
             ) + nativeAiModules(nativeAi),
         )
     }

@@ -22,45 +22,50 @@ struct WeatherPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            DetailsGrid(cells: page.details, ink: ink)
-            if let report = page.report {
-                CurrentReportCard(report: report, strings: strings, ink: ink).padding(.top, 16)
-            }
-            if let trend = page.trend {
-                TrendCard(trend: trend, ink: ink).padding(.top, 12)
-            }
-            if let week = page.week {
-                WeekStrip(week: week, strings: strings, ink: ink, onOpen: controller.nearbyActions.openComposer, onRetry: controller.retryForecast)
-                    .padding(.top, 20)
-            }
-            if let message = ui.chrome.statusMessage {
-                Text(message).font(.system(size: 13)).foregroundStyle(ink.opacity(0.84)).padding(.top, 8)
-            }
-            if ui.chrome.gpsDisabled || ui.chrome.locationPermissionDenied || ui.chrome.forecastFailed {
-                WaitingActions(chrome: ui.chrome, strings: strings, ink: ink, model: model).padding(.top, 8)
-            }
-            ForecastDetailsBlock(page: page, strings: strings, ink: ink, onOpenAlert: { model.openAlert = $0 })
-            if showAiSummary {
-                AiSummaryEntry(
-                    strings: strings.aiSummary,
-                    ink: ink,
-                    action: {
-                        model.showAiSummary = true
-                        controller.openAiSummary()
-                    }
-                )
-                .padding(.top, 16)
-            }
-            if page.showPromoCards {
-                PromoCards(ink: ink).padding(.top, 16)
-            }
-            if let nearby = page.nearby {
-                NearbyBlocks(nearby: nearby, strings: strings, ink: ink, onRetry: controller.nearbyActions.retryEvents, onOpenSaved: onOpenPlaces)
+            // One shader layer per section (not the whole page) keeps each layer small.
+            Group {
+                DetailsGrid(cells: page.details, ink: ink)
+                if let report = page.report {
+                    CurrentReportCard(report: report, strings: strings, ink: ink).padding(.top, 16)
+                }
+                if let trend = page.trend {
+                    TrendCard(trend: trend, ink: ink).padding(.top, 12)
+                }
+                if let week = page.week {
+                    WeekStrip(week: week, strings: strings, ink: ink, onOpen: controller.nearbyActions.openComposer)
+                        .padding(.top, 20)
+                }
+                if let message = ui.chrome.statusMessage {
+                    StatusNotice(message: message, ink: ink).padding(.top, 20)
+                }
+                if ui.chrome.gpsDisabled || ui.chrome.locationPermissionDenied || ui.chrome.forecastFailed {
+                    WaitingActions(chrome: ui.chrome, strings: strings, ink: ink, model: model, onOpenPlaces: onOpenPlaces)
+                        .padding(.top, 12)
+                }
+                ForecastDetailsBlock(page: page, strings: strings, ink: ink, onOpenAlert: { model.openAlert = $0 })
+                if showAiSummary {
+                    AiSummaryEntry(
+                        strings: strings.aiSummary,
+                        ink: ink,
+                        action: {
+                            model.showAiSummary = true
+                            controller.openAiSummary()
+                        }
+                    )
                     .padding(.top, 16)
+                }
+                if page.showPromoCards {
+                    PromoCards(ink: ink).padding(.top, 16)
+                }
+                if let nearby = page.nearby {
+                    NearbyBlocks(nearby: nearby, strings: strings, ink: ink, onRetry: controller.nearbyActions.retryEvents, onOpenSaved: onOpenPlaces)
+                        .padding(.top, 16)
+                }
+                if let photo = ui.backdrop.photo {
+                    PhotoCredit(photo: photo, ink: ink).padding(.top, 8)
+                }
             }
-            if let photo = ui.backdrop.photo {
-                PhotoCredit(photo: photo, ink: ink).padding(.top, 8)
-            }
+            .adaptiveInk()
         }
         .padding(.bottom, 12)
     }
@@ -273,7 +278,6 @@ private struct WeekStrip: View {
     let strings: HomeStrings
     let ink: Color
     let onOpen: () -> Void
-    let onRetry: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -281,9 +285,6 @@ private struct WeekStrip: View {
                 Text(strings.dailyForecast).font(.system(size: 18, weight: .medium)).frame(maxWidth: .infinity, alignment: .leading)
                 PillButton(title: strings.eventCalendar, ink: ink, action: onOpen)
                     .accessibilityLabel(strings.addEvent)
-                if week.showRetry {
-                    PillButton(title: strings.retry, ink: ink, action: onRetry)
-                }
             }
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 8) {
@@ -315,7 +316,7 @@ private struct DayCell: View {
                 .font(.system(size: 16, weight: day.isToday ? .semibold : .regular))
                 .foregroundStyle(day.isToday ? HomeTheme.inkOnLight : ink)
                 .frame(width: 32, height: 32)
-                .background(day.isToday ? Color.white : .clear, in: Circle())
+                .background(day.isToday ? Color(white: 0.97) : .clear, in: Circle())
                 .padding(.top, 4)
             if day.hasEvent {
                 Circle().fill(HomeTheme.alertYellow).frame(width: 5, height: 5)
@@ -341,10 +342,28 @@ struct WeatherIcon: View {
 
     var body: some View {
         AsyncImage(url: URL(string: url)) { image in
-            image.resizable().scaledToFit()
+            image.resizable().scaledToFit().inkShield()
         } placeholder: {
             Image(systemName: "sun.max").resizable().scaledToFit().opacity(0.4).padding(4)
         }
+    }
+}
+
+/// Why there's no forecast, in place of the empty week: an icon and the shared, localized message.
+private struct StatusNotice: View {
+    let message: String
+    let ink: Color
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Image(systemName: "location.slash")
+                .font(.system(size: 15, weight: .medium))
+                .accessibilityHidden(true)
+            Text(message)
+                .font(.system(size: 15))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(ink.opacity(0.9))
     }
 }
 
@@ -353,18 +372,32 @@ private struct WaitingActions: View {
     let strings: HomeStrings
     let ink: Color
     let model: HomeModel
+    let onOpenPlaces: () -> Void
 
     var body: some View {
-        HStack(spacing: 8) {
-            if chrome.gpsDisabled {
-                PillButton(title: strings.enableGps, ink: ink, action: model.permissions.openAppSettings)
+        // Up to three pills; longer translations stack instead of clipping.
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) {
+                buttons
             }
-            if chrome.locationPermissionDenied {
-                PillButton(title: strings.requestLocation, ink: ink, action: model.controller.requestLocationPermission)
+            VStack(alignment: .leading, spacing: 8) {
+                buttons
             }
-            if chrome.forecastFailed {
-                PillButton(title: strings.retry, ink: ink, action: model.controller.retryForecast)
-            }
+        }
+    }
+
+    @ViewBuilder
+    private var buttons: some View {
+        if chrome.gpsDisabled {
+            PillButton(title: strings.enableGps, ink: ink, action: model.permissions.openAppSettings)
+        }
+        if chrome.locationPermissionDenied {
+            PillButton(title: strings.requestLocation, ink: ink, action: model.controller.requestLocationPermission)
+        }
+        if chrome.forecastFailed {
+            PillButton(title: strings.retry, ink: ink, action: model.controller.retryForecast)
+            // A saved place's forecast needs no fix at all.
+            PillButton(title: strings.pickPlace, ink: ink, action: onOpenPlaces)
         }
     }
 }
@@ -382,6 +415,7 @@ struct PillButton: View {
                 .foregroundStyle(ink)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
+                .adaptiveInk(surface: HomeTheme.cardFillOpacity)
                 .background(HomeTheme.cardFill, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)

@@ -4,9 +4,11 @@ import ComposeApp
 
 @main
 struct iOSApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     init() {
         FirebaseApp.configure()
-        KoinKt.startWeatherifyKoin(nativeAi: FoundationModelsBridge())
+        KoinKt.startWeatherifyKoin(nativeAi: FoundationModelsBridge(), pushTokens: FirebasePushTokens())
     }
 
     var body: some Scene {

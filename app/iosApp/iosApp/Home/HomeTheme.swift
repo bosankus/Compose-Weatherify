@@ -7,7 +7,8 @@ enum HomeTheme {
     /// Dark ink when the top of the photo is bright.
     static let inkOnLight = Color(hex: 0x1C2430)
     /// Every dark card over the photo.
-    static let cardFill = Color.black.opacity(0.38)
+    static let cardFillOpacity = 0.38
+    static let cardFill = Color.black.opacity(cardFillOpacity)
     static let cardRadius: CGFloat = 20
     static let yellow = Color(hex: 0xF8BF1D)
     static let onYellow = Color(hex: 0x212121)
@@ -49,6 +50,7 @@ struct HomeCard: ViewModifier {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .adaptiveInk(surface: HomeTheme.cardFillOpacity)
             .background(HomeTheme.cardFill, in: RoundedRectangle(cornerRadius: HomeTheme.cardRadius, style: .continuous))
     }
 }

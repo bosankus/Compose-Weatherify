@@ -140,3 +140,18 @@ kotlin {
         }
     }
 }
+
+// Swift 6.2 can leave macro-expansion buffers (SKIE's `#isolation`, which expands to a bare `nil`)
+// in `swift/swift-generated-sources`, next to the Swift SKIE generates. SKIE then compiles them as
+// sources on the next link, which fails with "expressions are not allowed at the top level". They
+// are diagnostic output only, so they are cleared before every framework link.
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink>().configureEach {
+    val skieBinaries = layout.buildDirectory.dir("skie/binaries")
+    doFirst {
+        skieBinaries.get().asFile
+            .walkTopDown()
+            .filter { it.isDirectory && it.name == "swift-generated-sources" }
+            .toList()
+            .forEach { it.deleteRecursively() }
+    }
+}

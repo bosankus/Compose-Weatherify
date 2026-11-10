@@ -42,13 +42,17 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":common-ui"))
-            implementation(project(":feature:auth"))
-            implementation(project(":feature:language"))
-            implementation(project(":feature:payment"))
-            implementation(project(":feature:finder"))
-            implementation(project(":feature:home"))
-            implementation(project(":feature:settings"))
+            implementation(project(":routing"))
             implementation(project(":analytics"))
+            // Type dependencies only — navigation module uses these feature modules'
+            // commonMain type definitions (interfaces, data classes, sealed classes)
+            // but NOT their composable implementations (which are provided via factories).
+            implementation(project(":feature:home"))
+            implementation(project(":feature:auth"))
+            implementation(project(":feature:payment"))
+            implementation(project(":feature:settings"))
+            implementation(project(":feature:language"))
+            implementation(project(":feature:finder"))
             implementation(libs.compose.multiplatform.resources)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)

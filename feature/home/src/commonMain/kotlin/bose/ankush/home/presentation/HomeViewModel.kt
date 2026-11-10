@@ -4,52 +4,46 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
+import bose.ankush.analytics.ErrorReporter
 import bose.ankush.home.domain.location.LocationProblem
+import bose.ankush.home.domain.model.HomeWeather
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.usecase.GetActiveCoordinates
-import bose.ankush.home.domain.usecase.GetAirQuality
-import bose.ankush.home.domain.usecase.GetWeatherReport
-import bose.ankush.home.domain.usecase.RefreshWeatherReport
+import bose.ankush.home.domain.usecase.ObserveHomeWeather
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.default_coordinates_txt
 import bose.ankush.home.generated.resources.general_error_txt
 import bose.ankush.home.generated.resources.location_permission_denied_txt
 import bose.ankush.home.presentation.util.errorMessageFromException
+import bose.ankush.network.util.NetworkException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 
 /**
- * Home's MVI ViewModel. Refetches when [GetActiveCoordinates.changes] fires, so a location pinned
- * from a sibling tab (via [bose.ankush.home.HomeLocationCoordinator]) is picked up without a
- * direct cross-module ViewModel reference.
+ * Home's MVI ViewModel. Weather, place, and location all come from [ObserveHomeWeather], which
+ * also refetches when a place is pinned from a sibling tab (via
+ * [bose.ankush.home.HomeLocationCoordinator]). This class turns that into [HomeState] and
+ * handles the notification banner.
  */
 internal class HomeViewModel(
-    private val refreshWeatherReport: RefreshWeatherReport,
-    private val getWeatherReport: GetWeatherReport,
-    private val getAirQuality: GetAirQuality,
+    private val observeHomeWeather: ObserveHomeWeather,
     private val getActiveCoordinates: GetActiveCoordinates,
     private val remoteConfigGate: HomeRemoteConfigGate,
     private val analyticsTracker: AnalyticsTracker,
+    private val errorReporter: ErrorReporter,
+    private val errorMessage: suspend (Exception) -> String? = ::errorMessageFromException,
 ) : ViewModel() {
     private val _state = MutableStateFlow(HomeState())
     val state: StateFlow<HomeState> = _state.asStateFlow()
@@ -57,9 +51,8 @@ internal class HomeViewModel(
     private val _effect = Channel<HomeEffect>(Channel.BUFFERED)
     val effect: Flow<HomeEffect> = _effect.receiveAsFlow()
 
-    /** Background network refresh while a Room forecast is already on screen. Not pull-to-refresh. */
-    private val _refreshing = MutableStateFlow(false)
-    val refreshing: StateFlow<Boolean> = _refreshing.asStateFlow()
+    private var notificationBannerVisibilityJob: Job? = null
+    private var reportedFailure: Throwable? = null
 
     private val refreshTrigger = MutableSharedFlow<Boolean>(
         extraBufferCapacity = 1,
@@ -70,7 +63,7 @@ internal class HomeViewModel(
         if (e !is CancellationException) {
             viewModelScope.launch {
                 val message =
-                    if (e is Exception) errorMessageFromException(e) else getString(Res.string.general_error_txt)
+                    if (e is Exception) errorMessage(e) else getString(Res.string.general_error_txt)
                 dispatch(HomeAction.Error(message))
             }
         }
@@ -79,22 +72,11 @@ internal class HomeViewModel(
     init {
         remoteConfigGate.initialize()
 
-        val overrideChanged = getActiveCoordinates.changes().map { true }
-
         viewModelScope.launch(dataFetchExceptionHandler) {
-            merge(refreshTrigger, overrideChanged)
-                .onStart { emit(false) }
-                .catch {
-                    if (it !is CancellationException) dispatch(HomeAction.Error(messageFrom(it)))
-                }.collectLatest { forceRefresh ->
-                    try {
-                        runFetch(forceRefresh)
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        dispatch(HomeAction.Error(e.message))
-                    }
-                }
+            observeHomeWeather(refreshTrigger).collect { weather ->
+                reportFailure(weather.status)
+                dispatch(HomeAction.WeatherChanged(weather, messageFor(weather)))
+            }
         }
     }
 
@@ -115,7 +97,7 @@ internal class HomeViewModel(
             HomeIntent.EnableNotificationBanner ->
                 _effect.trySend(
                     element =
-                        if (_state.value.isNotificationPermissionPermanentlyDeclined) {
+                        if (_state.value.notificationBanner.isPermanentlyDeclined) {
                             HomeEffect.OpenNotificationSettings
                         } else {
                             HomeEffect.RequestNotificationPermission
@@ -133,8 +115,6 @@ internal class HomeViewModel(
             is HomeIntent.NotificationPermissionResult -> handlePermissionResult(intent = intent)
         }
     }
-
-    private var notificationBannerVisibilityJob: Job? = null
 
     private fun updateNotificationBannerVisibility(hasPermission: Boolean) {
         // Cancel any in-flight update first: HomeRoute re-fires this on every permission-flag
@@ -170,130 +150,47 @@ internal class HomeViewModel(
         )
     }
 
-    private suspend fun runFetch(forceRefresh: Boolean) {
-        dispatch(HomeAction.Loading(isRefreshing = forceRefresh))
-        // Paint the Room forecast before GPS, reverse geocode, or the network refresh.
-        emitSavedForecast()
-        val result = getActiveCoordinates.current()
-        result.problem?.let { issue ->
-            dispatch(
-                HomeAction.SetOffline(
-                    message = issue.toMessage(),
-                    isOffline = true,
-                    isGpsDisabled = issue is LocationProblem.GpsDisabled,
-                    isLocationPermissionDenied = issue is LocationProblem.PermissionDenied
-                ),
-            )
-        }
-
-        val spot = result.coordinates
-        if (spot != null) {
-            fetchWeatherData(
-                lat = spot.coordinates.latitude,
-                lon = spot.coordinates.longitude,
-                isOverridden = spot.isOverridden,
-                overrideName = spot.overrideName,
-                forceRefresh = forceRefresh,
-            )
-        } else if (result.problem == null) {
-            dispatch(
-                HomeAction.Error(
-                    getString(Res.string.default_coordinates_txt),
-                ),
-            )
-        }
-    }
-
     /**
-     * Emits the Room forecast when one exists, before saved coordinates, GPS, or the network.
-     * Room keeps one global row, so the read is not gated on coordinates. Saved coordinates
-     * are attached afterward when they exist. An empty cache leaves the loading state alone.
-     * [HomeAction.CacheChecked] is dispatched either way, so the UI shows the full loading
-     * state only once Room is known to be empty.
+     * Files each failed attempt once. The toast shows a friendly line; the report keeps the cause
+     * and its code, which is what an "Oops!..Something went wrong." needs to be traced.
      */
-    private suspend fun emitSavedForecast() {
-        if (_state.value.weatherData != null) return
-        try {
-            val cachedWeather = getWeatherReport.cached().first() ?: return
-            val cachedAQ = getAirQuality.cached().first()
-            dispatch(HomeAction.Success(weather = cachedWeather, airQuality = cachedAQ))
-            dispatch(HomeAction.CacheChecked)
-            val savedCoordinates = getActiveCoordinates.lastKnown() ?: return
-            dispatch(
-                HomeAction.Success(
-                    location = savedCoordinates.coordinates.latitude to savedCoordinates.coordinates.longitude,
-                    isLocationOverridden = savedCoordinates.isOverridden,
-                    overrideLocationName = savedCoordinates.overrideName,
-                    weather = _state.value.weatherData ?: cachedWeather,
-                    airQuality = _state.value.airQualityData ?: cachedAQ,
-                ),
-            )
-        } finally {
-            if (!_state.value.hasCheckedCache) dispatch(HomeAction.CacheChecked)
-        }
+    private fun reportFailure(status: HomeWeather.Status) {
+        val cause = (status as? HomeWeather.Status.Failed)?.cause ?: return
+        if (cause === reportedFailure) return
+        reportedFailure = cause
+        errorReporter.recordError(
+            throwable = cause,
+            message = "Home weather attempt failed",
+            context = mapOf(
+                "errorCode" to ((cause as? NetworkException)?.errorCode?.toString() ?: "none")
+            ),
+        )
     }
 
-    private suspend fun fetchWeatherData(
-        lat: Double,
-        lon: Double,
-        isOverridden: Boolean,
-        overrideName: String?,
-        forceRefresh: Boolean,
-    ) {
-        val location = lat to lon
-        // A new active location (a saved place picked, or back to GPS) keeps the current
-        // forecast and place on screen until the forecast for the new coordinates lands,
-        // so Room's single row never pairs the old weather with the new place name.
-        // GPS-to-GPS jitter on pull to refresh is not a switch.
-        val current = _state.value
-        val switchingLocation =
-            forceRefresh &&
-                    current.userLocation.let { it != null && it != location } &&
-                    (isOverridden || current.isLocationOverridden)
-        coroutineScope {
-            val refreshFinished = MutableStateFlow(false)
-            combine(
-                getAirQuality(location.first, location.second),
-                getWeatherReport.observeWithRefresh(
-                    location = location,
-                    refresh = { refreshWeatherReport(location, forceRefresh) },
-                    onRefreshStart = { _refreshing.value = true },
-                    onRefreshEnd = {
-                        _refreshing.value = false
-                        refreshFinished.value = true
-                    },
-                ),
-                refreshFinished,
-            ) { air, weather, finished ->
-                Triple(air, weather, finished)
-            }.catch { e ->
-                if (e is CancellationException) throw e
-                val error =
-                    if (e is Exception) {
-                        errorMessageFromException(e)
-                    } else {
-                        getString(Res.string.general_error_txt)
-                    }
-                dispatch(HomeAction.Error(message = error))
-            }.collectLatest { (air, weather, finished) ->
-                // Empty Room, or a location switch, waits for the refresh to settle.
-                if ((weather == null || switchingLocation) && !finished) return@collectLatest
-                dispatch(
-                    HomeAction.Success(
-                        location = location,
-                        isLocationOverridden = isOverridden,
-                        overrideLocationName = overrideName,
-                        weather = weather,
-                        airQuality = air,
-                    ),
-                )
-            }
+    /** Text for a failure or a missing location, or null when [weather] has neither. */
+    private suspend fun messageFor(weather: HomeWeather): String? =
+        when (val status = weather.status) {
+            is HomeWeather.Status.Failed -> messageFrom(status.cause)
+            HomeWeather.Status.NoLocation ->
+                weather.locationProblem?.toMessage()
+                    ?: getString(Res.string.default_coordinates_txt)
+
+            else -> null
         }
-    }
 
     private fun resetLocationOverride() {
+        val current = _state.value
+        if (current.isResettingLocation) return
+        current.pinnedPlaceName?.let { dispatch(HomeAction.ResetLocationStarted(it)) }
         viewModelScope.launch(dataFetchExceptionHandler) {
-            getActiveCoordinates.reset()
+            try {
+                getActiveCoordinates.reset()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                dispatch(HomeAction.ResetLocationFailed)
+                throw e
+            }
         }
     }
 
@@ -305,6 +202,6 @@ internal class HomeViewModel(
         }
 
     private suspend fun messageFrom(cause: Throwable): String =
-        (cause as? Exception)?.let { errorMessageFromException(it) }
+        (cause as? Exception)?.let { errorMessage(it) }
             ?: getString(Res.string.general_error_txt)
 }

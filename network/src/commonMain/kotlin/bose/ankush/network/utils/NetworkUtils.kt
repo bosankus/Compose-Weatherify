@@ -2,6 +2,7 @@ package bose.ankush.network.utils
 
 import bose.ankush.network.util.NetworkException
 import kotlinx.coroutines.delay
+import kotlin.coroutines.cancellation.CancellationException
 
 object NetworkUtils {
     suspend fun <T> retryWithExponentialBackoff(
@@ -16,6 +17,9 @@ object NetworkUtils {
         repeat(maxRetries) { attempt ->
             try {
                 return block()
+            } catch (e: CancellationException) {
+                // Not a failed request: wrapping it would turn a cancelled call into an error.
+                throw e
             } catch (e: Exception) {
                 lastException = e
                 if (attempt == maxRetries - 1) {

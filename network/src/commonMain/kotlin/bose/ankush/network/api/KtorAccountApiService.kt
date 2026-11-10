@@ -8,12 +8,14 @@ import bose.ankush.network.model.ApiErrorData
 import bose.ankush.network.model.ApiResponse
 import bose.ankush.network.model.DeleteAccountRequest
 import bose.ankush.network.model.DeleteAccountResult
+import bose.ankush.network.model.PushTokenRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
+import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
@@ -54,6 +56,28 @@ class KtorAccountApiService(
             .authorizedRequest(tokenManager) { authConfig ->
                 delete("$baseUrl/account/photo") { authConfig() }
             }.body()
+
+    override suspend fun registerPushToken(token: String): Boolean =
+        httpClient
+            .authorizedRequest(tokenManager) { authConfig ->
+                post("$baseUrl/account/push-token") {
+                    authConfig()
+                    contentType(ContentType.Application.Json)
+                    setBody(PushTokenRequest(token))
+                }
+            }.status
+            .isSuccess()
+
+    override suspend fun unregisterPushToken(token: String): Boolean =
+        httpClient
+            .authorizedRequest(tokenManager) { authConfig ->
+                delete("$baseUrl/account/push-token") {
+                    authConfig()
+                    contentType(ContentType.Application.Json)
+                    setBody(PushTokenRequest(token))
+                }
+            }.status
+            .isSuccess()
 
     // Never retried: a repeat after a lost 200 would 401 and read as a failure. The interceptor
     // replays it once after a token refresh, which is safe because the first attempt was refused.

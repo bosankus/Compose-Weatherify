@@ -1,27 +1,26 @@
 package bose.ankush.network.auth.interceptor
 
+import bose.ankush.network.auth.dpop.authorize
 import bose.ankush.network.auth.events.AuthEvent
 import bose.ankush.network.auth.events.AuthEventBus
 import bose.ankush.network.auth.token.TokenManager
 import bose.ankush.network.auth.token.TokenResult
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 
 suspend fun HttpClient.authorizedRequest(
     tokenManager: TokenManager,
     block: suspend HttpClient.(HttpRequestBuilder.() -> Unit) -> HttpResponse,
 ): HttpResponse {
-    fun authHeader(token: String?): HttpRequestBuilder.() -> Unit =
-        {
-            token?.takeIf { it.isNotBlank() }?.let { header(HttpHeaders.Authorization, "Bearer $it") }
-        }
+    fun authHeader(
+        token: String?,
+        scheme: String,
+    ): HttpRequestBuilder.() -> Unit = { authorize(token, scheme) }
 
     val firstToken = tokenManager.getStoredToken()
-    val response = block(authHeader(firstToken))
+    val response = block(authHeader(firstToken, tokenManager.authorizationScheme()))
 
     if (response.status != HttpStatusCode.Unauthorized) {
         return response
@@ -29,9 +28,10 @@ suspend fun HttpClient.authorizedRequest(
 
     // Reacts to 401 only: a 403 (e.g. a wrong password on DELETE /account) never refreshes or
     // signs out. At most one refresh and one replay per call, so a 401 can't loop.
-    return when (val result = tokenManager.handleUnauthorized()) {
+    return when (val result = tokenManager.handleUnauthorized(rejectedToken = firstToken)) {
         is TokenResult.Valid -> {
-            val retried = block(authHeader(result.token))
+            // Read the scheme again: the refresh may have moved the session to a DPoP-bound token.
+            val retried = block(authHeader(result.token, tokenManager.authorizationScheme()))
             // A fresh token that is still refused means the account itself is gone or
             // deactivated; refreshing again would only repeat this.
             if (retried.status == HttpStatusCode.Unauthorized) endSession(tokenManager)

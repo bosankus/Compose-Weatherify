@@ -16,6 +16,9 @@ struct HomeView: View {
     /// The tab bar slides away while reading down the page and returns on the way back up.
     @State private var tabBarHidden = false
     @State private var scrollTracker = ScrollDirectionTracker()
+    /// The map behind the places page is about 40 tiles, so it is built the first time that page
+    /// shows and then kept, ready for the next visit.
+    @State private var placesMapBuilt = false
     @Environment(\.scenePhase) private var scenePhase
 
     init(session: AppSession) {
@@ -33,6 +36,11 @@ struct HomeView: View {
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
                 .animation(.easeInOut(duration: 0.15), value: sample)
+            if placesMapBuilt, let map = model.ui?.places.map {
+                let onPlaces = model.page == .places
+                PlacesMapBackdrop(map: map, pulsing: onPlaces && scenePhase == .active)
+                    .opacity(onPlaces ? 1 : 0)
+            }
             if let ui = model.ui {
                 content(ui)
             }
@@ -51,6 +59,11 @@ struct HomeView: View {
                 settings.controller.reloadStrings()
             }
         }
+        .onChange(of: model.page) { page in
+            if page == .places {
+                placesMapBuilt = true
+            }
+        }
         .onChange(of: scenePhase) { phase in
             if phase == .active {
                 model.didBecomeActive()
@@ -60,7 +73,16 @@ struct HomeView: View {
 
     @ViewBuilder
     private func content(_ ui: HomeScreenUi) -> some View {
-        let ink = sample.ink
+        // The places map is dark whatever the photo is, so its page always takes light ink.
+        let onMap = model.page == .places && ui.places.map != nil
+        // iOS 17+: text is drawn in sentinel ink and each section resolves it per pixel against the
+        // photo behind it, live while scrolling (see AdaptiveInk). Older systems get one ink for the
+        // header and one for the pages under it.
+        let luminance = onMap || !AdaptiveInk.isSupported ? nil : sample.map
+        let ink = luminance != nil ? AdaptiveInk.sentinel : onMap ? HomeTheme.inkOnDark : sample.ink
+        // Pages under the header sit on the bottom scrim, so they read against that, not the sky.
+        let chromeInk = onMap ? HomeTheme.inkOnDark : sample.bodyInk
+        let bodyInk = luminance != nil ? AdaptiveInk.sentinel : chromeInk
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 // Weather and places share the forecast header; settings has its own profile header.
@@ -78,14 +100,14 @@ struct HomeView: View {
                 ZStack(alignment: .top) {
                     switch model.page {
                     case .weather:
-                        WeatherPage(ui: ui, ink: ink, model: model, showAiSummary: model.aiAvailable, onOpenPlaces: { show(.places) })
+                        WeatherPage(ui: ui, ink: bodyInk, model: model, showAiSummary: model.aiAvailable, onOpenPlaces: { show(.places) })
                             .transition(pageTransition)
                     case .places:
                         PlacesPage(
                             places: ui.places,
                             strings: ui.strings.places,
                             retry: ui.strings.retry,
-                            ink: ink,
+                            ink: bodyInk,
                             controller: model.controller,
                             onUpgrade: { show(.hub) }
                         )
@@ -95,6 +117,7 @@ struct HomeView: View {
                             SettingsPage(
                                 ui: settingsUi,
                                 ink: ink,
+                                bodyInk: bodyInk,
                                 model: settings,
                                 permissions: model.permissions,
                                 onOpenLanguage: { showLanguage = true }
@@ -106,6 +129,7 @@ struct HomeView: View {
             }
             .padding(.horizontal, HomeTheme.pageInset)
             .padding(.bottom, HomeTheme.tabBarHeight + 40)
+            .environment(\.backdropLuminance, luminance)
             .background(
                 GeometryReader { proxy in
                     Color.clear.preference(
@@ -138,7 +162,7 @@ struct HomeView: View {
         }
         .simultaneousGesture(pageSwipe)
         .overlay(alignment: .bottom) {
-            bottomOverlay(ui, ink: ink)
+            bottomOverlay(ui, ink: chromeInk)
         }
         .overlay(alignment: .top) {
             StatusBarFade()
@@ -192,21 +216,24 @@ struct HomeView: View {
 
     private func bottomOverlay(_ ui: HomeScreenUi, ink: Color) -> some View {
         VStack(spacing: 12) {
-            HStack {
-                RefreshChip(visible: ui.chrome.isBackgroundRefreshing && !ui.chrome.isRefreshing, ink: ink)
-                Spacer()
-                if ui.places.showAddButton {
-                    Button(action: model.controller.placeActions.openSearch) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundStyle(HomeTheme.onYellow)
-                            .frame(width: 56, height: 56)
-                            .background(HomeTheme.yellow, in: Circle())
-                            .shadow(color: .black.opacity(0.3), radius: 6, y: 3)
+            // The loader is centred on the row; the add button keeps the trailing edge.
+            ZStack {
+                RefreshChip(visible: ui.chrome.isLoading, ink: ink)
+                HStack {
+                    Spacer()
+                    if ui.places.showAddButton {
+                        Button(action: model.controller.placeActions.openSearch) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 22, weight: .semibold))
+                                .foregroundStyle(HomeTheme.onYellow)
+                                .frame(width: 56, height: 56)
+                                .background(HomeTheme.yellow, in: Circle())
+                                .shadow(color: .black.opacity(0.3), radius: 6, y: 3)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(ui.strings.places.add)
+                        .transition(.scale(scale: 0.4).combined(with: .opacity))
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(ui.strings.places.add)
-                    .transition(.scale(scale: 0.4).combined(with: .opacity))
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: ui.places.showAddButton)

@@ -1,5 +1,7 @@
 package bose.ankush.network.auth.api
 
+import bose.ankush.network.auth.dpop.authorize
+import bose.ankush.network.auth.dpop.dpop
 import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.model.LoginRequest
 import bose.ankush.network.auth.model.LogoutResponse
@@ -8,11 +10,9 @@ import bose.ankush.network.auth.model.RegisterRequest
 import bose.ankush.network.utils.NetworkUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 
 class KtorAuthApiService(
@@ -23,6 +23,7 @@ class KtorAuthApiService(
         NetworkUtils.retryWithExponentialBackoff {
             httpClient
                 .post("$baseUrl/login") {
+                    dpop()
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }.body()
@@ -32,6 +33,7 @@ class KtorAuthApiService(
         NetworkUtils.retryWithExponentialBackoff {
             httpClient
                 .post("$baseUrl/register") {
+                    dpop()
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }.body()
@@ -41,16 +43,20 @@ class KtorAuthApiService(
         NetworkUtils.retryWithExponentialBackoff {
             httpClient
                 .post("$baseUrl/refresh-token") {
+                    dpop()
                     contentType(ContentType.Application.Json)
                     setBody(request)
                 }.body()
         }
 
-    override suspend fun logout(token: String?): LogoutResponse =
+    override suspend fun logout(
+        token: String?,
+        scheme: String,
+    ): LogoutResponse =
         NetworkUtils.retryWithExponentialBackoff {
             httpClient
                 .post("$baseUrl/logout") {
-                    token?.let { header(HttpHeaders.Authorization, "Bearer $it") }
+                    authorize(token, scheme)
                 }.body()
         }
 }

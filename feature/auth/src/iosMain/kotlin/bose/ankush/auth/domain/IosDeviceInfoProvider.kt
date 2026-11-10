@@ -1,5 +1,6 @@
 package bose.ankush.auth.domain
 
+import bose.ankush.network.repository.PushTokenProvider
 import kotlinx.cinterop.CPointerVar
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
@@ -21,7 +22,10 @@ import platform.posix.AF_INET
 import platform.posix.INET_ADDRSTRLEN
 import platform.posix.sockaddr_in
 
-internal class IosDeviceInfoProvider : DeviceInfoProvider {
+/** [pushTokens] is the app's Firebase Messaging token source; null when none is bound. */
+internal class IosDeviceInfoProvider(
+    private val pushTokens: PushTokenProvider?,
+) : DeviceInfoProvider {
     override fun getDeviceModel(): String = UIDevice.currentDevice.model
 
     override fun getOperatingSystem(): String = OPERATING_SYSTEM
@@ -37,7 +41,7 @@ internal class IosDeviceInfoProvider : DeviceInfoProvider {
 
     override fun getCurrentUtcTimestamp(): String = currentUtcTimestamp()
 
-    override suspend fun getFirebaseToken(): String? = null
+    override suspend fun getFirebaseToken(): String? = pushTokens?.token()
 
     private companion object {
         const val OPERATING_SYSTEM = "iOS"

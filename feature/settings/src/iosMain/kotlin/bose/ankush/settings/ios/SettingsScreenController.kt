@@ -11,6 +11,7 @@ import bose.ankush.settings.domain.ProfilePhoto
 import bose.ankush.settings.generated.resources.Res
 import bose.ankush.settings.generated.resources.premium_activated_msg_txt
 import bose.ankush.settings.generated.resources.premium_activated_title_txt
+import bose.ankush.settings.generated.resources.profile_offline_txt
 import bose.ankush.settings.generated.resources.profile_photo_read_failed_txt
 import bose.ankush.settings.generated.resources.profile_photo_remove_failed_txt
 import bose.ankush.settings.generated.resources.profile_photo_removed_txt
@@ -224,6 +225,7 @@ class SettingsScreenController(
                 ProfileMessage.PhotoUpdated -> Res.string.profile_photo_updated_txt to null
                 ProfileMessage.PhotoRemoved -> Res.string.profile_photo_removed_txt to null
                 ProfileMessage.PhotoUnreadable -> Res.string.profile_photo_read_failed_txt to null
+                ProfileMessage.Offline -> Res.string.profile_offline_txt to null
                 is ProfileMessage.UploadFailed -> Res.string.profile_photo_upload_failed_txt to reason
                 is ProfileMessage.RemoveFailed -> Res.string.profile_photo_remove_failed_txt to reason
             }

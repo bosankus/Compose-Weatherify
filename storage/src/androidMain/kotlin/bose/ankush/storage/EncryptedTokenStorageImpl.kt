@@ -40,9 +40,29 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
         MutableStateFlow(encryptedSharedPreferences.contains(TOKEN_KEY))
     }
 
-    actual override suspend fun saveToken(token: String) {
+    actual override suspend fun saveTokens(
+        accessToken: String,
+        refreshToken: String?,
+        tokenType: String?,
+    ) {
         withContext(Dispatchers.IO) {
-            val success = encryptedSharedPreferences.edit().putString(TOKEN_KEY, token).commit()
+            // One commit, so the tokens and their type can never end up from different sessions.
+            val success =
+                encryptedSharedPreferences
+                    .edit()
+                    .putString(TOKEN_KEY, accessToken)
+                    .apply {
+                        if (refreshToken != null) {
+                            putString(REFRESH_TOKEN_KEY, refreshToken)
+                        } else {
+                            remove(REFRESH_TOKEN_KEY)
+                        }
+                        if (tokenType != null) {
+                            putString(TOKEN_TYPE_KEY, tokenType)
+                        } else {
+                            remove(TOKEN_TYPE_KEY)
+                        }
+                    }.commit()
             if (success) {
                 _hasToken.value = true
             }
@@ -54,11 +74,27 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
             encryptedSharedPreferences.getString(TOKEN_KEY, null)
         }
 
+    actual override suspend fun getRefreshToken(): String? =
+        withContext(Dispatchers.IO) {
+            encryptedSharedPreferences.getString(REFRESH_TOKEN_KEY, null)
+        }
+
+    actual override suspend fun getTokenType(): String? =
+        withContext(Dispatchers.IO) {
+            encryptedSharedPreferences.getString(TOKEN_TYPE_KEY, null)
+        }
+
     actual override fun hasToken(): Flow<Boolean> = _hasToken.asStateFlow()
 
     actual override suspend fun clearToken() {
         withContext(Dispatchers.IO) {
-            val success = encryptedSharedPreferences.edit().remove(TOKEN_KEY).commit()
+            val success =
+                encryptedSharedPreferences
+                    .edit()
+                    .remove(TOKEN_KEY)
+                    .remove(REFRESH_TOKEN_KEY)
+                    .remove(TOKEN_TYPE_KEY)
+                    .commit()
             if (success) {
                 _hasToken.value = false
             }
@@ -68,6 +104,8 @@ actual class EncryptedTokenStorageImpl : TokenStorage {
     companion object {
         private const val PREFS_NAME = "encrypted_auth_prefs"
         private const val TOKEN_KEY = "auth_token"
+        private const val REFRESH_TOKEN_KEY = "refresh_token"
+        private const val TOKEN_TYPE_KEY = "token_type"
     }
 }
 

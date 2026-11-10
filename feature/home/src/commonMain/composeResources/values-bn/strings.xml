@@ -10,6 +10,9 @@
     <string name="network_timeout_txt">অনুরোধের সময় শেষ হয়ে গেছে। পরে আবার চেষ্টা করুন।</string>
     <string name="general_error_txt">আরে!.. কিছু একটা ভুল হয়েছে।</string>
     <string name="gps_disabled_error_txt">লোকেশন সেবা বন্ধ আছে। স্থানীয় আবহাওয়া পেতে GPS চালু করুন।</string>
+    <string name="location_unavailable_txt">আপনার অবস্থান খুঁজে পাওয়া যায়নি। আবার চেষ্টা করুন, অথবা আবহাওয়া দেখতে একটি জায়গা বেছে নিন।</string>
+    <string name="location_pick_place_btn">জায়গা বেছে নিন</string>
+    <string name="allow_location_btn">অবস্থানের অনুমতি দিন</string>
     <string name="enable_gps_btn_txt">GPS চালু করুন</string>
     <string name="default_coordinates_txt">অবস্থান স্থানাঙ্ক এখনো আপডেট হয়নি।</string>
     <string name="cancel_btn_txt">বাতিল করুন</string>

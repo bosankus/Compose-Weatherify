@@ -347,7 +347,7 @@ struct EventSheet: View {
 
 // MARK: - Alert details
 
-extension AlertUi: Identifiable {
+extension AlertUi: @retroactive Identifiable {
     public var id: String {
         key
     }

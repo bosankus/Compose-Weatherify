@@ -1,7 +1,10 @@
 package bose.ankush.network.di
 
 import bose.ankush.analytics.ErrorReporter
+import bose.ankush.network.auth.dpop.Dpop
+import bose.ankush.network.auth.dpop.DpopProofFactory
 import bose.ankush.network.util.NetworkConnectivity
+import bose.ankush.tokenstorage.api.DpopKey
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -21,6 +24,7 @@ expect val networkDomainModule: Module
 fun createHttpClient(
     errorReporter: ErrorReporter,
     networkConnectivity: NetworkConnectivity,
+    dpopKey: DpopKey,
 ): HttpClient {
     val json =
         Json {
@@ -38,6 +42,10 @@ fun createHttpClient(
         install(Logging) {
             logger = Logger.SIMPLE
             level = LogLevel.NONE
+        }
+        install(Dpop) {
+            proofs = DpopProofFactory(dpopKey)
+            onProofFailed = { errorReporter.recordError(it, "DPoP proof failed") }
         }
         // Reporting lives here rather than at each call site so the endpoint is taken from the
         // request Ktor actually sent — it can't drift from the URL the way a hand-written label

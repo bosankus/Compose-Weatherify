@@ -30,6 +30,8 @@ data class HeaderUi(
     /** Set while a saved place, not GPS, drives the forecast. */
     val locationOverrideName: String?,
     val locationOverrideDescription: String?,
+    /** Reset to GPS tapped: the chip spins until the GPS forecast lands, then goes. */
+    val locationResetting: Boolean,
 )
 
 data class BackdropUi(
@@ -45,10 +47,10 @@ data class BackdropPhotoUi(
     val unsplashUrl: String,
 )
 
-/** Pull to refresh, background refresh, prompts and banners around the content. */
+/** The loader, prompts and banners around the content. */
 data class ChromeUi(
-    val isRefreshing: Boolean,
-    val isBackgroundRefreshing: Boolean,
+    /** The one loading state, for the centred bottom loader. Pull to refresh does not hold open. */
+    val isLoading: Boolean,
     val offlineMessage: String?,
     val showNotificationPrompt: Boolean,
     val notificationDeclinedForever: Boolean,
@@ -100,7 +102,6 @@ data class TrendUi(
 
 data class WeekUi(
     val days: List<DayUi>,
-    val showRetry: Boolean,
 )
 
 data class DayUi(
@@ -186,8 +187,34 @@ data class PlacesPageUi(
     val loadFailed: Boolean,
     val notice: String?,
     val currentIsActive: Boolean,
+    /** GPS was picked and Home is still fetching its weather. */
+    val currentIsSwitching: Boolean,
     val places: List<PlaceUi>,
     val showAddButton: Boolean,
+    /** Null until Home has a place to centre the map on. */
+    val map: PlacesMapUi?,
+)
+
+/** The street map behind the places page, centred on the place Home is showing. */
+data class PlacesMapUi(
+    val centerLat: Double,
+    val centerLon: Double,
+    /** Shown zoom, in 256pt tiles. */
+    val zoom: Int,
+    /** How far down the page the centre sits, 0 at the top to 1 at the bottom. */
+    val focusY: Double,
+    /** Tile URL with {z}, {x} and {y} placeholders. */
+    val tileUrlTemplate: String,
+    /** Credit line the tile licence asks for wherever the map shows. */
+    val attribution: String,
+    /** Saved places other than the centre. */
+    val pins: List<MapPinUi>,
+)
+
+data class MapPinUi(
+    val key: String,
+    val lat: Double,
+    val lon: Double,
 )
 
 data class PlaceUi(
@@ -195,6 +222,8 @@ data class PlaceUi(
     val title: String,
     val detail: String,
     val isActive: Boolean,
+    /** Picked, and Home is still fetching its weather: the spinner before the tick. */
+    val isSwitching: Boolean,
     /** Null hides the remove button (a place still being stored). */
     val deleteLabel: String?,
 )
@@ -242,9 +271,6 @@ sealed interface HomeScreenEvent {
     data object OpenNotificationSettings : HomeScreenEvent
 
     data object OpenLocationSettings : HomeScreenEvent
-
-    /** The active location changed; go back to the weather page. */
-    data object ShowWeather : HomeScreenEvent
 
     /** Another screen asked for saved places. */
     data object ShowPlaces : HomeScreenEvent

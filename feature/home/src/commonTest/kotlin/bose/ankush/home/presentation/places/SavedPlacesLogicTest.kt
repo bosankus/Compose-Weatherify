@@ -1,6 +1,8 @@
 package bose.ankush.home.presentation.places
 
 import bose.ankush.finder.domain.model.Location
+import bose.ankush.home.domain.model.ForecastPlace
+import bose.ankush.home.domain.nearby.GeoPoint
 import bose.ankush.storage.model.LocationPreferences
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -95,5 +97,86 @@ class SavedPlacesLogicTest {
     @Test
     fun coordinatesAreRoundedToFourPlaces() {
         assertEquals("48.8566, 2.3522", SavedPlacesLogic.formatCoordinates(48.856614, 2.3522219))
+    }
+
+    @Test
+    fun pickedPlaceSpinsUntilHomeShowsIt() {
+        val oldForecast =
+            ForecastPlace(name = "Berlin", isPinned = true, point = GeoPoint(52.52, 13.405))
+        val parisForecast =
+            ForecastPlace(name = "Paris", isPinned = true, point = GeoPoint(paris.lat, paris.lon))
+
+        // Override written, Home has not started the new attempt yet: still the old forecast.
+        assertFalse(SavedPlacesLogic.showsPlace(oldForecast, paris))
+        assertTrue(
+            SavedPlacesLogic.isSwitching(
+                true,
+                homeShowsIt = false,
+                home = HomeProgress(oldForecast)
+            )
+        )
+        // Fetching Paris.
+        assertTrue(
+            SavedPlacesLogic.isSwitching(
+                true,
+                homeShowsIt = false,
+                home = HomeProgress(oldForecast, isLoading = true)
+            ),
+        )
+        // Paris forecast landed and the attempt settled.
+        assertTrue(SavedPlacesLogic.showsPlace(parisForecast, paris))
+        assertFalse(
+            SavedPlacesLogic.isSwitching(
+                true,
+                homeShowsIt = true,
+                home = HomeProgress(parisForecast)
+            )
+        )
+    }
+
+    @Test
+    fun failedSwitchStopsSpinning() {
+        assertFalse(
+            SavedPlacesLogic.isSwitching(
+                true,
+                homeShowsIt = false,
+                home = HomeProgress(failed = true)
+            ),
+        )
+    }
+
+    @Test
+    fun inactiveCardNeverSpins() {
+        assertFalse(
+            SavedPlacesLogic.isSwitching(
+                false,
+                homeShowsIt = false,
+                home = HomeProgress(isLoading = true)
+            )
+        )
+    }
+
+    @Test
+    fun currentLocationIsShownOnlyWhenForecastIsNotPinned() {
+        val point = GeoPoint(1.0, 2.0)
+        assertFalse(SavedPlacesLogic.showsCurrentLocation(null))
+        assertFalse(
+            SavedPlacesLogic.showsCurrentLocation(
+                ForecastPlace(
+                    name = null,
+                    isPinned = true,
+                    point = point
+                )
+            )
+        )
+        assertTrue(
+            SavedPlacesLogic.showsCurrentLocation(
+                ForecastPlace(
+                    name = null,
+                    isPinned = false,
+                    point = point
+                )
+            )
+        )
     }
 }

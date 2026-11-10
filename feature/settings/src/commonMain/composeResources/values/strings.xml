@@ -42,6 +42,7 @@
     <string name="profile_photo_removed_txt">Profile photo removed</string>
     <string name="profile_photo_upload_failed_txt">Couldn’t update your photo. Try again.</string>
     <string name="profile_photo_remove_failed_txt">Couldn’t remove your photo. Try again.</string>
+    <string name="profile_offline_txt">You’re offline. Connect to the internet and try again.</string>
     <string name="profile_photo_read_failed_txt">Couldn’t read that photo. Try a different one.</string>
     <string name="profile_photo_content_desc">Profile photo</string>
     <string name="profile_edit_photo_content_desc">Change profile photo</string>

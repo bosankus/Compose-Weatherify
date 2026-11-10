@@ -9,17 +9,9 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -27,23 +19,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastType
@@ -53,8 +36,6 @@ import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.cancel_btn_txt
 import bose.ankush.home.generated.resources.enable_gps_btn_txt
 import bose.ankush.home.generated.resources.enable_notification_btn
-import bose.ankush.home.generated.resources.location_override_chip_content_desc
-import bose.ankush.home.generated.resources.location_override_reset_btn
 import bose.ankush.home.generated.resources.network_unavailable_txt
 import bose.ankush.home.generated.resources.notification_permission_declined_txt
 import bose.ankush.home.generated.resources.notification_permission_message
@@ -75,10 +56,12 @@ data class HomeScreenChrome(
     val current: WeatherForecast.Current? = null,
     val timezoneOffset: Int? = null,
     val todaySummary: String? = null,
-    val refreshing: Boolean = false,
-    val backgroundRefreshing: Boolean = false,
+    /** [HomeState.isLoading]: the bottom loader. Pull to refresh only plays its gesture. */
+    val loading: Boolean = false,
     val onRefresh: () -> Unit = {},
     val locationOverrideName: String? = null,
+    /** Reset to GPS tapped; the chip spins until the GPS forecast lands. */
+    val resettingLocation: Boolean = false,
     val onResetLocation: () -> Unit = {},
     val showNotificationPrompt: Boolean = false,
     val notificationDeclinedForever: Boolean = false,
@@ -103,9 +86,8 @@ internal fun rememberHomeScreenChrome(
     viewModel: HomeViewModel,
 ): HomeScreenChrome {
     val context = LocalContext.current
-    val backgroundRefreshing by viewModel.refreshing.collectAsStateWithLifecycle()
     // One instance per input change, so the pager pages that take it can skip recomposition.
-    return remember(state, backgroundRefreshing, eventDates, forecastVisible, viewModel, context) {
+    return remember(state, eventDates, forecastVisible, viewModel, context) {
         HomeScreenChrome(
             current = state.weatherData?.current,
             timezoneOffset = state.weatherData?.timezoneOffset,
@@ -114,13 +96,13 @@ internal fun rememberHomeScreenChrome(
                     ?.daily
                     ?.firstOrNull()
                     ?.summary,
-            refreshing = state.isRefreshing,
-            backgroundRefreshing = backgroundRefreshing,
+            loading = state.isLoading,
             onRefresh = { viewModel.processIntent(HomeIntent.Refresh) },
-            locationOverrideName = state.activeLocationName?.takeIf { state.isLocationOverridden && it.isNotBlank() },
+            locationOverrideName = state.locationChipName,
+            resettingLocation = state.isResettingLocation,
             onResetLocation = { viewModel.processIntent(HomeIntent.ResetLocationOverride) },
-            showNotificationPrompt = state.showNotificationBanner,
-            notificationDeclinedForever = state.isNotificationPermissionPermanentlyDeclined,
+            showNotificationPrompt = state.notificationBanner.isVisible,
+            notificationDeclinedForever = state.notificationBanner.isPermanentlyDeclined,
             onEnableNotifications = { viewModel.processIntent(HomeIntent.EnableNotificationBanner) },
             onDismissNotifications = { viewModel.processIntent(HomeIntent.DismissNotificationBanner) },
             offlineMessage = if (forecastVisible && state.isOffline) state.offlineMessage else null,
@@ -236,7 +218,11 @@ internal fun NotificationPrompt(chrome: HomeScreenChrome) {
 }
 
 @Composable
-internal fun OfflineToast(message: String?) {
+/** Place at the bottom: the toast only fills its width and keeps its own gap above the tab bar. */
+internal fun OfflineToast(
+    message: String?,
+    modifier: Modifier = Modifier,
+) {
     var visible by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(message) {
@@ -248,49 +234,14 @@ internal fun OfflineToast(message: String?) {
         }
     }
     NotificationToast(
+        modifier = modifier,
         message = text ?: stringResource(Res.string.network_unavailable_txt),
         title = stringResource(Res.string.offline_toast_title_txt),
         type = ToastType.WARNING,
         isVisible = visible,
         onDismiss = { visible = false },
+        bottomOffset = TabBarReserveHeight,
     )
-}
-
-@Composable
-internal fun LocationOverrideChip(
-    label: String,
-    name: String,
-    onReset: () -> Unit,
-    contentColor: Color,
-    modifier: Modifier = Modifier,
-) {
-    val description = stringResource(Res.string.location_override_chip_content_desc, name)
-    Row(
-        modifier =
-            modifier
-                .clip(RoundedCornerShape(18.dp))
-                .background(Color.Black.copy(alpha = CARD_ALPHA))
-                .semantics {
-                    role = Role.Button
-                    contentDescription = description
-                }.clickable(onClick = onReset)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Filled.LocationOn,
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.padding(0.dp),
-        )
-        Text(
-            text = "$label  ·  ${stringResource(Res.string.location_override_reset_btn)}",
-            color = contentColor,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-        )
-    }
 }
 
 @Composable

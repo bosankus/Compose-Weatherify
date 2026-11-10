@@ -11,8 +11,11 @@ interface AccountPhotoStore {
         bytes: ByteArray,
     )
 
-    /** The photo at [photoUrl] was removed. */
-    fun remove(photoUrl: String)
+    /**
+     * [photoUrl] is the account's only photo now (null: no photo). Any other photo cached before,
+     * in this run or an earlier one, is deleted. A re-signed URL for the same photo keeps it.
+     */
+    fun keepOnly(photoUrl: String?)
 
     /** Everything, on logout. */
     fun clear()

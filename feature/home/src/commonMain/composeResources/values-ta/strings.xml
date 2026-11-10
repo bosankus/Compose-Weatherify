@@ -10,6 +10,9 @@
     <string name="network_timeout_txt">கோரிக்கை நேர வரம்பு மீறியது. பிறகு மீண்டும் முயற்சிக்கவும்.</string>
     <string name="general_error_txt">அச்சோ!.. ஏதோ தவறு நடந்தது.</string>
     <string name="gps_disabled_error_txt">இட சேவைகள் அணைக்கப்பட்டுள்ளன. உள்ளூர் வானிலை பெற GPS இயக்கவும்.</string>
+    <string name="location_unavailable_txt">உங்கள் இருப்பிடத்தைக் கண்டறிய முடியவில்லை. மீண்டும் முயலவும், அல்லது வானிலையைப் பார்க்க ஒரு இடத்தைத் தேர்ந்தெடுக்கவும்.</string>
+    <string name="location_pick_place_btn">இடத்தைத் தேர்ந்தெடு</string>
+    <string name="allow_location_btn">இருப்பிடத்தை அனுமதி</string>
     <string name="enable_gps_btn_txt">GPS இயக்கு</string>
     <string name="default_coordinates_txt">இட ஆயங்கள் இன்னும் புதுப்பிக்கப்படவில்லை.</string>
     <string name="cancel_btn_txt">ரத்து செய்</string>

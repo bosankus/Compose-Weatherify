@@ -13,6 +13,9 @@
     <string name="network_timeout_txt">פג הזמן הקצוב לבקשה. אנא נסה שוב מאוחר יותר.</string>
     <string name="general_error_txt">אופס!..משהו השתבש.</string>
     <string name="gps_disabled_error_txt">שירותי המיקום כבויים. הפעל GPS כדי לקבל את מזג האוויר המקומי.</string>
+    <string name="location_unavailable_txt">לא הצלחנו למצוא את המיקום שלך. נסו שוב, או בחרו מקום כדי לראות את מזג האוויר שלו.</string>
+    <string name="location_pick_place_btn">בחירת מקום</string>
+    <string name="allow_location_btn">אישור מיקום</string>
     <string name="enable_gps_btn_txt">הפעל GPS</string>
     <string name="default_coordinates_txt">קואורדינטות המיקום עדיין לא עודכנו.</string>
     <string name="weather_icon_content">סמל מצב מזג האוויר</string>

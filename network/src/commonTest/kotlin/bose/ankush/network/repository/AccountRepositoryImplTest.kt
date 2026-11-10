@@ -75,6 +75,7 @@ class AccountRepositoryImplTest {
             assertEquals("Photo exceeds 5MB limit", result.exceptionOrNull()?.message)
             assertEquals("https://signed/old", repository.account.value?.photoUrl)
             assertNull(photoStore.storedUrl)
+            assertEquals(listOf<String?>("https://signed/old"), photoStore.kept)
         }
 
     @Test
@@ -89,11 +90,43 @@ class AccountRepositoryImplTest {
 
             repository.deletePhoto().getOrThrow()
             assertEquals(Account("a@b.c", null), repository.account.value)
-            assertEquals(listOf("https://signed/old"), photoStore.removed)
+            assertEquals(listOf("https://signed/old", null), photoStore.kept)
 
             repository.clear()
             assertNull(repository.account.value)
             assertTrue(photoStore.cleared)
+        }
+
+    @Test
+    fun everyFetchTellsTheStoreWhichPhotoIsCurrent() =
+        runTest {
+            api.account = account("https://storage/users/old-uuid?sig=1")
+            repository.getAccount()
+            api.account = account("https://storage/users/new-uuid?sig=2")
+            repository.getAccount()
+            api.account = account(" ")
+            repository.getAccount()
+
+            assertEquals(
+                listOf(
+                    "https://storage/users/old-uuid?sig=1",
+                    "https://storage/users/new-uuid?sig=2",
+                    null
+                ),
+                photoStore.kept,
+            )
+        }
+
+    @Test
+    fun uploadStoresTheNewPhotoThenKeepsOnlyIt() =
+        runTest {
+            repository.getAccount()
+            photoStore.kept.clear()
+
+            repository.uploadPhoto(byteArrayOf(1), "image/jpeg", "photo.jpg").getOrThrow()
+
+            assertEquals("https://signed/new", photoStore.storedUrl)
+            assertEquals(listOf<String?>("https://signed/new"), photoStore.kept)
         }
 
     @Test
@@ -134,12 +167,15 @@ class AccountRepositoryImplTest {
             assertFalse(photoStore.cleared)
         }
 
+    private fun account(photoUrl: String?) =
+        ApiResponse(status = true, message = "ok", data = Account("a@b.c", photoUrl))
+
     private class RecordingPhotoStore : AccountPhotoStore {
         var storedUrl: String? = null
         var storedBytes: ByteArray? = null
         var publishedWhenStored: String? = null
         var onStore: () -> Unit = {}
-        val removed = mutableListOf<String>()
+        val kept = mutableListOf<String?>()
         var cleared = false
 
         override suspend fun store(
@@ -151,8 +187,8 @@ class AccountRepositoryImplTest {
             onStore()
         }
 
-        override fun remove(photoUrl: String) {
-            removed += photoUrl
+        override fun keepOnly(photoUrl: String?) {
+            kept += photoUrl
         }
 
         override fun clear() {
@@ -179,6 +215,10 @@ class AccountRepositoryImplTest {
 
         override suspend fun deleteAccountPhoto(): ApiResponse<AccountPhoto> =
             ApiResponse(status = true, message = "ok", data = AccountPhoto(null))
+
+        override suspend fun registerPushToken(token: String): Boolean = true
+
+        override suspend fun unregisterPushToken(token: String): Boolean = true
 
         var deleteResult: DeleteAccountResult = DeleteAccountResult.Deleted
         var deleteError: Exception? = null

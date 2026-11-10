@@ -3,6 +3,8 @@ package bose.ankush.settings.presentation.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bose.ankush.analytics.ErrorReporter
+import bose.ankush.network.util.ApiRejection
+import bose.ankush.network.util.NetworkConnectivity
 import bose.ankush.settings.domain.ObserveAccount
 import bose.ankush.settings.domain.ProfilePhoto
 import bose.ankush.settings.domain.RefreshAccount
@@ -25,7 +27,8 @@ import kotlinx.coroutines.launch
  *
  * The email and photo come from the shared account, so the home avatar updates the moment an
  * upload finishes. Only one photo change runs at a time, and it is not cancelled by a refresh
- * or by leaving the screen's composition: the server may already have it.
+ * or by leaving the screen's composition: the server may already have it. A change is not
+ * attempted while offline, so the user is told at once instead of after a connect timeout.
  */
 internal class ProfileViewModel(
     observeAccount: ObserveAccount,
@@ -33,6 +36,7 @@ internal class ProfileViewModel(
     private val uploadProfilePhoto: UploadProfilePhoto,
     private val removeProfilePhoto: RemoveProfilePhoto,
     private val errorReporter: ErrorReporter,
+    private val networkConnectivity: NetworkConnectivity,
 ) : ViewModel() {
     private val local = MutableStateFlow(LocalState())
 
@@ -96,6 +100,7 @@ internal class ProfileViewModel(
     }
 
     private fun upload(photo: ProfilePhoto) {
+        if (isOffline()) return
         if (!startOperation(PhotoOperation.Uploading)) return
         viewModelScope.launch {
             val result = uploadProfilePhoto(photo)
@@ -115,6 +120,7 @@ internal class ProfileViewModel(
 
     private fun remove() {
         local.update { it.copy(isRemoveConfirmVisible = false) }
+        if (isOffline()) return
         if (!startOperation(PhotoOperation.Removing)) return
         viewModelScope.launch {
             val result = removeProfilePhoto()
@@ -126,6 +132,13 @@ internal class ProfileViewModel(
                     _messages.trySend(ProfileMessage.RemoveFailed(error.reasonOrNull()))
                 }
         }
+    }
+
+    /** True, after telling the user, when there is no network to send the change over. */
+    private fun isOffline(): Boolean {
+        if (networkConnectivity.isNetworkAvailable()) return false
+        _messages.trySend(ProfileMessage.Offline)
+        return true
     }
 
     /** Atomically claims the single photo-operation slot. False when one is already running. */
@@ -147,7 +160,15 @@ internal class ProfileViewModel(
         errorReporter.recordError(error, message, context + ("reason" to error.message.orEmpty()))
     }
 
-    private fun Throwable.reasonOrNull(): String? = message?.trim()?.takeIf { it.isNotEmpty() }
+    /**
+     * Only a reason meant for the user: the server's own refusal, or the size check before sending.
+     * A transport failure's message is a Ktor diagnostic with the URL in it, so it stays in reports.
+     */
+    private fun Throwable.reasonOrNull(): String? =
+        takeIf { it is ApiRejection || it is IllegalArgumentException }
+            ?.message
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
 
     private fun finishOperation() {
         local.update { it.copy(operation = PhotoOperation.Idle) }

@@ -4,6 +4,9 @@ import bose.ankush.home.domain.location.LocationClient
 import bose.ankush.home.generated.resources.Res
 import bose.ankush.home.generated.resources.city_error_txt
 import bose.ankush.home.generated.resources.general_error_txt
+import bose.ankush.home.generated.resources.gps_disabled_error_txt
+import bose.ankush.home.generated.resources.location_permission_denied_txt
+import bose.ankush.home.generated.resources.location_unavailable_txt
 import bose.ankush.home.generated.resources.network_timeout_txt
 import bose.ankush.home.generated.resources.network_unavailable_txt
 import bose.ankush.home.generated.resources.server_error_txt
@@ -13,9 +16,16 @@ import org.jetbrains.compose.resources.getString
 
 internal suspend fun errorMessageFromException(exception: Exception): String? =
     when (exception) {
-        is LocationClient.LocationException -> exception.message
+        is LocationClient.LocationException -> locationErrorMessage(exception.reason)
         is NetworkException -> errorMessageForCode(exception.errorCode)
         else -> getString(Res.string.general_error_txt)
+    }
+
+private suspend fun locationErrorMessage(reason: LocationClient.Reason): String =
+    when (reason) {
+        LocationClient.Reason.PermissionDenied -> getString(Res.string.location_permission_denied_txt)
+        LocationClient.Reason.ServicesOff -> getString(Res.string.gps_disabled_error_txt)
+        LocationClient.Reason.NoFix -> getString(Res.string.location_unavailable_txt)
     }
 
 private suspend fun errorMessageForCode(errorCode: Int): String =

@@ -12,6 +12,7 @@ import bose.ankush.home.generated.resources.ai_summary_retry
 import bose.ankush.home.generated.resources.ai_summary_tips_heading
 import bose.ankush.home.generated.resources.ai_summary_title
 import bose.ankush.home.generated.resources.ai_summary_writing
+import bose.ankush.home.generated.resources.allow_location_btn
 import bose.ankush.home.generated.resources.cancel_btn_txt
 import bose.ankush.home.generated.resources.daily_forecast_heading_txt
 import bose.ankush.home.generated.resources.enable_gps_btn_txt
@@ -21,7 +22,9 @@ import bose.ankush.home.generated.resources.event_sheet_title
 import bose.ankush.home.generated.resources.event_title_hint
 import bose.ankush.home.generated.resources.hourly_forecast_heading_txt
 import bose.ankush.home.generated.resources.location_override_reset_btn
+import bose.ankush.home.generated.resources.location_override_resetting
 import bose.ankush.home.generated.resources.location_permission_settings_steps
+import bose.ankush.home.generated.resources.location_pick_place_btn
 import bose.ankush.home.generated.resources.network_unavailable_txt
 import bose.ankush.home.generated.resources.notification_permission_declined_txt
 import bose.ankush.home.generated.resources.notification_permission_message
@@ -56,6 +59,7 @@ data class HomeStrings(
     val hourlyForecast: String,
     val enableGps: String,
     val requestLocation: String,
+    val pickPlace: String,
     val enableNotifications: String,
     val notificationMessage: String,
     val notificationDeclined: String,
@@ -64,6 +68,7 @@ data class HomeStrings(
     val offlineTitle: String,
     val networkUnavailable: String,
     val resetToGps: String,
+    val resettingToGps: String,
     val eventCalendar: String,
     val addEvent: String,
     val nearbyEvents: String,
@@ -134,7 +139,8 @@ internal suspend fun loadHomeStrings(): HomeStrings =
         dailyForecast = getString(Res.string.daily_forecast_heading_txt),
         hourlyForecast = getString(Res.string.hourly_forecast_heading_txt),
         enableGps = getString(Res.string.enable_gps_btn_txt),
-        requestLocation = "Request location permission",
+        requestLocation = getString(Res.string.allow_location_btn),
+        pickPlace = getString(Res.string.location_pick_place_btn),
         enableNotifications = getString(Res.string.enable_notification_btn),
         notificationMessage = getString(Res.string.notification_permission_message),
         notificationDeclined = getString(Res.string.notification_permission_declined_txt),
@@ -144,6 +150,7 @@ internal suspend fun loadHomeStrings(): HomeStrings =
         offlineTitle = getString(Res.string.offline_toast_title_txt),
         networkUnavailable = getString(Res.string.network_unavailable_txt),
         resetToGps = getString(Res.string.location_override_reset_btn),
+        resettingToGps = getString(Res.string.location_override_resetting),
         // Same fixed English copy as the Android screen, which has no resources for these yet.
         eventCalendar = "Event calendar",
         addEvent = "Add event",

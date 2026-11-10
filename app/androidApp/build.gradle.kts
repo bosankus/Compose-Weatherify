@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.secrets.gradle.plugin)
     alias(libs.plugins.ben.manes.versions)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 secrets {
@@ -100,6 +101,7 @@ dependencies {
     api(project(":feature:home"))
     api(project(":feature:settings"))
     api(project(":navigation"))
+    api(project(":routing"))
     api(project(":storage"))
     api(project(":network"))
     api(project(":analytics"))
@@ -108,10 +110,15 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
+    implementation(libs.androidx.navigation3.runtime)
 
     implementation(libs.google.play.app.update)
     implementation(libs.google.play.app.update.ktx)
     implementation(libs.androidx.core.splashscreen)
+
+    // Installs the generated baseline profile on sideloaded/non-Play installs too.
+    implementation(libs.androidx.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
 
     // Wearable Data Layer API — phone<->watch messaging/data sync.
     implementation(libs.google.play.services.wearable)
@@ -119,6 +126,7 @@ dependencies {
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
+    implementation("androidx.compose.runtime:runtime-saveable")
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)

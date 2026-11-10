@@ -13,10 +13,10 @@ class PlaceActions internal constructor(
     private val pickedSuggestion: MutableStateFlow<String?>,
     private val onPlacesPage: MutableStateFlow<Boolean>,
 ) {
-    /** The pager settled on a page; the places page loads each time it is shown. */
+    /** The pager settled on a page; the places page loads only until it has a list. */
     fun pageChanged(placesPage: Boolean) {
         onPlacesPage.value = placesPage
-        if (placesPage) places.processIntent(SavedPlacesIntent.Load)
+        if (placesPage) places.processIntent(SavedPlacesIntent.PageShown)
     }
 
     fun load() = places.processIntent(SavedPlacesIntent.Load)

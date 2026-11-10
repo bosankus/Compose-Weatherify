@@ -1,34 +1,19 @@
 package bose.ankush.home.presentation
 
-import bose.ankush.home.domain.model.AirQuality
-import bose.ankush.home.domain.model.WeatherForecast
+import bose.ankush.home.domain.model.HomeWeather
 
 internal sealed interface HomeAction {
-    /** The first Room read finished. Empty Room may now show the loading state. */
-    data object CacheChecked : HomeAction
-
-    data class Loading(
-        val isRefreshing: Boolean = false,
+    /**
+     * A new [HomeWeather]. [message] is the text for its failure or missing location, already
+     * resolved from string resources, or null when it has neither.
+     */
+    data class WeatherChanged(
+        val weather: HomeWeather,
+        val message: String?,
     ) : HomeAction
 
     data class Error(
         val message: String?,
-        val isGpsDisabled: Boolean = false,
-    ) : HomeAction
-
-    data class SetOffline(
-        val message: String?,
-        val isOffline: Boolean = false,
-        val isGpsDisabled: Boolean = false,
-        val isLocationPermissionDenied: Boolean = false,
-    ) : HomeAction
-
-    data class Success(
-        val weather: WeatherForecast? = null,
-        val airQuality: AirQuality? = null,
-        val location: Pair<Double, Double>? = null,
-        val isLocationOverridden: Boolean = false,
-        val overrideLocationName: String? = null,
     ) : HomeAction
 
     data class UpdateNotificationBanner(
@@ -38,4 +23,12 @@ internal sealed interface HomeAction {
     ) : HomeAction
 
     data object DismissNotificationBanner : HomeAction
+
+    /** "Reset to GPS" tapped while [name] was pinned. */
+    data class ResetLocationStarted(
+        val name: String,
+    ) : HomeAction
+
+    /** The override could not be cleared; the chip goes back to its idle look. */
+    data object ResetLocationFailed : HomeAction
 }

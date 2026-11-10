@@ -1,41 +1,27 @@
 package bose.ankush.network.auth.token
 
+import bose.ankush.network.auth.dpop.authorizationScheme
+import bose.ankush.network.auth.model.AuthResponse
 import bose.ankush.network.auth.repository.AuthRepository
 import bose.ankush.tokenstorage.api.TokenStorage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.time.Clock
 
+/**
+ * The one way to refresh the session. Every refresh runs under one lock, so a refresh token is
+ * presented once and never again: with rotation, the server treats a second use as theft and
+ * revokes the session.
+ */
 class TokenManager(
     private val tokenStorage: TokenStorage,
     private val authRepository: AuthRepository,
 ) {
     private val refreshMutex = Mutex()
-    private var lastRefreshTime: Long = 0
 
-    suspend fun refreshToken(currentTime: Long = Clock.System.now().epochSeconds): TokenResult =
-        refreshMutex.withLock {
-            lastRefreshTime = currentTime
-            try {
-                val response =
-                    authRepository.refreshToken()
-                        ?: return TokenResult.NoToken
-                val newToken = response.data?.token
-                if (response.isSuccess() && !newToken.isNullOrBlank()) {
-                    tokenStorage.saveToken(newToken)
-                    return TokenResult.Valid(newToken)
-                }
-                // If token is missing in a successful response, treat as no token
-                if (response.isSuccess() && newToken.isNullOrBlank()) {
-                    return TokenResult.NoToken
-                }
-                return TokenResult.InvalidToken(response.data?.errorCode)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                return TokenResult.Error(e)
-            }
-        }
+    /** Refreshes now and returns the server's response, for callers that need its data (premium). */
+    suspend fun refreshSession(): AuthResponse? =
+        refreshMutex.withLock { authRepository.refreshToken() }
 
     /**
      * Returns the currently stored token without attempting a refresh.
@@ -43,10 +29,34 @@ class TokenManager(
      */
     suspend fun getStoredToken(): String? = tokenStorage.getToken()
 
-    suspend fun handleUnauthorized(): TokenResult {
-        lastRefreshTime = 0
-        return refreshToken()
-    }
+    /** "DPoP" once the server has bound the stored token to the device key, otherwise "Bearer". */
+    suspend fun authorizationScheme(): String = authorizationScheme(tokenStorage.getTokenType())
+
+    /**
+     * The server refused [rejectedToken]. When requests fail together, the first to get the lock
+     * refreshes and the rest find a newer token already stored and reuse it.
+     */
+    suspend fun handleUnauthorized(rejectedToken: String?): TokenResult =
+        refreshMutex.withLock {
+            val current = tokenStorage.getToken()
+            if (current != null && current != rejectedToken) TokenResult.Valid(current) else exchange()
+        }
+
+    private suspend fun exchange(): TokenResult =
+        try {
+            val response = authRepository.refreshToken()
+            val newToken = response?.data?.token
+            when {
+                response == null -> TokenResult.NoToken
+                response.isSuccess() && !newToken.isNullOrBlank() -> TokenResult.Valid(newToken)
+                // A success without a token can't authenticate anything.
+                response.isSuccess() -> TokenResult.NoToken
+                else -> TokenResult.InvalidToken(response.data?.errorCode)
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            TokenResult.Error(e)
+        }
 
     suspend fun forceLogout(): TokenResult =
         try {

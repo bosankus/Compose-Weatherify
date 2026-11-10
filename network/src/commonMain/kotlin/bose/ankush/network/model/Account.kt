@@ -18,6 +18,12 @@ data class AccountPhoto(
     val photoUrl: String? = null,
 )
 
+/** Body of POST and DELETE /account/push-token: this device's FCM token. */
+@Serializable
+data class PushTokenRequest(
+    val token: String,
+)
+
 /** Body of DELETE /account: the current password, re-entered to confirm. */
 @Serializable
 data class DeleteAccountRequest(

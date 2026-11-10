@@ -49,7 +49,8 @@ internal sealed interface ProfileIntent {
 
 /**
  * One-off messages. The screen turns each into localized text. A failure carries the server's
- * own reason when it gave one (for example a size or format rejection), shown under it.
+ * own reason when it gave one (for example a size or format rejection), shown under it; a
+ * timeout or dropped connection carries none.
  */
 internal sealed interface ProfileMessage {
     data object PhotoUpdated : ProfileMessage
@@ -57,6 +58,9 @@ internal sealed interface ProfileMessage {
     data object PhotoRemoved : ProfileMessage
 
     data object PhotoUnreadable : ProfileMessage
+
+    /** No network, so the photo change was not attempted. */
+    data object Offline : ProfileMessage
 
     data class UploadFailed(
         val reason: String? = null,

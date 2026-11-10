@@ -1,115 +1,118 @@
 package bose.ankush.weatherify.wear.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.wear.compose.foundation.lazy.TransformingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.Icon
-import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.lazy.rememberTransformationSpec
 import androidx.wear.compose.material3.lazy.transformedHeight
-
-private val AlertAmber = Color(0xFFFFD54F)
+import bose.ankush.weatherify.wear.presentation.components.horizontalScreenMargin
+import bose.ankush.weatherify.wear.presentation.theme.DialColors
 
 @Composable
 internal fun AlertDetailScreen(alert: AlertUiState) {
     val columnState = rememberTransformingLazyColumnState()
     val transformationSpec = rememberTransformationSpec()
-    val configuration = LocalConfiguration.current
-    val marginFraction = if (configuration.isScreenRound) 0.08f else 0.04f
-    val horizontalMargin = (configuration.screenWidthDp * marginFraction).dp
 
-    ScreenScaffold(
-        scrollState = columnState,
-        // Alerts always use the low-glare night storm palette — the amber heading pops
-        // against it regardless of the actual time of day.
-        modifier =
-            Modifier.background(
-                brush = WeatherIconType.THUNDERSTORM.toBackgroundGradient(DayPhase.NIGHT),
-            ),
-    ) { contentPadding ->
+    ScreenScaffold(scrollState = columnState) { contentPadding ->
         TransformingLazyColumn(
             state = columnState,
             contentPadding = contentPadding,
-            modifier = Modifier.padding(horizontal = horizontalMargin),
+            modifier = Modifier.padding(horizontal = horizontalScreenMargin()),
         ) {
             item {
-                Icon(
-                    imageVector = Icons.Filled.WarningAmber,
-                    contentDescription = null,
-                    tint = AlertAmber,
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier =
                         Modifier
-                            .size(24.dp)
-                            .transformedHeight(this, transformationSpec),
-                )
+                            .transformedHeight(this, transformationSpec)
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(DialColors.AccentGradient),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.WarningAmber,
+                        contentDescription = null,
+                        tint = DialColors.TextPrimary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
             }
             item {
                 Text(
                     text = alert.event,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = AlertAmber,
+                    fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
+                    color = DialColors.TextPrimary,
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .transformedHeight(this, transformationSpec)
-                            .padding(top = 4.dp),
+                            .padding(top = 8.dp),
                 )
             }
             alert.sender?.let {
                 item {
                     Text(
-                        text = "Issued by: $it",
-                        style = MaterialTheme.typography.labelSmall,
+                        text = it,
+                        fontSize = 12.sp,
                         textAlign = TextAlign.Center,
+                        color = DialColors.TextMuted,
                         modifier =
                             Modifier
                                 .fillMaxWidth()
                                 .transformedHeight(this, transformationSpec)
-                                .padding(top = 4.dp),
+                                .padding(top = 2.dp),
                     )
                 }
             }
             if (alert.start != null || alert.end != null) {
                 item {
-                    val timeRange = listOfNotNull(alert.start, alert.end).joinToString(" - ")
                     Text(
-                        text = timeRange,
-                        style = MaterialTheme.typography.bodyExtraSmall,
+                        text = listOfNotNull(alert.start, alert.end).joinToString(" – "),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center,
+                        color = DialColors.Crimson,
                         modifier =
                             Modifier
                                 .fillMaxWidth()
                                 .transformedHeight(this, transformationSpec)
-                                .padding(top = 4.dp),
+                                .padding(top = 6.dp),
                     )
                 }
             }
-            item {
-                Text(
-                    text = alert.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .transformedHeight(this, transformationSpec)
-                            .padding(top = 12.dp),
-                )
+            if (alert.description.isNotBlank()) {
+                item {
+                    Text(
+                        text = alert.description,
+                        fontSize = 13.sp,
+                        color = DialColors.TextPrimary.copy(alpha = 0.85f),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .transformedHeight(this, transformationSpec)
+                                .padding(top = 12.dp),
+                    )
+                }
             }
         }
     }

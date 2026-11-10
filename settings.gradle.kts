@@ -28,6 +28,7 @@ include(
     ":app:iosApp",
     ":app:wearApp",
     ":automotive",
+    ":baselineprofile",
     ":analytics",
     ":common-ui",
     ":feature:auth",
@@ -38,6 +39,7 @@ include(
     ":feature:settings",
     ":navigation",
     ":network",
+    ":routing",
     ":storage",
     ":token-storage-api",
 )

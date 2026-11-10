@@ -26,6 +26,13 @@ packages:
   # app link step resolves their symbols. This replaces what the Podfile used to do.
   KotlinMultiplatformLinkedPackage:
     path: KotlinMultiplatformLinkedPackage
+  # FirebaseMessaging is only used from Swift (the app delegate and the notification service
+  # extension), so it is linked here rather than cinterop'd by a KMP module. Same package and
+  # version as :feature:home's swiftPMDependencies, which SwiftPM resolves to one copy; bump both
+  # together.
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    exactVersion: 12.4.0
 
 targets:
   iosApp:
@@ -36,6 +43,14 @@ targets:
     dependencies:
       - package: KotlinMultiplatformLinkedPackage
         product: KotlinMultiplatformLinkedPackage
+      - package: Firebase
+        product: FirebaseMessaging
+      - target: NotificationService
+    entitlements:
+      path: iosApp/iosApp.entitlements
+      properties:
+        # Xcode swaps in "production" when exporting with a distribution profile.
+        aps-environment: development
     info:
       path: iosApp/Info.plist
       properties:
@@ -53,6 +68,11 @@ targets:
           UIColorName: SplashBackground
         # No status bar on the launch screen or the splash; it comes back with sign-in/home.
         UIStatusBarHidden: true
+        # Silent pushes (account_photo_changed) wake the app to refetch the account.
+        UIBackgroundModes: [ remote-notification ]
+        # AppDelegate hands the APNs token and each push to Firebase itself; method swizzling
+        # is unreliable behind SwiftUI's UIApplicationDelegateAdaptor.
+        FirebaseAppDelegateProxyEnabled: false
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: bose.ankush.weatherify.ios
@@ -76,3 +96,27 @@ targets:
         # whenever a change landed outside that glob. Gradle's own task-level
         # up-to-date checks already make a no-op invocation fast, so it's safe to
         # always run this phase and let Gradle decide what's stale.
+        # basedOnDependencyAnalysis: false says so explicitly, which also silences
+        # Xcode's "will be run during every build" warning.
+        basedOnDependencyAnalysis: false
+
+  # Adds the picture to pushes that carry one (the backend's fcm_options.image, sent with
+  # mutable-content) before iOS shows them.
+  NotificationService:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: NotificationService
+    dependencies:
+      - package: Firebase
+        product: FirebaseMessaging
+    info:
+      path: NotificationService/Info.plist
+      properties:
+        CFBundleDisplayName: NotificationService
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: bose.ankush.weatherify.ios.NotificationService

@@ -16,12 +16,12 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.wear.compose.material3.AppScaffold
-import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.navigation3.SwipeDismissableSceneStrategy
 import bose.ankush.weatherify.wear.data.WeatherSyncStore
 import bose.ankush.weatherify.wear.data.WeatherUiMapper
 import bose.ankush.weatherify.wear.presentation.navigation.AlertDetailRoute
 import bose.ankush.weatherify.wear.presentation.navigation.WeatherRoute
+import bose.ankush.weatherify.wear.presentation.theme.WeatherifyWearTheme
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
 private fun WeatherifyWearApp() {
     val synced by WeatherSyncStore.synced.collectAsState()
 
-    MaterialTheme {
+    WeatherifyWearTheme {
         // Single AppScaffold at the root: it owns the TimeText overlay and keeps it fixed
         // while individual ScreenScaffolds swap underneath — nesting one per screen makes
         // the clock re-enter on every navigation, which reads as jank.
@@ -90,7 +90,7 @@ private fun WeatherNavHost(uiState: WeatherUiState) {
     val entryProvider =
         entryProvider<NavKey> {
             entry<WeatherRoute> {
-                WeatherScreen(
+                WeatherPagerScreen(
                     uiState = uiState,
                     onAlertClick = { backStack.add(AlertDetailRoute) },
                 )

@@ -15,26 +15,36 @@ struct PlacesPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(strings.title)
-                .font(.system(size: 20, weight: .medium))
-                .foregroundStyle(ink)
-                .headerShadow()
-            if let notice = places.notice {
-                Text(notice).font(.system(size: 13)).foregroundStyle(ink.opacity(0.9))
+            // Each child resolves sentinel ink on its own layer.
+            Group {
+                Text(strings.title)
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(ink)
+                    .headerShadow()
+                if let notice = places.notice {
+                    Text(notice).font(.system(size: 13)).foregroundStyle(ink.opacity(0.9))
+                }
+                PlaceCard(
+                    title: strings.current,
+                    detail: strings.currentDetail,
+                    symbol: "location.fill",
+                    isActive: places.currentIsActive,
+                    isSwitching: places.currentIsSwitching,
+                    deleteLabel: nil,
+                    ink: ink,
+                    onSelect: controller.placeActions.useCurrentLocation,
+                    onDelete: {}
+                )
+                content
+                if let map = places.map {
+                    Text(map.attribution)
+                        .font(.system(size: 11))
+                        .foregroundStyle(ink.opacity(HomeTheme.mutedAlpha))
+                }
+                // Keeps the last card clear of the add button.
+                Spacer().frame(height: 72)
             }
-            PlaceCard(
-                title: strings.current,
-                detail: strings.currentDetail,
-                symbol: "location.fill",
-                isActive: places.currentIsActive,
-                deleteLabel: nil,
-                ink: ink,
-                onSelect: controller.placeActions.useCurrentLocation,
-                onDelete: {}
-            )
-            content
-            // Keeps the last card clear of the add button.
-            Spacer().frame(height: 72)
+            .adaptiveInk()
         }
         .animation(.easeInOut(duration: 0.2), value: places.places.map(\.key))
         .confirmationDialog(
@@ -77,6 +87,7 @@ struct PlacesPage: View {
                     detail: place.detail,
                     symbol: "mappin.and.ellipse",
                     isActive: place.isActive,
+                    isSwitching: place.isSwitching,
                     deleteLabel: place.deleteLabel,
                     ink: ink,
                     onSelect: { controller.placeActions.select(key: place.key) },
@@ -93,10 +104,18 @@ private struct PlaceCard: View {
     let detail: String
     let symbol: String
     let isActive: Bool
+    let isSwitching: Bool
     let deleteLabel: String?
     let ink: Color
     let onSelect: () -> Void
     let onDelete: () -> Void
+
+    private var phase: PlaceStatusMark.Phase {
+        if isActive {
+            return isSwitching ? .switching : .selected
+        }
+        return deleteLabel != nil ? .remove : .none
+    }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -109,14 +128,21 @@ private struct PlaceCard: View {
                 Text(detail).font(.system(size: 13)).foregroundStyle(ink.opacity(HomeTheme.mutedAlpha)).lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            trailing
-                .frame(width: 44, height: 44)
-                .animation(.easeInOut(duration: 0.2), value: isActive)
+            Button(action: onDelete) {
+                PlaceStatusMark(phase: phase, ink: ink)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            // Only the X is a button; on the tick or spinner a tap falls through to the card.
+            .allowsHitTesting(phase == .remove)
+            .accessibilityLabel(deleteLabel ?? "")
+            .accessibilityHidden(phase != .remove)
         }
         .foregroundStyle(ink)
         .padding(.leading, 14)
         .padding(.trailing, 6)
         .padding(.vertical, 12)
+        .adaptiveInk(surface: HomeTheme.cardFillOpacity)
         .background(HomeTheme.cardFill, in: RoundedRectangle(cornerRadius: HomeTheme.cardRadius, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: HomeTheme.cardRadius, style: .continuous)
@@ -134,26 +160,81 @@ private struct PlaceCard: View {
             }
         }
     }
+}
 
-    @ViewBuilder
-    private var trailing: some View {
-        if isActive {
-            Image(systemName: "checkmark")
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(HomeTheme.onYellow)
+/// Right end of a place card, one mark that morphs between states (same as Android's
+/// `PlaceStatusMark`): the X twists down into a small spinning ring while Home fetches the
+/// picked place, then the ring fills into the yellow disc as the tick draws itself in.
+private struct PlaceStatusMark: View {
+    enum Phase {
+        case remove, switching, selected, none
+    }
+
+    let phase: Phase
+    let ink: Color
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(HomeTheme.yellow)
                 .frame(width: 28, height: 28)
-                .background(HomeTheme.yellow, in: Circle())
-                .transition(.scale(scale: 0.6).combined(with: .opacity))
-        } else if let deleteLabel {
-            Button(action: onDelete) {
-                Image(systemName: "xmark").font(.system(size: 14, weight: .semibold)).foregroundStyle(ink.opacity(HomeTheme.mutedAlpha))
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+                .scaleEffect(phase == .selected ? 1 : 0.001)
+                .animation(
+                    phase == .selected ? .spring(response: 0.35, dampingFraction: 0.6) : .easeInOut(duration: Self.morph),
+                    value: phase
+                )
+            CrossShape()
+                .stroke(ink.opacity(HomeTheme.mutedAlpha), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                .frame(width: 10, height: 10)
+                .rotationEffect(.degrees(phase == .remove ? 0 : 90))
+                .scaleEffect(phase == .remove ? 1 : 0.001)
+            TimelineView(.animation(paused: phase != .switching)) { context in
+                Circle()
+                    .trim(from: 0, to: phase == .switching ? 0.75 : 0)
+                    .stroke(HomeTheme.yellow, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                    .frame(width: 16, height: 16)
+                    .rotationEffect(.degrees(Self.spinAngle(at: context.date)))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(deleteLabel)
-            .transition(.scale(scale: 0.6).combined(with: .opacity))
+            TickShape()
+                .trim(from: 0, to: phase == .selected ? 1 : 0)
+                .stroke(HomeTheme.onYellow, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+                .frame(width: 9.1, height: 6.6)
+                .animation(
+                    phase == .selected ? .easeOut(duration: 0.26).delay(0.09) : .easeIn(duration: Self.morph / 2),
+                    value: phase
+                )
         }
+        .frame(width: 44, height: 44)
+        .animation(.easeInOut(duration: Self.morph), value: phase)
+    }
+
+    private static let morph = 0.22
+    private static let spinPeriod = 0.8
+
+    private static func spinAngle(at date: Date) -> Double {
+        date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: spinPeriod) / spinPeriod * 360 - 90
+    }
+}
+
+private struct CrossShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.move(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        return path
+    }
+}
+
+/// Short stroke first, so trimming draws the tick the way a hand would.
+private struct TickShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY + rect.height * 0.55))
+        path.addLine(to: CGPoint(x: rect.minX + rect.width * 0.34, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        return path
     }
 }
 

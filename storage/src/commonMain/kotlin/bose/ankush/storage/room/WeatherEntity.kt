@@ -18,6 +18,11 @@ data class WeatherEntity(
     @ColumnInfo(defaultValue = "0") val lastUpdated: Long = 0L,
     /** OpenWeather `timezone_offset` in seconds. Added in schema 5; null for older rows. */
     val timezoneOffset: Int? = null,
+    /** Where this forecast was fetched. Added in schema 6; null for older rows. */
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    /** The pinned name, else the reverse-geocoded one, at fetch time. Added in schema 6. */
+    val placeName: String? = null,
 ) {
     @Serializable
     data class Alert(

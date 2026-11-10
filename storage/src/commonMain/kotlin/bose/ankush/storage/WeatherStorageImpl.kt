@@ -2,58 +2,36 @@ package bose.ankush.storage
 
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.model.AirQualityData
+import bose.ankush.storage.model.StoredWeather
 import bose.ankush.storage.model.WeatherCondition
 import bose.ankush.storage.model.WeatherData
 import bose.ankush.storage.room.AirQualityEntity
 import bose.ankush.storage.room.Weather
-import bose.ankush.storage.room.WeatherDatabase
+import bose.ankush.storage.room.WeatherDao
 import bose.ankush.storage.room.WeatherEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 /**
- * Room-backed [WeatherStorage] shared by Android and iOS.
- *
- * [getLastWeatherUpdateTime] reads the existing Room `lastUpdated` column. A timestamp remembered
- * for this process is used only when that location was saved during the session, so a cold start
- * still sees the column. Weather / air-quality payloads stay durable in Room on both platforms.
+ * Room-backed [WeatherStorage] shared by Android and iOS. The saved row carries its own fetch
+ * time, coordinates, and place name, so freshness is read from the row itself.
  */
 class WeatherStorageImpl(
-    private val weatherDatabase: WeatherDatabase,
+    private val weatherDao: WeatherDao,
 ) : WeatherStorage {
-    private val locationTimestamps = mutableMapOf<String, Long>()
-
-    private fun locationKey(coordinates: Pair<Double, Double>) = "${coordinates.first}_${coordinates.second}"
-
-    override fun getWeatherReport(coordinates: Pair<Double, Double>): Flow<WeatherData?> =
-        weatherDatabase.weatherDao().getWeather().map {
-            it?.toWeatherData()
+    /**
+     * The weather table only signals a change. [WeatherDao.refreshWeather] and
+     * [WeatherDao.clearAll] always touch both tables, so the pair is then read in one transaction.
+     */
+    override fun observeWeather(): Flow<StoredWeather?> {
+        return weatherDao.getWeather().map {
+            weatherDao.findWeatherWithAirQuality()?.let { (weather, airQuality) ->
+                StoredWeather(weather.toWeatherData(), airQuality?.toAirQualityData())
+            }
         }
-
-    override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQualityData?> =
-        weatherDatabase.weatherDao().getAirQuality().map {
-            it?.toAirQualityData()
-        }
-
-    override suspend fun getLastWeatherUpdateTime(coordinates: Pair<Double, Double>): Long {
-        val remembered = locationTimestamps[locationKey(coordinates)]
-        if (remembered != null) return remembered
-        return weatherDatabase
-            .weatherDao()
-            .getWeather()
-            .first()
-            ?.lastUpdated ?: 0L
-    }
-
-    override suspend fun saveLastWeatherUpdateTime(
-        coordinates: Pair<Double, Double>,
-        time: Long,
-    ) {
-        locationTimestamps[locationKey(coordinates)] = time
     }
 
     override suspend fun saveWeatherData(
@@ -61,7 +39,7 @@ class WeatherStorageImpl(
         airQualityData: AirQualityData,
     ) {
         withContext(Dispatchers.IO) {
-            weatherDatabase.weatherDao().refreshWeather(
+            weatherDao.refreshWeather(
                 weatherData.toWeatherEntity(),
                 airQualityData.toAirQualityEntity(),
             )
@@ -70,9 +48,8 @@ class WeatherStorageImpl(
 
     override suspend fun clearAllData() {
         withContext(Dispatchers.IO) {
-            weatherDatabase.weatherDao().clearAll()
+            weatherDao.clearAll()
         }
-        locationTimestamps.clear()
     }
 }
 
@@ -158,6 +135,9 @@ internal fun WeatherEntity.toWeatherData() =
             },
         lastUpdated = lastUpdated,
         timezoneOffset = timezoneOffset,
+        latitude = latitude,
+        longitude = longitude,
+        placeName = placeName,
     )
 
 internal fun WeatherData.toWeatherEntity() =
@@ -232,6 +212,9 @@ internal fun WeatherData.toWeatherEntity() =
             },
         lastUpdated = lastUpdated,
         timezoneOffset = timezoneOffset,
+        latitude = latitude,
+        longitude = longitude,
+        placeName = placeName,
     )
 
 internal fun AirQualityEntity.toAirQualityData() = AirQualityData(id, aqi, co, no2, o3, so2, pm10, pm25)

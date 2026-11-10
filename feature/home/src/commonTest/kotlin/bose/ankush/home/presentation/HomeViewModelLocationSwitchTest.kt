@@ -2,16 +2,17 @@ package bose.ankush.home.presentation
 
 import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.finder.domain.model.Location
+import bose.ankush.home.domain.location.ActiveCoordinates
 import bose.ankush.home.domain.location.Coordinates
 import bose.ankush.home.domain.location.LocationClient
-import bose.ankush.home.domain.model.AirQuality
+import bose.ankush.home.domain.model.RefreshOutcome
 import bose.ankush.home.domain.model.WeatherForecast
+import bose.ankush.home.domain.model.WeatherSnapshot
+import bose.ankush.home.domain.nearby.GeoPoint
 import bose.ankush.home.domain.remoteconfig.HomeRemoteConfigGate
 import bose.ankush.home.domain.repository.WeatherRepository
 import bose.ankush.home.domain.usecase.GetActiveCoordinatesImpl
-import bose.ankush.home.domain.usecase.GetAirQuality
-import bose.ankush.home.domain.usecase.GetWeatherReport
-import bose.ankush.home.domain.usecase.RefreshWeatherReport
+import bose.ankush.home.domain.usecase.ObserveHomeWeather
 import bose.ankush.home.presentation.places.FakeFinder
 import bose.ankush.home.presentation.places.FakeLocationPreferences
 import bose.ankush.home.presentation.places.NoopAnalytics
@@ -71,9 +72,9 @@ class HomeViewModelLocationSwitchTest {
 
             assertEquals(PARIS to true, repository.refreshes.last())
             val state = home.state.value
-            assertEquals(PARIS, state.userLocation)
-            assertTrue(state.isLocationOverridden)
-            assertEquals("Paris", state.activeLocationName)
+            assertEquals(PARIS_POINT, state.place?.point)
+            assertTrue(state.place?.isPinned == true)
+            assertEquals("Paris", state.pinnedPlaceName)
         }
 
     @Test
@@ -92,15 +93,48 @@ class HomeViewModelLocationSwitchTest {
             advanceUntilIdle()
 
             assertEquals(PARIS to true, repository.refreshes.last())
-            assertEquals(GPS, home.state.value.userLocation)
-            assertFalse(home.state.value.isLocationOverridden)
-            assertTrue(home.state.value.isRefreshing)
+            assertEquals(GPS_POINT, home.state.value.place?.point)
+            assertFalse(home.state.value.place?.isPinned == true)
+            assertTrue(home.state.value.isLoading)
 
             release.complete(Unit)
             advanceUntilIdle()
-            assertEquals(PARIS, home.state.value.userLocation)
-            assertTrue(home.state.value.isLocationOverridden)
-            assertFalse(home.state.value.isRefreshing)
+            assertEquals(PARIS_POINT, home.state.value.place?.point)
+            assertTrue(home.state.value.place?.isPinned == true)
+            assertFalse(home.state.value.isLoading)
+        }
+
+    /** Room still holds the GPS forecast, so a failed switch must not label it Paris. */
+    @Test
+    fun failedSwitchKeepsTheOldPlaceAndReportsOffline() =
+        runTest {
+            Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+            val preferences = FakeLocationPreferences(
+                LocationPreferences(
+                    latitude = GPS_LAT,
+                    longitude = GPS_LON
+                )
+            )
+            val repository = RecordingWeatherRepository()
+            val home = homeViewModel(repository, preferences)
+            val places = placesViewModel(
+                finder = FakeFinder(mutableListOf(PARIS_PLACE)),
+                preferences = preferences
+            )
+            advanceUntilIdle()
+
+            // Its message is used as-is; other errors read string resources, absent in host tests.
+            repository.failure = LocationClient.LocationException("offline")
+            places.processIntent(SavedPlacesIntent.Select(PARIS_PLACE))
+            advanceUntilIdle()
+
+            val state = home.state.value
+            assertEquals(PARIS to true, repository.refreshes.last())
+            assertEquals(GPS_POINT, state.place?.point)
+            assertFalse(state.place?.isPinned == true)
+            assertTrue(state.isOffline)
+            assertEquals("offline", state.offlineMessage)
+            assertFalse(state.isLoading)
         }
 
     @Test
@@ -119,29 +153,28 @@ class HomeViewModelLocationSwitchTest {
             advanceUntilIdle()
 
             assertEquals(GPS to true, repository.refreshes.last())
-            assertEquals(GPS, home.state.value.userLocation)
-            assertFalse(home.state.value.isLocationOverridden)
+            assertEquals(GPS_POINT, home.state.value.place?.point)
+            assertFalse(home.state.value.place?.isPinned == true)
         }
 
     private fun homeViewModel(
         repository: RecordingWeatherRepository,
         preferences: FakeLocationPreferences,
-    ): HomeViewModel =
-        HomeViewModel(
-            refreshWeatherReport = RefreshWeatherReport(repository),
-            getWeatherReport = GetWeatherReport(repository),
-            getAirQuality = GetAirQuality(repository),
-            getActiveCoordinates =
-                GetActiveCoordinatesImpl(
-                    client =
-                object : LocationClient {
-                    override suspend fun getCurrentLocation(): Result<Coordinates> =
-                        Result.success(Coordinates(GPS_LAT, GPS_LON))
+    ): HomeViewModel {
+        val coordinates =
+            GetActiveCoordinatesImpl(
+                client =
+                    object : LocationClient {
+                        override suspend fun getCurrentLocation(): Result<Coordinates> =
+                            Result.success(Coordinates(GPS_LAT, GPS_LON))
 
-                    override fun hasLocationPermission(): Boolean = true
-                },
-                    storage = preferences,
-                ),
+                        override fun hasLocationPermission(): Boolean = true
+                    },
+                storage = preferences,
+            )
+        return HomeViewModel(
+            observeHomeWeather = ObserveHomeWeather(repository, coordinates),
+            getActiveCoordinates = coordinates,
             remoteConfigGate =
                 object : HomeRemoteConfigGate {
                     override fun initialize(onActivated: () -> Unit) = Unit
@@ -149,26 +182,41 @@ class HomeViewModelLocationSwitchTest {
                     override fun isNotificationBannerEnabled(): Boolean = false
                 },
             analyticsTracker = NoopAnalytics as AnalyticsTracker,
+            errorReporter = RecordingErrorReporter(),
+            // Resource strings can't load in host tests; the failure's own text stands in.
+            errorMessage = { it.message },
         )
+    }
 
     /** Room's single forecast row; each refresh writes a forecast tagged with its coordinates. */
     private class RecordingWeatherRepository : WeatherRepository {
-        private val weather = MutableStateFlow<WeatherForecast?>(forecast(id = 0L))
+        private val weather = MutableStateFlow<WeatherSnapshot?>(
+            WeatherSnapshot(
+                forecast(id = 0L),
+                airQuality = null
+            )
+        )
         val refreshes = mutableListOf<Pair<Pair<Double, Double>, Boolean>>()
         var gate: CompletableDeferred<Unit>? = null
+        var failure: Throwable? = null
 
-        override fun getAirQualityReport(coordinates: Pair<Double, Double>): Flow<AirQuality> =
-            MutableStateFlow(AirQuality())
+        override val snapshot: Flow<WeatherSnapshot?> = weather
 
-        override fun getWeatherReport(location: Pair<Double, Double>): Flow<WeatherForecast?> = weather
-
-        override suspend fun refreshWeatherData(
-            coordinates: Pair<Double, Double>,
+        override suspend fun refresh(
+            place: ActiveCoordinates,
             forceRefresh: Boolean,
-        ) {
-            refreshes += coordinates to forceRefresh
+        ): Result<RefreshOutcome> {
+            refreshes += (place.coordinates.latitude to place.coordinates.longitude) to forceRefresh
             gate?.await()
-            weather.value = forecast(id = refreshes.size.toLong())
+            failure?.let { return Result.failure(it) }
+            weather.value =
+                WeatherSnapshot(
+                    forecast(id = refreshes.size.toLong()),
+                    airQuality = null,
+                    point = GeoPoint(place.coordinates.latitude, place.coordinates.longitude),
+                    placeName = place.overrideName,
+                )
+            return Result.success(RefreshOutcome.Updated)
         }
 
         override suspend fun clearAllData() = Unit
@@ -181,6 +229,8 @@ class HomeViewModelLocationSwitchTest {
         const val PARIS_LON = 2.3522
         val GPS = GPS_LAT to GPS_LON
         val PARIS = PARIS_LAT to PARIS_LON
+        val GPS_POINT = GeoPoint(GPS_LAT, GPS_LON)
+        val PARIS_POINT = GeoPoint(PARIS_LAT, PARIS_LON)
         val PARIS_PLACE = Location(id = "paris", name = "Paris", lat = PARIS_LAT, lon = PARIS_LON)
 
         fun forecast(id: Long): WeatherForecast =
