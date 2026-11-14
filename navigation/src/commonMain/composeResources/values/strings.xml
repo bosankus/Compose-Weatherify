@@ -5,9 +5,15 @@
     <string name="profile_nested_nav">Profile</string>
     <string name="saved_locations_icon_content">Saved locations</string>
     <string name="locale_config_error_txt">Failed to load language configuration. Using default language.</string>
-    <string name="location_permission_rationale_txt">Weatherify needs location access to show weather for your area.</string>
-    <string name="location_permission_declined_txt">Location permission is required. Please grant it from Settings to continue.</string>
-    <string name="location_permission_declined_ios_txt">Location access is turned off. To fix it: open Settings, tap Apps, tap this app in the list, tap Location, then choose "While Using the App".</string>
-    <string name="grant_permission_btn_txt">Grant Permission</string>
     <string name="exit_btn_txt">Exit</string>
+    <string name="permissions_dialog_title_txt">Permissions</string>
+    <string name="permissions_dialog_body_txt">Weatherify needs these to work well.</string>
+    <string name="permission_location_title_txt">Location</string>
+    <string name="permission_location_reason_txt">Weather for where you are. Required.</string>
+    <string name="permission_notification_title_txt">Notifications</string>
+    <string name="permission_notification_reason_txt">Severe weather alerts and updates.</string>
+    <string name="permission_allow_btn_txt">Allow</string>
+    <string name="permission_granted_txt">Granted</string>
+    <string name="permission_denied_txt">Denied</string>
+    <string name="permission_not_now_btn_txt">Not now</string>
 </resources>

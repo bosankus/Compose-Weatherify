@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -19,15 +18,12 @@ import bose.ankush.analytics.AnalyticsTracker
 import bose.ankush.analytics.ErrorReporter
 import bose.ankush.auth.presentation.AuthViewModel
 import bose.ankush.commonui.components.ToastAnchorState
-import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.home.HomeLocationCoordinator
 import bose.ankush.home.HomeNotificationPermissionResult
-import bose.ankush.navigation.generated.resources.Res
-import bose.ankush.navigation.generated.resources.exit_btn_txt
-import bose.ankush.navigation.generated.resources.grant_permission_btn_txt
-import bose.ankush.navigation.generated.resources.location_permission_declined_ios_txt
-import bose.ankush.navigation.generated.resources.location_permission_declined_txt
-import bose.ankush.navigation.generated.resources.location_permission_rationale_txt
+import bose.ankush.navigation.permissions.AppPermission
+import bose.ankush.navigation.permissions.PermissionRow
+import bose.ankush.navigation.permissions.PermissionStatus
+import bose.ankush.navigation.permissions.PermissionsDialog
 import bose.ankush.navigation.platform.ExitAppOnBackPress
 import bose.ankush.navigation.platform.ObserveAppForeground
 import bose.ankush.navigation.platform.RequestLocationPermission
@@ -41,7 +37,6 @@ import bose.ankush.routing.SavedLocationsRoute
 import bose.ankush.routing.SettingsRoute
 import bose.ankush.settings.presentation.SettingsPresentation
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 
 /**
@@ -150,14 +145,18 @@ fun AppNavigation(
     val navigator = remember { AppNavigator(navigationState) }
     var hasLocationPermission by remember { mutableStateOf(platformPermissions.hasLocationPermission()) }
     var hasNotificationPermission by remember { mutableStateOf(false) }
+    // The notification check is async; holding the permissions dialog until it lands keeps the
+    // row from flashing "Allow" for a permission that's actually granted.
+    var hasCheckedNotificationPermission by remember { mutableStateOf(false) }
     var showNotificationPermissionRequest by remember { mutableStateOf(false) }
     var notificationPermissionResult by remember {
         mutableStateOf<HomeNotificationPermissionResult?>(null)
     }
     var isNotificationPermissionPermanentlyDeclined by remember { mutableStateOf(false) }
-    var locationPermissionRequestId by remember { mutableStateOf(0) }
-    var showLocationPermissionRationale by remember { mutableStateOf(false) }
-    var isLocationPermissionPermanentlyDeclined by remember { mutableStateOf(false) }
+    var showLocationPermissionRequest by remember { mutableStateOf(false) }
+    var isLocationPermissionDenied by rememberSaveable { mutableStateOf(false) }
+    var isNotificationPermissionDenied by rememberSaveable { mutableStateOf(false) }
+    var isPermissionsDialogDismissed by rememberSaveable { mutableStateOf(false) }
 
     val refreshPermissionState = {
         hasLocationPermission = platformPermissions.hasLocationPermission()
@@ -169,61 +168,46 @@ fun AppNavigation(
 
     LaunchedEffect(Unit) {
         hasNotificationPermission = platformPermissions.hasNotificationPermission()
+        if (platformPermissions.isNotificationPermissionDenied()) isNotificationPermissionDenied = true
+        hasCheckedNotificationPermission = true
     }
 
-    if (!hasLocationPermission) {
-        key(locationPermissionRequestId) {
-            RequestLocationPermission(
-                onResult = { granted, permanentlyDeclined ->
-                    hasLocationPermission = granted
-                    isLocationPermissionPermanentlyDeclined = permanentlyDeclined
-                    showLocationPermissionRationale = !granted
-                    analyticsTracker.track(
-                        AnalyticsEvent.PermissionResult("location", granted, permanentlyDeclined),
-                    )
-                },
-            )
-        }
-        if (showLocationPermissionRationale) {
-            PermissionAlertDialog(
-                descriptionText =
-                    stringResource(
-                        when {
-                            !isLocationPermissionPermanentlyDeclined -> Res.string.location_permission_rationale_txt
-                            platformPermissions.requiresManualSettingsNavigationHint() ->
-                                Res.string.location_permission_declined_ios_txt
+    val requestOrOpenSettings: (AppPermission) -> Unit = { permission ->
+        when (permission) {
+            AppPermission.Location ->
+                if (isLocationPermissionDenied) {
+                    platformPermissions.openAppSystemSettings()
+                } else {
+                    showLocationPermissionRequest = true
+                }
 
-                            else -> Res.string.location_permission_declined_txt
-                        },
-                    ),
-                isPermanentlyDeclined = isLocationPermissionPermanentlyDeclined,
-                onPositiveAction = {
-                    if (isLocationPermissionPermanentlyDeclined) {
-                        platformPermissions.openAppSystemSettings()
-                    } else {
-                        showLocationPermissionRationale = false
-                        locationPermissionRequestId++
-                    }
-                },
-                onNegativeAction = {
-                    showLocationPermissionRationale = false
-                    exitApp()
-                },
-                positiveButtonLabel =
-                    if (isLocationPermissionPermanentlyDeclined) {
-                        stringResource(Res.string.grant_permission_btn_txt)
-                    } else {
-                        "OK"
-                    },
-                negativeButtonLabel = stringResource(Res.string.exit_btn_txt),
-            )
+            AppPermission.Notifications ->
+                if (isNotificationPermissionDenied) {
+                    platformPermissions.openNotificationSettings()
+                } else {
+                    showNotificationPermissionRequest = true
+                }
         }
+    }
+
+    if (showLocationPermissionRequest) {
+        RequestLocationPermission(
+            onResult = { granted, permanentlyDeclined ->
+                hasLocationPermission = granted
+                isLocationPermissionDenied = !granted
+                showLocationPermissionRequest = false
+                analyticsTracker.track(
+                    AnalyticsEvent.PermissionResult("location", granted, permanentlyDeclined),
+                )
+            },
+        )
     }
 
     if (showNotificationPermissionRequest) {
         RequestNotificationPermission(
             onResult = { granted, permanentlyDeclined ->
                 hasNotificationPermission = granted
+                isNotificationPermissionDenied = !granted
                 isNotificationPermissionPermanentlyDeclined = permanentlyDeclined
                 notificationPermissionResult =
                     HomeNotificationPermissionResult(
@@ -232,6 +216,34 @@ fun AppNavigation(
                     )
                 showNotificationPermissionRequest = false
             },
+        )
+    }
+
+    val permissionRows =
+        buildList {
+            add(PermissionRow(AppPermission.Location, permissionStatus(hasLocationPermission, isLocationPermissionDenied)))
+            if (platformPermissions.requiresRuntimeNotificationPermission()) {
+                add(
+                    PermissionRow(
+                        AppPermission.Notifications,
+                        permissionStatus(hasNotificationPermission, isNotificationPermissionDenied),
+                    ),
+                )
+            }
+        }
+    val showPermissionsDialog =
+        hasCheckedNotificationPermission &&
+            permissionRows.any { it.status != PermissionStatus.Granted } &&
+            // Location is required, so its absence overrides an earlier "Not now".
+            (!hasLocationPermission || !isPermissionsDialogDismissed)
+
+    if (showPermissionsDialog) {
+        PermissionsDialog(
+            rows = permissionRows,
+            onAllow = requestOrOpenSettings,
+            onOpenSettings = requestOrOpenSettings,
+            onDismiss = { isPermissionsDialogDismissed = true },
+            onExit = exitApp,
         )
     }
 
@@ -268,7 +280,7 @@ fun AppNavigation(
                                         showNotificationPermissionRequest = true
                                     },
                                     onRequestLocationPermission = {
-                                        locationPermissionRequestId++
+                                        requestOrOpenSettings(AppPermission.Location)
                                     },
                                     onOpenNotificationSettings = { platformPermissions.openNotificationSettings() },
                                     onOpenLocationSettings = { platformPermissions.openLocationSettings() },
@@ -360,6 +372,16 @@ fun AppNavigation(
         onBack = navigator::goBack,
     )
 }
+
+private fun permissionStatus(
+    isGranted: Boolean,
+    isDenied: Boolean,
+): PermissionStatus =
+    when {
+        isGranted -> PermissionStatus.Granted
+        isDenied -> PermissionStatus.Denied
+        else -> PermissionStatus.NotRequested
+    }
 
 /** Fires once per navigation-in — [LaunchedEffect] re-runs each time this entry is recomposed
  * fresh (nav3 tears down/rebuilds top-level tab entries on switch), matching Firebase's own

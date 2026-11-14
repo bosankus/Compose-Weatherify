@@ -30,17 +30,11 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.flowWithLifecycle
 import bose.ankush.commonui.components.NotificationToast
 import bose.ankush.commonui.components.ToastType
-import bose.ankush.commonui.permissions.PermissionAlertDialog
 import bose.ankush.home.domain.model.WeatherForecast
 import bose.ankush.home.generated.resources.Res
-import bose.ankush.home.generated.resources.cancel_btn_txt
 import bose.ankush.home.generated.resources.enable_gps_btn_txt
-import bose.ankush.home.generated.resources.enable_notification_btn
 import bose.ankush.home.generated.resources.network_unavailable_txt
-import bose.ankush.home.generated.resources.notification_permission_declined_txt
-import bose.ankush.home.generated.resources.notification_permission_message
 import bose.ankush.home.generated.resources.offline_toast_title_txt
-import bose.ankush.home.generated.resources.open_settings_btn
 import bose.ankush.home.generated.resources.retry_btn_txt
 import bose.ankush.home.presentation.HomeEffect
 import bose.ankush.home.presentation.HomeIntent
@@ -192,29 +186,6 @@ internal fun CollectHomeEffects(viewModel: HomeViewModel) {
             }
         }
     }
-}
-
-@Composable
-internal fun NotificationPrompt(chrome: HomeScreenChrome) {
-    if (!chrome.showNotificationPrompt) return
-    // Once declined for good the system dialog never shows again, so say where the tap goes.
-    val declined = chrome.notificationDeclinedForever
-    PermissionAlertDialog(
-        descriptionText =
-            stringResource(
-                if (declined) {
-                    Res.string.notification_permission_declined_txt
-                } else {
-                    Res.string.notification_permission_message
-                },
-            ),
-        isPermanentlyDeclined = declined,
-        onPositiveAction = chrome.onEnableNotifications,
-        onNegativeAction = chrome.onDismissNotifications,
-        positiveButtonLabel =
-            stringResource(if (declined) Res.string.open_settings_btn else Res.string.enable_notification_btn),
-        negativeButtonLabel = stringResource(Res.string.cancel_btn_txt),
-    )
 }
 
 @Composable

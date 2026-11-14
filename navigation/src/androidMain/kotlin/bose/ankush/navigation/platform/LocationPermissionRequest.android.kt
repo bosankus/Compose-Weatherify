@@ -21,7 +21,9 @@ actual fun RequestLocationPermission(onResult: (isGranted: Boolean, isPermanentl
         rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestMultiplePermissions(),
             onResult = { grants ->
-                val isGranted = grants.values.all { it }
+                // A cancelled request (e.g. Back on the system dialog) returns an empty map, which
+                // `all { }` would read as granted.
+                val isGranted = grants.isNotEmpty() && grants.values.all { it }
                 val isPermanentlyDeclined =
                     !isGranted &&
                         activity != null &&

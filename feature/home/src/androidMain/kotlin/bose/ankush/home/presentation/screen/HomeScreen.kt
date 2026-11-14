@@ -297,7 +297,6 @@ private fun HomePager(
     val pager = model.pager
     val content = shell.content
     Box(modifier = modifier.fillMaxSize()) {
-        NotificationPrompt(chrome)
         PullToRefreshBox(
             // Never held open: the pull plays its slide-down and lets go; the bottom loader shows the work.
             isRefreshing = false,
