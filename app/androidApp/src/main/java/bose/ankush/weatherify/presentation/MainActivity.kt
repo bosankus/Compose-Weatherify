@@ -499,7 +499,10 @@ class MainActivity :
     private class LanguageContentFactoryImpl : LanguageContentFactory {
         @Composable
         override fun LanguageScreen(languages: List<String>, onBack: () -> Unit) {
-            LanguageScreen(languages = languages) { onBack() }
+            bose.ankush.language.presentation.LanguageScreen(
+                languages = languages,
+                navAction = onBack,
+            )
         }
     }
 
@@ -646,6 +649,23 @@ class MainActivity :
     override fun onDestroy() {
         super.onDestroy()
         razorpayCheckout = null
+        releaseRazorpayDismissCallback()
+    }
+
+    /**
+     * `Checkout.open(activity, …)` parks a callback capturing the Activity in the static
+     * `OpinionatedSoln.dismissCallback` and the SDK never clears it, so every Activity that
+     * opened checkout leaks (~16 MB) until the next payment overwrites it. There is no public
+     * API for this; the SDK's consumer rules keep `com.razorpay.**`, so the name is stable.
+     */
+    private fun releaseRazorpayDismissCallback() {
+        runCatching {
+            Class
+                .forName("com.razorpay.OpinionatedSoln")
+                .getDeclaredField("dismissCallback")
+                .apply { isAccessible = true }
+                .set(null, null)
+        }.onFailure { Timber.w(it, "Couldn't release Razorpay dismissCallback") }
     }
 }
 
