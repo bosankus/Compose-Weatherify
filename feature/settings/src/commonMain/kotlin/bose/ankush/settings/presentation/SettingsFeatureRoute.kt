@@ -1,6 +1,9 @@
 package bose.ankush.settings.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.alpha
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -355,7 +358,7 @@ internal fun SettingsScreenContent(
                                 body = stringResource(Res.string.logout_confirmation_txt),
                                 confirm = stringResource(Res.string.confirm_btn_txt),
                             ),
-                        enabled = !model.isLoggingOut,
+                        inProgress = model.isLoggingOut,
                         onConfirm = actions.onLogout,
                         onDismiss = actions.onCloseLogoutDialog,
                     )
@@ -478,9 +481,10 @@ private fun SettingsConfirmDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     enabled: Boolean = true,
+    inProgress: Boolean = false,
 ) {
     AlertDialog(
-        onDismissRequest = { if (enabled) onDismiss() },
+        onDismissRequest = { if (enabled && !inProgress) onDismiss() },
         containerColor = SettingsSurface,
         titleContentColor = SettingsInk,
         textContentColor = SettingsInkMuted,
@@ -488,16 +492,30 @@ private fun SettingsConfirmDialog(
         title = { Text(text = copy.title, fontWeight = FontWeight.SemiBold) },
         text = { Text(text = copy.body) },
         confirmButton = {
-            TextButton(onClick = onConfirm, enabled = enabled) {
-                Text(
-                    copy.confirm,
-                    color = SettingsDanger.copy(alpha = if (enabled) 1f else DISABLED_ALPHA),
-                )
+            TextButton(onClick = onConfirm, enabled = enabled && !inProgress) {
+                // Same width either way, so the button doesn't jump when the spinner swaps in.
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        copy.confirm,
+                        color = SettingsDanger.copy(alpha = if (enabled) 1f else DISABLED_ALPHA),
+                        modifier = Modifier.alpha(if (inProgress) 0f else 1f),
+                    )
+                    if (inProgress) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(PROGRESS_SIZE),
+                            color = SettingsDanger,
+                            strokeWidth = PROGRESS_STROKE,
+                        )
+                    }
+                }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss, enabled = enabled) {
-                Text(stringResource(Res.string.cancel_btn_txt), color = SettingsInk)
+            TextButton(onClick = onDismiss, enabled = enabled && !inProgress) {
+                Text(
+                    stringResource(Res.string.cancel_btn_txt),
+                    color = SettingsInk.copy(alpha = if (inProgress) DISABLED_ALPHA else 1f),
+                )
             }
         },
     )
@@ -535,6 +553,8 @@ private fun PremiumSheetOverlay(
 
 private const val SCRIM_ALPHA = 0.5f
 private const val DISABLED_ALPHA = 0.4f
+private val PROGRESS_SIZE = 18.dp
+private val PROGRESS_STROKE = 2.dp
 private val PAGE_TOP_GAP = 12.dp
 
 // region Previews
