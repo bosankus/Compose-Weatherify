@@ -13,6 +13,7 @@ import bose.ankush.storage.api.PremiumStorage
 import bose.ankush.storage.api.WeatherStorage
 import bose.ankush.storage.common.LOCATION_PREFERENCES_FILE_NAME
 import bose.ankush.storage.common.PREMIUM_PREFERENCES_FILE_NAME
+import bose.ankush.storage.room.WeatherDao
 import bose.ankush.storage.room.WeatherDataModelConverters
 import bose.ankush.storage.room.WeatherDatabase
 import bose.ankush.storage.room.createWeatherDatabase
@@ -31,6 +32,7 @@ actual val storageDomainModule: Module =
         single<TokenStorage> { EncryptedTokenStorageImpl() }
         single<WeatherDataModelConverters> { WeatherDataModelConverters() }
         single<WeatherDatabase> { createWeatherDatabase(converters = get()) }
+        single<WeatherDao> { get<WeatherDatabase>().weatherDao() }
         single<WeatherStorage> { WeatherStorageImpl(get()) }
         single<DpopKey> { SecureEnclaveDpopKey() }
         single<DataStore<Preferences>> {
