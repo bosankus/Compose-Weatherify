@@ -1,11 +1,10 @@
-package bose.ankush.auth.ios
+package bose.ankush.auth.backdrop
 
 import bose.ankush.network.api.UnsplashApi
 import bose.ankush.network.model.UnsplashPhoto
 import kotlinx.coroutines.CancellationException
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import platform.Foundation.NSUserDefaults
 import kotlin.time.Clock
 
 /** The sign-in backdrop for one day. */
@@ -16,6 +15,17 @@ internal class ForestPhoto(
     val downloadLocation: String,
 )
 
+/** Keeps the day's pick on the device: NSUserDefaults on iOS, SharedPreferences on Android. */
+internal interface ForestPhotoStore {
+    /** The pick stored for [day], or null when none was stored that day. */
+    fun load(day: Int): ForestPhoto?
+
+    fun save(
+        day: Int,
+        photo: ForestPhoto,
+    )
+}
+
 /**
  * A different Unsplash forest for each day, the same for everyone on that day: the date picks
  * one of a few calm forest searches and one photo from its results. The day's pick is kept, so
@@ -24,25 +34,27 @@ internal class ForestPhoto(
  */
 internal class DailyForestPhoto(
     private val api: UnsplashApi,
-    private val defaults: NSUserDefaults = NSUserDefaults.standardUserDefaults,
+    private val store: ForestPhotoStore,
 ) {
     private var tracked = false
 
     suspend fun today(): ForestPhoto? {
         val day = epochDay()
-        cached(day)?.let { return it }
+        store.load(day)?.let { return it }
         val photo =
             try {
                 val results =
                     api.searchPhotos(query = QUERIES[day % QUERIES.size], perPage = PER_PAGE)
-                results.takeIf { it.isNotEmpty() }?.let { it[(day / QUERIES.size) % it.size] }
+                results
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { it[(day / QUERIES.size) % it.size] }
                     ?.toForestPhoto()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
                 null
             }
-        photo?.let { store(day, it) }
+        photo?.let { store.save(day, it) }
         return photo
     }
 
@@ -67,24 +79,6 @@ internal class DailyForestPhoto(
             .toEpochDays()
             .toInt()
 
-    /** Today's stored pick, if one was stored today with a URL and a credit. */
-    private fun cached(day: Int): ForestPhoto? {
-        val fields = FIELDS.map { defaults.stringForKey(KEY_PREFIX + it).orEmpty() }
-        val usable = defaults.integerForKey(KEY_DAY)
-            .toInt() == day && fields[0].isNotBlank() && fields[1].isNotBlank()
-        return if (usable) ForestPhoto(fields[0], fields[1], fields[2], fields[3]) else null
-    }
-
-    private fun store(
-        day: Int,
-        photo: ForestPhoto,
-    ) {
-        defaults.setInteger(day.toLong(), forKey = KEY_DAY)
-        listOf(photo.imageUrl, photo.photographer, photo.profileUrl, photo.downloadLocation)
-            .zip(FIELDS)
-            .forEach { (value, field) -> defaults.setObject(value, forKey = KEY_PREFIX + field) }
-    }
-
     private fun UnsplashPhoto.toForestPhoto(): ForestPhoto =
         ForestPhoto(
             imageUrl = urls.raw + (if ('?' in urls.raw) "&" else "?") + "w=1170&h=2532&fit=crop&fm=jpg&q=80",
@@ -105,9 +99,19 @@ internal class DailyForestPhoto(
                 "forest morning light",
             )
         const val PER_PAGE = 30
-        const val KEY_DAY = "login_forest.day"
-        const val KEY_PREFIX = "login_forest."
-        val FIELDS = listOf("url", "name", "profile", "download")
         const val REFERRAL = "utm_source=weatherify&utm_medium=referral"
     }
 }
+
+/** Field names shared by both platform stores, so a stored pick reads back the same way. */
+internal val FOREST_FIELDS = listOf("url", "name", "profile", "download")
+
+internal fun ForestPhoto.fieldValues(): List<String> = listOf(imageUrl, photographer, profileUrl, downloadLocation)
+
+/** A stored pick is usable only with a URL and a credit. */
+internal fun forestPhotoOrNull(fields: List<String>): ForestPhoto? =
+    if (fields[0].isNotBlank() && fields[1].isNotBlank()) {
+        ForestPhoto(fields[0], fields[1], fields[2], fields[3])
+    } else {
+        null
+    }

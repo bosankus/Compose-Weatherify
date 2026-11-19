@@ -2,6 +2,10 @@ package bose.ankush.auth.ios
 
 import bose.ankush.analytics.AnalyticsEvent
 import bose.ankush.analytics.AnalyticsTracker
+import bose.ankush.auth.backdrop.DailyForestPhoto
+import bose.ankush.auth.backdrop.ForestPhoto
+import bose.ankush.auth.backdrop.LoginPhotoUi
+import bose.ankush.auth.backdrop.toUi
 import bose.ankush.auth.generated.resources.Res
 import bose.ankush.auth.generated.resources.login_create_account_title
 import bose.ankush.auth.generated.resources.login_email_label
@@ -13,7 +17,6 @@ import bose.ankush.auth.generated.resources.login_join_community_subtitle
 import bose.ankush.auth.generated.resources.login_password_hide_btn
 import bose.ankush.auth.generated.resources.login_password_label
 import bose.ankush.auth.generated.resources.login_password_show_btn
-import bose.ankush.auth.generated.resources.login_photo_credit
 import bose.ankush.auth.generated.resources.login_privacy_link_txt
 import bose.ankush.auth.generated.resources.login_signin_btn
 import bose.ankush.auth.generated.resources.login_signin_subtitle
@@ -81,13 +84,6 @@ data class LoginScreenUi(
     val photo: LoginPhotoUi?,
 )
 
-data class LoginPhotoUi(
-    val imageUrl: String,
-    val credit: String,
-    val profileUrl: String,
-    val unsplashUrl: String,
-)
-
 /** A failed sign-in, an expired session, or a deleted account, for Swift to show as a banner. */
 data class LoginNotice(
     val message: String,
@@ -105,7 +101,7 @@ class LoginScreenController(
     private val scope = MainScope()
     private val strings = MutableStateFlow<LoginStrings?>(null)
     private val notices = Channel<LoginNotice>(Channel.BUFFERED)
-    private val forest = DailyForestPhoto(get<UnsplashApi>())
+    private val forest = DailyForestPhoto(get<UnsplashApi>(), get())
     private val photo = MutableStateFlow<ForestPhoto?>(null)
     private val photoUi = MutableStateFlow<LoginPhotoUi?>(null)
 
@@ -114,7 +110,7 @@ class LoginScreenController(
             LoginScreenUi(
                 strings = copy,
                 isLoading = authState is AuthState.Loading,
-                photo = backdrop
+                photo = backdrop,
             )
         }.stateIn(scope, SharingStarted.Eagerly, null)
 
@@ -127,32 +123,28 @@ class LoginScreenController(
         scope.launch {
             val today = forest.today() ?: return@launch
             photo.value = today
-            photoUi.value =
-                LoginPhotoUi(
-                    imageUrl = today.imageUrl,
-                    credit = getString(Res.string.login_photo_credit, today.photographer),
-                    profileUrl = today.profileUrl,
-                    unsplashUrl = UNSPLASH_URL,
-                )
+            photoUi.value = today.toUi()
         }
         scope.launch {
             auth.authState.collect { authState ->
                 when (authState) {
                     is AuthState.Error -> notify(LoginNotice(authState.message, isWarning = false))
-                    is AuthState.SessionExpired -> notify(
-                        LoginNotice(
-                            authState.message,
-                            isWarning = true
+                    is AuthState.SessionExpired ->
+                        notify(
+                            LoginNotice(
+                                authState.message,
+                                isWarning = true,
+                            ),
                         )
-                    )
 
                     // Not an error: the Swift banner treats every non-warning notice as one.
-                    is AuthState.AccountDeleted -> notify(
-                        LoginNotice(
-                            authState.message,
-                            isWarning = true
+                    is AuthState.AccountDeleted ->
+                        notify(
+                            LoginNotice(
+                                authState.message,
+                                isWarning = true,
+                            ),
                         )
-                    )
 
                     else -> Unit
                 }
@@ -184,15 +176,21 @@ class LoginScreenController(
     ) {
         if (auth.authState.value is AuthState.Loading || validateLogin(
                 email,
-                password
+                password,
             ) != null
-        ) return
+        ) {
+            return
+        }
         val trimmed = email.trim()
         auth.processIntent(
-            if (register) AuthIntent.Register(trimmed, password) else AuthIntent.Login(
-                trimmed,
-                password
-            ),
+            if (register) {
+                AuthIntent.Register(trimmed, password)
+            } else {
+                AuthIntent.Login(
+                    trimmed,
+                    password,
+                )
+            },
         )
     }
 
@@ -239,5 +237,3 @@ class LoginScreenController(
         )
     }
 }
-
-private const val UNSPLASH_URL = "https://unsplash.com/?utm_source=weatherify&utm_medium=referral"

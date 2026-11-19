@@ -108,7 +108,7 @@ class MainActivity :
         splash.setKeepOnScreenCondition {
             val contentReady =
                 authViewModel.isAuthInitialized.value &&
-                        (!authViewModel.isLoggedIn.value || HomeFirstContent.isReady.value)
+                    (!authViewModel.isLoggedIn.value || HomeFirstContent.isReady.value)
             !contentReady && SystemClock.elapsedRealtime() - startedAt < SPLASH_MAX_HOLD_MILLIS
         }
         splash.setOnExitAnimationListener { provider ->
@@ -248,11 +248,14 @@ class MainActivity :
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .windowInsetsPadding(
-                        WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
-                    ),
+                    .background(MaterialTheme.colorScheme.background),
         ) {
+            // The signed-in app keeps clear of the nav bar and keyboard; the login screen is
+            // full-bleed and handles its own insets.
+            val safeArea =
+                Modifier.windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal),
+                )
             when {
                 !isAuthInitialized -> {
                     Box(
@@ -261,11 +264,11 @@ class MainActivity :
                     ) { CircularProgressIndicator() }
                 }
 
-                isLoggedIn -> AuthorizedContent(toastController = toastController)
-                else -> UnauthorizedContent(authState = authState)
+                isLoggedIn -> Box(safeArea) { AuthorizedContent(toastController = toastController) }
+                else -> UnauthorizedContent(authState = authState, safeArea = safeArea)
             }
             NotificationToast(
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier.align(Alignment.BottomCenter).then(safeArea),
                 message = toastState.message,
                 title = toastState.title,
                 type = toastState.type,
@@ -347,7 +350,9 @@ class MainActivity :
             isNotificationPermissionPermanentlyDeclined: Boolean,
             onRequestNotificationPermission: () -> Unit,
         ) {
-            val platformPermissions = bose.ankush.navigation.platform.rememberPlatformPermissions()
+            val platformPermissions =
+                bose.ankush.navigation.platform
+                    .rememberPlatformPermissions()
             val authState by authViewModel.authState.collectAsState()
             val paymentUiState by paymentViewModel.uiState.collectAsState()
             val isBottomBarVisible = rememberSaveable { mutableStateOf(true) }
@@ -360,15 +365,15 @@ class MainActivity :
                 versionName = versionName,
                 shouldShowNotificationItem =
                     platformPermissions.requiresRuntimeNotificationPermission() &&
-                            !hasNotificationPermission,
+                        !hasNotificationPermission,
                 languageList = languageList,
                 onLogout = { authViewModel.processIntent(AuthIntent.Logout) },
                 onLoggedOutHandled = { authViewModel.processIntent(AuthIntent.Reset) },
                 onStartPayment = {
                     paymentViewModel.processIntent(
                         PaymentIntent.StartPayment(
-                            it
-                        )
+                            it,
+                        ),
                     )
                 },
                 onBackNavAction = navigator::goBack,
@@ -392,20 +397,21 @@ class MainActivity :
                 bottomBar = {
                     if (SettingsPresentation.Page(
                             bottomInset,
-                            onCoverChange
+                            onCoverChange,
                         ) == SettingsPresentation.Screen
                     ) {
                         bose.ankush.navigation.AppBottomBar(
                             isBottomBarVisible,
                             navigator,
-                            toastAnchorState
+                            toastAnchorState,
                         )
                     }
                 },
-                presentation = SettingsPresentation.Page(
-                    bottomInset,
-                    onCoverChange
-                ),
+                presentation =
+                    SettingsPresentation.Page(
+                        bottomInset,
+                        onCoverChange,
+                    ),
             )
         }
     }
@@ -440,7 +446,9 @@ class MainActivity :
             presentation: SettingsPresentation,
             bottomBar: @Composable (() -> Unit)?,
         ) {
-            val platformPermissions = bose.ankush.navigation.platform.rememberPlatformPermissions()
+            val platformPermissions =
+                bose.ankush.navigation.platform
+                    .rememberPlatformPermissions()
             val authState by authViewModel.authState.collectAsState()
             val paymentUiState by paymentViewModel.uiState.collectAsState()
             val isBottomBarVisible = rememberSaveable { mutableStateOf(true) }
@@ -453,15 +461,15 @@ class MainActivity :
                 versionName = versionName,
                 shouldShowNotificationItem =
                     platformPermissions.requiresRuntimeNotificationPermission() &&
-                            !hasNotificationPermission,
+                        !hasNotificationPermission,
                 languageList = languageList,
                 onLogout = { authViewModel.processIntent(AuthIntent.Logout) },
                 onLoggedOutHandled = { authViewModel.processIntent(AuthIntent.Reset) },
                 onStartPayment = {
                     paymentViewModel.processIntent(
                         PaymentIntent.StartPayment(
-                            it
-                        )
+                            it,
+                        ),
                     )
                 },
                 onBackNavAction = navigator::goBack,
@@ -482,15 +490,16 @@ class MainActivity :
                 onBottomBarVisibilityChange = { isBottomBarVisible.value = it },
                 onRefreshPremium = { authViewModel.processIntent(AuthIntent.RefreshToken) },
                 toastAnchorState = toastAnchorState,
-                bottomBar = bottomBar ?: {
-                    if (presentation == SettingsPresentation.Screen) {
-                        bose.ankush.navigation.AppBottomBar(
-                            isBottomBarVisible,
-                            navigator,
-                            toastAnchorState
-                        )
-                    }
-                },
+                bottomBar =
+                    bottomBar ?: {
+                        if (presentation == SettingsPresentation.Screen) {
+                            bose.ankush.navigation.AppBottomBar(
+                                isBottomBarVisible,
+                                navigator,
+                                toastAnchorState,
+                            )
+                        }
+                    },
                 presentation = presentation,
             )
         }
@@ -498,7 +507,10 @@ class MainActivity :
 
     private class LanguageContentFactoryImpl : LanguageContentFactory {
         @Composable
-        override fun LanguageScreen(languages: List<String>, onBack: () -> Unit) {
+        override fun LanguageScreen(
+            languages: List<String>,
+            onBack: () -> Unit,
+        ) {
             bose.ankush.language.presentation.LanguageScreen(
                 languages = languages,
                 navAction = onBack,
@@ -523,13 +535,18 @@ class MainActivity :
     }
 
     @Composable
-    private fun UnauthorizedContent(authState: AuthState) {
+    private fun UnauthorizedContent(
+        authState: AuthState,
+        safeArea: Modifier,
+    ) {
         var currentWebUrl by remember { mutableStateOf<String?>(null) }
         if (currentWebUrl != null) {
-            InAppWebView(
-                url = currentWebUrl!!,
-                onClose = { currentWebUrl = null },
-            )
+            Box(safeArea) {
+                InAppWebView(
+                    url = currentWebUrl!!,
+                    onClose = { currentWebUrl = null },
+                )
+            }
         } else {
             LaunchedEffect(Unit) {
                 analyticsTracker.track(AnalyticsEvent.ScreenView("login", "LoginScreen"))
@@ -559,7 +576,7 @@ class MainActivity :
             .addOnFailureListener {
                 Timber.w(
                     it,
-                    "Couldn't rotate the FCM token after account deletion"
+                    "Couldn't rotate the FCM token after account deletion",
                 )
             }
         Checkout.clearUserData(applicationContext)

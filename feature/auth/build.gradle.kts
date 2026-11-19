@@ -44,13 +44,18 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":network"))
             implementation(project(":analytics"))
+            implementation(project(":common-ui"))
             implementation(libs.compose.multiplatform.resources)
             implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.foundation)
             implementation(libs.compose.multiplatform.material3)
             implementation(libs.compose.multiplatform.ui)
+            implementation(libs.compose.multiplatform.materialIconsExtended)
             implementation(libs.koin.core)
             implementation(libs.koin.core.viewmodel)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.coil3.compose)
+            implementation(libs.coil3.network.ktor)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.androidx.lifecycle.viewmodel.kmp)
             implementation(libs.kotlinx.datetime)
@@ -62,6 +67,8 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.koin.android)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.core.ktx)
             implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.firebase.messaging)
         }
